@@ -398,23 +398,39 @@ Should arguments with `dynamic` type be allowed? That might require using the ru
 
 ## Open questions
 
+### Should arguments affect collection expression conversion?
+
+Should collection arguments and the applicable methods affect convertibility of the collection expression?
+```csharp
+Print([with(comparer: null), 1, 2, 3]); // ambiguous or Print<int>(HashSet<int>)?
+
+static void Print<T>(List<T> list) { ... }
+static void Print<T>(HashSet<T> set) { ... }
+```
+
+If the arguments affect convertibility based on the applicable methods, arguments should probably affect type inference as well.
+```csharp
+Print([with(comparer: StringComparer.Ordinal)]); // Print<string>(HashSet<string>)?
+```
+
+For reference, similar cases with target-typed `new()` result in errors.
+```csharp
+Print<int>(new(comparer: null));              // error: ambiguous
+Print(new(comparer: StringComparer.Ordinal)); // error: type arguments cannot be inferred
+```
+
 ### Target types where arguments are *required*
 
 Should collection expression conversions be supported to target types where arguments must be supplied because all of the constructors or factory methods require at least one argument?
+
 Such types could be used with collection expressions that include explicit `with()` arguments but the types could not be used for `params` parameters.
 
-A collection type where the constructor is called directly:
+For example, consider the following type constructed from a factory method:
 ```csharp
-class MyCollection<T> : IEnumerable<T>
-{
-    public MyCollection(int capacity) { ... }
-    public void Add(T t) { ... }
-    // ...
-}
-```
+MyCollection<object> c;
+c = [];                  // error: no arguments
+c = [with(capacity: 1)]; // ok
 
-A collection type constructed with a builder method:
-```csharp
 [CollectionBuilder(typeof(MyBuilder), "Create")]
 class MyCollection<T> : IEnumerable<T> { ... }
 
@@ -424,25 +440,59 @@ class MyBuilder
 }
 ```
 
-For either of those cases, arguments are required:
+The same question applies for when the constructor is called directly as in the example below.
+However, for the target types where the constructor is called directly, the collection expression *conversion* currently requires a constructor callable with no arguments. We would need to remove that conversion requirement to support such types.
+
 ```csharp
-MyCollection<object> x;
-x = [];                  // error: no arguments
-x = [with()];            // error: no 'capacity'
-x = [with(capacity: 1)]; // ok
+c = [];                  // error: no arguments
+c = [with(capacity: 1)]; // error: no constructor callable with no arguments?
+
+class MyCollection<T> : IEnumerable<T>
+{
+    public MyCollection(int capacity) { ... }
+    public void Add(T t) { ... }
+    // ...
+}
 ```
 
-### Construction overloads for *interface types*
+### Collection builder method parameter order
 
-Should the constructor candidates for `ICollection<T>` and `IList<T>` be the accessible constructors from `List<T>`, or specific signatures independent from `List<T>`, say `new()` and `new(int capacity)`?
+For *collection builder* methods, should the span parameter be before or after any parameters for collection arguments?
 
-Similarly, should the constructor candidates for `IDictionary<TKey, TValue>` be the accessible constructors from `Dictionary<TKey, TValue>`, or specific signatures, say `new()`, `new(int capacity)`, `new(IEqualityComparer<K> comparer)`, and `new(int capacity, IEqualityComparer<K> comparer)`?
+Elements first would allow the arguments to be declared as optional.
+```csharp
+class MySetBuilder
+{
+    public static MySet<T> Create<T>(ReadOnlySpan<T> items, IEqualityComparer<T> comparer = null) { ... }
+}
+```
+
+Arguments first would allow the span to be a `params` parameter, to support calling directly in expanded form.
+```csharp
+var s = MySetBuilder.Create(StringComparer.Ordinal, x, y, z);
+
+class MySetBuilder
+{
+    public static MySet<T> Create<T>(IEqualityComparer<T> comparer, params ReadOnlySpan<T> items) { ... }
+}
+```
+
+### Arguments for *interface types*
+
+Should arguments be supported for interface target types?
+
+```csharp
+ICollection<int> c = [with(capacity: 4)];
+IReadOnlyDictionary<string, int> d = [with(comparer: StringComparer.Ordinal), ..values];
+```
+
+If so, which method signatures are used when binding the arguments?
+
+For `ICollection<T>` and `IList<T>` should we use the accessible constructors from `List<T>`, or specific signatures independent from `List<T>`, say `new()` and `new(int capacity)`?
+
+For `IDictionary<TKey, TValue>` should we use the accessible constructors from `Dictionary<TKey, TValue>`, or specific signatures, say `new()`, `new(int capacity)`, `new(IEqualityComparer<K> comparer)`, and `new(int capacity, IEqualityComparer<K> comparer)`?
 
 What about `IReadOnlyDictionary<TKey, TValue>` which may be implemented by a synthesized type?
-
-### Construction overloads for *collection builder* types
-
-Should the candidate methods for collection builder types include all overloads on the builder type with the required name, or should the candidates be limited as described [above](#create-method-candidates), for instance by requiring the first parameter is `ReadOnlySpan<T>`?
 
 ### Allow empty argument list for any target type
 

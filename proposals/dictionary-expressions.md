@@ -123,18 +123,6 @@ List<string, int> nameToAge2 = ["mads": 21, .. existingDict]; // as would
 List<string, int> nameToAge3 = ["mads": 21, .. existingListOfKVPS];
 ```
 
-## Dictionary types
-
-A type is considered a *dictionary type* if the following hold:
-* The *element type* is `KeyValuePair<TKey, TValue>`.
-* The *type* has an instance *indexer*, with a `get` accessor where:
-  * The indexer has a single parameter with an identity conversion from the parameter type to `TKey`.\*
-  * There is an identity conversion from the indexer type to `TValue`.\*
-  * The `get` accessor returns by value.
-  * The `get` accessor is as accessible as the declaring type.
-
-\* *Identity conversions are used rather than exact matches to allow type differences in the signature that are ignored by the runtime: `object` vs. `dynamic`; tuple element names; nullable reference types; etc.*
-
 ## Comparer support
 
 A dictionary expression can also provide a custom *comparer* to control its behavior just by including such a value as the first `expression_element` in the expression. For example:
@@ -179,19 +167,40 @@ Dictionary<string, int> caseInsensitiveMap = [comparer : StringComparer.CaseInse
 
 ## Conversions
 
-*Collection expression conversions* are updated to include conversions to *dictionary types*.
+[*Collection expression conversions*](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-12.0/collection-expressions.md#conversions) are **updated** to include conversions to *dictionary types*.
 
-An implicit *collection expression conversion* exists from a *collection expression* to the following *dictionary types*:
-* A *dictionary type* with an appropriate *[create method](#create-methods)*.
+An implicit *collection expression conversion* exists from a collection expression to the following types:
+* A single dimensional *array type* `T[]`, in which case the *element type* is `T`
+* A *span type*:
+  * `System.Span<T>`
+  * `System.ReadOnlySpan<T>`  
+  In which case the *element type* is `T`
+* A *type* with an appropriate *[create method](#create-methods)*, in which case the *element type* is the [*iteration type*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/statements.md#1295-the-foreach-statement) determined from a `GetEnumerator` instance method or enumerable interface, not from an extension method
+* A *struct* or *class type* that implements `System.Collections.IEnumerable` where:
+  * The *type* has an *[applicable](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/expressions.md#11642-applicable-function-member)* constructor that can be invoked with no arguments, and the constructor is accessible at the location of the collection expression.
+  * **One of the following holds:**
+    * **The [*iteration type*](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/statements.md#1395-the-foreach-statement) of the *type* is `KeyValuePair<TKey, TValue>`, and the *type* has an instance *indexer*, with `get` and `set` accessors where:**
+      * **The indexer has a single parameter.**
+      * **There is an identity conversion from the parameter type to `TKey` and an identity conversion from the indexer type to `TValue`.** *Identity conversions rather than exact matches allow type differences that are ignored by the runtime: `object` vs. `dynamic`; tuple element names; nullable reference types; etc.*
+      * **The `get` accessor returns by value.**
+      * **The `get` and `set` accessors are as accessible as the declaring type.**  
+    * If the collection expression has any elements, the *type* has an instance or extension method `Add` where:
+      * The method can be invoked with a single value argument.
+      * If the method is generic, the type arguments can be inferred from the collection and argument.
+      * The method is accessible at the location of the collection expression.
 
-* A *struct* or *class* *dictionary type* that implements `System.Collections.IEnumerable` where:
-  * The *element type* is determined from a `GetEnumerator` instance method or enumerable interface.
-  * The *type* has an *[applicable](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/expressions.md#11642-applicable-function-member)* constructor that can be invoked with no arguments (*or* a constructor with a single [*comparer*](#Comparer-support) parameter), and the constructor is accessible at the location of the collection expression.
-  * The *indexer* has a `set` accessor that is as accessible as the declaring type.
-
+    In which case the *element type* is the [*iteration type*](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/statements.md#1395-the-foreach-statement) of the *type*.
 * An *interface type*:
-  * `System.Collections.Generic.IDictionary<TKey, TValue>`
-  * `System.Collections.Generic.IReadOnlyDictionary<TKey, TValue>`
+  * `System.Collections.Generic.IEnumerable<T>`
+  * `System.Collections.Generic.IReadOnlyCollection<T>`
+  * `System.Collections.Generic.IReadOnlyList<T>`
+  * `System.Collections.Generic.ICollection<T>`
+  * `System.Collections.Generic.IList<T>`  
+    In which case the *element type* is `T`
+* **An *interface type*:**
+  * **`System.Collections.Generic.IDictionary<TKey, TValue>`**
+  * **`System.Collections.Generic.IReadOnlyDictionary<TKey, TValue>`**  
+  **In which case the *element type* is `KeyValuePair<TKey, TValue>`**
 
 *Collection expression conversions* require implicit conversions for each element.
 The element conversion rules are updated as follows.
@@ -201,6 +210,8 @@ The element conversion rules are updated as follows.
 > * If `Eᵢ` is a *spread element* `..Sᵢ`, there is an implicit conversion from the *iteration type* of `Sᵢ` to `T`.
 > * **If `Eᵢ` is a *key-value pair element* `Kᵢ:Vᵢ` and `T` is a type `KeyValuePair<K, V>`, there is an implicit conversion from `Kᵢ` to `K` and an implicit conversion from `Vᵢ` to `V`.**
 > * **Otherwise there is *no conversion* from the collection expression to the target type.**
+
+Collection arguments are *not* considered when determining *collection expression* conversions.
 
 ### Key-value pair conversions
 
@@ -251,25 +262,32 @@ The runtime has committed to supplying these new CollectionBuilder methods that 
 
 ## Construction
 
-The elements of a collection expression are evaluated in order, left to right. Each element is evaluated exactly once, and any further references to the elements refer to the results of this initial evaluation.
+[*Collection construction*](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-12.0/collection-expressions.md#construction) is **updated** as follows.
 
-If the target is a *dictionary type*, and collection expression's first element is an `expression_element`, and the type of that element is some [*comparer*](#Comparer-support), then:
+The elements of a collection expression are evaluated in order, left to right. Each element is evaluated exactly once, and any further references to the elements refer to the results of this initial evaluation.  
+...
 
-- If using a constructor to instantiate the value, the constructor must take a single parameter whose type is some [*comparer*](#Comparer-support) type.  The first `element_expression` value will be passed to this parameter.
-- If using a *[create method](#create-methods)*, the method's first parameter's type is some [*comparer*](#Comparer-support) type. The first `element_expression` value will be passed to this parameter.
-- If creating an interface, this [*comparer*](#Comparer-support) must be some `IEqualityComparer<TKey>` type. That comparer will be used to control the behavior of the final type (synthesized or otherwise).  This means that instantiating interfaces only supports hashing semantics, not ordered semantics.
+If the target type is a *struct* or *class type* that implements `System.Collections.IEnumerable`, and the target type does not have a *[create method](#create-methods)*, the construction of the collection instance is as follows:
 
-For each element `Eᵢ` in order:
-- If the target is a *dictionary type* then:
-  - If `Eᵢ` is a *key value pair element* `Kᵢ:Vᵢ`, first `Kᵢ` is evaluated, then `Vᵢ` is evaluated, and the applicable indexer is invoked on the dictionary instance with the converted values of `Kᵢ` and `Vᵢ`.
-  - If `Eᵢ` is an *expression element* of type `KeyValuePair<Kᵢ:Vᵢ>`, then `Eᵢ` is evaluated, and the applicable indexer is invoked on the dictionary instance with the converted values of `.Key` and `.Value` from the value of `Eᵢ`.
-  - If `Eᵢ` is an *spread element* `..Sᵢ` where `Sᵢ` has an [*iteration type*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/statements.md#1295-the-foreach-statement) `KeyValuePair<Kᵢ, Vᵢ>`, then `Sᵢ` is evaluated and an applicable `GetEnumerator` instance or extension method is invoked on the value of `Sᵢ`, and for each item `Sₑ` from the enumerator, the applicable indexer is invoked on the dictionary instance with the converted values of `.Key` and `.Value` from the value of `Sₑ`. If the enumerator implements `IDisposable`, then `Dispose` will be called after enumeration, regardless of exceptions.
-- If the target is a *collection type* that has an *element type* of `KeyValuePair<Kₑ, Vₑ>` then:
-  - If `Eᵢ` is a *key value pair element* `Kᵢ:Vᵢ`, first `Kᵢ` is evaluated, then `Vᵢ` is evaluated, then a `KeyValuePair<Kₑ, Vₑ>` value is constructed with the converted values of `Kᵢ` and `Vᵢ`, and the value is added to the collection instance *using existing steps for *collection types**.
-  - If `Eᵢ` is an *expression element* of type `KeyValuePair<Kᵢ:Vᵢ>`, then `Eᵢ` is evaluated, then a `KeyValuePair<Kₑ, Vₑ>` value is constructed with the converted values of `.Key` and `.Value` from the value of `Eᵢ`, and the value is added to the collection instance *using existing steps for *collection types**.
-  - If `Eᵢ` is an *spread element* `..Sᵢ` where `Sᵢ` has an [*iteration type*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/statements.md#1295-the-foreach-statement) `KeyValuePair<Kᵢ, Vᵢ>`, then `Sᵢ` is evaluated and an applicable `GetEnumerator` instance or extension method is invoked on the value of `Sᵢ`, and for each item `Sₑ` from the enumerator, then a `KeyValuePair<Kₑ, Vₑ>` value is constructed with the converted values of `.Key` and `.Value` from the value of `Sₑ`, and the value is added to the collection instance *using existing steps for *collection types**. If the enumerator implements `IDisposable`, then `Dispose` will be called after enumeration, regardless of exceptions.
-- If the target is a *collection type* that has an *element type* other than `KeyValuePair<,>` then:
-  - *[Use existing steps for construction]*
+* The elements are evaluated in order. Some or all elements may be evaluated *during* the steps below rather than before.
+
+* The compiler *may* determine the *known length* of the collection expression by invoking [*countable*](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-8.0/ranges.md#adding-index-and-range-support-to-existing-library-types) properties &mdash; or equivalent properties from well-known interfaces or types &mdash; on each *spread element expression*.
+
+* The constructor that is applicable with no arguments is invoked.
+
+* **If the *iteration type* is `KeyValuePair<TKey, TValue>`, and the *type* has a corresponding instance *indexer* then:**
+  * **For each element in order:**
+    * **If the element is a *key value pair element* `Kᵢ:Vᵢ`, first `Kᵢ` is evaluated, then `Vᵢ` is evaluated, and the applicable indexer is invoked on the collection instance with the converted values of `Kᵢ` and `Vᵢ`. If `Kᵢ` has `dynamic` type, the applicable indexer may be determined at runtime.**
+    * **If the element is an *expression element* `Eᵢ`, first `Eᵢ` is evaluated, then implicitly converted to  `KeyValuePair<TKey, TValue>`, and the applicable indexer is invoked on the collection instance with the values of `Key` and `Value` from the implicitly converted value. If `Eᵢ` has `dynamic` type, the implicit conversion is an unbox.**
+    * **If the element is a *spread element* where the spread element *expression* has an [*iteration type*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/statements.md#1295-the-foreach-statement) `Tᵢ` then:**
+      * **An applicable `GetEnumerator` instance or extension method is invoked on the spread element *expression* and for each item from the enumerator the item is implicitly converted to `KeyValuePair<TKey, TValue>`, and the applicable indexer is invoked on the collection instance with the values of `Key` and `Value` from the implicitly converted value. If `Tᵢ` is `dynamic`, the implicit conversion is an unbox. If the enumerator implements `IDisposable`, then `Dispose` will be called after enumeration, regardless of exceptions.**
+
+* Otherwise, if the *type* has a corresponding instance `Add` method then:
+  * For each element in order:
+    * If the element is an *expression element*, the applicable `Add` instance or extension method is invoked with the element *expression* as the argument. (Unlike classic [*collection initializer behavior*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/expressions.md#117154-collection-initializers), element evaluation and `Add` calls are not necessarily interleaved.)
+    * If the element is a *spread element* then ...:
+      * An applicable `GetEnumerator` instance or extension method is invoked on the *spread element expression* and for each item from the enumerator the applicable `Add` instance or extension method is invoked on the *collection instance* with the item as the argument. If the enumerator implements `IDisposable`, then `Dispose` will be called after enumeration, regardless of exceptions.
+      * ...
 
 ## Type inference
 
@@ -522,6 +540,52 @@ What are the rules when types have multiple indexers and multiple implementation
 This concern already exists with *collection types*.  For those types, the rule is that we must have an *element type* as per the existing language rules.  This follows for *dictionary types*, along with the rule that there must be a corresponding indexer for this *element type*.  If those hold, the type can be used as a *dictionary type*.  If these don't hold, it cannot be.
 
 ## Open Questions
+
+### Binding to indexer
+
+For concrete dictionary types that do not use `CollectionBuilderAttribute`, where the compiler constructs the resulting instance using a constructor and repeated calls to an indexer, how should the compiler resolve the appropriate indexer for each element?
+
+```csharp
+MyDictionary<string, int> d =
+  [
+    (object)"one":1, // this[object] { set; }
+    "two":2          // this[string] { set; }
+  ];
+
+class MyDictionary<K, V> : IEnumerable<KeyValuePair<object, object>>
+{
+  // ...
+  public V this[K k] { ... }
+  public object this[object o] { ... }
+}
+```
+
+Options include:
+1. For each element individually, use normal lookup rules and overload resolution to determine the resulting indexer based on the element expression (for an expression element) or type (for a spread or key-value pair element). *This corresponds to the binding behavior for `Add()` methods for non-dictionary collection expressions.*
+2. Use the target type implementation of `IDictionary<K, V>.this[K] { get; set; }`.
+3. Use the accessible indexer that matches the signature `V this[K] { get; set; }`.
+
+### Key-value pair conversions
+
+Should the compiler support a new [*key-value pair conversion*](#key-value-pair-conversions) within collection expressions to allow implicit conversions from an expression element of type `KeyValuePair<K1, V1>`, or a spread element with an iteration type of `KeyValuePair<K1, V1>` to the collection expression iteration type `KeyValuePair<K2, V2>`?
+
+### Concrete type for `I{ReadOnly}Dictionary<K, V>`
+
+What concrete type should be used for a dictionary expression with target type `IDictionary<K, V>`?
+
+Options include:
+1. Use `Dictionary<K, V>`, and state that as a requirement.
+2. Use `Dictionary<K, V>` for now, and state the compiler is free to use any conforming implementation.
+3. Synthesize an internal type and use that.
+
+What concrete type should be used for `IReadOnlyDictionary<K, V>`?
+
+Options include:
+1. Use a BCL type such as `ReadOnlyDictionary<K, V>`, and state that as a requirement.
+2. Use a BCL type such as `ReadOnlyDictionary<K, V>` for now, and state the compiler is free to use any conforming implementation.
+3. Synthesize an internal type and use that.
+
+We should consider aligning the decisions with the concrete types provided for collection expressions targeting mutable and immutable non-dictionary interfaces.
 
 ### Question: Types that support both collection and dictionary initialization
 
