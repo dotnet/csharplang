@@ -284,7 +284,7 @@ For more details, see https://github.com/dotnet/roslyn/issues/77254.
 [partial-events-discussion]: https://github.com/dotnet/csharplang/discussions/8064
 [partial-ordering]: https://github.com/dotnet/csharplang/issues/8966
 [xamarin]: https://github.com/xamarin/xamarin-macios/issues/21308#issuecomment-2447535524
-[weak-events]: https://learn.microsoft.com/en-us/dotNet/api/system.windows.weakeventmanager
+[weak-events]: https://learn.microsoft.com/dotNet/api/system.windows.weakeventmanager
 [event-syntax]: https://github.com/dotnet/csharpstandard/blob/f3c66477dc2d0a76d5c278e457a63c1695ddae08/standard/classes.md#1581-general
 [event-field-like]: https://github.com/dotnet/csharpstandard/blob/f3c66477dc2d0a76d5c278e457a63c1695ddae08/standard/classes.md#1582-field-like-events
 [ctor-syntax]: https://github.com/dotnet/csharpstandard/blob/f3c66477dc2d0a76d5c278e457a63c1695ddae08/standard/classes.md#1511-instance-constructors
