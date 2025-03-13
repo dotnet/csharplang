@@ -9,8 +9,6 @@ Extensions introduce new requirements for our API reference pipeline. The additi
 
 The new extensions experience should be built on the framework used for the existing extension methods. The document describes the new experience as a set of enhancements to the existing extension method documentation.
 
-<< Add navigation notes and anchors>>
-
 ## Existing Extension methods
 
 The prototype for an extension method communicates many of the key concepts that consumers need to use these methods in their application. Consider this prototype:
@@ -48,6 +46,7 @@ The presentation and navigation elements used for the docs site help users find 
   - Each overload has a separate entry in the section.
   - The signatures indicate if the method is a specialization (`Sum(this IEnumerable<int>)`) or generic (`Where<T>(this IEnumerable<T> source, Func<T, bool> predicate)`).
   - The section lists all extensions, from all extending types. They are grouped by type, then sorted alphabetically. **We would like this to change, and have the extension methods sorted alphabetically, without regard to the containing class.**
+    - **Alternative: This should change so that the API pages always group extension methods by their containing class and receiver type, including generic specialization.**
   - The signature does not show any indication of the extending type.
   - The docs pipeline generates this section on the extended type from the descriptions of the extension methods. The `///` comments on the extended type (for example, `System.Collections.Generic.IEnumerable<T>`) doesn't need to include all extension methods in the entire library.
 
@@ -62,7 +61,9 @@ The presentation for C# 14 extensions needs to account for several new types of 
 - Extension indexers.
 - Extension operators.
 
-The current format for extension methods should be extended as follows:
+This proposal currently assumes no changes to the presentation for existing extension methods.
+
+> Alternative:  [Compatibility with existing extension methods](./compat-mode-in-extensions.md) is still subject to [refinement](./Compatibility%20through%20coexistence%20between%20extension%20types%20and%20extension%20methods.md). One proposal makes existing extension methods indistinguishable from new extension members when consumed. If that proposal is adopted, we should experiment with displaying all extension members using this updated format. Readers can give feedback on whether they prefer a unified presentation, or want to know if a method follows the new or old format.
 
 ### Extension member prototypes
 
@@ -83,6 +84,19 @@ extension<T>(IEnumerable<T>)
     public static IEnumerable<T> Create(int size, Func<int, T> factory);
 }
 ```
+
+> Alternatives: The prototypes above show a single extension member in an extension container. In source, multiple members share the same receiver and are declared in the same extension container. An alternative for the prototypes would be as follows:
+>
+> ```csharp
+> extension<T>(IEnumerable<T> source)
+> {
+>     public bool IsEmpty { get; }
+>     public int Length { get; }
+>     public IEnumerable<T> Sample(int sampleInterval);
+> }
+> ```
+>
+> It could save screen space to collect members by receiver declaration and remove the duplication. That would only apply on pages where multiple prototypes are shown together. Another negative is that it could conflict with the current lists in the TOC that have all overloads collected together. We should specify the URL for the docs page for a single `extension` declaration.
 
 The *receiver parameter* includes a parameter name when the receiver is an instance. The *receiver parameter* doesn't include a parameter name when the receiver is a type.
 
@@ -109,7 +123,7 @@ The API docs build system generates the section on the type page for the extende
   - Each overload has a separate entry in the section.
   - The signatures indicate if the method is a specialization (`extension(IEnumerable<int> source) { ... }`) or generic (`extension<T>(IEnumerable<T> source) { ... }`).
   - The section lists all extensions, from all extending types. They are sorted alphabetically, as proposed for current extension methods.
-  - The signature does not show any indication of the extending type.
+    - **Alternative: All extension members are grouped by containing class and receiver type, including generic specialization.**
 
 ### Extension class page
 
@@ -117,7 +131,7 @@ The page for the class containing extensions will need only minimal updates in h
 
 - The TOC node for the class will typically have additional nodes for **Properties** (including indexers), and **operators**. Classes already support this, so it should already work. Note that the node for methods displays *method groups*, not *individual overloads*. That should remain.
 - The page should also have sections for **Properties**, and **operators**.
-- The prototypes for extensions should be displayed as shown [above](#extension-member-prototypes).
+- The prototypes for extensions should be displayed as shown [above](#extension-member-prototypes). Note alternative for grouping extensions by receiver declaration.
 
 ### Extension member page
 
