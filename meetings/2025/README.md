@@ -52,10 +52,6 @@ All schedule items must have a public issue or checked-in proposal that can be l
 - [#9133](https://github.com/dotnet/csharplang/pull/9133) - Specify how [extensions](../../proposals/extensions.md) are displayed in API reference (@billwagner, @gewarren).
 - [Interpolated string handler method names.](https://github.com/dotnet/csharplang/blob/a970d01597886d84d7498e1b6a9d8e8e8ebf02c1/proposals/interpolated-string-handler-method-names.md) (333fred, stephentoub)
 
-### Wed Feb 19, 2025
-
-- [Extension member lookup.](https://github.com/dotnet/csharplang/blob/main/meetings/working-groups/extensions/extensions-lookup.md) (Julien, Mads)
-
 ## C# Language Design Notes for 2025
 
 ### Wed Mar 5, 2025
@@ -64,6 +60,12 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 - Dictionary expressions
 - Target-typed static member lookup
+
+### Wed Feb 19, 2025
+
+[C# Language Design Meeting for February 19th, 2025](https://github.com/dotnet/csharplang/blob/main/meetings/2025/LDM-2025-02-19.md)
+
+- Extensions
 
 ### Wed Feb 12, 2025
 
