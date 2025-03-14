@@ -206,6 +206,7 @@ When publishing a set of notes, take the following steps:
 1. Put the notes in the appropriate `meetings/<year>` folder. Notes should follow the `LDM-<year>-<month>-<date>.md` format.
    1. Any supplemental documents for the meeting are also included here with the same prefix to ensure good sorting.
    2. Include an agenda at the top with document-relative links to each topic discussed during LDM.
+   3. Include both the champion issue and the reviewed specification for a given topic.
 2. Update the `meetings/<year>/README.md` to:
    1. Move the date into the `C# Language Design Notes for <year>` section
    2. Update the agenda to be the final agenda from the meeting notes. Remove document-relative links.
