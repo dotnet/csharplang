@@ -206,7 +206,8 @@ An implicit *collection expression conversion* exists from a collection expressi
 *Collection expression conversions* require implicit conversions for each element.
 The element conversion rules are **updated** as follows.
 
-* **If the *iteration type* is `KeyValuePair<K, V>`, then for each *element* `Eᵢ` in the collection expression one of the following holds:**
+The implicit conversion exists if for each *element* `Eᵢ` in the collection expression:
+* **If the target *iteration type* is `KeyValuePair<K, V>`, then one of the following holds:**
   * **If `Eᵢ` is a *key-value pair element* `Kᵢ:Vᵢ`, there is an implicit conversion from `Kᵢ` to `K` and an implicit conversion from `Vᵢ` to `V`.**
   * **If `Eᵢ` is an *expression element* then one of the following holds:**
     * **There is an implicit conversion from `Eᵢ` to `KeyValuePair<K:V>` where the conversion is one of:**
@@ -217,7 +218,7 @@ The element conversion rules are **updated** as follows.
     * **`Eᵢ` has type `KeyValuePair<Kᵢ:Vᵢ>` and there is an implicit conversion from `Kᵢ` to `K` and an implicit conversion from `Vᵢ` to `V`.**
   * **If `Eᵢ` is a *spread element* `..Sᵢ`, where the *iteration type* of `Sᵢ` is `KeyValuePair<Kᵢ:Vᵢ>`, there is an implicit conversion from `Kᵢ` to `K` and an implicit conversion from `Vᵢ` to `V`.**
 
-* **If the *iteration type* `T` *is not* `KeyValuePair<K, V>`, then for each *element* `Eᵢ` in the collection expression one of the following holds:**
+* **If the target *iteration type* `T` *is not* `KeyValuePair<K, V>`, then one of the following holds:**
   * If `Eᵢ` is an *expression element*, there is an implicit conversion from `Eᵢ` to `T`.
   * If `Eᵢ` is a *spread element* `..Sᵢ`, there is an implicit conversion from the *iteration type* of `Sᵢ` to `T`.
 
