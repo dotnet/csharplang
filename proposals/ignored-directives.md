@@ -4,23 +4,16 @@ Champion issue: <https://github.com/dotnet/csharplang/issues/3507>
 
 ## Summary
 
-Add `#` directives to be used by tooling, but ignored by the language.
+Add `#:` directive prefix to be used by tooling, but ignored by the language.
 
 ```cs
 #!/usr/bin/dotnet run
-#sdk Microsoft.NET.Sdk.Web
-#package Microsoft.AspNetCore.OpenApi 9.0.2
+#:sdk      Microsoft.NET.Sdk.Web
+#:property TargetFramework=net11.0
+#:property LangVersion=preview
+#:package  System.CommandLine=2.0.0-*
 
-var builder = WebApplication.CreateBuilder(args);
-
-builder.Services.AddOpenApi();
-
-var app = builder.Builder();
-
-app.MapGet("/", () => new { Message = "Hello, World!" })
-    .WithName("HelloWorld");
-
-app.Run();
+Console.WriteLine("Hello, World!");
 ```
 
 ## Motivation
@@ -51,8 +44,7 @@ PP_Ignored
 
 PP_IgnoredToken
     : '!'
-    | 'package'
-    | 'sdk'
+    | ':'
     ;
 ```
 
@@ -70,36 +62,33 @@ e.g., Roslyn will report an error if these directives are present in a file comp
 (and tooling will remove these directives when migrating file-based programs to project-based programs).
 That error should not be reported for the `#!` directive, it can be placed on any file because it might invoke some other tool than `dotnet run`.
 
+Similarly, the compiler or SDK should still error/warn on unrecognized directives to "reserve" them for future use by the official .NET tooling.
+
 <!--
 ## Drawbacks
 -->
 
 ## Alternatives
 
-### One ignored prefix
+### Separate directives instead of one ignored prefix
 
-Reusing an existing syntax form or introducing just a single new ignored prefix
-would allow tooling to introduce new directives without needing to change the language spec.
-However, we do not anticipate needing to add many directives.
-- For `dotnet run file.cs` specifically, we aim to add only as few directives as possible,
-  and for anything more advanced, project-based programs should be used instead
-  (we don't want to have two ways to configure everything).
-- In any case, it seems good if new directives are discussed and approved by the language design team
+We could add each ignored directive to the language instead of introducing one ignored prefix.
+- For `dotnet run file.cs` specifically, we might want to add only as few directives as possible,
+  and for anything more advanced, recommend users to eject to project-based programs instead
+  (i.e., avoid having two ways to configure everything).
+- In any case, it might be good if new directives are discussed and approved by the language design team
   since they are part of the overall C# language experience.
-
-On the other hand, with one ignored prefix, we could allow file-based programs to specify any project metadata:
 
 ```cs
 #!/usr/bin/dotnet run
-#:sdk      Microsoft.NET.Sdk.Web
-#:property TargetFramework/net11.0
-#:property LangVersion/preview
-#:package  System.CommandLine/2.0.0-*
+#sdk      Microsoft.NET.Sdk.Web
+#property TargetFramework=net11.0
+#property LangVersion=preview
+#package  System.CommandLine=2.0.0-*
+#something // unrecognized directives would still be required by the language spec to be an error
 
 Console.WriteLine("Hello, World!");
 ```
-
-The compiler or SDK should still error/warn on unrecognized directives to "reserve" them for future use by the official .NET tooling.
 
 ### Other syntax forms
 
@@ -125,7 +114,7 @@ However, the naming of the directive is less clear.
 
 #### Sigil
 
-We could reserve one sigil prefix (e.g., `#!`/`#@`/`#$`/`#:`) for any directives that should be ignored by the language.
+We could reserve another sigil prefix (e.g., `#!`/`#@`/`#$`) for any directives that should be ignored by the language.
 Note that `#!` would be interpreted as shebang by shells if it is at the first line of the file.
 
 ```cs
@@ -146,12 +135,6 @@ Documentation XML comments are more verbose and we would need to ensure they do 
 ```cs
 /// <package name="Microsoft.CodeAnalysis" version="4.14.0" />
 ```
-
-## Open questions
-
-### More directives
-
-We can consider also `#tfm`.
 
 <!--
 ## Links
