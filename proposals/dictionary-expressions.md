@@ -566,6 +566,32 @@ Options include:
 2. Use the target type implementation of `IDictionary<K, V>.this[K] { get; set; }`.
 3. Use the accessible indexer that matches the signature `V this[K] { get; set; }`.
 
+### Support dictionary types as `params` type
+
+Should types with element type `KeyValuePair<K, V>`, that are not otherwise collection types, be supported as `params` parameter types?
+
+```csharp
+KeyValuePair<string, int> x, y;
+
+ToDictionary(x, y);
+ToReadOnlyDictionary(x, y);
+
+static Dictionary<K, V> ToDictionary<K, V>(
+    params Dictionary<K, V> elements) => elements;          // C#14: ok?
+
+static IReadOnlyDictionary<K, V> ToReadOnlyDictionary<K, V>(
+    params IReadOnlyDictionary<K, V> elements) => elements; // C#14: ok?
+```
+
+Note that regardless of whether we support dictionary types for `params`, or simply continue to support C#12 collection types with `KeyValuePair<K, V>` element type, it won't be possible to use `k:v` syntax when calling a `params` method with *expanded form*.
+
+```csharp
+ToList("one":1);   // error: syntax error ':'
+ToList(["two":2]); // C#14: ok
+
+static List<KeyValuePair<K, V>> ToList<K, V>(params List<KeyValuePair<K, V>> elements) => elements;
+```
+
 ### Concrete type for `I{ReadOnly}Dictionary<K, V>`
 
 What concrete type should be used for a dictionary expression with target type `IDictionary<K, V>`?
