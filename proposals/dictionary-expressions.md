@@ -211,7 +211,6 @@ The implicit conversion exists if for each *element* `Eᵢ` in the collection ex
   * **If `Eᵢ` is a *key-value pair element* `Kᵢ:Vᵢ`, there is an implicit conversion from `Kᵢ` to `K` and an implicit conversion from `Vᵢ` to `V`.**
   * **If `Eᵢ` is an *expression element* then one of the following holds:**
     * **There is an implicit conversion from `Eᵢ` to `KeyValuePair<K:V>` where the conversion is one of:**
-      * ***identity conversion***
       * ***default literal conversion***
       * ***target-typed new conversion***
       * ***implicit throw conversion***
