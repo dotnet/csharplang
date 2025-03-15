@@ -264,18 +264,31 @@ If the target type is a *struct* or *class type* that implements `System.Collect
 
 * The constructor that is applicable with no arguments is invoked.
 
-* **If the *iteration type* is `KeyValuePair<K, V>`, and the *type* has a corresponding instance *indexer* then:**
+* **If the *iteration type* is `KeyValuePair<K, V>`, then:**
   * **For each element in order:**
-    * **If the element is a *key value pair element* `Kᵢ:Vᵢ`, first `Kᵢ` is evaluated, then `Vᵢ` is evaluated, and the applicable indexer is invoked on the collection instance with the converted values of `Kᵢ` and `Vᵢ`. If `Kᵢ` has `dynamic` type, the applicable indexer may be determined at runtime.**
-    * **If the element is an *expression element* `Eᵢ`, first `Eᵢ` is evaluated, then implicitly converted to  `KeyValuePair<K, V>`, and the applicable indexer is invoked on the collection instance with the values of `Key` and `Value` from the implicitly converted value. If `Eᵢ` has `dynamic` type, the implicit conversion is an unbox.**
-    * **If the element is a *spread element* where the spread element *expression* has an [*iteration type*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/statements.md#1295-the-foreach-statement) `Tᵢ` then:**
-      * **An applicable `GetEnumerator` instance or extension method is invoked on the spread element *expression* and for each item from the enumerator the item is implicitly converted to `KeyValuePair<K, V>`, and the applicable indexer is invoked on the collection instance with the values of `Key` and `Value` from the implicitly converted value. If `Tᵢ` is `dynamic`, the implicit conversion is an unbox. If the enumerator implements `IDisposable`, then `Dispose` will be called after enumeration, regardless of exceptions.**
+    * **If the element is a *key value pair element* `Kᵢ:Vᵢ`, then:**
+      * **First `Kᵢ` is evaluated, then `Vᵢ` is evaluated.**
+      * **If the target type has a corresponding *indexer*, then the indexer is invoked on the collection instance with the converted values of `Kᵢ` and `Vᵢ`.**
+      * **Otherwise a `KeyValuePair<K, V>` is constructed from the converted values of `Kᵢ` and `Vᵢ`, and the applicable `Add` instance or extension method is invoked with that value.**
+    * **If the element is an *expression element* `Eᵢ`, then:**
+      * **`Eᵢ` is evaluated as a value of type `KeyValuePair<Kᵢ:Vᵢ>`.**
+      * **If the target type has a corresponding *indexer*, then the indexer is invoked on the collection instance with the converted values of `Key` and `Value` from the evaluated expression.**
+      * **Otherwise a `KeyValuePair<K, V>` is constructed from the converted values of `Key` and `Value` from the evaluated expression, and the applicable `Add` instance or extension method is invoked with that value.**
+    * **If the element is a *spread element* where the spread element *expression* has an [*iteration type*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/statements.md#1295-the-foreach-statement) `KeyValuePair<Kᵢ:Vᵢ>` then:**
+      * **An applicable `GetEnumerator` instance or extension method is invoked on the spread element *expression***.
+      * **For each item from the enumerator:**
+        * **If the target type has a corresponding *indexer*, then the indexer is invoked on the collection instance with the converted values of `Key` and `Value` from the item.**
+        * **Otherwise a `KeyValuePair<K, V>` is constructed from the converted values of `Key` and `Value` from the item, and the applicable `Add` instance or extension method is invoked with that value.**
+      * **If the enumerator implements `IDisposable`, then `Dispose` will be called after enumeration, regardless of exceptions.**
 
-* Otherwise, if the *type* has a corresponding instance `Add` method then:
+* Otherwise:
   * For each element in order:
     * If the element is an *expression element*, the applicable `Add` instance or extension method is invoked with the element *expression* as the argument. (Unlike classic [*collection initializer behavior*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/expressions.md#117154-collection-initializers), element evaluation and `Add` calls are not necessarily interleaved.)
     * If the element is a *spread element* then ...:
-      * An applicable `GetEnumerator` instance or extension method is invoked on the *spread element expression* and for each item from the enumerator the applicable `Add` instance or extension method is invoked on the *collection instance* with the item as the argument. If the enumerator implements `IDisposable`, then `Dispose` will be called after enumeration, regardless of exceptions.
+      * An applicable `GetEnumerator` instance or extension method is invoked on the *spread element expression*.
+      * For each item from the enumerator:
+        * The applicable `Add` instance or extension method is invoked on the *collection instance* with the item as the argument.
+      * If the enumerator implements `IDisposable`, then `Dispose` will be called after enumeration, regardless of exceptions.
       * ...
 
 ## Type inference
