@@ -558,6 +558,20 @@ static class E
     }
 }
 ```
+- Do we want to synthesize a receiver?
+```csharp
+static class E
+{
+    extension(object o)
+    {
+        public void M() 
+        {
+            M2();
+        }
+        public void M2() { }
+    }
+}
+```
 
 ### Accessibility
 
