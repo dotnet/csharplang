@@ -566,6 +566,33 @@ Options include:
 2. Use the target type implementation of `IDictionary<K, V>.this[K] { get; set; }`.
 3. Use the accessible indexer that matches the signature `V this[K] { get; set; }`.
 
+### Conversion from expression element for `KeyValuePair<K, V>` collections
+
+Confirm the **allowed conversions** for a conversion from *expression element* when the target type is a `KeyValuePair<K, V>` collection.
+
+>  * If `Eᵢ` is an *expression element* then one of the following holds:
+>     * **There is an implicit conversion from `Eᵢ` to `KeyValuePair<K:V>` where the conversion is one of:**
+>       * ***default literal conversion***
+>       * ***target-typed new conversion***
+>       * ***implicit throw conversion***
+>     * `Eᵢ` has type `KeyValuePair<Kᵢ:Vᵢ>` and there is an implicit conversion from `Kᵢ` to `K` and an implicit conversion from `Vᵢ` to `V`.
+
+### Type inference for key-value pair elements
+
+Confirm the type inference rules for *key-value pair elements*.
+
+>   * **If `Eᵢ` is a *key value pair element* `Kᵢ:Vᵢ`, then an *output type inference* is made *from* `Kᵢ` *to* `Kₑ` and an *output type inference* is made *from* `Vᵢ` *to* `Vₑ`.**
+
+### Overload resolution for `KeyValuePair<K, V>` collections
+
+Confirm the *better conversion* rules for overload resolution when the target types are `KeyValuePair<K, V>` collections.
+
+> Conversion comparisons are made as follows:
+> - **If the target is a type with an *element type* `KeyValuePair<Kₑ, Vₑ>`:**
+>   - **If `ELᵢ` is a *key value pair element* `Kᵢ:Vᵢ`, conversion comparison uses better conversion from expression from `Kᵢ` to `Kₑ` and better conversion from expression from `Vᵢ` to `Vₑ`.**
+>   - **If `ELᵢ` is an *expression element* with *element type* `KeyValuePair<Kᵢ, Vᵢ>`, conversion comparison uses better conversion from type `Kᵢ` to `Kₑ` and better conversion from type `Vᵢ` to `Vₑ`.**
+>   - **If `ELᵢ` is an *spread element* with an expression with *element type* `KeyValuePair<Kᵢ, Vᵢ>`, conversion comparison uses better conversion from type `Kᵢ` to `Kₑ` and better conversion from type `Vᵢ` to `Vₑ`.**
+
 ### Support dictionary types as `params` type
 
 Should types with element type `KeyValuePair<K, V>`, that are not otherwise collection types, be supported as `params` parameter types?
