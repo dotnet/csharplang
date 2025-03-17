@@ -509,6 +509,22 @@ two static extension methods are allowed to have the same signature (according t
 - ~~How to resolve properties?~~ (answered in broad strokes LDM 2025-03-03, but needs follow-up for betterness)
 - ~~Scoping and shadowing rules for extension parameter and type parameters~~ (answer: in scope of extension block, shadowing disallowed, LDM 2025-03-10)
 - How should ORPA apply to new extension methods?
+
+```
+public static class Extensions
+{
+    extension(Type1)
+    {
+        [OverloadResolutionPriority(1)]
+        public void Overload(...)
+    }
+    extension(Type2)
+    {
+        public void Overload(...)
+    }
+}
+```
+
 - How to retcon the classic extension resolution rules? Do we 
   1. update the standard for classic extension methods, and use that to also describe new extension methods,
   2. keep the existing language for classic extension methods, use that to also describe new extension methods, but have a known spec deviation for both,
