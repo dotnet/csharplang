@@ -60,7 +60,8 @@ Section [7.3 Declarations](https://github.com/dotnet/csharpstandard/blob/standar
 > 
 > ...
 > 
-> - Each method declaration, property declaration, property accessor declaration, indexer declaration, indexer accessor declaration, operator declaration, instance constructor declaration, anonymous function, and local function creates a new declaration space called a ***local variable declaration space***. Names are introduced into this declaration space through formal parameters (*fixed_parameter*s and *parameter_array*s) and *type_parameter*s. The set accessor for a property or an indexer introduces the name `value` as a formal parameter. **If the member declaration occurs directly within an *extension_declaration*, the *receiver_parameter* introduces its *identifier*, if any, as a formal parameter.**
+> - Each method declaration, property declaration, property accessor declaration, indexer declaration, indexer accessor declaration, operator declaration, instance constructor declaration, anonymous function, and local function creates a new declaration space called a ***local variable declaration space***. Names are introduced into this declaration space through formal parameters (*fixed_parameter*s and *parameter_array*s) and *type_parameter*s. The set accessor for a property or an indexer introduces the name `value` as a formal parameter. 
+**An *extension_declaration* introduces to each member declaration directly contained within it its *type_parameter_list* as type parameters and the *identifier*, if any, of its *receiver_parameter* as a formal parameter.**
 
 There is an existing need to specify (maybe in Section[12.8.4 Simple Names](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/expressions.md#1284-simple-names)) something along the lines of the following:
 
