@@ -568,24 +568,61 @@ Options include:
 
 ### Conversion from expression element for `KeyValuePair<K, V>` collections
 
-Confirm the **allowed conversions** for a conversion from *expression element* when the target type is a `KeyValuePair<K, V>` collection.
+Confirm the **allowed conversions** from an *expression element* when the target type is a `KeyValuePair<K, V>` collection.
+
+```csharp
+KeyValuePair<string, int>? x = null;
+List<KeyValuePair<string, int>> list;
+list = [default];             // ok
+list = [new()];               // ok
+list = [x ?? throw new Exception()]; // ok
+list = [new StringIntPair()]; // error: UDC not supported
+```
 
 >  * If `Eᵢ` is an *expression element* then one of the following holds:
 >     * **There is an implicit conversion from `Eᵢ` to `KeyValuePair<K:V>` where the conversion is one of:**
 >       * ***default literal conversion***
 >       * ***target-typed new conversion***
 >       * ***implicit throw conversion***
->     * `Eᵢ` has type `KeyValuePair<Kᵢ:Vᵢ>` and there is an implicit conversion from `Kᵢ` to `K` and an implicit conversion from `Vᵢ` to `V`.
+>     * **`Eᵢ` has type `KeyValuePair<Kᵢ:Vᵢ>` and there is an implicit conversion from `Kᵢ` to `K` and an implicit conversion from `Vᵢ` to `V`.**
 
 ### Type inference for key-value pair elements
 
-Confirm the type inference rules for *key-value pair elements*.
+Confirm the [*type inference*](#type-inference) rules for *key-value pair elements*.
 
->   * **If `Eᵢ` is a *key value pair element* `Kᵢ:Vᵢ`, then an *output type inference* is made *from* `Kᵢ` *to* `Kₑ` and an *output type inference* is made *from* `Vᵢ` *to* `Vₑ`.**
+```csharp
+string x; int y;
+KeyValuePair<string, long> e;
+Dictionary<object, int> d;
+...
+Print([x:y]);         // Print<string, int>
+Print([e]);           // Print<string, long>
+Print([..d]);         // Print<object, int>
+Print([x:y, e, ..d]); // Print<object, long>
+
+void Print<K, V>(List<KeyValuePair<K, V>> pairs) { ... }
+```
+
+>   * **If `T` has an *element type* `KeyValuePair<Kₑ, Vₑ>`, or `T` is a *nullable value type* `T0?` and `T0` has an *element type* `KeyValuePair<Kₑ, Vₑ>`, then for each `Eᵢ`**:
+>     * **If `Eᵢ` is a *key value pair element* `Kᵢ:Vᵢ`, then an *input type inference* is made *from* `Kᵢ` *to* `Kₑ` and an *input type inference* is made *from* `Vᵢ` *to* `Vₑ`.**
+>     * **If `Eᵢ` is an *expression element* with type `KeyValuePair<Kᵢ, Vᵢ>`, then a [*lower-bound inference*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/expressions.md#116310-lower-bound-inferences) is made *from* `Kᵢ` *to* `Kₑ` and a [*lower-bound inference*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/expressions.md#116310-lower-bound-inferences) is made *from* `Vᵢ` *to* `Vₑ`.**
+>     * **If `Eᵢ` is a *spread element* with an [*iteration type*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/statements.md#1295-the-foreach-statement) `KeyValuePair<Kᵢ, Vᵢ>`, then a [*lower-bound inference*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/expressions.md#116310-lower-bound-inferences) is made *from* `Kᵢ` *to* `Kₑ` and a [*lower-bound inference*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/expressions.md#116310-lower-bound-inferences) is made *from* `Vᵢ` *to* `Vₑ`.**
 
 ### Overload resolution for `KeyValuePair<K, V>` collections
 
-Confirm the *better conversion* rules for overload resolution when the target types are `KeyValuePair<K, V>` collections.
+Confirm the *better conversion* rules for [*overload resolution*](#overload-resolution) when the target types are `KeyValuePair<K, V>` collections.
+
+```csharp
+KeyValuePair<byte, int> e;
+Dictionary<byte, int> d;
+...
+Print([1:2]); // <int, int>
+Print([e])    // ambiguous
+Print([..d])  // ambiguous
+
+void Print(List<KeyValuePair<int, int>> pairs) { ... }
+void Print(List<KeyValuePair<byte, object>> pairs) { ... }
+```
 
 > Conversion comparisons are made as follows:
 > - **If the target is a type with an *element type* `KeyValuePair<Kₑ, Vₑ>`:**
