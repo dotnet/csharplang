@@ -583,9 +583,9 @@ list = [new StringIntPair()]; // error: UDC not supported
 >       * ***target-typed new conversion***
 >     * **`Eᵢ` has type `KeyValuePair<Kᵢ:Vᵢ>` and there is an implicit conversion from `Kᵢ` to `K` and an implicit conversion from `Vᵢ` to `V`.**
 
-### Type inference for key-value pair elements
+### Type inference for `KeyValuePair<K, V>` collections
 
-Confirm the [*type inference*](#type-inference) rules for *key-value pair elements*.
+Confirm the [*type inference*](#type-inference) rules for elements when the target type is a `KeyValuePair<K, V>` collection.
 
 ```csharp
 string x; int y;
