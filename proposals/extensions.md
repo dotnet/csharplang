@@ -494,13 +494,7 @@ static class CollectionExtensions
 
 #### static factory scenario
 
-We talked about emitting a modopt on return type for implementation methods corresponding to static extension members.
-But that has some limitations, as roslyn only allows named type symbols (so no type parameters or array types).
-
-Current [proposal](https://github.com/dotnet/roslyn/pull/77603):
-two static extension methods are allowed to have the same signature (according to the current language rules) as long as all the following conditions are met:
-- methods have different return type and/or different return ref-ness
-- methods extending different types (ref-ness of the receiver parameter is not considered)
+- ~~What are the conflict rules for static methods?~~ (answer: use existing C# rules for the enclosing static type, no relaxation, LDM 2025-03-17)
 
 ### Lookup
 
@@ -595,75 +589,7 @@ static class E
 
 ### Accessibility
 
-- What is the meaning of accessibility within an extension declaration? ([thread](https://github.com/dotnet/roslyn/pull/77358#discussion_r1974061527))
-
-If we adopt the natural accessibility that falls out from the metadata as designed, then we run
-into problems such as this one:
-```csharp
-public static class Extensions
-{
-    extension(C1 x)
-    {
-        public void M1() { } // what accessibility should one put here?
-    }
-
-    private class C1 {}
-
-    public static void SomeOtherMethod() 
-    {
-        var c1 = new C1();
-        c1.ImplementationOfM1();
-    }
-}
-```
-That code lowers as:
-```csharp
-public static class Extensions
-{
-    // extension(C1 x)
-    public class ExtensionContainer
-    {
-        private static void Marker(C1 x){}
-        
-        // Must be accessible outside of the container
-        public void M1() => throw null;
-    }
-    
-    // error CS0051: Inconsistent accessibility: parameter type 'Extensions.C1' is less accessible 
-    //               than method 'Extensions.ImplementationOfM1(Extensions.C1)'
-    // Inherits effective accessibility of M1, hence public
-    public static void ImplementationOfM1(this C1 x) {}
- 
-    private class C1 {}
-    
-    public static void SomeOtherMethod() 
-    {
-        var c1 = new C1();
-        c1.ImplementationOfM1();
-    }
-}
-```
-
-If we use the accessibility that falls out of the metadata representation, then the skeleton and implementation methods
-would seem to have different accessibilities:
-```csharp
-public static class Extensions
-{
-    extension(object)
-    {
-        private static void M1() { }
-    }
-
-    public static void SomeOtherMethod() 
-    {
-        // allowed or not?
-        object.M1();
-        object.ImplementationOfM1();
-    }
-}
-```
-
-So it would seem more natural to treat extension declarations as "transparent": `private` means private to the enclosing static class, not the extension type.
+- ~~What is the meaning of accessibility within an extension declaration?~~ (answer: extension declarations do not count as an accessibility scope, LDM 2025-03-17)
 
 ### Extension declaration validation
 
