@@ -489,21 +489,25 @@ static class CollectionExtensions
 - Should skeleton methods throw `NotSupportedException` or some other standard exception (right now we do `throw null;`)?
 - Should we accept more than one parameter in marker method in metadata (in case new versions add more info)?
 - Should the extension marker or speakable implementation methods be marked with special name?
-- Should we add `[Extension]` attribute on the static class even when there is no instance extension method inside? (answer: yes, LDM 2025-03-10)
-- Confirm we should add `[Extension]` attribute to implementation getters and setters too. (answer: no, LDM 2025-03-10)
+- ~~Should we add `[Extension]` attribute on the static class even when there is no instance extension method inside?~~ (answer: yes, LDM 2025-03-10)
+- ~~Confirm we should add `[Extension]` attribute to implementation getters and setters too.~~ (answer: no, LDM 2025-03-10)
 
 #### static factory scenario
 
 We talked about emitting a modopt on return type for implementation methods corresponding to static extension members.
 But that has some limitations, as roslyn only allows named type symbols (so no type parameters or array types).
 
+Current [proposal](https://github.com/dotnet/roslyn/pull/77603):
+two static extension methods are allowed to have the same signature (according to the current language rules) as long as all the following conditions are met:
+- methods have different return type and/or different return ref-ness
+- methods extending different types (ref-ness of the receiver parameter is not considered)
+
 ### Lookup
 
-- How to resolve instance method invocations now that we have speakable implementation names? We need to avoid ambiguity by understanding that those are the same method.
-- How to resolve static extension methods? (answer: just like instance extension methods, LDM 2025-03-03)
-- Should betterness be adjusted for resolution of static extension methods?
-- How to resolve properties? (answered in broad strokes LDM 2025-03-03, but needs follow-up for betterness)
-- Scoping and shadowing rules for extension parameter and type parameters (answer: in scope of extension block, shadowing disallowed, LDM 2025-03-10)
+- ~~How to resolve instance method invocations now that we have speakable implementation names?~~ We prefer the skeleton method to its corresponding implementation method. 
+- ~~How to resolve static extension methods?~~ (answer: just like instance extension methods, LDM 2025-03-03)
+- ~~How to resolve properties?~~ (answered in broad strokes LDM 2025-03-03, but needs follow-up for betterness)
+- ~~Scoping and shadowing rules for extension parameter and type parameters~~ (answer: in scope of extension block, shadowing disallowed, LDM 2025-03-10)
 - How should ORPA apply to new extension methods?
 - How to retcon the classic extension resolution rules? Do we 
   1. update the standard for classic extension methods, and use that to also describe new extension methods,
@@ -558,7 +562,7 @@ static class E
     }
 }
 ```
-- Do we want to synthesize a receiver?
+- Do we have an implicit receiver within extension declarations?
 ```csharp
 static class E
 {
@@ -647,8 +651,8 @@ So it would seem more natural to treat extension declarations as "transparent": 
 
 ### Extension declaration validation
 
-- Should we relax the type parameter validation (inferrability: all the type parameters must appear in the type of the extension parameter) where there are only methods? This would allow porting 100% of classic extension methods.  
-If you have `TResult M<TResult, TSource>(this TSource source)`, you could port it as `extension<TResult, TSource>(TSource source) { TResult M() ... }`.
+- ~~Should we relax the type parameter validation (inferrability: all the type parameters must appear in the type of the extension parameter) where there are only methods?  This would allow porting 100% of classic extension methods.  
+If you have `TResult M<TResult, TSource>(this TSource source)`, you could port it as `extension<TResult, TSource>(TSource source) { TResult M() ... }`.~~ (answer: no, LDM 2025-03-17)
 - Confirm whether init-only accessors should be allowed in extensions
 - Should the only difference in receiver ref-ness be allowed `extension(int receiver) { public void M2() {} }`    `extension(ref int receiver) { public void M2() {} }`?
 - Should we complain about a conflict like this `extension(object receiver) { public int P1 => 1; }`   `extension(object receiver) { public int P1 {set{}} }`?
