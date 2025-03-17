@@ -74,22 +74,23 @@ public static class E
 {
     extension(string s)
     {
-        public int M(int i) // *1*
+        public int M1(int i) // *1*
         {
             return s.Length + i;
         }
-        public int M(string s) // *2* Error: Cannot reuse name `s`
+        public int M2(string s) // *2* Error: Cannot reuse name `s`
         {
             return s.Length;
         }
-        public static string P => s; // Error: Cannot use `s` from static context
+        public static string P // *3*
+        {
+            get => s; // Error: Cannot use `s` from static context
+        }
     }
 }
 ```
 
-In the example, `*1*` and `*2*` denote local variable declaration spaces. The receiver parameter `s` is added to both declaration spaces as a formal parameter, making it an error for `*2*` to declare another parameter named `s`. 
-
-The receiver parameter `s` shall not be accessed from a static context; thus the body of the static property `P` yields a compile-time error.
+In the example, `*1*`, `*2*` and `*3*` denote local variable declaration spaces. The receiver parameter `s` is added to all three declaration spaces as a formal parameter. This makes it a compile-time error for `M2` to declare another parameter named `s`, and for the body of `P` to access `s` from a static context.
 
 ### Static classes as extension containers
 
