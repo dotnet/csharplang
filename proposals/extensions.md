@@ -590,6 +590,22 @@ static class E
 ### Accessibility
 
 - ~~What is the meaning of accessibility within an extension declaration?~~ (answer: extension declarations do not count as an accessibility scope, LDM 2025-03-17)
+- Should we apply the "inconsistent accessibility" check on the receiver parameter even for static members?
+```csharp
+public static class Extensions
+{
+    extension(PrivateType p)
+    {
+        // We report inconsistent accessibility error, 
+        //   because we generate a `public static void M(PrivateType p)` implementation in enclosing type
+        public void M() { } 
+
+        public static void M2() { } // should we also report here, even though not technically necessary?
+    }
+
+    private class PrivateType { }
+}
+```
 
 ### Extension declaration validation
 
