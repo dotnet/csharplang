@@ -94,7 +94,7 @@ ref struct RS
 
 void M(RS a, ref int x)
 {
-  a?.b = ref x; // error: Operator '?' can't be applied to operand of type 'C'.
+  a?.b = ref x; // error: Operator '?' can't be applied to operand of type 'RS'.
 }
 ```
 
