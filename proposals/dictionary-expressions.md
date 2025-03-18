@@ -206,21 +206,14 @@ An implicit *collection expression conversion* exists from a collection expressi
 *Collection expression conversions* require implicit conversions for each element.
 The element conversion rules are **updated** as follows.
 
-The implicit conversion exists if for each *element* `Eᵢ` in the collection expression:
-* **If the target *iteration type* is `KeyValuePair<K, V>`, then one of the following holds:**
-  * **If `Eᵢ` is a *key-value pair element* `Kᵢ:Vᵢ`, there is an implicit conversion from `Kᵢ` to `K` and an implicit conversion from `Vᵢ` to `V`.**
-  * **If `Eᵢ` is an *expression element* then one of the following holds:**
-    * **There is an implicit conversion from `Eᵢ` to `KeyValuePair<K:V>` where the conversion is one of:**
-      * ***default literal conversion***
-      * ***target-typed new conversion***
-    * **`Eᵢ` has type `KeyValuePair<Kᵢ:Vᵢ>` and there is an implicit conversion from `Kᵢ` to `K` and an implicit conversion from `Vᵢ` to `V`.**
-  * **If `Eᵢ` is a *spread element* `..Sᵢ`, where the *iteration type* of `Sᵢ` is `KeyValuePair<Kᵢ:Vᵢ>`, there is an implicit conversion from `Kᵢ` to `K` and an implicit conversion from `Vᵢ` to `V`.**
-
-* **If the target *iteration type* `T` *is not* `KeyValuePair<K, V>`, then one of the following holds:**
-  * If `Eᵢ` is an *expression element*, there is an implicit conversion from `Eᵢ` to `T`.
-  * If `Eᵢ` is a *spread element* `..Sᵢ`, there is an implicit conversion from the *iteration type* of `Sᵢ` to `T`.
-
-* **Otherwise there is *no conversion* from the collection expression to the target type.**
+The implicit conversion exists if the type has an *element type* `T` where for each *element* `Eᵢ` in the collection expression:
+* If `Eᵢ` is an *expression element* then:
+  * There is an implicit conversion from `Eᵢ` to `T` **or**
+  * **There is no implicit conversion from `Eᵢ` to `T`, and `T` is a type `KeyValuePair<K, V>`, `Eᵢ` is a *key-value pair element* `Kᵢ:Vᵢ`, and there is an implicit conversion from `Kᵢ` to `K` and an implicit conversion from `Vᵢ` to `V`.**
+* If `Eᵢ` is a *spread element* `..Sᵢ` then:
+  * There is an implicit conversion from the *iteration type* of `Sᵢ` to `T` **or**
+  * **There is no implicit conversion from the *iteration type* of `Sᵢ` to `T`, and `T` is a type `KeyValuePair<K, V>`, the *iteration type* of `Sᵢ` is a type `Kᵢ:Vᵢ`, and there is an implicit conversion from `Kᵢ` to `K` and an implicit conversion from `Vᵢ` to `V`.**
+* **If `Eᵢ` is a *key-value pair element* `Kᵢ:Vᵢ`, then `T` is a type `KeyValuePair<K, V>`, and there is an implicit conversion from `Kᵢ` to `K` and an implicit conversion from `Vᵢ` to `V`.**
 
 > Allowing implicit key and value conversions is useful for *expression elements* and *spread elements* where the key or value types do not match the collection element type exactly.
 > 
@@ -483,6 +476,25 @@ Which approach should we go with for dictionary expressions? Options include:
 
 **Resolution:** Use *indexer* as the lowering form. [LDM-2024-03-11](https://github.com/dotnet/csharplang/blob/main/meetings/2024/LDM-2024-03-11.md#conclusions)
 
+### Conversion from expression element for `KeyValuePair<K, V>` collections
+
+Confirm the **allowed conversions** from an *expression element* when the target type is a `KeyValuePair<K, V>` collection.
+
+```csharp
+List<KeyValuePair<string, int>> list;
+list = [default];             // ok
+list = [new()];               // ok
+list = [new StringIntPair()]; // error: UDC not supported
+```
+
+>  * If `Eᵢ` is an *expression element* then one of the following holds:
+>     * **There is an implicit conversion from `Eᵢ` to `KeyValuePair<K:V>` where the conversion is one of:**
+>       * ***default literal conversion***
+>       * ***target-typed new conversion***
+>     * **`Eᵢ` has type `KeyValuePair<Kᵢ:Vᵢ>` and there is an implicit conversion from `Kᵢ` to `K` and an implicit conversion from `Vᵢ` to `V`.**
+
+**Resolution:** Existing conversions should continue to apply for *expression elements* and *spread elements* before considering co-variant conversions of `Key` and `Value` for distinct `KeyValuePair<,>` types. [LDM-2025-03-17](https://github.com/dotnet/csharplang/blob/main/meetings/2024/LDM-2025-03-17)
+
 ## Retracted Designs/Questions
 
 ### Question: Should `k:v` elements force dictionary semantics?
@@ -564,24 +576,6 @@ Options include:
 1. For each element individually, use normal lookup rules and overload resolution to determine the resulting indexer based on the element expression (for an expression element) or type (for a spread or key-value pair element). *This corresponds to the binding behavior for `Add()` methods for non-dictionary collection expressions.*
 2. Use the target type implementation of `IDictionary<K, V>.this[K] { get; set; }`.
 3. Use the accessible indexer that matches the signature `V this[K] { get; set; }`.
-
-### Conversion from expression element for `KeyValuePair<K, V>` collections
-
-Confirm the **allowed conversions** from an *expression element* when the target type is a `KeyValuePair<K, V>` collection.
-
-```csharp
-KeyValuePair<string, int>? x = null;
-List<KeyValuePair<string, int>> list;
-list = [default];             // ok
-list = [new()];               // ok
-list = [new StringIntPair()]; // error: UDC not supported
-```
-
->  * If `Eᵢ` is an *expression element* then one of the following holds:
->     * **There is an implicit conversion from `Eᵢ` to `KeyValuePair<K:V>` where the conversion is one of:**
->       * ***default literal conversion***
->       * ***target-typed new conversion***
->     * **`Eᵢ` has type `KeyValuePair<Kᵢ:Vᵢ>` and there is an implicit conversion from `Kᵢ` to `K` and an implicit conversion from `Vᵢ` to `V`.**
 
 ### Type inference for `KeyValuePair<K, V>` collections
 
