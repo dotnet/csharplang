@@ -41,7 +41,7 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ### Mon Mar 24, 2025
 
-- Dictionary expressions / collection arguments [open questions](https://github.com/dotnet/csharplang/pull/9216) (cston)
+- Dictionary expressions [open questions](https://github.com/dotnet/csharplang/blob/main/proposals/dictionary-expressions.md#open-questions) (cston)
 - [Extension open issues](https://github.com/dotnet/csharplang/blob/main/proposals/extensions.md#open-issues) (Julien)
 
 ### Wed Mar 19, 2025
