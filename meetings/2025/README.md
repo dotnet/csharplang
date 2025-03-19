@@ -61,10 +61,6 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 - [Extension open issues](https://github.com/dotnet/csharplang/blob/main/proposals/extensions.md#open-issues) (Julien) (2hrs)
 
-### Mon Mar 3, 2025
-
-- [Extensions: More metadata and lookup open issues](https://github.com/dotnet/csharplang/blob/main/proposals/extensions.md#open-issues) (Julien) (2hrs)
-
 ## C# Language Design Notes for 2025
 
 ### Wed Mar 5, 2025
@@ -73,6 +69,12 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 - Dictionary expressions
 - Target-typed static member lookup
+
+### Mon Mar 3, 2025
+
+[C# Language Design Meeting for March 3rd, 2025](https://github.com/dotnet/csharplang/blob/main/meetings/2025/LDM-2025-03-03.md)
+
+- Extensions
 
 ### Wed Feb 26, 2025
 
