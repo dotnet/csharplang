@@ -41,6 +41,9 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ### Mon Mar 24, 2025
 
+- Dictionary expressions / collection arguments [open questions](https://github.com/dotnet/csharplang/pull/9216) (cston)
+- [Extension open issues](https://github.com/dotnet/csharplang/blob/main/proposals/extensions.md#open-issues) (Julien)
+
 ### Wed Mar 19, 2025
 
 - [Readonly setter calls on non-variables](https://github.com/dotnet/csharplang/blob/main/proposals/readonly-setter-calls-on-non-variables.md) (jnm2)
