@@ -77,7 +77,27 @@ These use cases would no longer be blocked if CS1612 is fully updated with an un
 
 The CS1612 error is not produced for assignments where the setter is readonly. (If the whole struct is readonly, then the setter is also readonly.) The setter call is emitted the same way as any non-accessor readonly instance method call.
 
-### Notes
+### Null-conditional assignment
+
+The [Null-conditional assignment](https://github.com/dotnet/csharplang/blob/main/proposals/null-conditional-assignment.md) proposal enables the following syntax:
+
+```cs
+a?.b = value;
+a?.b.c = value;
+a?[index] = value;
+```
+
+CS1612 errors will be produced for this new syntax in the same way that they are for the existing syntax below:
+
+```cs
+a2.b = value;
+a2.b.c = value;
+a2[index] = value;
+```
+
+Thus, when the setter is readonly, the assignments will be permitted in both cases, and when the setter is not readonly, the normal CS1612 error for structs will remain in both cases.
+
+### InlineArray
 
 InlineArray properties are covered by a separate error which this proposal does not affect:
 
@@ -143,5 +163,35 @@ class C
 {
     public ArraySegment<object> ArraySegmentProp { get; set; }
     public Span<object> StructWithRefReturningIndexer => ArraySegmentProp.AsSpan();
+}
+```
+
+## Downsides
+
+If this proposal is taken, it becomes a source-breaking change to remove the `readonly` keyword from a struct or setter. Without the `readonly` keyword, the errors would then be relevant and would reappear.
+
+Due to what looks like an unintentional change in the compiler, this source-breaking change is already in effect when the setter is called on an invocation expression:
+
+```cs
+// Removing 'readonly' from S1 causes a CS1612 error.
+M().Prop = 1;
+
+S1 M() => default;
+
+public readonly struct S1
+{
+    public int Prop { get => 0; set { } }
+}
+```
+
+```cs
+// Removing 'readonly' from S2.Prop.set causes a CS1612 error.
+M().Prop = 1;
+
+S2 M() => default;
+
+public struct S2
+{
+    public int Prop { get => 0; readonly set { } }
 }
 ```
