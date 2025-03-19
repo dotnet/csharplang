@@ -50,66 +50,37 @@ receiver_parameter // add
 Extension declarations shall only be declared in non-generic, non-nested static classes.  
 It is an error for a type to be named `extension`.  
 
-### Declaration spaces
+### Scoping rules
 
-Section [7.3 Declarations](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/basic-concepts.md#73-declarations) in the C# Standard is updated as follows (additions in **bold non-italic**):
-
-> ...
-> 
-> There are several different types of declaration spaces, as described in the following.
-> 
-> ...
-> 
-> - Each method declaration, property declaration, property accessor declaration, indexer declaration, indexer accessor declaration, operator declaration, instance constructor declaration, anonymous function, and local function creates a new declaration space called a ***local variable declaration space***. Names are introduced into this declaration space through formal parameters (*fixed_parameter*s and *parameter_array*s) and *type_parameter*s. The set accessor for a property or an indexer introduces the name `value` as a formal parameter. 
-**An *extension_declaration* introduces to each member declaration directly contained within it its *type_parameter_list* as type parameters and the *identifier*, if any, of its *receiver_parameter* as a formal parameter.**
-
-There is an existing need to specify (maybe in Section [12.8.4 Simple Names](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/expressions.md#1284-simple-names)) something along the lines of the following:
-
-> If a local variable directly occurring in a given declaration space is accessed from within a static member or static lambda expression that is itself nested within that declaration space, a compile-time error is given.
-
-Thus, for receiver parameters as well as any other local variable, a reference from within a static context still resolves to that variable, but leads to an error.
-
-``` c#
-public static class E
-{
-    extension(string s)
-    {
-        public int M1(int i) // *1*
-        {
-            return s.Length + i;
-        }
-        public int M2(string s) // *2* Error: Cannot reuse name `s`
-        {
-            return s.Length;
-        }
-        public static string P // *3*
-        {
-            get => s; // Error: Cannot use `s` from static context
-        }
-    }
-}
-```
-
-In the example, `*1*`, `*2*` and `*3*` denote local variable declaration spaces. The receiver parameter `s` is added to all three declaration spaces as a formal parameter. This makes it a compile-time error for `M2` to declare another parameter named `s`, and for the body of `P` to access `s` from a static context.
+The type parameters and receiver parameter of an extension declaration are in scope within the body of the extension declaration. It is an error to refer to the receiver parameter from within a static member. It is an error for members to declare type parameters or parameters with the same name as a type parameter or receiver parameter of the extension declaration.
 
 ``` c#
 public static class E
 {
     extension<T>(T[] ts)
     {
-        public int M1() // *1*
-        {
-            return ts.Length;
-        }
-        public int M2<T>(T[] ts2) // *2* Error: Cannot reuse name `T`
-        {
-            return ts.Length + ts2.Length;
-        }
+        public bool M1(T t) => ts.Contains(t);        // `T` and `ts` are in scope
+        public static bool M2(T t) => ts.Contains(t); // Error: Cannot refer to `ts` from static context
+        public void M3(int T, string ts) { }          // Error: Cannot reuse names `T` and `ts`
+        public void M4<T, ts>(string s) { }           // Error: Cannot reuse names `T` and `ts`
     }
 }
 ```
 
-In the example, `*1*` and `*2*` denote local variable declaration spaces. The receiver type parameter `T` is added to all three declaration spaces as a type parameter. This makes it a compile-time error for `M2` to declare another type parameter named `T`.
+It is not an error for the members themselves to have the same name as the type parameters or receiver parameter of the enclosing extension declaration. Member names are not directly found in a simple name lookup from within the extension declaration; lookup will thus find the type parameter or receiver parameter of that name, rather than the member. 
+
+Members do give rise to static methods being declared directly on the enclosing static class, and those can be found via simple name lookup; however, an extension declaration type parameter or receiver parameter of the same name will be found first.
+
+``` c#
+public static class E
+{
+    extension<T>(T[] ts)
+    {
+        public void T() { M(ts); } // Generated static method M<T>(T[]) is found
+        public void M() { T(ts); } // Error: T is a type parameter
+    }
+}
+```
 
 ### Static classes as extension containers
 
