@@ -179,11 +179,12 @@ An implicit *collection expression conversion* exists from a collection expressi
 * A *struct* or *class type* that implements `System.Collections.IEnumerable` where:
   * The *type* has an *[applicable](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/expressions.md#11642-applicable-function-member)* constructor that can be invoked with no arguments, and the constructor is accessible at the location of the collection expression.
   * **One of the following holds:**
-    * **The [*iteration type*](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/statements.md#1395-the-foreach-statement) of the *type* is `KeyValuePair<TKey, TValue>`, and the *type* has an instance *indexer*, with `get` and `set` accessors where:**
-      * **The indexer has a single parameter.**
-      * **There is an identity conversion from the parameter type to `TKey` and an identity conversion from the indexer type to `TValue`.** *Identity conversions rather than exact matches allow type differences that are ignored by the runtime: `object` vs. `dynamic`; tuple element names; nullable reference types; etc.*
+    * **The [*iteration type*](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/statements.md#1395-the-foreach-statement) of the *type* is `KeyValuePair<K, V>`, and the *type* has an instance *indexer*, with `get` and `set` accessors where:**
+      * **The indexer has a single parameter passed by value or with `in`.**
+      * **There is an identity conversion from the parameter type to `K` and an identity conversion from the indexer type to `V`.** *Identity conversions rather than exact matches allow type differences that are ignored by the runtime: `object` vs. `dynamic`; tuple element names; nullable reference types; etc.*
       * **The `get` accessor returns by value.**
-      * **The `get` and `set` accessors are as accessible as the declaring type.**  
+      * **The `get` and `set` accessors are declared `public`.**
+      * **The indexer is not [*hidden*](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/basic-concepts.md#7723-hiding-through-inheritance).**
     * If the collection expression has any elements, the *type* has an instance or extension method `Add` where:
       * The method can be invoked with a single value argument.
       * If the method is generic, the type arguments can be inferred from the collection and argument.
@@ -203,46 +204,32 @@ An implicit *collection expression conversion* exists from a collection expressi
   **In which case the *element type* is `KeyValuePair<TKey, TValue>`**
 
 *Collection expression conversions* require implicit conversions for each element.
-The element conversion rules are updated as follows.
+The element conversion rules are **updated** as follows.
 
-> The implicit conversion exists if the type has an *element type* `T` where for each *element* `Eᵢ` in the collection expression:
-> * If `Eᵢ` is an *expression element*, there is an implicit conversion from `Eᵢ` to `T`.
-> * If `Eᵢ` is a *spread element* `..Sᵢ`, there is an implicit conversion from the *iteration type* of `Sᵢ` to `T`.
-> * **If `Eᵢ` is a *key-value pair element* `Kᵢ:Vᵢ` and `T` is a type `KeyValuePair<K, V>`, there is an implicit conversion from `Kᵢ` to `K` and an implicit conversion from `Vᵢ` to `V`.**
-> * **Otherwise there is *no conversion* from the collection expression to the target type.**
+The implicit conversion exists if for each *element* `Eᵢ` in the collection expression:
+* **If the target *iteration type* is `KeyValuePair<K, V>`, then one of the following holds:**
+  * **If `Eᵢ` is a *key-value pair element* `Kᵢ:Vᵢ`, there is an implicit conversion from `Kᵢ` to `K` and an implicit conversion from `Vᵢ` to `V`.**
+  * **If `Eᵢ` is an *expression element* then one of the following holds:**
+    * **There is an implicit conversion from `Eᵢ` to `KeyValuePair<K:V>` where the conversion is one of:**
+      * ***default literal conversion***
+      * ***target-typed new conversion***
+    * **`Eᵢ` has type `KeyValuePair<Kᵢ:Vᵢ>` and there is an implicit conversion from `Kᵢ` to `K` and an implicit conversion from `Vᵢ` to `V`.**
+  * **If `Eᵢ` is a *spread element* `..Sᵢ`, where the *iteration type* of `Sᵢ` is `KeyValuePair<Kᵢ:Vᵢ>`, there is an implicit conversion from `Kᵢ` to `K` and an implicit conversion from `Vᵢ` to `V`.**
+
+* **If the target *iteration type* `T` *is not* `KeyValuePair<K, V>`, then one of the following holds:**
+  * If `Eᵢ` is an *expression element*, there is an implicit conversion from `Eᵢ` to `T`.
+  * If `Eᵢ` is a *spread element* `..Sᵢ`, there is an implicit conversion from the *iteration type* of `Sᵢ` to `T`.
+
+* **Otherwise there is *no conversion* from the collection expression to the target type.**
+
+> Allowing implicit key and value conversions is useful for *expression elements* and *spread elements* where the key or value types do not match the collection element type exactly.
+> 
+> ```csharp
+> Dictionary<int, string>  x = ...;
+> Dictionary<long, object> y = [..x]; // key-value pair conversion from KVP<int, string> to KVP<long, object>
+> ```
 
 Collection arguments are *not* considered when determining *collection expression* conversions.
-
-### Key-value pair conversions
-
-A *key-value pair conversion* is introduced.
-
-An implicit *key-value pair conversion* exists from an *expression element* to the *element type* of the containing *collection expression* if all of the following hold:
-- the expression element has *type* `KeyValuePair<Kᵢ, Vᵢ>`
-- the collection expression has *element type* `KeyValuePair<K, V>`
-- there is an implicit conversion from `Kᵢ` to `K`
-- there is an implicit conversion from `Vᵢ` to `V`
-
-An implicit *key-value pair conversion* exists from the *iteration type* of a *spread element* to the *element type* of the containing *collection expression* if all of the following hold:
-- the spread element has *iteration type* `KeyValuePair<Kᵢ, Vᵢ>`
-- the collection expression has *element type* `KeyValuePair<K, V>`
-- there is an implicit conversion from `Kᵢ` to `K`
-- there is an implicit conversion from `Vᵢ` to `V`
-
-Key-value pair conversions are useful for *expression elements* and *spread elements* where the key or value types do not match the collection element type exactly.
-Despite the name, key-value pair conversions *do not* apply to *key-value elements*.
-
-```csharp
-Dictionary<int, string>  x = ...;
-Dictionary<long, object> y = [..x]; // key-value pair conversion from KVP<int, string> to KVP<long, object>
-```
-
-Implicit key-value pair conversions are similar to [*implicit tuple conversions*](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/conversions.md#10213-implicit-tuple-conversions) that allow converting between distinct tuple types.
-
-```csharp
-List<(int, string)>  x = ...;
-List<(long, object)> y = [..x]; // tuple conversion from (int, string) to (long, object)
-```
 
 ## Create methods
 
@@ -275,18 +262,31 @@ If the target type is a *struct* or *class type* that implements `System.Collect
 
 * The constructor that is applicable with no arguments is invoked.
 
-* **If the *iteration type* is `KeyValuePair<TKey, TValue>`, and the *type* has a corresponding instance *indexer* then:**
+* **If the *iteration type* is `KeyValuePair<K, V>`, then:**
   * **For each element in order:**
-    * **If the element is a *key value pair element* `Kᵢ:Vᵢ`, first `Kᵢ` is evaluated, then `Vᵢ` is evaluated, and the applicable indexer is invoked on the collection instance with the converted values of `Kᵢ` and `Vᵢ`. If `Kᵢ` has `dynamic` type, the applicable indexer may be determined at runtime.**
-    * **If the element is an *expression element* `Eᵢ`, first `Eᵢ` is evaluated, then implicitly converted to  `KeyValuePair<TKey, TValue>`, and the applicable indexer is invoked on the collection instance with the values of `Key` and `Value` from the implicitly converted value. If `Eᵢ` has `dynamic` type, the implicit conversion is an unbox.**
-    * **If the element is a *spread element* where the spread element *expression* has an [*iteration type*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/statements.md#1295-the-foreach-statement) `Tᵢ` then:**
-      * **An applicable `GetEnumerator` instance or extension method is invoked on the spread element *expression* and for each item from the enumerator the item is implicitly converted to `KeyValuePair<TKey, TValue>`, and the applicable indexer is invoked on the collection instance with the values of `Key` and `Value` from the implicitly converted value. If `Tᵢ` is `dynamic`, the implicit conversion is an unbox. If the enumerator implements `IDisposable`, then `Dispose` will be called after enumeration, regardless of exceptions.**
+    * **If the element is a *key value pair element* `Kᵢ:Vᵢ`, then:**
+      * **First `Kᵢ` is evaluated, then `Vᵢ` is evaluated.**
+      * **If the target type has a corresponding *indexer*, then the indexer is invoked on the collection instance with the converted values of `Kᵢ` and `Vᵢ`.**
+      * **Otherwise a `KeyValuePair<K, V>` is constructed from the converted values of `Kᵢ` and `Vᵢ`, and the applicable `Add` instance or extension method is invoked with that value.**
+    * **If the element is an *expression element* `Eᵢ`, then:**
+      * **`Eᵢ` is evaluated as a value of type `KeyValuePair<Kᵢ:Vᵢ>`.**
+      * **If the target type has a corresponding *indexer*, then the indexer is invoked on the collection instance with the converted values of `Key` and `Value` from the evaluated expression.**
+      * **Otherwise a `KeyValuePair<K, V>` is constructed from the converted values of `Key` and `Value` from the evaluated expression, and the applicable `Add` instance or extension method is invoked with that value.**
+    * **If the element is a *spread element* where the spread element *expression* has an [*iteration type*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/statements.md#1295-the-foreach-statement) `KeyValuePair<Kᵢ:Vᵢ>` then:**
+      * **An applicable `GetEnumerator` instance or extension method is invoked on the spread element *expression***.
+      * **For each item from the enumerator:**
+        * **If the target type has a corresponding *indexer*, then the indexer is invoked on the collection instance with the converted values of `Key` and `Value` from the item.**
+        * **Otherwise a `KeyValuePair<K, V>` is constructed from the converted values of `Key` and `Value` from the item, and the applicable `Add` instance or extension method is invoked with that value.**
+      * **If the enumerator implements `IDisposable`, then `Dispose` will be called after enumeration, regardless of exceptions.**
 
-* Otherwise, if the *type* has a corresponding instance `Add` method then:
+* Otherwise:
   * For each element in order:
     * If the element is an *expression element*, the applicable `Add` instance or extension method is invoked with the element *expression* as the argument. (Unlike classic [*collection initializer behavior*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/expressions.md#117154-collection-initializers), element evaluation and `Add` calls are not necessarily interleaved.)
     * If the element is a *spread element* then ...:
-      * An applicable `GetEnumerator` instance or extension method is invoked on the *spread element expression* and for each item from the enumerator the applicable `Add` instance or extension method is invoked on the *collection instance* with the item as the argument. If the enumerator implements `IDisposable`, then `Dispose` will be called after enumeration, regardless of exceptions.
+      * An applicable `GetEnumerator` instance or extension method is invoked on the *spread element expression*.
+      * For each item from the enumerator:
+        * The applicable `Add` instance or extension method is invoked on the *collection instance* with the item as the argument.
+      * If the enumerator implements `IDisposable`, then `Dispose` will be called after enumeration, regardless of exceptions.
       * ...
 
 ## Type inference
@@ -565,9 +565,93 @@ Options include:
 2. Use the target type implementation of `IDictionary<K, V>.this[K] { get; set; }`.
 3. Use the accessible indexer that matches the signature `V this[K] { get; set; }`.
 
-### Key-value pair conversions
+### Conversion from expression element for `KeyValuePair<K, V>` collections
 
-Should the compiler support a new [*key-value pair conversion*](#key-value-pair-conversions) within collection expressions to allow implicit conversions from an expression element of type `KeyValuePair<K1, V1>`, or a spread element with an iteration type of `KeyValuePair<K1, V1>` to the collection expression iteration type `KeyValuePair<K2, V2>`?
+Confirm the **allowed conversions** from an *expression element* when the target type is a `KeyValuePair<K, V>` collection.
+
+```csharp
+KeyValuePair<string, int>? x = null;
+List<KeyValuePair<string, int>> list;
+list = [default];             // ok
+list = [new()];               // ok
+list = [new StringIntPair()]; // error: UDC not supported
+```
+
+>  * If `Eᵢ` is an *expression element* then one of the following holds:
+>     * **There is an implicit conversion from `Eᵢ` to `KeyValuePair<K:V>` where the conversion is one of:**
+>       * ***default literal conversion***
+>       * ***target-typed new conversion***
+>     * **`Eᵢ` has type `KeyValuePair<Kᵢ:Vᵢ>` and there is an implicit conversion from `Kᵢ` to `K` and an implicit conversion from `Vᵢ` to `V`.**
+
+### Type inference for `KeyValuePair<K, V>` collections
+
+Confirm the [*type inference*](#type-inference) rules for elements when the target type is a `KeyValuePair<K, V>` collection.
+
+```csharp
+string x; int y;
+KeyValuePair<string, long> e;
+Dictionary<object, int> d;
+...
+Print([x:y]);         // Print<string, int>
+Print([e]);           // Print<string, long>
+Print([..d]);         // Print<object, int>
+Print([x:y, e, ..d]); // Print<object, long>
+
+void Print<K, V>(List<KeyValuePair<K, V>> pairs) { ... }
+```
+
+>   * **If `T` has an *element type* `KeyValuePair<Kₑ, Vₑ>`, or `T` is a *nullable value type* `T0?` and `T0` has an *element type* `KeyValuePair<Kₑ, Vₑ>`, then for each `Eᵢ`**:
+>     * **If `Eᵢ` is a *key value pair element* `Kᵢ:Vᵢ`, then an *input type inference* is made *from* `Kᵢ` *to* `Kₑ` and an *input type inference* is made *from* `Vᵢ` *to* `Vₑ`.**
+>     * **If `Eᵢ` is an *expression element* with type `KeyValuePair<Kᵢ, Vᵢ>`, then a [*lower-bound inference*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/expressions.md#116310-lower-bound-inferences) is made *from* `Kᵢ` *to* `Kₑ` and a [*lower-bound inference*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/expressions.md#116310-lower-bound-inferences) is made *from* `Vᵢ` *to* `Vₑ`.**
+>     * **If `Eᵢ` is a *spread element* with an [*iteration type*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/statements.md#1295-the-foreach-statement) `KeyValuePair<Kᵢ, Vᵢ>`, then a [*lower-bound inference*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/expressions.md#116310-lower-bound-inferences) is made *from* `Kᵢ` *to* `Kₑ` and a [*lower-bound inference*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/expressions.md#116310-lower-bound-inferences) is made *from* `Vᵢ` *to* `Vₑ`.**
+
+### Overload resolution for `KeyValuePair<K, V>` collections
+
+Confirm the *better conversion* rules for [*overload resolution*](#overload-resolution) when the target types are `KeyValuePair<K, V>` collections.
+
+```csharp
+KeyValuePair<byte, int> e;
+Dictionary<byte, int> d;
+...
+Print([1:2]); // <int, int>
+Print([e])    // ambiguous
+Print([..d])  // ambiguous
+
+void Print(List<KeyValuePair<int, int>> pairs) { ... }
+void Print(List<KeyValuePair<byte, object>> pairs) { ... }
+```
+
+> Conversion comparisons are made as follows:
+> - **If the target is a type with an *element type* `KeyValuePair<Kₑ, Vₑ>`:**
+>   - **If `ELᵢ` is a *key value pair element* `Kᵢ:Vᵢ`, conversion comparison uses better conversion from expression from `Kᵢ` to `Kₑ` and better conversion from expression from `Vᵢ` to `Vₑ`.**
+>   - **If `ELᵢ` is an *expression element* with *element type* `KeyValuePair<Kᵢ, Vᵢ>`, conversion comparison uses better conversion from type `Kᵢ` to `Kₑ` and better conversion from type `Vᵢ` to `Vₑ`.**
+>   - **If `ELᵢ` is an *spread element* with an expression with *element type* `KeyValuePair<Kᵢ, Vᵢ>`, conversion comparison uses better conversion from type `Kᵢ` to `Kₑ` and better conversion from type `Vᵢ` to `Vₑ`.**
+
+### Support dictionary types as `params` type
+
+Should types with element type `KeyValuePair<K, V>`, that are not otherwise collection types, be supported as `params` parameter types?
+
+```csharp
+KeyValuePair<string, int> x, y;
+
+ToDictionary(x, y);
+ToReadOnlyDictionary(x, y);
+
+static Dictionary<K, V> ToDictionary<K, V>(
+    params Dictionary<K, V> elements) => elements;          // C#14: ok?
+
+static IReadOnlyDictionary<K, V> ToReadOnlyDictionary<K, V>(
+    params IReadOnlyDictionary<K, V> elements) => elements; // C#14: ok?
+```
+
+Note that regardless of whether we support dictionary types for `params`, or simply continue to support C#12 collection types with `KeyValuePair<K, V>` element type, it won't be possible to use `k:v` syntax when calling a `params` method with *expanded form*.
+
+```csharp
+ToList("one":1);   // error: syntax error ':'
+ToList(["two":2]); // C#14: ok
+
+static List<KeyValuePair<K, V>> ToList<K, V>(params List<KeyValuePair<K, V>> elements) => elements;
+```
 
 ### Concrete type for `I{ReadOnly}Dictionary<K, V>`
 

@@ -398,6 +398,17 @@ Should arguments with `dynamic` type be allowed? That might require using the ru
 
 ## Open questions
 
+### `with()` breaking change
+
+The proposed `with()` element is a breaking change.
+```csharp
+object x, y, z = ...;
+object[] items = [with(x, y), z]; // C#13: ok; C#14: error args not supported for object[]
+
+object with(object x, object y) { ... }
+```
+Confirm the breaking change is acceptable, and whether breaking change should be tied to language version.
+
 ### Should arguments affect collection expression conversion?
 
 Should collection arguments and the applicable methods affect convertibility of the collection expression?
