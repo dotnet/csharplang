@@ -63,7 +63,7 @@ Section [7.3 Declarations](https://github.com/dotnet/csharpstandard/blob/standar
 > - Each method declaration, property declaration, property accessor declaration, indexer declaration, indexer accessor declaration, operator declaration, instance constructor declaration, anonymous function, and local function creates a new declaration space called a ***local variable declaration space***. Names are introduced into this declaration space through formal parameters (*fixed_parameter*s and *parameter_array*s) and *type_parameter*s. The set accessor for a property or an indexer introduces the name `value` as a formal parameter. 
 **An *extension_declaration* introduces to each member declaration directly contained within it its *type_parameter_list* as type parameters and the *identifier*, if any, of its *receiver_parameter* as a formal parameter.**
 
-There is an existing need to specify (maybe in Section[12.8.4 Simple Names](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/expressions.md#1284-simple-names)) something along the lines of the following:
+There is an existing need to specify (maybe in Section [12.8.4 Simple Names](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/expressions.md#1284-simple-names)) something along the lines of the following:
 
 > If a local variable directly occurring in a given declaration space is accessed from within a static member or static lambda expression that is itself nested within that declaration space, a compile-time error is given.
 
@@ -91,6 +91,25 @@ public static class E
 ```
 
 In the example, `*1*`, `*2*` and `*3*` denote local variable declaration spaces. The receiver parameter `s` is added to all three declaration spaces as a formal parameter. This makes it a compile-time error for `M2` to declare another parameter named `s`, and for the body of `P` to access `s` from a static context.
+
+``` c#
+public static class E
+{
+    extension<T>(T[] ts)
+    {
+        public int M1() // *1*
+        {
+            return ts.Length;
+        }
+        public int M2<T>(T[] ts2) // *2* Error: Cannot reuse name `T`
+        {
+            return ts.Length + ts2.Length;
+        }
+    }
+}
+```
+
+In the example, `*1*` and `*2*` denote local variable declaration spaces. The receiver type parameter `T` is added to all three declaration spaces as a type parameter. This makes it a compile-time error for `M2` to declare another type parameter named `T`.
 
 ### Static classes as extension containers
 
