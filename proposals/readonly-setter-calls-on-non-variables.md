@@ -87,7 +87,7 @@ a?.b.c = value;
 a?[index] = value;
 ```
 
-CS1612 errors will be produced for this new syntax in the same way that they are for the corresponding forms when `a` is non-nullable:
+CS1612 errors will be produced for this new syntax in the same way that they are for the existing syntax below:
 
 ```cs
 a2.b = value;
@@ -95,7 +95,7 @@ a2.b.c = value;
 a2[index] = value;
 ```
 
-Thus, null-conditional assignments will also be permitted when the setter is readonly.
+Thus, when the setter is readonly, the assignments will be permitted in both cases, and when the setter is not readonly, the normal CS1612 error for structs will remain in both cases.
 
 ### InlineArray
 
@@ -170,7 +170,7 @@ class C
 
 If this proposal is taken, it becomes a source-breaking change to remove the `readonly` keyword from a struct or setter. Without the `readonly` keyword, the errors would then be relevant and would reappear.
 
-However, in effect, this bridge has already been crossed for invocation expressions. It's already a source-breaking change to remove the `readonly` keyword from a struct or setter, because the struct value may be obtained from an invocation expression where the compiler already omits the CS1612 error for these:
+Due to what looks like an unintentional change in the compiler, this source-breaking change is already in effect when the setter is called on an invocation expression:
 
 ```cs
 // Removing 'readonly' from S1 causes a CS1612 error.
