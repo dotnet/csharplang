@@ -431,7 +431,7 @@ Print<int>(new(comparer: null));              // error: ambiguous
 Print(new(comparer: StringComparer.Ordinal)); // error: type arguments cannot be inferred
 ```
 
-**Resolution:** Collection arguments should not be considered for conversion or type inference. [LDM-2025-03-17](https://github.com/dotnet/csharplang/blob/main/meetings/2025/LDM-2025-03-17)
+**Resolution:** Collection arguments should be ignored in conversions and type inference. [LDM-2025-03-17](https://github.com/dotnet/csharplang/blob/main/meetings/2025/LDM-2025-03-17)
 
 ### Collection builder method parameter order
 
