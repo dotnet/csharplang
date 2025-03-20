@@ -64,6 +64,8 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ### Mon Mar 10, 2025
 
+[C# Language Design Meeting for March 10th, 2025](https://github.com/dotnet/csharplang/blob/main/meetings/2025/LDM-2025-03-10.md)
+
 - Extensions
     - Property method calling
     - Scoping and Shadowing
