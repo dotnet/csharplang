@@ -208,11 +208,11 @@ The element conversion rules are **updated** as follows.
 
 The implicit conversion exists if the type has an *element type* `T` where for each *element* `Eᵢ` in the collection expression:
 * If `Eᵢ` is an *expression element* then:
-  * There is an implicit conversion from `Eᵢ` to `T` **or**
-  * **There is no implicit conversion from `Eᵢ` to `T`, and `T` is a type `KeyValuePair<K, V>`, `Eᵢ` is a *key-value pair element* `Kᵢ:Vᵢ`, and there is an implicit conversion from `Kᵢ` to `K` and an implicit conversion from `Vᵢ` to `V`.**
+  * There is an implicit conversion from `Eᵢ` to `T`, **or**
+  * **There is no implicit conversion from `Eᵢ` to `T`, and `T` is a type `KeyValuePair<K, V>`, and `Eᵢ` has a type `KeyValuePair<Kᵢ, Vᵢ>`, and there is an implicit conversion from `Kᵢ` to `K` and an implicit conversion from `Vᵢ` to `V`.**
 * If `Eᵢ` is a *spread element* `..Sᵢ` then:
-  * There is an implicit conversion from the *iteration type* of `Sᵢ` to `T` **or**
-  * **There is no implicit conversion from the *iteration type* of `Sᵢ` to `T`, and `T` is a type `KeyValuePair<K, V>`, the *iteration type* of `Sᵢ` is a type `Kᵢ:Vᵢ`, and there is an implicit conversion from `Kᵢ` to `K` and an implicit conversion from `Vᵢ` to `V`.**
+  * There is an implicit conversion from the *iteration type* of `Sᵢ` to `T`, **or**
+  * **There is no implicit conversion from the *iteration type* of `Sᵢ` to `T`, and `T` is a type `KeyValuePair<K, V>`, and `Sᵢ` has an *iteration type* `KeyValuePair<Kᵢ, Vᵢ>`, and there is an implicit conversion from `Kᵢ` to `K` and an implicit conversion from `Vᵢ` to `V`.**
 * **If `Eᵢ` is a *key-value pair element* `Kᵢ:Vᵢ`, then `T` is a type `KeyValuePair<K, V>`, and there is an implicit conversion from `Kᵢ` to `K` and an implicit conversion from `Vᵢ` to `V`.**
 
 > Allowing implicit key and value conversions is useful for *expression elements* and *spread elements* where the key or value types do not match the collection element type exactly.
