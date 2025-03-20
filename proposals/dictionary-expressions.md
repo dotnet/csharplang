@@ -255,7 +255,7 @@ If the target type is a *struct* or *class type* that implements `System.Collect
 
 * The constructor that is applicable with no arguments is invoked.
 
-* **If the *iteration type* is `KeyValuePair<K, V>` and the [*collection expression conversion*](#conversions) involves an instance *indexer* then:**
+* **If the *iteration type* is a type `KeyValuePair<K, V>` and the [*collection expression conversion*](#conversions) involves an instance *indexer*, then:**
   * **For each element in order:**
     * **If the element is a *key value pair element* `Kᵢ:Vᵢ` then:**
       * **First `Kᵢ` is evaluated, then `Vᵢ` is evaluated.**
@@ -277,7 +277,7 @@ If the target type is a *struct* or *class type* that implements `System.Collect
           * **The indexer is invoked on the collection instance with `Key` and `Value` of the item, converted to `K` and `V`.**
       * **If the enumerator implements `IDisposable`, then `Dispose` will be called after enumeration, regardless of exceptions.**
 
-* **If the *iteration type* is `KeyValuePair<K, V>` and the [*collection expression conversion*](#conversions) involves an applicable `Add` method then:**
+* **If the *iteration type* is a type `KeyValuePair<K, V>` and the [*collection expression conversion*](#conversions) involves an applicable `Add` method, then:**
   * **For each element in order:**
     * **If the element is a *key value pair element* `Kᵢ:Vᵢ` then:**
       * **A `KeyValuePair<K:V>` instance is constructed from the expressions `Kᵢ` and `Vᵢ` converted to `K` and `V`.**
