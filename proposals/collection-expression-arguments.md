@@ -303,7 +303,7 @@ l = [with(default)];           // error: ambiguous constructor
 ```
 
 If the target type is a type with a *create method*, then:
-* The *argument list* is the *collection expression* containing the elements only (no arguments), followed by the *argument list*.
+* The *argument list* is the `with()` *argument list* followed by a *collection expression* containing the elements only (no arguments).
 * [*Overload resolution*](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/expressions.md#1264-overload-resolution) is used to determine the best factory method from the *argument list* from the [*create method candidates*](#create-method-candidates):
 * If a best factory method is found, the method is invoked with the *argument list*.
   * If the factory method has a `params` parameter, the invocation may be in expanded form.
@@ -313,7 +313,7 @@ If the target type is a type with a *create method*, then:
 MyCollection<string> c = [with(GetComparer()), "1", "2"];
 // IEqualityComparer<string> _tmp1 = GetComparer();
 // ReadOnlySpan<string> _tmp2 = ["1", "2"];
-// c = MyBuilder.Create<string>(_tmp2, _tmp1);
+// c = MyBuilder.Create<string>(_tmp1, _tmp2);
 
 [CollectionBuilder(typeof(MyBuilder), "Create")]
 class MyCollection<T> { ... }
@@ -321,7 +321,7 @@ class MyCollection<T> { ... }
 class MyBuilder
 {
     public static MyCollection<T> Create<T>(ReadOnlySpan<T> elements);
-    public static MyCollection<T> Create<T>(ReadOnlySpan<T> elements, IEqualityComparer<T> comparer);
+    public static MyCollection<T> Create<T>(IEqualityComparer<T> comparer, ReadOnlySpan<T> elements);
 }
 ```
 
@@ -377,7 +377,7 @@ For a collection expression where the target type *definition* has a `[Collectio
 > * The method must be `static`.
 > * The method must be accessible where the collection expression is used.
 > * The *arity* of the method must match the *arity* of the collection type.
-> * The method must have a **first** parameter of type `System.ReadOnlySpan<E>`, passed by value.
+> * The method must have a **last** parameter of type `System.ReadOnlySpan<E>`, passed by value.
 > * There is an [*identity conversion*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/conversions.md#1022-identity-conversion), [*implicit reference conversion*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/conversions.md#1028-implicit-reference-conversions), or [*boxing conversion*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/conversions.md#1029-boxing-conversions) from the method return type to the *collection type*.
 > 
 > Methods declared on base types or interfaces are ignored and not part of the `CM` set.
@@ -385,7 +385,7 @@ For a collection expression where the target type *definition* has a `[Collectio
 > For a *collection expression* with a target type <code>C&lt;S<sub>0</sub>, S<sub>1</sub>, &mldr;&gt;</code> where the *type declaration* <code>C&lt;T<sub>0</sub>, T<sub>1</sub>, &mldr;&gt;</code> has an associated *builder method* <code>B.M&lt;U<sub>0</sub>, U<sub>1</sub>, &mldr;&gt;()</code>, the *generic type arguments* from the target type are applied in order &mdash; and from outermost containing type to innermost &mdash; to the *builder method*.
 
 The key differences from the earlier algorithm are:
-* Candidate methods may have additional parameters following the `ReadOnlySpan<E>` parameter.
+* Candidate methods may have additional parameters *before* the `ReadOnlySpan<E>` parameter.
 * Multiple candidate methods are supported.
 
 ## Answered questions
@@ -396,8 +396,6 @@ Should arguments with `dynamic` type be allowed? That might require using the ru
 
 **Resolution:** Disallowed. [LDM-2025-01-22](https://github.com/dotnet/csharplang/blob/main/meetings/2025/LDM-2025-01-22.md#conclusion-1)
 
-## Open questions
-
 ### `with()` breaking change
 
 The proposed `with()` element is a breaking change.
@@ -407,7 +405,10 @@ object[] items = [with(x, y), z]; // C#13: ok; C#14: error args not supported fo
 
 object with(object x, object y) { ... }
 ```
+
 Confirm the breaking change is acceptable, and whether breaking change should be tied to language version.
+
+**Resolution:** No change when compiling with earlier language version. [LDM-2025-03-17](https://github.com/dotnet/csharplang/blob/main/meetings/2025/LDM-2025-03-17)
 
 ### Should arguments affect collection expression conversion?
 
@@ -429,6 +430,34 @@ For reference, similar cases with target-typed `new()` result in errors.
 Print<int>(new(comparer: null));              // error: ambiguous
 Print(new(comparer: StringComparer.Ordinal)); // error: type arguments cannot be inferred
 ```
+
+**Resolution:** Collection arguments should not be considered for conversion or type inference. [LDM-2025-03-17](https://github.com/dotnet/csharplang/blob/main/meetings/2025/LDM-2025-03-17)
+
+### Collection builder method parameter order
+
+For *collection builder* methods, should the span parameter be before or after any parameters for collection arguments?
+
+Elements first would allow the arguments to be declared as optional.
+```csharp
+class MySetBuilder
+{
+    public static MySet<T> Create<T>(ReadOnlySpan<T> items, IEqualityComparer<T> comparer = null) { ... }
+}
+```
+
+Arguments first would allow the span to be a `params` parameter, to support calling directly in expanded form.
+```csharp
+var s = MySetBuilder.Create(StringComparer.Ordinal, x, y, z);
+
+class MySetBuilder
+{
+    public static MySet<T> Create<T>(IEqualityComparer<T> comparer, params ReadOnlySpan<T> items) { ... }
+}
+```
+
+**Resolution:** The span parameter for elements should be the last parameter. [LDM-2025-03-12](https://github.com/dotnet/csharplang/blob/main/meetings/2025/LDM-2025-03-12)
+
+## Open questions
 
 ### Target types where arguments are *required*
 
@@ -463,28 +492,6 @@ class MyCollection<T> : IEnumerable<T>
     public MyCollection(int capacity) { ... }
     public void Add(T t) { ... }
     // ...
-}
-```
-
-### Collection builder method parameter order
-
-For *collection builder* methods, should the span parameter be before or after any parameters for collection arguments?
-
-Elements first would allow the arguments to be declared as optional.
-```csharp
-class MySetBuilder
-{
-    public static MySet<T> Create<T>(ReadOnlySpan<T> items, IEqualityComparer<T> comparer = null) { ... }
-}
-```
-
-Arguments first would allow the span to be a `params` parameter, to support calling directly in expanded form.
-```csharp
-var s = MySetBuilder.Create(StringComparer.Ordinal, x, y, z);
-
-class MySetBuilder
-{
-    public static MySet<T> Create<T>(IEqualityComparer<T> comparer, params ReadOnlySpan<T> items) { ... }
 }
 ```
 
