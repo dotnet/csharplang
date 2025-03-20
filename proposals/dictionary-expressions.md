@@ -280,7 +280,8 @@ If the target type is a *struct* or *class type* that implements `System.Collect
 * **If the *iteration type* is a type `KeyValuePair<K, V>` and the [*collection expression conversion*](#conversions) involves an applicable `Add` method, then:**
   * **For each element in order:**
     * **If the element is a *key value pair element* `Kᵢ:Vᵢ` then:**
-      * **A `KeyValuePair<K:V>` instance is constructed from the expressions `Kᵢ` and `Vᵢ` converted to `K` and `V`.**
+      * **First `Kᵢ` is evaluated, then `Vᵢ` is evaluated.**
+      * **A `KeyValuePair<K:V>` instance is constructed from the values of `Kᵢ` and `Vᵢ` converted to `K` and `V`.**
       * **The applicable `Add` instance or extension method is invoked with the `KeyValuePair<K, V>` instance as the argument.**
     * **If the element is an *expression element* `Eᵢ`, then:**
       * **If `Eᵢ` is implicitly convertible to `KeyValuePair<K, V>`, then the applicable `Add` instance or extension method is invoked with `Eᵢ` as the argument.**
