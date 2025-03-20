@@ -60,11 +60,15 @@ All schedule items must have a public issue or checked-in proposal that can be l
 - [Collection builder method parameter order](https://github.com/dotnet/csharplang/blob/0d5e1f2c0864e65c6163e4a06405720493ba018a/proposals/collection-expression-arguments.md#collection-builder-method-parameter-order) (cston) (Time-boxed to 1st hour)
 - [Ignored directives](https://github.com/dotnet/csharplang/blob/main/proposals/ignored-directives.md) (jjonescz, DamianEdwards)
 
+## C# Language Design Notes for 2025
+
 ### Mon Mar 10, 2025
 
-- [Extension open issues](https://github.com/dotnet/csharplang/blob/main/proposals/extensions.md#open-issues) (Julien) (2hrs)
-
-## C# Language Design Notes for 2025
+- Extensions
+    - Property method calling
+    - Scoping and Shadowing
+    - Type parameter inferrability
+    - Accessibility
 
 ### Wed Mar 5, 2025
 
