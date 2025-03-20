@@ -408,7 +408,7 @@ object with(object x, object y) { ... }
 
 Confirm the breaking change is acceptable, and whether breaking change should be tied to language version.
 
-**Resolution:** No change when compiling with earlier language version. [LDM-2025-03-17](https://github.com/dotnet/csharplang/blob/main/meetings/2025/LDM-2025-03-17)
+**Resolution:** Keep previous behavior (no breaking change) when compiling with earlier language version. [LDM-2025-03-17](https://github.com/dotnet/csharplang/blob/main/meetings/2025/LDM-2025-03-17)
 
 ### Should arguments affect collection expression conversion?
 
