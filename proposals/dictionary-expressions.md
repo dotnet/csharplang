@@ -519,7 +519,7 @@ list = [new StringIntPair()]; // error: UDC not supported
 >       * ***target-typed new conversion***
 >     * **`Eᵢ` has type `KeyValuePair<Kᵢ:Vᵢ>` and there is an implicit conversion from `Kᵢ` to `K` and an implicit conversion from `Vᵢ` to `V`.**
 
-**Resolution:** Existing conversions should continue to apply for *expression elements* and *spread elements* before considering co-variant conversions of `Key` and `Value` for distinct `KeyValuePair<,>` types. [LDM-2025-03-17](https://github.com/dotnet/csharplang/blob/main/meetings/2024/LDM-2025-03-17)
+**Resolution:** Existing conversions should continue to apply for *expression elements* and *spread elements* before considering co-variant conversions of `Key` and `Value` for distinct `KeyValuePair<,>` types. [LDM-2025-03-17](https://github.com/dotnet/csharplang/blob/main/meetings/2024/LDM-2025-03-17.md)
 
 ## Retracted Designs/Questions
 

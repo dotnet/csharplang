@@ -408,7 +408,7 @@ object with(object x, object y) { ... }
 
 Confirm the breaking change is acceptable, and whether breaking change should be tied to language version.
 
-**Resolution:** Keep previous behavior (no breaking change) when compiling with earlier language version. [LDM-2025-03-17](https://github.com/dotnet/csharplang/blob/main/meetings/2025/LDM-2025-03-17)
+**Resolution:** Keep previous behavior (no breaking change) when compiling with earlier language version. [LDM-2025-03-17](https://github.com/dotnet/csharplang/blob/main/meetings/2025/LDM-2025-03-17.md)
 
 ### Should arguments affect collection expression conversion?
 
@@ -431,7 +431,7 @@ Print<int>(new(comparer: null));              // error: ambiguous
 Print(new(comparer: StringComparer.Ordinal)); // error: type arguments cannot be inferred
 ```
 
-**Resolution:** Collection arguments should be ignored in conversions and type inference. [LDM-2025-03-17](https://github.com/dotnet/csharplang/blob/main/meetings/2025/LDM-2025-03-17)
+**Resolution:** Collection arguments should be ignored in conversions and type inference. [LDM-2025-03-17](https://github.com/dotnet/csharplang/blob/main/meetings/2025/LDM-2025-03-17.md)
 
 ### Collection builder method parameter order
 
@@ -455,7 +455,7 @@ class MySetBuilder
 }
 ```
 
-**Resolution:** The span parameter for elements should be the last parameter. [LDM-2025-03-12](https://github.com/dotnet/csharplang/blob/main/meetings/2025/LDM-2025-03-12)
+**Resolution:** The span parameter for elements should be the last parameter. [LDM-2025-03-12](https://github.com/dotnet/csharplang/blob/main/meetings/2025/LDM-2025-03-12.md)
 
 ## Open questions
 
