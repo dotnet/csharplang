@@ -264,7 +264,7 @@ If the target type is a *struct* or *class type* that implements `System.Collect
       * **If `Eᵢ` is implicitly convertible to `KeyValuePair<K, V>`, then:**
         * **`Eᵢ` is evaluated and converted to a `KeyValuePair<K, V>`.**
         * **The indexer is invoked on the collection instance with `Key` and `Value` of the converted value.**
-      * **Otherwise, `Eᵢ` has a type `KeyValuePair<Kᵢ, Vᵢ>`, then:**
+      * **Otherwise, `Eᵢ` has a type `KeyValuePair<Kᵢ, Vᵢ>`, in which case:**
         * **`Eᵢ` is evaluated.**
         * **The indexer is invoked on the collection instance with `Key` and `Value` of the value, converted to `K` and `V`.**
     * **If the element is a *spread element* where the spread element *expression* has an [*iteration type*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/statements.md#1295-the-foreach-statement) `Tᵢ` then:**
@@ -273,7 +273,7 @@ If the target type is a *struct* or *class type* that implements `System.Collect
         * **If `Tᵢ` is implicitly convertible to `KeyValuePair<K, V>` then:**
           * **The item is converted to a `KeyValuePair<K, V>`.**
           * **The indexer is invoked on the collection instance with `Key` and `Value` of the converted item.**
-        * **Otherwise, `Tᵢ` is a type `KeyValuePair<Kᵢ, Vᵢ>`, then:**
+        * **Otherwise, `Tᵢ` is a type `KeyValuePair<Kᵢ, Vᵢ>`, in which case:**
           * **The indexer is invoked on the collection instance with `Key` and `Value` of the item, converted to `K` and `V`.**
       * **If the enumerator implements `IDisposable`, then `Dispose` will be called after enumeration, regardless of exceptions.**
 
@@ -285,7 +285,7 @@ If the target type is a *struct* or *class type* that implements `System.Collect
       * **The applicable `Add` instance or extension method is invoked with the `KeyValuePair<K, V>` instance as the argument.**
     * **If the element is an *expression element* `Eᵢ`, then:**
       * **If `Eᵢ` is implicitly convertible to `KeyValuePair<K, V>`, then the applicable `Add` instance or extension method is invoked with `Eᵢ` as the argument.**
-      * **Otherwise, `Eᵢ` has a type `KeyValuePair<Kᵢ, Vᵢ>`, then:**
+      * **Otherwise, `Eᵢ` has a type `KeyValuePair<Kᵢ, Vᵢ>`, in which case:**
         * **`Eᵢ` is evaluated.**
         * **A `KeyValuePair<K:V>` instance is constructed from the `Key` and `Value` of the value, converted to `K` and `V`.**
         * **The applicable `Add` instance or extension method is invoked with the `KeyValuePair<K, V>` instance as the argument.**
@@ -293,12 +293,12 @@ If the target type is a *struct* or *class type* that implements `System.Collect
       * **An applicable `GetEnumerator` instance or extension method is invoked on the spread element *expression***.
       * **For each item from the enumerator:**
         * **If `Tᵢ` is implicitly convertible to `KeyValuePair<K, V>` then the applicable `Add` instance or extension method is invoked with item as the argument.**
-        * **Otherwise, `Tᵢ` is a type `KeyValuePair<Kᵢ, Vᵢ>`, then:**
+        * **Otherwise, `Tᵢ` is a type `KeyValuePair<Kᵢ, Vᵢ>`, in which case:**
           * **A `KeyValuePair<K:V>` instance is constructed from the `Key` and `Value` of the item, converted to `K` and `V`.**
           * **The applicable `Add` instance or extension method is invoked with the `KeyValuePair<K, V>` instance as the argument.**
       * **If the enumerator implements `IDisposable`, then `Dispose` will be called after enumeration, regardless of exceptions.**
 
-* Otherwise, the *iteration type* is *not* a `KeyValuePair<K, V>` type, then:
+* Otherwise, the *iteration type* is *not* a `KeyValuePair<K, V>` type, in which case:
   * For each element in order:
     * If the element is an *expression element*, the applicable `Add` instance or extension method is invoked with the element *expression* as the argument.
     * If the element is a *spread element* then ...:
