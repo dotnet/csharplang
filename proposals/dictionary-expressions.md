@@ -255,21 +255,24 @@ If the target type is a *struct* or *class type* that implements `System.Collect
 
 * The constructor that is applicable with no arguments is invoked.
 
-* **If the *iteration type* is `KeyValuePair<K, V>`, then:**
+* **If the *iteration type* is `KeyValuePair<K, V>` then:**
   * **For each element in order:**
-    * **If the element is a *key value pair element* `Kᵢ:Vᵢ`, then:**
+    * **If the element is a *key value pair element* `Kᵢ:Vᵢ` then:**
       * **First `Kᵢ` is evaluated, then `Vᵢ` is evaluated.**
       * **If the target type has a corresponding *indexer*, then the indexer is invoked on the collection instance with the converted values of `Kᵢ` and `Vᵢ`.**
-      * **Otherwise a `KeyValuePair<K, V>` is constructed from the converted values of `Kᵢ` and `Vᵢ`, and the applicable `Add` instance or extension method is invoked with that value.**
+      * **Otherwise a `KeyValuePair<K, V>` is constructed from the converted values of `Kᵢ` and `Vᵢ`, and the applicable `Add` instance or extension method is invoked with that constructed value.**
     * **If the element is an *expression element* `Eᵢ`, then:**
-      * **`Eᵢ` is evaluated as a value of type `KeyValuePair<Kᵢ:Vᵢ>`.**
-      * **If the target type has a corresponding *indexer*, then the indexer is invoked on the collection instance with the converted values of `Key` and `Value` from the evaluated expression.**
-      * **Otherwise a `KeyValuePair<K, V>` is constructed from the converted values of `Key` and `Value` from the evaluated expression, and the applicable `Add` instance or extension method is invoked with that value.**
-    * **If the element is a *spread element* where the spread element *expression* has an [*iteration type*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/statements.md#1295-the-foreach-statement) `KeyValuePair<Kᵢ:Vᵢ>` then:**
+      * **If `Eᵢ` is implicitly convertible to `KeyValuePair<K, V>`, then `Eᵢ` is evaluated and converted to a `KeyValuePair<K, V>`.**
+      * **Otherwise, `Eᵢ` has a type `KeyValuePair<Kᵢ:Vᵢ>`, so `Eᵢ` is evaluated without an additional conversion.**
+      * **If the target type has a corresponding *indexer*, then the indexer is invoked on the collection instance with `Key` and `Value` of the converted expression converted to `K` and `V`.**
+      * **Otherwise a `KeyValuePair<K, V>` is constructed from `Key` and `Value` of the converted expression converted to `K` and `V`, and the applicable `Add` instance or extension method is invoked with that constructed value.**
+    * **If the element is a *spread element* where the spread element *expression* has an [*iteration type*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/statements.md#1295-the-foreach-statement) `Tᵢ` then:**
       * **An applicable `GetEnumerator` instance or extension method is invoked on the spread element *expression***.
       * **For each item from the enumerator:**
-        * **If the target type has a corresponding *indexer*, then the indexer is invoked on the collection instance with the converted values of `Key` and `Value` from the item.**
-        * **Otherwise a `KeyValuePair<K, V>` is constructed from the converted values of `Key` and `Value` from the item, and the applicable `Add` instance or extension method is invoked with that value.**
+        * **If `Tᵢ` is implicitly convertible to `KeyValuePair<K, V>` then the item is converted to a `KeyValuePair<K, V>`.**
+        * **Otherwise, `Tᵢ` is a type `KeyValuePair<Kᵢ:Vᵢ>`, so the item is used without an additional conversion.**
+        * **If the target type has a corresponding *indexer*, then the indexer is invoked on the collection instance with `Key` and `Value` of the converted item.**
+        * **Otherwise a `KeyValuePair<K, V>` is constructed from `Key` and `Value` of the converted item, and the applicable `Add` instance or extension method is invoked with that constructed value.**
       * **If the enumerator implements `IDisposable`, then `Dispose` will be called after enumeration, regardless of exceptions.**
 
 * Otherwise:
