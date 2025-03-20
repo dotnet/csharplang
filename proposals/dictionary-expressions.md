@@ -271,8 +271,8 @@ If the target type is a *struct* or *class type* that implements `System.Collect
       * **For each item from the enumerator:**
         * **If `Tᵢ` is implicitly convertible to `KeyValuePair<K, V>` then the item is converted to a `KeyValuePair<K, V>`.**
         * **Otherwise, `Tᵢ` is a type `KeyValuePair<Kᵢ:Vᵢ>`, so the item is used without an additional conversion.**
-        * **If the target type has a corresponding *indexer*, then the indexer is invoked on the collection instance with `Key` and `Value` of the converted item.**
-        * **Otherwise a `KeyValuePair<K, V>` is constructed from `Key` and `Value` of the converted item, and the applicable `Add` instance or extension method is invoked with that constructed value.**
+        * **If the target type has a corresponding *indexer*, then the indexer is invoked on the collection instance with `Key` and `Value` of the converted item converted to `K` and `V`.**
+        * **Otherwise a `KeyValuePair<K, V>` is constructed from `Key` and `Value` of the converted item converted to `K` and `V`, and the applicable `Add` instance or extension method is invoked with that constructed value.**
       * **If the enumerator implements `IDisposable`, then `Dispose` will be called after enumeration, regardless of exceptions.**
 
 * Otherwise:
