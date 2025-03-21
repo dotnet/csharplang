@@ -49,12 +49,19 @@ All schedule items must have a public issue or checked-in proposal that can be l
 - [Readonly setter calls on non-variables](https://github.com/dotnet/csharplang/blob/main/proposals/readonly-setter-calls-on-non-variables.md) (jnm2)
 - [Extension open issues](https://github.com/dotnet/csharplang/blob/main/proposals/extensions.md#open-issues) (Julien)
 
+## C# Language Design Notes for 2025
+
 ### Mon Mar 17, 2025
 
-- Dictionary expressions / collection arguments [open questions](https://github.com/dotnet/csharplang/pull/9216) (cston)
-- [Extension open issues](https://github.com/dotnet/csharplang/blob/main/proposals/extensions.md#open-issues) (Julien)
+[C# Language Design Meeting for March 17th, 2025](https://github.com/dotnet/csharplang/blob/main/meetings/2025/LDM-2025-03-17.md)
 
-## C# Language Design Notes for 2025
+- Collection expression arguments
+    - `with` breaking change
+    - Collection expression arguments and conversions
+- Dictionary expressions
+- Extensions
+    - Accessibility
+    - Static factory scenarios
 
 ### Mon Mar 12, 2025
 
