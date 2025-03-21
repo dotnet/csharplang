@@ -3,6 +3,8 @@
 All schedule items must have a public issue or checked-in proposal that can be linked from the notes.
 
 ## Schedule ASAP
+
+- [Extension open issues](https://github.com/dotnet/csharplang/blob/main/proposals/extensions.md#open-issues) (Julien)
  
 ## Schedule when convenient
 
@@ -42,14 +44,14 @@ All schedule items must have a public issue or checked-in proposal that can be l
 ### Mon Mar 24, 2025
 
 - Dictionary expressions [open questions](https://github.com/dotnet/csharplang/blob/main/proposals/dictionary-expressions.md#open-questions) (cston)
-- [Extension open issues](https://github.com/dotnet/csharplang/blob/main/proposals/extensions.md#open-issues) (Julien)
+
+## C# Language Design Notes for 2025
 
 ### Wed Mar 19, 2025
 
-- [Readonly setter calls on non-variables](https://github.com/dotnet/csharplang/blob/main/proposals/readonly-setter-calls-on-non-variables.md) (jnm2)
-- [Extension open issues](https://github.com/dotnet/csharplang/blob/main/proposals/extensions.md#open-issues) (Julien)
+[C# Language Design Meeting for March 19th, 2025](https://github.com/dotnet/csharplang/blob/main/meetings/2025/LDM-2025-03-19.md)
 
-## C# Language Design Notes for 2025
+- Readonly setters on non-variables
 
 ### Mon Mar 17, 2025
 
