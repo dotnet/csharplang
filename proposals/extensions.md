@@ -523,7 +523,7 @@ public static class Extensions
   1. update the standard for classic extension methods, and use that to also describe new extension methods,
   2. keep the existing language for classic extension methods, use that to also describe new extension methods, but have a known spec deviation for both,
   3. keep the existing language for classic extension methods, but use different language for new extension methods, and only have a known spec deviation for classic extension methods?
-- Confirm that we want to disallow explicit type arguments on a property access:
+- ~~Confirm that we want to disallow explicit type arguments on a property access~~ (answer: no property access with explicit type arguments, discussed in WG)
 ```csharp
 string s = "ran";
 _ = s.P<object>; // error
@@ -572,7 +572,7 @@ static class E
     }
 }
 ```
-- Do we have an implicit receiver within extension declarations?
+- ~~Do we have an implicit receiver within extension declarations?~~ (answer: no, was previous discussed in LDM)
 ```csharp
 static class E
 {
@@ -625,6 +625,8 @@ static class E
     }
 }
 ```
+The current conflict rules are: 1. check no conflict within similar extensions using class/struct rules, 2. check no conflict between implementation methods across various extensions declarations.  
+Do we stil need the first part of the rules?
 
 
 ### XML docs
