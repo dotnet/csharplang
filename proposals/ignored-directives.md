@@ -1,6 +1,6 @@
 # Ignored directives
 
-Champion issue: <https://github.com/dotnet/csharplang/issues/3507>
+Champion issue: <https://github.com/dotnet/csharplang/issues/8617>
 
 ## Summary
 
