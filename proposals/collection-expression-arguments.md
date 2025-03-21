@@ -455,7 +455,7 @@ class MySetBuilder
 }
 ```
 
-**Resolution:** The span parameter for elements should be the last parameter. [LDM-2025-03-12](https://github.com/dotnet/csharplang/blob/main/meetings/2025/LDM-2025-03-12.md)
+**Resolution:** The span parameter for elements should be the last parameter. [LDM-2025-03-12](https://github.com/dotnet/csharplang/blob/main/meetings/2025/LDM-2025-03-12.md#conclusion-1)
 
 ## Open questions
 
