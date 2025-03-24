@@ -482,7 +482,7 @@ static class CollectionExtensions
 
 ## Open issues
 
-- Confirm `extension` vs. `extensions` as the keyword
+- ~~Confirm `extension` vs. `extensions` as the keyword~~ (answer: `extension`, LDM 2025-03-24)
 
 ### Metadata
 
@@ -614,7 +614,7 @@ If you have `TResult M<TResult, TSource>(this TSource source)`, you could port i
 - Confirm whether init-only accessors should be allowed in extensions
 - Should the only difference in receiver ref-ness be allowed `extension(int receiver) { public void M2() {} }`    `extension(ref int receiver) { public void M2() {} }`?
 - Should we complain about a conflict like this `extension(object receiver) { public int P1 => 1; }`   `extension(object receiver) { public int P1 {set{}} }`?
-- Should we complain about conflicts between skeleton methods that aren't conflicts between implementation methods?
+- ~~Should we complain about conflicts between skeleton methods that aren't conflicts between implementation methods?~~ (answer: yes, keep spec'ed rule, LDM 2025-03-24)
 ```csharp
 static class E
 {
