@@ -4,7 +4,6 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ## Schedule ASAP
 
-- [Extension open issues](https://github.com/dotnet/csharplang/blob/main/proposals/extensions.md#open-issues) (Julien)
  
 ## Schedule when convenient
 
@@ -44,6 +43,7 @@ All schedule items must have a public issue or checked-in proposal that can be l
 ### Mon Mar 24, 2025
 
 - Dictionary expressions [open questions](https://github.com/dotnet/csharplang/blob/main/proposals/dictionary-expressions.md#open-questions) (cston)
+- [Extension open issues](https://github.com/dotnet/csharplang/blob/main/proposals/extensions.md#open-issues) (Julien)
 
 ## C# Language Design Notes for 2025
 
