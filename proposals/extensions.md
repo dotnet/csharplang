@@ -523,7 +523,7 @@ public static class Extensions
   1. update the standard for classic extension methods, and use that to also describe new extension methods,
   2. keep the existing language for classic extension methods, use that to also describe new extension methods, but have a known spec deviation for both,
   3. keep the existing language for classic extension methods, but use different language for new extension methods, and only have a known spec deviation for classic extension methods?
-- Confirm that we want to disallow explicit type arguments on a property access:
+- ~~Confirm that we want to disallow explicit type arguments on a property access~~ (answer: no property access with explicit type arguments, discussed in WG)
 ```csharp
 string s = "ran";
 _ = s.P<object>; // error
@@ -572,7 +572,7 @@ static class E
     }
 }
 ```
-- Do we have an implicit receiver within extension declarations?
+- ~~Do we have an implicit receiver within extension declarations?~~ (answer: no, was previous discussed in LDM)
 ```csharp
 static class E
 {
@@ -590,6 +590,22 @@ static class E
 ### Accessibility
 
 - ~~What is the meaning of accessibility within an extension declaration?~~ (answer: extension declarations do not count as an accessibility scope, LDM 2025-03-17)
+- Should we apply the "inconsistent accessibility" check on the receiver parameter even for static members?
+```csharp
+public static class Extensions
+{
+    extension(PrivateType p)
+    {
+        // We report inconsistent accessibility error, 
+        //   because we generate a `public static void M(PrivateType p)` implementation in enclosing type
+        public void M() { } 
+
+        public static void M2() { } // should we also report here, even though not technically necessary?
+    }
+
+    private class PrivateType { }
+}
+```
 
 ### Extension declaration validation
 
@@ -598,6 +614,20 @@ If you have `TResult M<TResult, TSource>(this TSource source)`, you could port i
 - Confirm whether init-only accessors should be allowed in extensions
 - Should the only difference in receiver ref-ness be allowed `extension(int receiver) { public void M2() {} }`    `extension(ref int receiver) { public void M2() {} }`?
 - Should we complain about a conflict like this `extension(object receiver) { public int P1 => 1; }`   `extension(object receiver) { public int P1 {set{}} }`?
+- Should we complain about conflicts between skeleton methods that aren't conflicts between implementation methods?
+```csharp
+static class E
+{
+    extension(object)
+    {
+        public void Method() {  }
+        public static void Method() { }
+    }
+}
+```
+The current conflict rules are: 1. check no conflict within similar extensions using class/struct rules, 2. check no conflict between implementation methods across various extensions declarations.  
+Do we stil need the first part of the rules?
+
 
 ### XML docs
 
