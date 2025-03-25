@@ -40,12 +40,19 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ### Mon Mar 31, 2025
 
+## C# Language Design Notes for 2025
+
 ### Mon Mar 24, 2025
 
-- Dictionary expressions [open questions](https://github.com/dotnet/csharplang/blob/main/proposals/dictionary-expressions.md#open-questions) (cston)
-- [Extension open issues](https://github.com/dotnet/csharplang/blob/main/proposals/extensions.md#open-issues) (Julien)
+[C# Language Design Meeting for March 24th, 2025](https://github.com/dotnet/csharplang/blob/main/meetings/2025/LDM-2025-03-24.md)
 
-## C# Language Design Notes for 2025
+- Dictionary Expressions
+    - Support dictionary types as `params` type
+    - Type inference for `KeyValuePair<K, V>` collections
+    - Overload resolution for `KeyValuePair<K, V>` collections
+- Extensions
+    - Signature conflict rules
+    - `extension` vs `extensions`
 
 ### Wed Mar 19, 2025
 
