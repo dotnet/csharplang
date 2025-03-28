@@ -590,6 +590,12 @@ purpose of the method is to modify the instance.
 If a derived class declares a 'compound assignment'/'instance increment' operator with the same signature as one in base,
 should we require an `override` modifier?
 
+### Should we have any consistency enforcement between declared `+=` and `+` operators?
+
+During [LDM-2025-02-12](https://github.com/dotnet/csharplang/blob/main/meetings/2025/LDM-2025-02-12.md#user-defined-instance-based-operators)
+a concern was raised about authors accidentally pushing their users into odd scenarios where a `+=` may work, but
+`+` won't (or vice versa) because one form declares extra operators than the other.
+
 ## Alternatives
 [alternatives]: #alternatives
 
@@ -602,3 +608,8 @@ type, that parameter should not be a `ref` parameter. Because in case of a class
 must be mutated, not the location where the instance is stored. However, when an operator is declared
 in an interface, it is often not known whether the interface will be implemented only by classes,
 or only by structures. Therefore, it is not clear whether the first parameter should be a `ref` parameter.
+
+## Design meetings
+
+- [LDM-2025-02-12](https://github.com/dotnet/csharplang/blob/main/meetings/2025/LDM-2025-02-12.md#user-defined-instance-based-operators)
+
