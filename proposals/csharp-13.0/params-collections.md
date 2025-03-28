@@ -56,7 +56,7 @@ The *type* of a parameter collection shall be one of the following valid target 
   - `System.Span<T>`
   - `System.ReadOnlySpan<T>`  
   in which cases the *element type* is `T`
-- A *type* with an appropriate *[create method](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-12.0/collection-expressions.md#create-methods)*,
+- A *type* with an appropriate *[create method](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-12.0/collection-expressions.md#create-methods)* that can be invoked with no additional arguments,
   which is at least as accessible as the declaring member, and with a corresponding *element type* resulting from that determination
 - A *struct* or *class type* that implements `System.Collections.IEnumerable` where:
   - The *type* has a constructor that can be invoked with no arguments, and the constructor is at least as accessible as the declaring member.
