@@ -8,6 +8,7 @@ All schedule items must have a public issue or checked-in proposal that can be l
 ## Schedule when convenient
 
 - Triage (working set)
+- [Interpolated string handler argument value](https://github.com/dotnet/csharplang/blob/main/proposals/interpolated-string-handler-argument-value.md) (Aleksey)
 
 ## Recurring topics
 
