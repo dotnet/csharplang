@@ -7,8 +7,6 @@ All schedule items must have a public issue or checked-in proposal that can be l
  
 ## Schedule when convenient
 
-- [Readonly setter calls on non-variables](https://github.com/dotnet/csharplang/blob/main/proposals/readonly-setter-calls-on-non-variables.md) (jnm2) (not 3/31)
-- [Target-typed static member lookup](https://github.com/dotnet/csharplang/blob/main/proposals/target-typed-static-member-lookup.md) (jnm2, CyrusNajmabadi) (not 3/31)
 - Triage (working set)
 
 ## Recurring topics
