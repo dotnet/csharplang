@@ -39,7 +39,7 @@ All schedule items must have a public issue or checked-in proposal that can be l
 ### Wed Apr 2, 2025
 
 - [User Defined Compound Assignment Operators](https://github.com/dotnet/csharplang/blob/main/proposals/user-defined-compound-assignment.md#open-questions) (Aleksey)
-- Readonly Setters (Joseph)
+- [Readonly Setters](https://github.com/dotnet/csharplang/blob/main/proposals/readonly-setter-calls-on-non-variables.md) (jnm2)
 
 ## C# Language Design Notes for 2025
 
