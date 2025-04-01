@@ -33,7 +33,7 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ### Mon Apr 14, 2025
 
-### Wed Apr 9, 2025
+### Wed Apr 9, 2025 (1 hour only)
 
 ### Mon Apr 7, 2025
 
