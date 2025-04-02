@@ -693,7 +693,7 @@ WG recommendation: In line with the how we shipped collection expressions and mu
 Specifically:
   1. "Use `Dictionary<K, V>`, and state that as a requirement for target type `IDictionary<K, V>`".
   2. Synthesize an internal type for `IReadOnlyDictionary<K, V>` and use that.  That way code cannot take a dependency on the underlying type, which we are free to change.
-     This may incur an extra allocation, but that is already true for the more common `IEnumerable/IReadOnlyList` cases for collection expressions.
+     This may incur an extra allocation, but that is already true for the more common `IEnumerable<T>` / `IReadOnlyList<T>` cases for collection expressions.
 
 ### Question: Types that support both collection and dictionary initialization
 
