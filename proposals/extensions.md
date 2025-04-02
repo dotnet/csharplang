@@ -102,6 +102,7 @@ If the _receiver parameter_ is named, the _receiver type_ may not be static.
 The _receiver parameter_ is not allowed to have modifiers if it is unnamed, and 
 it is only allowed to have the refness modifiers listed below and `scoped` otherwise.  
 The _receiver parameter_ bears the same restrictions as the first parameter of a classic extension method.  
+The _receiver parameter_ may not have an `[EnumeratorCancellation]` attribute.  
 
 ### Extension members
 
