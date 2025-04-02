@@ -4,11 +4,9 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ## Schedule ASAP
 
- 
 ## Schedule when convenient
 
 - Triage (working set)
-- [Interpolated string handler argument value](https://github.com/dotnet/csharplang/blob/main/proposals/interpolated-string-handler-argument-value.md) (Aleksey)
 
 ## Recurring topics
 
@@ -39,6 +37,8 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ### Mon Apr 7, 2025 
 
+- [Interpolated string handler argument value](https://github.com/dotnet/csharplang/blob/main/proposals/interpolated-string-handler-argument-value.md) (Aleksey)
+- 
 ### Wed Apr 2, 2025
 
 - [User Defined Compound Assignment Operators](https://github.com/dotnet/csharplang/blob/main/proposals/user-defined-compound-assignment.md#open-questions) (Aleksey)
