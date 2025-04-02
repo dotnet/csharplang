@@ -725,4 +725,6 @@ Resolution: TBD.  Working group recommendation: Use applicable instance indexer 
 
 Parsing ambiguity around: `[a ? [b] : c]`
 
-Working group recommendation: Use normal parsing here.  So this would be the same as `[a ? ([b]) : (c)]` (a collection expression containing a conditional expression).  If the user wants a `key_value_pair_element` here, they can write: `[(a?[b]) : c]`
+Working group recommendation: Use normal parsing here.  So this would be the same as `[a ? ([b]) : (c)]` (a collection expression containing a conditional expression).
+If the user wants a `key_value_pair_element` here, they can write: `[(a?[b]) : c]`.  This code already will exist today in a collection expression, and it should not
+change meaning.
