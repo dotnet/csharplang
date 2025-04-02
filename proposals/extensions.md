@@ -367,7 +367,7 @@ Note: This is similar to ref assemblies. The reason for using `throw null` bodie
 is so that IL verification could run and pass (thus validating the completeness of the metadata).
 
 The extension marker method encodes the receiver parameter.  
-- It is public and static, and is called `<Extension>$`.  
+- It is private and static, and is called `<Extension>$`.  
 - It has the attributes, refness, type and name from the receiver parameter on the extension declaration.  
 - If the receiver parameter doesn't specify a name, then the parameter name is empty.  
 
@@ -414,7 +414,7 @@ static class IEnumerableExtensions
 {
     public class <>E__1<T>
     {
-        public static <Extension>$(IEnumerable<T> source) => throw null;
+        private static <Extension>$(IEnumerable<T> source) => throw null;
         public void Method() => throw null;
         internal static int Property { get => throw null; set => throw null; }
         public int Property2 { get => throw null; set => throw null; }
@@ -422,7 +422,7 @@ static class IEnumerableExtensions
 
     public class <>E__2
     {
-        public static <Extension>$(IAsyncEnumerable<int> values) => throw null;
+        private static <Extension>$(IAsyncEnumerable<int> values) => throw null;
         public Task<int> SumAsync() => throw null;
     }
 
@@ -612,8 +612,8 @@ public static class Extensions
 - ~~Should we relax the type parameter validation (inferrability: all the type parameters must appear in the type of the extension parameter) where there are only methods?  This would allow porting 100% of classic extension methods.  
 If you have `TResult M<TResult, TSource>(this TSource source)`, you could port it as `extension<TResult, TSource>(TSource source) { TResult M() ... }`.~~ (answer: no, LDM 2025-03-17)
 - Confirm whether init-only accessors should be allowed in extensions
-- Should the only difference in receiver ref-ness be allowed `extension(int receiver) { public void M2() {} }`    `extension(ref int receiver) { public void M2() {} }`?
-- Should we complain about a conflict like this `extension(object receiver) { public int P1 => 1; }`   `extension(object receiver) { public int P1 {set{}} }`?
+- ~~Should the only difference in receiver ref-ness be allowed `extension(int receiver) { public void M2() {} }`    `extension(ref int receiver) { public void M2() {} }`?~~ (answer: no, keep spec'ed rule, LDM 2025-03-24)
+- ~~Should we complain about a conflict like this `extension(object receiver) { public int P1 => 1; }`   `extension(object receiver) { public int P1 {set{}} }`?~~ (answer: yes, keep spec'ed rule, LDM 2025-03-24)
 - ~~Should we complain about conflicts between skeleton methods that aren't conflicts between implementation methods?~~ (answer: yes, keep spec'ed rule, LDM 2025-03-24)
 ```csharp
 static class E
