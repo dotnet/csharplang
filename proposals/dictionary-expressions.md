@@ -689,7 +689,11 @@ Options include:
 2. Use a BCL type such as `ReadOnlyDictionary<K, V>` for now, and state the compiler is free to use any conforming implementation.
 3. Synthesize an internal type and use that.
 
-We should consider aligning the decisions with the concrete types provided for collection expressions targeting mutable and immutable non-dictionary interfaces.
+WG recommendation: In line with the how we shipped collection expressions and mutable/readonly interfaces, we should stay consistent with the dictionary interfaces.
+Specifically:
+  1. Use `Dictionary<K, V>`, and state that as a requirement for target type `IDictionary<K, V>`.
+  2. Synthesize an internal type for `IReadOnlyDictionary<K, V>` and use that.  That way code cannot take a dependency on the underlying type, which we are free to change.
+     This may incur an extra allocation, but that is already true for the more common `IEnumerable<T>` / `IReadOnlyList<T>` cases for collection expressions.
 
 ### Question: Types that support both collection and dictionary initialization
 
@@ -721,4 +725,6 @@ Resolution: TBD.  Working group recommendation: Use applicable instance indexer 
 
 Parsing ambiguity around: `[a ? [b] : c]`
 
-Working group recommendation: Use normal parsing here.  So this would be the same as `[a ? ([b]) : (c)]` (a collection expression containing a conditional expression).  If the user wants a `key_value_pair_element` here, they can write: `[(a?[b]) : c]`
+Working group recommendation: Use normal parsing here.  So this would be the same as `[a ? ([b]) : (c)]` (a collection expression containing a conditional expression).
+If the user wants a `key_value_pair_element` here, they can write: `[(a?[b]) : c]`.  This code already will exist today in a collection expression, and it should not
+change meaning.
