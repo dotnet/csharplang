@@ -98,8 +98,11 @@ public static class Enumerable
 The type in the receiver specification is referred to as the _receiver type_ and the parameter name,
 if present, is referred to as the _receiver parameter_.
 
-If the _receiver parameter_ has an identifier, the _receiver type_ may not be static.  
-The _receiver parameter_ is only allowed to have the refness modifiers listed below and `scoped`.  
+If the _receiver parameter_ is named, the _receiver type_ may not be static.  
+The _receiver parameter_ is not allowed to have modifiers if it is unnamed, and 
+it is only allowed to have the refness modifiers listed below and `scoped` otherwise.  
+The _receiver parameter_ bears the same restrictions as the first parameter of a classic extension method.  
+The `[EnumeratorCancellation]` attribute is ignored if it is placed on the _receiver parameter_.  
 
 ### Extension members
 
@@ -131,7 +134,10 @@ public static class Enumerable
 }
 ```
 
-It is an error to specify the `partial` modifier on a member of an extension declaration.
+It is an error to specify the following modifiers on a member of an extension declaration:
+`abstract`, `virtual`, `override`, `new`, `sealed`, `extern`, `partial`, and `protected` (and related accessibility modifiers).  
+Properties in extension declarations may not have `init` accessors.  
+The instance members are disallowed if the _receiver parameter_ is unnamed.  
 
 ### Refness
 
@@ -479,6 +485,10 @@ static class CollectionExtensions
     }
 }
 ```
+
+## Breaking changes
+
+Types and aliases may not be named "extensions".
 
 ## Open issues
 
