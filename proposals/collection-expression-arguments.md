@@ -390,19 +390,17 @@ The key differences from the earlier algorithm are:
 
 ### Applicable create method
 
-The definition of *applicable create method* is adapted from [*applicable function member*](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/expressions.md#12642-applicable-function-member), where:
-* The *argument list* is the *collection arguments* from the collection expression, or an empty list if no collection arguments are given.
-* The *parameter list* is the parameter list from the create method *excluding* the last parameter.
+The definition of *applicable create method*, given a *collection arguments* list, is adapted from [*applicable function member*](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/expressions.md#12642-applicable-function-member):
 
-> A method candidate is an *applicable create method* with respect to *collection arguments* `A` when all of the following are true:
-> * Each argument in `A` corresponds to a parameter in the *parameter list*, at most one argument corresponds to each parameter, and any parameter to which no argument corresponds is an optional parameter.
+> **A method candidate is an *applicable create method* with respect to *collection arguments* `A`, possibly empty, when all of the following are true:**
+> * Each argument in `A` corresponds to a parameter **from the create method *excluding the last parameter***, at most one argument corresponds to each parameter, and any parameter to which no argument corresponds is an optional parameter.
 > * For each argument in `A`, the parameter-passing mode of the argument is identical to the parameter-passing mode of the corresponding parameter, and
->   * for a value parameter, an implicit conversion exists from the argument expression to the type of the corresponding parameter, or
+>   * for a value parameter ~~or a parameter array~~, an implicit conversion exists from the argument expression to the type of the corresponding parameter, or
 >   * for a reference or output parameter, there is an identity conversion between the type of the argument expression (if any) and the type of the corresponding parameter, or
 >   * for an input parameter when the corresponding argument has the `in` modifier, there is an identity conversion between the type of the argument expression (if any) and the type of the corresponding parameter, or
 >   * for an input parameter when the corresponding argument omits the `in` modifier, an implicit conversion exists from the argument expression to the type of the corresponding parameter.
-
-The *parameter list* cannot contain a `params` parameter because the *parameter list* does not include the last parameter in the *create method*, so the candidate must be applicable in *normal form*.
+> 
+> **The *parameter list* cannot contain a `params` parameter since the last parameter of the *create method* is excluded, so the candidate must be applicable in *normal form*.**
 
 ## Answered questions
 
