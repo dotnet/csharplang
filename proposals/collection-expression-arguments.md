@@ -304,7 +304,7 @@ l = [with(default)];           // error: ambiguous constructor
 
 If the target type is a type with a *create method*, then:
 * The *argument list* is the `with()` *argument list* followed by a *collection expression* containing the elements only (no arguments).
-* [*Overload resolution*](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/expressions.md#1264-overload-resolution) is used to determine the best factory method from the *argument list* from the [*create method candidates*](#create-method-candidates):
+* [*Overload resolution*](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/expressions.md#1264-overload-resolution) is used to determine the best factory method from the *argument list* from the [*applicable create methods*](#applicable-create-method):
 * If a best factory method is found, the method is invoked with the *argument list*.
   * If the factory method has a `params` parameter, the invocation may be in expanded form.
 * Otherwise, a binding error is reported.
@@ -387,6 +387,20 @@ For a collection expression where the target type *definition* has a `[Collectio
 The key differences from the earlier algorithm are:
 * Candidate methods may have additional parameters *before* the `ReadOnlySpan<E>` parameter.
 * Multiple candidate methods are supported.
+
+### Applicable create method
+
+The definition of *applicable create method*, given a *collection arguments* list, is adapted from [*applicable function member*](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/expressions.md#12642-applicable-function-member):
+
+> **A method candidate is an *applicable create method* with respect to *collection arguments* `A`, possibly empty, when all of the following are true:**
+> * Each argument in `A` corresponds to a parameter **from the create method *excluding the last parameter***, at most one argument corresponds to each parameter, and any parameter to which no argument corresponds is an optional parameter.
+> * For each argument in `A`, the parameter-passing mode of the argument is identical to the parameter-passing mode of the corresponding parameter, and
+>   * for a value parameter ~~or a parameter array~~, an implicit conversion exists from the argument expression to the type of the corresponding parameter, or
+>   * for a reference or output parameter, there is an identity conversion between the type of the argument expression (if any) and the type of the corresponding parameter, or
+>   * for an input parameter when the corresponding argument has the `in` modifier, there is an identity conversion between the type of the argument expression (if any) and the type of the corresponding parameter, or
+>   * for an input parameter when the corresponding argument omits the `in` modifier, an implicit conversion exists from the argument expression to the type of the corresponding parameter.
+> 
+> **The *parameter list* cannot contain a `params` parameter since the last parameter of the *create method* is excluded, so the candidate must be applicable in *normal form*.**
 
 ## Answered questions
 
