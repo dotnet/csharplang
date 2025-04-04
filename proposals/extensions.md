@@ -488,7 +488,7 @@ static class CollectionExtensions
 
 ## Breaking changes
 
-Types and aliases may not be named "extensions".
+Types and aliases may not be named "extension".
 
 ## Open issues
 
