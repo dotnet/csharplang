@@ -4,8 +4,6 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ## Schedule ASAP
 
-- [Breaking change: partial extended interface members will be implicitly virtual and public](https://github.com/jjonescz/roslyn/blob/PartialEventsCtors-12-Interface/docs/compilers/CSharp/Compiler%20Breaking%20Changes%20-%20DotNet%2010.md#extended-partial-members-are-now-implicitly-virtual-and-public) (jjonescz, AlekseyTs)
-
 ## Schedule when convenient
 
 - Triage (working set)
@@ -35,6 +33,7 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ### Wed Apr 9, 2025 (1 hour only)
 
+- [Breaking change: partial extended interface members will be implicitly virtual and public](https://github.com/jjonescz/roslyn/blob/PartialEventsCtors-12-Interface/docs/compilers/CSharp/Compiler%20Breaking%20Changes%20-%20DotNet%2010.md#extended-partial-members-are-now-implicitly-virtual-and-public) (jjonescz, AlekseyTs)
 - Open questions: [dictionary expressions](https://github.com/dotnet/csharplang/blob/main/proposals/dictionary-expressions.md#open-questions), [collection arguments](https://github.com/dotnet/csharplang/blob/main/proposals/collection-expression-arguments.md#open-questions) (cston, CyrusNajmabadi)
 
 ### Mon Apr 7, 2025 
