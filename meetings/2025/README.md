@@ -4,6 +4,8 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ## Schedule ASAP
 
+- [Breaking change: partial extended interface members will be implicitly virtual and public](https://github.com/jjonescz/roslyn/blob/PartialEventsCtors-12-Interface/docs/compilers/CSharp/Compiler%20Breaking%20Changes%20-%20DotNet%2010.md#extended-partial-members-are-now-implicitly-virtual-and-public) (jjonescz, AlekseyTs)
+
 ## Schedule when convenient
 
 - Triage (working set)
