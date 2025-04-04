@@ -33,13 +33,14 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ### Wed Apr 9, 2025 (1 hour only)
 
-- [Breaking change: partial extended interface members will be implicitly virtual and public](https://github.com/jjonescz/roslyn/blob/PartialEventsCtors-12-Interface/docs/compilers/CSharp/Compiler%20Breaking%20Changes%20-%20DotNet%2010.md#extended-partial-members-are-now-implicitly-virtual-and-public) (jjonescz, AlekseyTs)
+
 - Open questions: [dictionary expressions](https://github.com/dotnet/csharplang/blob/main/proposals/dictionary-expressions.md#open-questions), [collection arguments](https://github.com/dotnet/csharplang/blob/main/proposals/collection-expression-arguments.md#open-questions) (cston, CyrusNajmabadi)
 
 ### Mon Apr 7, 2025 
 
+- [Breaking change: partial extended interface members will be implicitly virtual and public](https://github.com/jjonescz/roslyn/blob/PartialEventsCtors-12-Interface/docs/compilers/CSharp/Compiler%20Breaking%20Changes%20-%20DotNet%2010.md#extended-partial-members-are-now-implicitly-virtual-and-public) (jjonescz, AlekseyTs)
 - [Interpolated string handler argument value](https://github.com/dotnet/csharplang/blob/main/proposals/interpolated-string-handler-argument-value.md) (Aleksey)
-- 
+  
 ### Wed Apr 2, 2025
 
 - [User Defined Compound Assignment Operators](https://github.com/dotnet/csharplang/blob/main/proposals/user-defined-compound-assignment.md#open-questions) (Aleksey)
