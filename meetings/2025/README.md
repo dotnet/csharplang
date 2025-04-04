@@ -39,11 +39,6 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 - [Breaking change: partial extended interface members will be implicitly virtual and public](https://github.com/jjonescz/roslyn/blob/PartialEventsCtors-12-Interface/docs/compilers/CSharp/Compiler%20Breaking%20Changes%20-%20DotNet%2010.md#extended-partial-members-are-now-implicitly-virtual-and-public) (jjonescz, AlekseyTs)
 - [Interpolated string handler argument value](https://github.com/dotnet/csharplang/blob/main/proposals/interpolated-string-handler-argument-value.md) (Aleksey)
-  
-### Wed Apr 2, 2025
-
-- [User Defined Compound Assignment Operators](https://github.com/dotnet/csharplang/blob/main/proposals/user-defined-compound-assignment.md#open-questions) (Aleksey)
-- [Readonly Setters](https://github.com/dotnet/csharplang/blob/main/proposals/readonly-setter-calls-on-non-variables.md) (jnm2)
 
 ## C# Language Design Notes for 2025
 
