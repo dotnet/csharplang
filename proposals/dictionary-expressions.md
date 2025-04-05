@@ -567,64 +567,6 @@ list = [new StringIntPair()]; // error: UDC not supported
 
 **Resolution:** Existing conversions should continue to apply for *expression elements* and *spread elements* before considering co-variant conversions of `Key` and `Value` for distinct `KeyValuePair<,>` types. [LDM-2025-03-17](https://github.com/dotnet/csharplang/blob/main/meetings/2025/LDM-2025-03-17.md#conclusion-2)
 
-## Retracted Designs/Questions
-
-### Question: Should `k:v` elements force dictionary semantics?
-
-Is there a concern around the following interface destinations:
-
-```c#
-// NOTE: These are not overloads.
-
-void AAA(IEnumerable<KeyValuePair<string, int>> pairs) ...
-void BBB(IDictionary<string, int> pairs) ...
-
-AAA(["mads": 21, .. ldm]);
-BBB(["mads": 21, .. ldm]);
-```
-
-When the destination is an `IEnumerable<T>`, we tend to think we're producing a sequence (so "mads" could show up twice).  However, the use of the `k:v` syntax more strongly indicates production of a dictionary-value.
-
-What should we do here when targeting `IEnumerable<...>` *and* using `k:v` elements? Produce an ordered sequence, with possibly duplicated values?  Or produce an unordered dictionary, with unique keys?
-
-Resolution: `IEnumerable<KVP>` is not a dictionary type (as it lacks an indexer).  As such, it has sequential value semantics (and can include duplicates).  This would happen today anyways if someone did `[.. ldm]` and we do not think the presence of a `k:v` element changes how the semantics should work.
-
-This is also similar to how passing to an `IEnumerable<T>` would differ from passing to some *set* type with normal collection expressions.  The target type *intentionally* affects semantics, and there is no expectation that across very different target types that one would receive the same resultant values with the same behaviors.  We do not view *dictionary types* or *key value pair elements* as changing the calculus here.
-
-### Question: Allow deconstructible types?
-
-Should we take a very restrictive view of `KeyValuePair<,>`?  Specifically, should we allow only that exact type?  Or should we allow any types with an implicit conversion to that type?  For example:
-
-```c#
-struct Pair<X, Y>
-{
-  public static implicit operator KeyValuePair<X, Y>(Pair<X, Y> pair) => ...;
-}
-
-Dictionary<int, string> map1 = [pair1, pair2]; // ?
-
-List<Pair<int, string>> pairs = ...;
-Dictionary<int, string> map2 = [.. pairs]; // ?
-```
-
-Similarly, instead of `KeyValuePair<,>` we could allow *any* type deconstructible to two values? For example:
-
-```c#
-record struct Pair<X, Y>(X x, Y y);
-
-Dictionary<int, string> map1 = [pair1, pair2]; // ?
-```
-
-Resolution: While cute, these capabilities are not needed for core scenarios to work.  They also raise concerns about where to draw the line wrt to what is the dictionary space and what is not.  As such, we will only allow `KeyValuePair<,>` for now.  And we will not do anything with tuples and/or other deconstructible types.  This is also something that could be relaxed in the future if there is sufficient feedback and motivation to warrant it.  This design space is withdrawn from dictionary expressions.
-
-### Question: Semantics when a type implements the *dictionary type* shape in multiple ways.
-
-What are the rules when types have multiple indexers and multiple implementations of `IEnumerable<KVP<,>>`?
-
-This concern already exists with *collection types*.  For those types, the rule is that we must have an *element type* as per the existing language rules.  This follows for *dictionary types*, along with the rule that there must be a corresponding indexer for this *element type*.  If those hold, the type can be used as a *dictionary type*.  If these don't hold, it cannot be.
-
-## Open Questions
-
 ### Binding to indexer
 
 For concrete dictionary types that do not use `CollectionBuilderAttribute`, where the compiler constructs the resulting instance using a constructor and repeated calls to an indexer, how should the compiler resolve the appropriate indexer for each element?
@@ -718,6 +660,64 @@ ToList(["two":2]); // C#14: ok
 
 static List<KeyValuePair<K, V>> ToList<K, V>(params List<KeyValuePair<K, V>> elements) => elements;
 ```
+
+## Retracted Designs/Questions
+
+### Question: Should `k:v` elements force dictionary semantics?
+
+Is there a concern around the following interface destinations:
+
+```c#
+// NOTE: These are not overloads.
+
+void AAA(IEnumerable<KeyValuePair<string, int>> pairs) ...
+void BBB(IDictionary<string, int> pairs) ...
+
+AAA(["mads": 21, .. ldm]);
+BBB(["mads": 21, .. ldm]);
+```
+
+When the destination is an `IEnumerable<T>`, we tend to think we're producing a sequence (so "mads" could show up twice).  However, the use of the `k:v` syntax more strongly indicates production of a dictionary-value.
+
+What should we do here when targeting `IEnumerable<...>` *and* using `k:v` elements? Produce an ordered sequence, with possibly duplicated values?  Or produce an unordered dictionary, with unique keys?
+
+Resolution: `IEnumerable<KVP>` is not a dictionary type (as it lacks an indexer).  As such, it has sequential value semantics (and can include duplicates).  This would happen today anyways if someone did `[.. ldm]` and we do not think the presence of a `k:v` element changes how the semantics should work.
+
+This is also similar to how passing to an `IEnumerable<T>` would differ from passing to some *set* type with normal collection expressions.  The target type *intentionally* affects semantics, and there is no expectation that across very different target types that one would receive the same resultant values with the same behaviors.  We do not view *dictionary types* or *key value pair elements* as changing the calculus here.
+
+### Question: Allow deconstructible types?
+
+Should we take a very restrictive view of `KeyValuePair<,>`?  Specifically, should we allow only that exact type?  Or should we allow any types with an implicit conversion to that type?  For example:
+
+```c#
+struct Pair<X, Y>
+{
+  public static implicit operator KeyValuePair<X, Y>(Pair<X, Y> pair) => ...;
+}
+
+Dictionary<int, string> map1 = [pair1, pair2]; // ?
+
+List<Pair<int, string>> pairs = ...;
+Dictionary<int, string> map2 = [.. pairs]; // ?
+```
+
+Similarly, instead of `KeyValuePair<,>` we could allow *any* type deconstructible to two values? For example:
+
+```c#
+record struct Pair<X, Y>(X x, Y y);
+
+Dictionary<int, string> map1 = [pair1, pair2]; // ?
+```
+
+Resolution: While cute, these capabilities are not needed for core scenarios to work.  They also raise concerns about where to draw the line wrt to what is the dictionary space and what is not.  As such, we will only allow `KeyValuePair<,>` for now.  And we will not do anything with tuples and/or other deconstructible types.  This is also something that could be relaxed in the future if there is sufficient feedback and motivation to warrant it.  This design space is withdrawn from dictionary expressions.
+
+### Question: Semantics when a type implements the *dictionary type* shape in multiple ways.
+
+What are the rules when types have multiple indexers and multiple implementations of `IEnumerable<KVP<,>>`?
+
+This concern already exists with *collection types*.  For those types, the rule is that we must have an *element type* as per the existing language rules.  This follows for *dictionary types*, along with the rule that there must be a corresponding indexer for this *element type*.  If those hold, the type can be used as a *dictionary type*.  If these don't hold, it cannot be.
+
+## Open Questions
 
 ### Concrete type for `I{ReadOnly}Dictionary<K, V>`
 
