@@ -591,6 +591,8 @@ Options include:
 2. Use the target type implementation of `IDictionary<K, V>.this[K] { get; set; }`.
 3. Use the accessible indexer that matches the signature `V this[K] { get; set; }`.
 
+**Resolution:** Option 3: Use the indexer that qualifies the type as a dictionary type. [LDM-2025-03-05](https://github.com/dotnet/csharplang/blob/main/meetings/2025/LDM-2025-03-05.md#conclusion)
+
 ### Type inference for `KeyValuePair<K, V>` collections
 
 Confirm the [*type inference*](#type-inference) rules for elements when the target type is a `KeyValuePair<K, V>` collection.
@@ -613,6 +615,8 @@ void Print<K, V>(List<KeyValuePair<K, V>> pairs) { ... }
 >     * **If `Eᵢ` is an *expression element* with type `KeyValuePair<Kᵢ, Vᵢ>`, then a [*lower-bound inference*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/expressions.md#116310-lower-bound-inferences) is made *from* `Kᵢ` *to* `Kₑ` and a [*lower-bound inference*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/expressions.md#116310-lower-bound-inferences) is made *from* `Vᵢ` *to* `Vₑ`.**
 >     * **If `Eᵢ` is a *spread element* with an [*iteration type*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/statements.md#1295-the-foreach-statement) `KeyValuePair<Kᵢ, Vᵢ>`, then a [*lower-bound inference*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/expressions.md#116310-lower-bound-inferences) is made *from* `Kᵢ` *to* `Kₑ` and a [*lower-bound inference*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/expressions.md#116310-lower-bound-inferences) is made *from* `Vᵢ` *to* `Vₑ`.**
 
+**Resolution:** Rules accepted as written. [LDM-2025-03-24](https://github.com/dotnet/csharplang/blob/main/meetings/2025/LDM-2025-03-24.md#conclusion-1)
+
 ### Overload resolution for `KeyValuePair<K, V>` collections
 
 Confirm the *better conversion* rules for [*overload resolution*](#overload-resolution) when the target types are `KeyValuePair<K, V>` collections.
@@ -634,6 +638,8 @@ void Print(List<KeyValuePair<byte, object>> pairs) { ... }
 >   - **If `ELᵢ` is a *key value pair element* `Kᵢ:Vᵢ`, conversion comparison uses better conversion from expression from `Kᵢ` to `Kₑ` and better conversion from expression from `Vᵢ` to `Vₑ`.**
 >   - **If `ELᵢ` is an *expression element* with *element type* `KeyValuePair<Kᵢ, Vᵢ>`, conversion comparison uses better conversion from type `Kᵢ` to `Kₑ` and better conversion from type `Vᵢ` to `Vₑ`.**
 >   - **If `ELᵢ` is an *spread element* with an expression with *element type* `KeyValuePair<Kᵢ, Vᵢ>`, conversion comparison uses better conversion from type `Kᵢ` to `Kₑ` and better conversion from type `Vᵢ` to `Vₑ`.**
+
+**Resolution:** Rules accepted as written. [LDM-2025-03-24](https://github.com/dotnet/csharplang/blob/main/meetings/2025/LDM-2025-03-24.md#conclusion-2)
 
 ### Support dictionary types as `params` type
 
@@ -660,6 +666,8 @@ ToList(["two":2]); // C#14: ok
 
 static List<KeyValuePair<K, V>> ToList<K, V>(params List<KeyValuePair<K, V>> elements) => elements;
 ```
+
+**Resolution:** Allow `params` on dictionary-like types that can be targeted with a collection expression, and constructing those types will prefer using indexers when available. [LDM-2025-03-24](https://github.com/dotnet/csharplang/blob/main/meetings/2025/LDM-2025-03-24.md#conclusion)
 
 ## Retracted Designs/Questions
 
