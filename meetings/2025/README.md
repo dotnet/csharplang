@@ -47,12 +47,11 @@ All schedule items must have a public issue or checked-in proposal that can be l
 [C# Language Design Meeting for April 2nd, 2025](https://github.com/dotnet/csharplang/blob/main/meetings/2025/LDM-2025-04-02.md)
 
 - User Defined Compound Assignment Operators
-    - We will allow `readonly` modifiers, but we will not relax the target requirements at this time
-    - Shadowing will be allowed with the same rules as methods.
-    - Checks will _not_ be done on consistency between different forms of operators.
-
+    - Should readonly modifier be allowed in structures?
+    - Should shadowing be allowed
+    - Should we have any consistency enforcement between declared += and + operators?
 - Readonly setters
-    - We will include expansions in the _Readonly Setter calls on non-variables_ proposal
+    - Expansions
 
 ### Mon Mar 24, 2025
 
