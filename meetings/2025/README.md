@@ -35,12 +35,14 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 - Open questions: [dictionary expressions](https://github.com/dotnet/csharplang/blob/main/proposals/dictionary-expressions.md#open-questions), [collection arguments](https://github.com/dotnet/csharplang/blob/main/proposals/collection-expression-arguments.md#open-questions) (cston, CyrusNajmabadi)
 
+## C# Language Design Notes for 2025
+
 ### Mon Apr 7, 2025 
 
-- [Breaking change: partial extended interface members will be implicitly virtual and public](https://github.com/jjonescz/roslyn/blob/PartialEventsCtors-12-Interface/docs/compilers/CSharp/Compiler%20Breaking%20Changes%20-%20DotNet%2010.md#extended-partial-members-are-now-implicitly-virtual-and-public) (jjonescz, AlekseyTs)
-- [Interpolated string handler argument value](https://github.com/dotnet/csharplang/blob/main/proposals/interpolated-string-handler-argument-value.md) (Aleksey)
+[C# Language Design Meeting for April 7th, 2025](https://github.com/dotnet/csharplang/blob/main/meetings/2025/LDM-2025-04-07.md)
 
-## C# Language Design Notes for 2025
+- [Breaking change discussion: making partial members in interfaces virtual](#breaking-change-discussion-making-partial-members-in-interfaces-virtual)
+- [Interpolated string handler argument values](#interpolated-string-handler-argument-values)
 
 ### April 2, 2025
 
