@@ -41,8 +41,8 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 [C# Language Design Meeting for April 7th, 2025](https://github.com/dotnet/csharplang/blob/main/meetings/2025/LDM-2025-04-07.md)
 
-- [Breaking change discussion: making partial members in interfaces virtual](#breaking-change-discussion-making-partial-members-in-interfaces-virtual)
-- [Interpolated string handler argument values](#interpolated-string-handler-argument-values)
+- Breaking change discussion: making partial members in interfaces virtual
+- Interpolated string handler argument values
 
 ### April 2, 2025
 
