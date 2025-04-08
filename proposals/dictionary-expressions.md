@@ -669,6 +669,32 @@ static List<KeyValuePair<K, V>> ToList<K, V>(params List<KeyValuePair<K, V>> ele
 
 **Resolution:** Allow `params` on dictionary-like types that can be targeted with a collection expression, and constructing those types will prefer using indexers when available. [LDM-2025-03-24](https://github.com/dotnet/csharplang/blob/main/meetings/2025/LDM-2025-03-24.md#conclusion)
 
+### Question: Types that support both collection and dictionary initialization
+
+C# 12 supports collection types where the element type is some `KeyValuePair<,>`, where the type has an applicable `Add()` method that takes a single argument. Which approach should we use for initialization if the type also includes an indexer?
+
+For example, consider a type like so:
+
+```c#
+public class Hybrid<TKey, TValue> : IEnumerable<KeyValuePair<TKey, TValue>>
+{
+    public void Add(KeyValuePair<TKey, TValue> pair);
+    public TValue this[TKey key] { ... }
+}
+
+// This would compile in C# 12:
+// Translating to calls to .Add.
+Hybrid<string, int> nameToAge = [someKvp];
+```
+
+Options include:
+
+1. Use applicable instance indexer if available; otherwise use C#12 initialization.
+2. Use applicable instance indexer if available; otherwise report an error during construction (or conversion?).
+3. Use C#12 initialization always.
+
+Resolution: TBD.  Working group recommendation: Use applicable instance indexer only.  This ensures that everything dictionary-like is initialized in a consistent fashion.  This would be a break in behavior when recompiling.  The view is that these types would be rare.  And if they exist, it would be nonsensical for them to behave differently using the indexer versus the `.Add` (outside of potentially throwing behavior).
+
 ## Retracted Designs/Questions
 
 ### Question: Should `k:v` elements force dictionary semantics?
@@ -748,32 +774,6 @@ Specifically:
   1. Use `Dictionary<K, V>`, and state that as a requirement for target type `IDictionary<K, V>`.
   2. Synthesize an internal type for `IReadOnlyDictionary<K, V>` and use that.  That way code cannot take a dependency on the underlying type, which we are free to change.
      This may incur an extra allocation, but that is already true for the more common `IEnumerable<T>` / `IReadOnlyList<T>` cases for collection expressions.
-
-### Question: Types that support both collection and dictionary initialization
-
-C# 12 supports collection types where the element type is some `KeyValuePair<,>`, where the type has an applicable `Add()` method that takes a single argument. Which approach should we use for initialization if the type also includes an indexer?
-
-For example, consider a type like so:
-
-```c#
-public class Hybrid<TKey, TValue> : IEnumerable<KeyValuePair<TKey, TValue>>
-{
-    public void Add(KeyValuePair<TKey, TValue> pair);
-    public TValue this[TKey key] { ... }
-}
-
-// This would compile in C# 12:
-// Translating to calls to .Add.
-Hybrid<string, int> nameToAge = [someKvp];
-```
-
-Options include:
-
-1. Use applicable instance indexer if available; otherwise use C#12 initialization.
-2. Use applicable instance indexer if available; otherwise report an error during construction (or conversion?).
-3. Use C#12 initialization always.
-
-Resolution: TBD.  Working group recommendation: Use applicable instance indexer only.  This ensures that everything dictionary-like is initialized in a consistent fashion.  This would be a break in behavior when recompiling.  The view is that these types would be rare.  And if they exist, it would be nonsensical for them to behave differently using the indexer versus the `.Add` (outside of potentially throwing behavior).
 
 ### Question: Parsing ambiguity
 
