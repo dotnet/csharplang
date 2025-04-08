@@ -469,7 +469,13 @@ class MySetBuilder
 }
 ```
 
-**Resolution:** The span parameter for elements should be the last parameter. [LDM-2025-03-12](https://github.com/dotnet/csharplang/blob/main/meetings/2025/LDM-2025-03-12.md#conclusion-1)
+**Resolution:** The span parameter for elements should be the last parameter. [LDM-2025-03-17](https://github.com/dotnet/csharplang/blob/main/meetings/2025/LDM-2025-03-17.md#conclusion)
+
+### Arguments with earlier language version
+
+Is an error reported for `with()` when compiling with an earlier language version, or does `with` bind to another symbol in scope?
+
+**Resolution:** No breaking change for `with` inside a collection expression when compiling with earlier language versions. [LDM-2025-03-17](https://github.com/dotnet/csharplang/blob/main/meetings/2025/LDM-2025-03-17.md#conclusion-1)
 
 ## Open questions
 
@@ -529,10 +535,6 @@ What about `IReadOnlyDictionary<TKey, TValue>` which may be implemented by a syn
 ### Allow empty argument list for any target type
 
 For target types such as *arrays* and *span types* that do not allow arguments, should an explicit empty argument list, `with()`, be allowed?
-
-### Arguments with earlier language version
-
-Is an error reported for `with()` when compiling with an earlier language version, or does `with` bind to another symbol in scope?
 
 ### `__arglist`
 
