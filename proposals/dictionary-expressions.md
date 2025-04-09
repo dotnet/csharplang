@@ -567,7 +567,7 @@ What types and translation should be used when targeting dictionary interfaces (
 [*collection expressions*](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-12.0/collection-expressions.md#interface-translation)
 analogously translated to dictionaries.  Full details can be found in [interface-translation](#interface-translation).  
 
-[LDM-2025-04-09](link-tbd)
+[LDM-2025-04-09](https://github.com/dotnet/csharplang/blob/main/meetings/2025/LDM-2025-04-09.md#conclusion)
 
 ### Conversion from expression element for `KeyValuePair<K, V>` collections
 
