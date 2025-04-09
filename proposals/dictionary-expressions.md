@@ -567,6 +567,134 @@ list = [new StringIntPair()]; // error: UDC not supported
 
 **Resolution:** Existing conversions should continue to apply for *expression elements* and *spread elements* before considering co-variant conversions of `Key` and `Value` for distinct `KeyValuePair<,>` types. [LDM-2025-03-17](https://github.com/dotnet/csharplang/blob/main/meetings/2025/LDM-2025-03-17.md#conclusion-2)
 
+### Binding to indexer
+
+For concrete dictionary types that do not use `CollectionBuilderAttribute`, where the compiler constructs the resulting instance using a constructor and repeated calls to an indexer, how should the compiler resolve the appropriate indexer for each element?
+
+```csharp
+MyDictionary<string, int> d =
+  [
+    (object)"one":1, // this[object] { set; }
+    "two":2          // this[string] { set; }
+  ];
+
+class MyDictionary<K, V> : IEnumerable<KeyValuePair<object, object>>
+{
+  // ...
+  public V this[K k] { ... }
+  public object this[object o] { ... }
+}
+```
+
+Options include:
+1. For each element individually, use normal lookup rules and overload resolution to determine the resulting indexer based on the element expression (for an expression element) or type (for a spread or key-value pair element). *This corresponds to the binding behavior for `Add()` methods for non-dictionary collection expressions.*
+2. Use the target type implementation of `IDictionary<K, V>.this[K] { get; set; }`.
+3. Use the accessible indexer that matches the signature `V this[K] { get; set; }`.
+
+**Resolution:** Option 3: Use the indexer that qualifies the type as a dictionary type. [LDM-2025-03-05](https://github.com/dotnet/csharplang/blob/main/meetings/2025/LDM-2025-03-05.md#conclusion)
+
+### Type inference for `KeyValuePair<K, V>` collections
+
+Confirm the [*type inference*](#type-inference) rules for elements when the target type is a `KeyValuePair<K, V>` collection.
+
+```csharp
+string x; int y;
+KeyValuePair<string, long> e;
+Dictionary<object, int> d;
+...
+Print([x:y]);         // Print<string, int>
+Print([e]);           // Print<string, long>
+Print([..d]);         // Print<object, int>
+Print([x:y, e, ..d]); // Print<object, long>
+
+void Print<K, V>(List<KeyValuePair<K, V>> pairs) { ... }
+```
+
+>   * **If `T` has an *element type* `KeyValuePair<Kₑ, Vₑ>`, or `T` is a *nullable value type* `T0?` and `T0` has an *element type* `KeyValuePair<Kₑ, Vₑ>`, then for each `Eᵢ`**:
+>     * **If `Eᵢ` is a *key value pair element* `Kᵢ:Vᵢ`, then an *input type inference* is made *from* `Kᵢ` *to* `Kₑ` and an *input type inference* is made *from* `Vᵢ` *to* `Vₑ`.**
+>     * **If `Eᵢ` is an *expression element* with type `KeyValuePair<Kᵢ, Vᵢ>`, then a [*lower-bound inference*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/expressions.md#116310-lower-bound-inferences) is made *from* `Kᵢ` *to* `Kₑ` and a [*lower-bound inference*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/expressions.md#116310-lower-bound-inferences) is made *from* `Vᵢ` *to* `Vₑ`.**
+>     * **If `Eᵢ` is a *spread element* with an [*iteration type*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/statements.md#1295-the-foreach-statement) `KeyValuePair<Kᵢ, Vᵢ>`, then a [*lower-bound inference*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/expressions.md#116310-lower-bound-inferences) is made *from* `Kᵢ` *to* `Kₑ` and a [*lower-bound inference*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/expressions.md#116310-lower-bound-inferences) is made *from* `Vᵢ` *to* `Vₑ`.**
+
+**Resolution:** Rules accepted as written. [LDM-2025-03-24](https://github.com/dotnet/csharplang/blob/main/meetings/2025/LDM-2025-03-24.md#conclusion-1)
+
+### Overload resolution for `KeyValuePair<K, V>` collections
+
+Confirm the *better conversion* rules for [*overload resolution*](#overload-resolution) when the target types are `KeyValuePair<K, V>` collections.
+
+```csharp
+KeyValuePair<byte, int> e;
+Dictionary<byte, int> d;
+...
+Print([1:2]); // <int, int>
+Print([e])    // ambiguous
+Print([..d])  // ambiguous
+
+void Print(List<KeyValuePair<int, int>> pairs) { ... }
+void Print(List<KeyValuePair<byte, object>> pairs) { ... }
+```
+
+> Conversion comparisons are made as follows:
+> - **If the target is a type with an *element type* `KeyValuePair<Kₑ, Vₑ>`:**
+>   - **If `ELᵢ` is a *key value pair element* `Kᵢ:Vᵢ`, conversion comparison uses better conversion from expression from `Kᵢ` to `Kₑ` and better conversion from expression from `Vᵢ` to `Vₑ`.**
+>   - **If `ELᵢ` is an *expression element* with *element type* `KeyValuePair<Kᵢ, Vᵢ>`, conversion comparison uses better conversion from type `Kᵢ` to `Kₑ` and better conversion from type `Vᵢ` to `Vₑ`.**
+>   - **If `ELᵢ` is an *spread element* with an expression with *element type* `KeyValuePair<Kᵢ, Vᵢ>`, conversion comparison uses better conversion from type `Kᵢ` to `Kₑ` and better conversion from type `Vᵢ` to `Vₑ`.**
+
+**Resolution:** Rules accepted as written. [LDM-2025-03-24](https://github.com/dotnet/csharplang/blob/main/meetings/2025/LDM-2025-03-24.md#conclusion-2)
+
+### Support dictionary types as `params` type
+
+Should types with element type `KeyValuePair<K, V>`, that are not otherwise collection types, be supported as `params` parameter types?
+
+```csharp
+KeyValuePair<string, int> x, y;
+
+ToDictionary(x, y);
+ToReadOnlyDictionary(x, y);
+
+static Dictionary<K, V> ToDictionary<K, V>(
+    params Dictionary<K, V> elements) => elements;          // C#14: ok?
+
+static IReadOnlyDictionary<K, V> ToReadOnlyDictionary<K, V>(
+    params IReadOnlyDictionary<K, V> elements) => elements; // C#14: ok?
+```
+
+Note that regardless of whether we support dictionary types for `params`, or simply continue to support C#12 collection types with `KeyValuePair<K, V>` element type, it won't be possible to use `k:v` syntax when calling a `params` method with *expanded form*.
+
+```csharp
+ToList("one":1);   // error: syntax error ':'
+ToList(["two":2]); // C#14: ok
+
+static List<KeyValuePair<K, V>> ToList<K, V>(params List<KeyValuePair<K, V>> elements) => elements;
+```
+
+**Resolution:** Allow `params` on dictionary-like types that can be targeted with a collection expression, and constructing those types will prefer using indexers when available. [LDM-2025-03-24](https://github.com/dotnet/csharplang/blob/main/meetings/2025/LDM-2025-03-24.md#conclusion)
+
+### Question: Types that support both collection and dictionary initialization
+
+C# 12 supports collection types where the element type is some `KeyValuePair<,>`, where the type has an applicable `Add()` method that takes a single argument. Which approach should we use for initialization if the type also includes an indexer?
+
+For example, consider a type like so:
+
+```c#
+public class Hybrid<TKey, TValue> : IEnumerable<KeyValuePair<TKey, TValue>>
+{
+    public void Add(KeyValuePair<TKey, TValue> pair);
+    public TValue this[TKey key] { ... }
+}
+
+// This would compile in C# 12:
+// Translating to calls to .Add.
+Hybrid<string, int> nameToAge = [someKvp];
+```
+
+Options include:
+
+1. Use applicable instance indexer if available; otherwise use C#12 initialization.
+2. Use applicable instance indexer if available; otherwise report an error during construction (or conversion?).
+3. Use C#12 initialization always.
+
+**Resolution:** If the target type is a struct or class type that implements `IEnumerable` and has an iteration type of `KeyValuePair<K, V>`, and the type has the expected instance indexer (see [*Conversions*](#conversions)), then the indexer is used for initialization rather than any `Add` methods. [LDM-2025-03-05](https://github.com/dotnet/csharplang/blob/main/meetings/2025/LDM-2025-03-05.md#conclusion)
+
 ## Retracted Designs/Questions
 
 ### Question: Should `k:v` elements force dictionary semantics?
@@ -625,100 +753,6 @@ This concern already exists with *collection types*.  For those types, the rule 
 
 ## Open Questions
 
-### Binding to indexer
-
-For concrete dictionary types that do not use `CollectionBuilderAttribute`, where the compiler constructs the resulting instance using a constructor and repeated calls to an indexer, how should the compiler resolve the appropriate indexer for each element?
-
-```csharp
-MyDictionary<string, int> d =
-  [
-    (object)"one":1, // this[object] { set; }
-    "two":2          // this[string] { set; }
-  ];
-
-class MyDictionary<K, V> : IEnumerable<KeyValuePair<object, object>>
-{
-  // ...
-  public V this[K k] { ... }
-  public object this[object o] { ... }
-}
-```
-
-Options include:
-1. For each element individually, use normal lookup rules and overload resolution to determine the resulting indexer based on the element expression (for an expression element) or type (for a spread or key-value pair element). *This corresponds to the binding behavior for `Add()` methods for non-dictionary collection expressions.*
-2. Use the target type implementation of `IDictionary<K, V>.this[K] { get; set; }`.
-3. Use the accessible indexer that matches the signature `V this[K] { get; set; }`.
-
-### Type inference for `KeyValuePair<K, V>` collections
-
-Confirm the [*type inference*](#type-inference) rules for elements when the target type is a `KeyValuePair<K, V>` collection.
-
-```csharp
-string x; int y;
-KeyValuePair<string, long> e;
-Dictionary<object, int> d;
-...
-Print([x:y]);         // Print<string, int>
-Print([e]);           // Print<string, long>
-Print([..d]);         // Print<object, int>
-Print([x:y, e, ..d]); // Print<object, long>
-
-void Print<K, V>(List<KeyValuePair<K, V>> pairs) { ... }
-```
-
->   * **If `T` has an *element type* `KeyValuePair<Kₑ, Vₑ>`, or `T` is a *nullable value type* `T0?` and `T0` has an *element type* `KeyValuePair<Kₑ, Vₑ>`, then for each `Eᵢ`**:
->     * **If `Eᵢ` is a *key value pair element* `Kᵢ:Vᵢ`, then an *input type inference* is made *from* `Kᵢ` *to* `Kₑ` and an *input type inference* is made *from* `Vᵢ` *to* `Vₑ`.**
->     * **If `Eᵢ` is an *expression element* with type `KeyValuePair<Kᵢ, Vᵢ>`, then a [*lower-bound inference*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/expressions.md#116310-lower-bound-inferences) is made *from* `Kᵢ` *to* `Kₑ` and a [*lower-bound inference*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/expressions.md#116310-lower-bound-inferences) is made *from* `Vᵢ` *to* `Vₑ`.**
->     * **If `Eᵢ` is a *spread element* with an [*iteration type*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/statements.md#1295-the-foreach-statement) `KeyValuePair<Kᵢ, Vᵢ>`, then a [*lower-bound inference*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/expressions.md#116310-lower-bound-inferences) is made *from* `Kᵢ` *to* `Kₑ` and a [*lower-bound inference*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/expressions.md#116310-lower-bound-inferences) is made *from* `Vᵢ` *to* `Vₑ`.**
-
-### Overload resolution for `KeyValuePair<K, V>` collections
-
-Confirm the *better conversion* rules for [*overload resolution*](#overload-resolution) when the target types are `KeyValuePair<K, V>` collections.
-
-```csharp
-KeyValuePair<byte, int> e;
-Dictionary<byte, int> d;
-...
-Print([1:2]); // <int, int>
-Print([e])    // ambiguous
-Print([..d])  // ambiguous
-
-void Print(List<KeyValuePair<int, int>> pairs) { ... }
-void Print(List<KeyValuePair<byte, object>> pairs) { ... }
-```
-
-> Conversion comparisons are made as follows:
-> - **If the target is a type with an *element type* `KeyValuePair<Kₑ, Vₑ>`:**
->   - **If `ELᵢ` is a *key value pair element* `Kᵢ:Vᵢ`, conversion comparison uses better conversion from expression from `Kᵢ` to `Kₑ` and better conversion from expression from `Vᵢ` to `Vₑ`.**
->   - **If `ELᵢ` is an *expression element* with *element type* `KeyValuePair<Kᵢ, Vᵢ>`, conversion comparison uses better conversion from type `Kᵢ` to `Kₑ` and better conversion from type `Vᵢ` to `Vₑ`.**
->   - **If `ELᵢ` is an *spread element* with an expression with *element type* `KeyValuePair<Kᵢ, Vᵢ>`, conversion comparison uses better conversion from type `Kᵢ` to `Kₑ` and better conversion from type `Vᵢ` to `Vₑ`.**
-
-### Support dictionary types as `params` type
-
-Should types with element type `KeyValuePair<K, V>`, that are not otherwise collection types, be supported as `params` parameter types?
-
-```csharp
-KeyValuePair<string, int> x, y;
-
-ToDictionary(x, y);
-ToReadOnlyDictionary(x, y);
-
-static Dictionary<K, V> ToDictionary<K, V>(
-    params Dictionary<K, V> elements) => elements;          // C#14: ok?
-
-static IReadOnlyDictionary<K, V> ToReadOnlyDictionary<K, V>(
-    params IReadOnlyDictionary<K, V> elements) => elements; // C#14: ok?
-```
-
-Note that regardless of whether we support dictionary types for `params`, or simply continue to support C#12 collection types with `KeyValuePair<K, V>` element type, it won't be possible to use `k:v` syntax when calling a `params` method with *expanded form*.
-
-```csharp
-ToList("one":1);   // error: syntax error ':'
-ToList(["two":2]); // C#14: ok
-
-static List<KeyValuePair<K, V>> ToList<K, V>(params List<KeyValuePair<K, V>> elements) => elements;
-```
-
 ### Concrete type for `I{ReadOnly}Dictionary<K, V>`
 
 What concrete type should be used for a dictionary expression with target type `IDictionary<K, V>`?
@@ -740,32 +774,6 @@ Specifically:
   1. Use `Dictionary<K, V>`, and state that as a requirement for target type `IDictionary<K, V>`.
   2. Synthesize an internal type for `IReadOnlyDictionary<K, V>` and use that.  That way code cannot take a dependency on the underlying type, which we are free to change.
      This may incur an extra allocation, but that is already true for the more common `IEnumerable<T>` / `IReadOnlyList<T>` cases for collection expressions.
-
-### Question: Types that support both collection and dictionary initialization
-
-C# 12 supports collection types where the element type is some `KeyValuePair<,>`, where the type has an applicable `Add()` method that takes a single argument. Which approach should we use for initialization if the type also includes an indexer?
-
-For example, consider a type like so:
-
-```c#
-public class Hybrid<TKey, TValue> : IEnumerable<KeyValuePair<TKey, TValue>>
-{
-    public void Add(KeyValuePair<TKey, TValue> pair);
-    public TValue this[TKey key] { ... }
-}
-
-// This would compile in C# 12:
-// Translating to calls to .Add.
-Hybrid<string, int> nameToAge = [someKvp];
-```
-
-Options include:
-
-1. Use applicable instance indexer if available; otherwise use C#12 initialization.
-2. Use applicable instance indexer if available; otherwise report an error during construction (or conversion?).
-3. Use C#12 initialization always.
-
-Resolution: TBD.  Working group recommendation: Use applicable instance indexer only.  This ensures that everything dictionary-like is initialized in a consistent fashion.  This would be a break in behavior when recompiling.  The view is that these types would be rare.  And if they exist, it would be nonsensical for them to behave differently using the indexer versus the `.Add` (outside of potentially throwing behavior).
 
 ### Question: Parsing ambiguity
 
