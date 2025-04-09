@@ -1,5 +1,7 @@
 # `field` keyword in properties
 
+[!INCLUDE[Specletdisclaimer](./speclet-disclaimer.md)]
+
 Champion issue: <https://github.com/dotnet/csharplang/issues/8635>
 
 ## Summary

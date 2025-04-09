@@ -1,5 +1,7 @@
 # First-class Span Types
 
+[!INCLUDE[Specletdisclaimer](./speclet-disclaimer.md)]
+
 Champion issue: <https://github.com/dotnet/csharplang/issues/8714>
 
 ## Summary
