@@ -4,6 +4,8 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ## Schedule ASAP
 
+- Extensions [open issues](https://github.com/dotnet/csharplang/blob/main/proposals/extensions.md#open-issues) (Julien)
+
 ## Schedule when convenient
 
 - Triage (working set)
