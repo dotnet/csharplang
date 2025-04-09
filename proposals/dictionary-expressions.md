@@ -781,3 +781,15 @@ Parsing ambiguity around: `[a ? [b] : c]`
 Working group recommendation: Use normal parsing here.  So this would be the same as `[a ? ([b]) : (c)]` (a collection expression containing a conditional expression).
 If the user wants a `key_value_pair_element` here, they can write: `[(a?[b]) : c]`.  This code already will exist today in a collection expression, and it should not
 change meaning.
+
+### Question: Implement non-generic `IDictionary` when targeting `IReadOnlyDictionary<,>`
+
+Collection expressions specified explicitly:
+
+> Given a target type which does not contain mutating members, namely `IEnumerable<T>`, `IReadOnlyCollection<T>`, and `IReadOnlyList<T>`, a compliant implementation is required to produce a value that implements that interface. ...
+>
+> In addition, the value must implement the nongeneric `ICollection` and `IList` interfaces. This enables collection expressions to support dynamic introspection in scenarios such as data binding.
+
+Do we want a similar correspondance when the target type is `IReadOnlyDictionary<,>`?  Specifically, should the value be required to implement the non-generic `IDictionary` interface?
+
+Working group recomendation: Yes.  Implement `IDictionary`.  Specifically, all existing non-mutable dictionary types the compiler might use (`ReadOnlyDictionary<,>`, `FrozenDictionary<,>` or `ImmutableDictionary<,>`) all implement `IDictionary` (despite not needing to).  It is normal for our non-mutable types to expose this interface, and requiring it ensures maximal compatibility with any existing consumption code, with minor cost to the compiler.  For the most part, in practice the compiler will just be using these types anyways (most likely `ReadOnlyDictionary<,>` and `FrozenDictionary<,>`), so the guarantee is no actual cost.
