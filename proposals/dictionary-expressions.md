@@ -485,7 +485,8 @@ In either case, the type used is allowed to implement a larger set of interfaces
 
 Synthesized types are free to employ any strategy they want to implement the required interfaces properly. For example, returning a cached singleton for empty collections, or a synthesized type which inlines the keys/values directly within itself, avoiding the need for additional internal collection allocations.
 
-The value must return true when queried for `ICollection<T>.IsReadOnly`. This ensures consumers can appropriately tell that the collection is non-mutable, despite implementing the mutable views.  The value must throw on any call to a mutation methods (like `IDictionary<TKey, TValue>.Add`). This ensures safety, preventing a non-mutable collection from being accidentally mutated.
+1. The value must return `true` when queried for `ICollection<T>.IsReadOnly`. This ensures consumers can appropriately tell that the collection is non-mutable, despite implementing the mutable views.
+1. The value must throw on any call to a mutation methods (like `IDictionary<TKey, TValue>.Add`). This ensures safety, preventing a non-mutable collection from being accidentally mutated.
 
 This follows the originating intuition around the `IEnumerable<T> / IReadOnlyCollection<T> / IReadOnlyList<T>` interfaces and the allowed flexibility the compiler has in using an existing type or synthesized type when creating an instance of those in [*collection expressions*](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-12.0/collection-expressions.md#non-mutable-interface-translation). 
 
