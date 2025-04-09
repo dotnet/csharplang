@@ -470,13 +470,48 @@ X([a, b]); // ambiguous
 
 ## Interface translation
 
+### Non-mutable interface translation
+
+Given a target type `IReadOnlyDictionary<TKey, TValue>`, a compliant implementation is required to produce a value
+that implements that interface. If a type is synthesized, it is recommended the synthesized type implements `IDictionary<TKey, TValue>`,
+This ensures maximal compatibility with existing libraries, including those that introspect the interfaces implemented by a value in
+order to light up performance optimizations.
+
+In addition, the value must implement the nongeneric `ICollection` interface. This enables collection expressions to support dynamic
+introspection in scenarios such as data binding.
+
+A compliant implementation is free to:
+
+1. Use an existing type that implements the required interfaces.
+2. Synthesize a type that implements the required interfaces.
+
+In either case, the type used is allowed to implement a larger set of interfaces than those strictly required.
+
+Synthesized types are free to employ any strategy they want to implement the required interfaces properly.
+For example, a synthesized type might inline the elements directly within itself, avoiding the need for
+additional internal collection allocations.
+
+The value must return true when queried for `ICollection<T>.IsReadOnly`. This ensures consumers can appropriately tell
+that the collection is non-mutable, despite implementing the mutable views.  The value must throw on any call to a mutation
+methods (like `IDictionary<TKey, TValue>.Add`). This ensures safety, preventing a non-mutable collection from being
+accidentally mutated.
+
+This follows the originating intuition around the `IEnumerable<T> / IReadOnlyCollection<T> / IReadOnlyList<T>` interfaces
+and the allowed flexibility the compiler has in using an existing type or synthesized type when creating an instance of those
+in [*collection expressions*](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-12.0/collection-expressions.md#non-mutable-interface-translation). 
+
+
 ### Mutable interface translation
 
 Given the target type `IDictionary<TKey, TValue>`:
 
 1. The value must be an instance of `Dictionary<TKey, TValue>`
 
-Translation mechanics will happen using the already defined rules that encompass the `Dictionary<TKey, TValue>` type (including handling of an initially provided [*comparer*](#Comparer-support)). This follows the originating intuition around `IList<T> / ICollection<T>` and `List<T>` in [*collection expressions*](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-12.0/collection-expressions.md#mutable-interface-translation). 
+Translation mechanics will happen using the already defined rules that encompass the `Dictionary<TKey, TValue>` type
+(including handling of an initially provided [*comparer*](#Comparer-support)).
+
+This follows the originating intuition around the `IList<T> / ICollection<T>` interfaces and the concrete `List<T>`
+destination type in [*collection expressions*](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-12.0/collection-expressions.md#mutable-interface-translation). 
 
 
 ### Non-mutable interface translation
@@ -552,6 +587,16 @@ Which approach should we go with for dictionary expressions? Options include:
 3. Perhaps a hybrid model.  `.Add` if only using `k:v` and switching to indexers if using spread elements.  There is deep potential for confusion here.
 
 **Resolution:** Use *indexer* as the lowering form. [LDM-2024-03-11](https://github.com/dotnet/csharplang/blob/main/meetings/2024/LDM-2024-03-11.md#conclusions)
+
+### Answered question 5
+
+What types and translation should be used when targeting dictionary interfaces (`IDictionary<TKey, TValue>` or `IReadOnlyDictionary<TKey, TValue>`)?
+
+**Resulution:** Use the same rules used for mutable and read-only interfaces for normal
+[*collection expressions*](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-12.0/collection-expressions.md#interface-translation)
+analogously translated to dictionaries.  Full details can be found in [interface-translation](Interface Translation).  
+
+[LDM-2025-04-09](link-tbd)
 
 ### Conversion from expression element for `KeyValuePair<K, V>` collections
 
