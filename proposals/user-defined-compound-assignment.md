@@ -72,6 +72,7 @@ operator_modifier
     | 'sealed'
 +   | 'override'
 +   | 'new'
++   | 'readonly'
     ;
 
 operator_declarator
@@ -580,21 +581,30 @@ the set of candidate user-defined operators provided by `T` is determined as fol
 ## Open questions
 [open]: #open-questions
 
-### Should `readonly` modifier be allowed in structures?
+### [Resolved] Should `readonly` modifier be allowed in structures?
 
 It feels like there would be no benefit in allowing to mark a method with `readonly` when the whole
 purpose of the method is to modify the instance.
 
-### Should shadowing be allowed?
+[Conclusion:](https://github.com/dotnet/csharplang/blob/main/meetings/2025/LDM-2025-04-02.md#conclusion)
+We will allow `readonly` modifiers, but we will not relax the target requirements at this time.
+
+### [Resolved] Should shadowing be allowed?
 
 If a derived class declares a 'compound assignment'/'instance increment' operator with the same signature as one in base,
 should we require an `override` modifier?
 
-### Should we have any consistency enforcement between declared `+=` and `+` operators?
+[Conclusion:](https://github.com/dotnet/csharplang/blob/main/meetings/2025/LDM-2025-04-02.md#conclusion-1)
+Shadowing will be allowed with the same rules as methods.
+
+### [Resolved] Should we have any consistency enforcement between declared `+=` and `+` operators?
 
 During [LDM-2025-02-12](https://github.com/dotnet/csharplang/blob/main/meetings/2025/LDM-2025-02-12.md#user-defined-instance-based-operators)
 a concern was raised about authors accidentally pushing their users into odd scenarios where a `+=` may work, but
 `+` won't (or vice versa) because one form declares extra operators than the other.
+
+[Conclusion:](https://github.com/dotnet/csharplang/blob/main/meetings/2025/LDM-2025-04-02.md#conclusion-2)
+Checks will not be done on consistency between different forms of operators.
 
 ## Alternatives
 [alternatives]: #alternatives
@@ -612,4 +622,4 @@ or only by structures. Therefore, it is not clear whether the first parameter sh
 ## Design meetings
 
 - [LDM-2025-02-12](https://github.com/dotnet/csharplang/blob/main/meetings/2025/LDM-2025-02-12.md#user-defined-instance-based-operators)
-
+- [LDM-2025-04-02](https://github.com/dotnet/csharplang/blob/main/meetings/2025/LDM-2025-04-02.md#user-defined-compound-assignment-operators)
