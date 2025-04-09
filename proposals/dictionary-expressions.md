@@ -472,7 +472,12 @@ X([a, b]); // ambiguous
 
 ### Mutable interface translation
 
-Given the target type `IDictionary<TKey, TValue>`, the type used will be `Dictionary<TKey, TValue>`.  Using the normal translation mechanics defined already (including handling of an initially provided [*comparer*](#Comparer-support)). This follows the originating intuition around `IList<T>` and `List<T>` in *collection expressions*. 
+Given the target type `IDictionary<TKey, TValue>`:
+
+1. The value must be an instance of `Dictionary<TKey, TValue>`
+
+Translation mechanics will happen using the already defined rules that encompass the `Dictionary<TKey, TValue>` type (including handling of an initially provided [*comparer*](#Comparer-support)). This follows the originating intuition around `IList<T> / ICollection<T>` and `List<T>` in [*collection expressions*](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-12.0/collection-expressions.md#mutable-interface-translation). 
+
 
 ### Non-mutable interface translation
 
@@ -752,28 +757,6 @@ What are the rules when types have multiple indexers and multiple implementation
 This concern already exists with *collection types*.  For those types, the rule is that we must have an *element type* as per the existing language rules.  This follows for *dictionary types*, along with the rule that there must be a corresponding indexer for this *element type*.  If those hold, the type can be used as a *dictionary type*.  If these don't hold, it cannot be.
 
 ## Open Questions
-
-### Concrete type for `I{ReadOnly}Dictionary<K, V>`
-
-What concrete type should be used for a dictionary expression with target type `IDictionary<K, V>`?
-
-Options include:
-1. Use `Dictionary<K, V>`, and state that as a requirement.
-2. Use `Dictionary<K, V>` for now, and state the compiler is free to use any conforming implementation.
-3. Synthesize an internal type and use that.
-
-What concrete type should be used for `IReadOnlyDictionary<K, V>`?
-
-Options include:
-1. Use a BCL type such as `ReadOnlyDictionary<K, V>`, and state that as a requirement.
-2. Use a BCL type such as `ReadOnlyDictionary<K, V>` for now, and state the compiler is free to use any conforming implementation.
-3. Synthesize an internal type and use that.
-
-WG recommendation: In line with the how we shipped collection expressions and mutable/readonly interfaces, we should stay consistent with the dictionary interfaces.
-Specifically:
-  1. Use `Dictionary<K, V>`, and state that as a requirement for target type `IDictionary<K, V>`.
-  2. Synthesize an internal type for `IReadOnlyDictionary<K, V>` and use that.  That way code cannot take a dependency on the underlying type, which we are free to change.
-     This may incur an extra allocation, but that is already true for the more common `IEnumerable<T>` / `IReadOnlyList<T>` cases for collection expressions.
 
 ### Question: Parsing ambiguity
 
