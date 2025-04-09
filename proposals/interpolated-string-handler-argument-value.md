@@ -63,7 +63,8 @@ namespace System.Runtime.CompilerServices
 ```
 
 This attribute is used on parameters, to inform the compiler how to lower an interpolated string handler pattern used in a parameter position.
-The attribute can be used on its own or in combination with `InterpolatedStringHandlerArgument` attribute.
+The attribute can be used on its own or in combination with `InterpolatedStringHandlerArgument` attribute. Arrays are disallowed as argument
+values for the attribute in order to preserve design space.
 
 We make one small change to how interpolated string handlers perform [constructor resolution][constructor-resolution]. The change
 is bolded below:
@@ -157,3 +158,7 @@ None
 [isle]: https://github.com/fedarovich/isle/blob/main/src/Isle/Isle.Extensions.Logging/LoggerExtensions.tt
 [ilogger-proposal]: https://github.com/dotnet/runtime/issues/111283
 [constructor-resolution]: https://github.com/dotnet/csharplang/blob/main/proposals/csharp-10.0/improved-interpolated-strings.md#constructor-resolution
+
+## Design meetings
+
+- [LDM-2025-04-07](https://github.com/dotnet/csharplang/blob/main/meetings/2025/LDM-2025-04-07.md#interpolated-string-handler-argument-values)
