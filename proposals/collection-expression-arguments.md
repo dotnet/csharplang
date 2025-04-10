@@ -536,7 +536,7 @@ For **immutable** interface types, the options are similar:
 1. Use the accessible constructors from a well-known type in each case: likely `List<T>` or `Dictionary<K, V>`.
 1. Use signatures independent of specific type, although the only scenario may be `new(IEqualityComparer<K> comparer)` for `IReadOnlyDictionary<K, V>`.
 
-Using the accessible constructors from well-known types (option 1), has the following implications:
+Using the accessible constructors from a well-known type has the following implications:
 - Parameter names, optional-ness, `params`, are taken from the parameters directly.
 - All accessible constructors are included, even though that may not be useful for collection expressions, such as `List(IEnumerable<T>)` which would allow `IList<int> list = [with(1, 2, 3)];`.
 - The set of constructors may depend on the BCL version.
