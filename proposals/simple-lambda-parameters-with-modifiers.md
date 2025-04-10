@@ -1,5 +1,7 @@
 # Simple lambda parameters with modifiers
 
+[!INCLUDE[Specletdisclaimer](./speclet-disclaimer.md)]
+
 Champion issue: <https://github.com/dotnet/csharplang/issues/8637>
 
 ## Summary

@@ -1,5 +1,7 @@
 # Partial Events and Constructors
 
+[!INCLUDE[Specletdisclaimer](./speclet-disclaimer.md)]
+
 Champion issue: <https://github.com/dotnet/csharplang/issues/9058>
 
 ## Summary
