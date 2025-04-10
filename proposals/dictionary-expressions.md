@@ -563,7 +563,7 @@ Which approach should we go with for dictionary expressions? Options include:
 
 What types and translation should be used when targeting dictionary interfaces (`IDictionary<TKey, TValue>` or `IReadOnlyDictionary<TKey, TValue>`)?
 
-**Resolution:** Use the same rules used for mutable and read-only interfaces for normal
+**Resolution:** Use the same rules used for mutable and non-mutable interfaces for normal
 [*collection expressions*](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-12.0/collection-expressions.md#interface-translation)
 analogously translated to dictionaries.  Full details can be found in [interface-translation](#interface-translation).  
 
