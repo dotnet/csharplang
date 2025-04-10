@@ -501,7 +501,9 @@ class MyBuilder
 ```
 
 The same question applies for when the constructor is called directly as in the example below.
-However, for the target types where the constructor is called directly, the collection expression *conversion* currently requires a constructor callable with no arguments. We would need to remove that conversion requirement to support such types.
+
+However, for the target types where the constructor is called directly, the collection expression *conversion* currently **requires a constructor callable with no arguments**, but the collection *arguments* are ignored when determining convertibility.
+Would we relax or change the constructor requirement, or does this question (of supporting types where arguments are required) only apply to builder types?
 
 ```csharp
 c = [];                  // error: no arguments
@@ -526,11 +528,18 @@ IReadOnlyDictionary<string, int> d = [with(comparer: StringComparer.Ordinal), ..
 
 If so, which method signatures are used when binding the arguments?
 
-For `ICollection<T>` and `IList<T>` should we use the accessible constructors from `List<T>`, or specific signatures independent from `List<T>`, say `new()` and `new(int capacity)`?
+For **mutable** interface types, the options are:
+1. Use the accessible constructors from the well-known type required for instantation: `List<T>` or `Dictionary<K, V>`.
+1. Use signatures independent of specific type, for instance using `new()` and `new(int capacity)` for `ICollection<T>` and `IList<T>` (see [*Construction*](#construction) for potential signatures for each interface).
 
-For `IDictionary<TKey, TValue>` should we use the accessible constructors from `Dictionary<TKey, TValue>`, or specific signatures, say `new()`, `new(int capacity)`, `new(IEqualityComparer<K> comparer)`, and `new(int capacity, IEqualityComparer<K> comparer)`?
+For **non-mutable** interface types, the options are similar:
+1. Use the accessible constructors from a well-known type in each case: for instance `List<T>` or `Dictionary<K, V>`.
+1. Use signatures independent of specific type, although the only scenario may be `new(IEqualityComparer<K> comparer)` for `IReadOnlyDictionary<K, V>`.
 
-What about `IReadOnlyDictionary<TKey, TValue>` which may be implemented by a synthesized type?
+Using the accessible constructors from a well-known type has the following implications:
+- Parameter names, optional-ness, `params`, are taken from the parameters directly.
+- All accessible constructors are included, even though that may not be useful for collection expressions, such as `List(IEnumerable<T>)` which would allow `IList<int> list = [with(1, 2, 3)];`.
+- The set of constructors may depend on the BCL version.
 
 ### Allow empty argument list for any target type
 
