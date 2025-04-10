@@ -533,7 +533,7 @@ For **mutable** interface types, the options are:
 1. Use signatures independent of specific type, for instance using `new()` and `new(int capacity)` for `ICollection<T>` and `IList<T>` (see [*Construction*](#construction) for potential signatures for each interface).
 
 For **immutable** interface types, the options are similar:
-1. Use the accessible constructors from a well-known type in each case: likely `List<T>` or `Dictionary<K, V>`.
+1. Use the accessible constructors from a well-known type in each case: for instance `List<T>` or `Dictionary<K, V>`.
 1. Use signatures independent of specific type, although the only scenario may be `new(IEqualityComparer<K> comparer)` for `IReadOnlyDictionary<K, V>`.
 
 Using the accessible constructors from a well-known type has the following implications:
