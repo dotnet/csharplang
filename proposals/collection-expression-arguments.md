@@ -503,7 +503,7 @@ class MyBuilder
 The same question applies for when the constructor is called directly as in the example below.
 
 However, for the target types where the constructor is called directly, the collection expression *conversion* currently **requires a constructor callable with no arguments**, but the collection *arguments* are ignored when determining convertibility.
-Would we relax or change the constructor requirement, or does this question of supporting types where arguments are required only apply to builder types?
+Would we relax or change the constructor requirement, or does this question (of supporting types where arguments are required) only apply to builder types?
 
 ```csharp
 c = [];                  // error: no arguments
@@ -533,7 +533,7 @@ Options include:
 1. Use specific signatures independent of specific type, for instance using `new()` and `new(int capacity)` for `ICollection<T>` and `IList<T>` (see [*Construction*](#construction) for all interfaces).
 
 Using the accessible constructors from well-known types (option 1), has the following implications:
-- Parameter names, optional-ness, `params`, are taken from the parameters directly
+- Parameter names, optional-ness, `params`, are taken from the parameters directly.
 - All accessible constructors are included, even though that may not be useful for collection expressions, such as `List(IEnumerable<T>)` which would allow `IList<int> list = [with(1, 2, 3)];`.
 - The set of constructors may depend on the BCL version.
 
