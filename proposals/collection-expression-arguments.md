@@ -529,8 +529,8 @@ IReadOnlyDictionary<string, int> d = [with(comparer: StringComparer.Ordinal), ..
 If so, which method signatures are used when binding the arguments?
 
 Options include:
-1. Use the accessible constructors from well-known types in each case, for instance using the constructors from `List<T>` for `ICollection<T>` and `IList<T>`.
-1. Use specific signatures independent of specific type, for instance using `new()` and `new(int capacity)` for `ICollection<T>` and `IList<T>` (see [*Construction*](#construction) for all interfaces).
+1. Use the accessible constructors from well-known types in each case, for instance using the constructors from `List<T>` for `ICollection<T>` and `IList<T>`. For mutable interfaces, the well-known type is the type used for implementation.
+1. Use specific signatures independent of specific type, for instance using `new()` and `new(int capacity)` for `ICollection<T>` and `IList<T>` (see [*Construction*](#construction) for potential signatures for each interface).
 
 Using the accessible constructors from well-known types (option 1), has the following implications:
 - Parameter names, optional-ness, `params`, are taken from the parameters directly.
