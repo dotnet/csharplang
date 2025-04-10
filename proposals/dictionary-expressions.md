@@ -470,25 +470,36 @@ X([a, b]); // ambiguous
 
 ## Interface translation
 
-### Mutable interface translation
-
-Given the target type `IDictionary<TKey, TValue>`, the type used will be `Dictionary<TKey, TValue>`.  Using the normal translation mechanics defined already (including handling of an initially provided [*comparer*](#Comparer-support)). This follows the originating intuition around `IList<T>` and `List<T>` in *collection expressions*. 
-
 ### Non-mutable interface translation
 
-Given a target type `IReadOnlyDictionary<TKey, TValue>`, a compliant implementation is only required to produce a value that implements that interface. A compliant implementation is free to:
+Given a target type `IReadOnlyDictionary<TKey, TValue>`, a compliant implementation is required to produce a value that implements that interface. If a type is synthesized, it is recommended the synthesized type implements `IDictionary<TKey, TValue>` as well. This ensures maximal compatibility with existing libraries, including those that introspect the interfaces implemented by a value in order to light up performance optimizations.
 
-1. Use an existing type that implements that interface.
-1. Synthesize a type that implements the interface.
+In addition, the value must implement the nongeneric `IDictionary` interface. This enables collection expressions to support dynamic introspection in scenarios such as data binding.
+
+A compliant implementation is free to:
+
+1. Use an existing type that implements the required interfaces.
+2. Synthesize a type that implements the required interfaces.
 
 In either case, the type used is allowed to implement a larger set of interfaces than those strictly required.
 
-Synthesized types are free to employ any strategy they want to implement the required interfaces properly.  The value generated is allowed to implement more interfaces than required. For example, implementing the mutable interfaces as well (specifically, implementing `IDictionary<TKey, TValue>` or the non-generic `IDictionary`). However, in that case:
+Synthesized types are free to employ any strategy they want to implement the required interfaces properly. For example, returning a cached singleton for empty collections, or a synthesized type which inlines the keys/values directly within itself, avoiding the need for additional internal collection allocations.
 
-1. The value must return true when queried for `.IsReadOnly`. This ensures consumers can appropriately tell that the collection is non-mutable, despite implementing the mutable views.
-1. The value must throw on any call to a mutation method. This ensures safety, preventing a non-mutable collection from being accidentally mutated.
+1. The value must return `true` when queried for `ICollection<T>.IsReadOnly`. This ensures consumers can appropriately tell that the collection is non-mutable, despite implementing the mutable views.
+1. The value must throw on any call to a mutation method (like `IDictionary<TKey, TValue>.Add`). This ensures safety, preventing a non-mutable collection from being accidentally mutated.
 
-This follows the originating intuition around `IReadOnlyList<T>` and the synthesized type for it in *collection expressions*. 
+This follows the originating intuition around the `IEnumerable<T> / IReadOnlyCollection<T> / IReadOnlyList<T>` interfaces and the allowed flexibility the compiler has in using an existing type or synthesized type when creating an instance of those in [*collection expressions*](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-12.0/collection-expressions.md#non-mutable-interface-translation). 
+
+
+### Mutable interface translation
+
+Given the target type `IDictionary<TKey, TValue>`:
+
+1. The value must be an instance of `Dictionary<TKey, TValue>`
+
+Translation mechanics will happen using the already defined rules that encompass the `Dictionary<TKey, TValue>` type (including handling of an initially provided [*comparer*](#Comparer-support)).
+
+This follows the originating intuition around the `IList<T> / ICollection<T>` interfaces and the concrete `List<T>` destination type in [*collection expressions*](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-12.0/collection-expressions.md#mutable-interface-translation). 
 
 
 ## Answered Questions
@@ -547,6 +558,16 @@ Which approach should we go with for dictionary expressions? Options include:
 3. Perhaps a hybrid model.  `.Add` if only using `k:v` and switching to indexers if using spread elements.  There is deep potential for confusion here.
 
 **Resolution:** Use *indexer* as the lowering form. [LDM-2024-03-11](https://github.com/dotnet/csharplang/blob/main/meetings/2024/LDM-2024-03-11.md#conclusions)
+
+### Answered question 5
+
+What types and translation should be used when targeting dictionary interfaces (`IDictionary<TKey, TValue>` or `IReadOnlyDictionary<TKey, TValue>`)?
+
+**Resolution:** Use the same rules used for mutable and non-mutable interfaces for normal
+[*collection expressions*](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-12.0/collection-expressions.md#interface-translation)
+analogously translated to dictionaries.  Full details can be found in [interface-translation](#interface-translation).  
+
+[LDM-2025-04-09](https://github.com/dotnet/csharplang/blob/main/meetings/2025/LDM-2025-04-09.md#conclusion)
 
 ### Conversion from expression element for `KeyValuePair<K, V>` collections
 
@@ -753,28 +774,6 @@ This concern already exists with *collection types*.  For those types, the rule 
 
 ## Open Questions
 
-### Concrete type for `I{ReadOnly}Dictionary<K, V>`
-
-What concrete type should be used for a dictionary expression with target type `IDictionary<K, V>`?
-
-Options include:
-1. Use `Dictionary<K, V>`, and state that as a requirement.
-2. Use `Dictionary<K, V>` for now, and state the compiler is free to use any conforming implementation.
-3. Synthesize an internal type and use that.
-
-What concrete type should be used for `IReadOnlyDictionary<K, V>`?
-
-Options include:
-1. Use a BCL type such as `ReadOnlyDictionary<K, V>`, and state that as a requirement.
-2. Use a BCL type such as `ReadOnlyDictionary<K, V>` for now, and state the compiler is free to use any conforming implementation.
-3. Synthesize an internal type and use that.
-
-WG recommendation: In line with the how we shipped collection expressions and mutable/readonly interfaces, we should stay consistent with the dictionary interfaces.
-Specifically:
-  1. Use `Dictionary<K, V>`, and state that as a requirement for target type `IDictionary<K, V>`.
-  2. Synthesize an internal type for `IReadOnlyDictionary<K, V>` and use that.  That way code cannot take a dependency on the underlying type, which we are free to change.
-     This may incur an extra allocation, but that is already true for the more common `IEnumerable<T>` / `IReadOnlyList<T>` cases for collection expressions.
-
 ### Question: Parsing ambiguity
 
 Parsing ambiguity around: `[a ? [b] : c]`
@@ -782,3 +781,15 @@ Parsing ambiguity around: `[a ? [b] : c]`
 Working group recommendation: Use normal parsing here.  So this would be the same as `[a ? ([b]) : (c)]` (a collection expression containing a conditional expression).
 If the user wants a `key_value_pair_element` here, they can write: `[(a?[b]) : c]`.  This code already will exist today in a collection expression, and it should not
 change meaning.
+
+### Question: Implement non-generic `IDictionary` when targeting `IReadOnlyDictionary<,>`
+
+Collection expressions specified explicitly:
+
+> Given a target type which does not contain mutating members, namely `IEnumerable<T>`, `IReadOnlyCollection<T>`, and `IReadOnlyList<T>`, a compliant implementation is required to produce a value that implements that interface. ...
+>
+> In addition, the value must implement the nongeneric `ICollection` and `IList` interfaces. This enables collection expressions to support dynamic introspection in scenarios such as data binding.
+
+Do we want a similar correspondance when the target type is `IReadOnlyDictionary<,>`?  Specifically, should the value be required to implement the non-generic `IDictionary` interface?
+
+Working group recomendation: Yes, implement `IDictionary`.  All existing non-mutable dictionary types the compiler might use (`ReadOnlyDictionary<,>`, `FrozenDictionary<,>` or `ImmutableDictionary<,>`) implement `IDictionary`.  It is normal for our non-mutable types to expose this interface, and requiring it ensures maximal compatibility with any existing consumption code.
