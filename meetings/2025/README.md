@@ -28,8 +28,6 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ### Wed, Apr 23, 2025
 
-### Mon Apr 21, 2025
-
 ### Wed Apr 16, 2025
 
 ### Mon Apr 14, 2025
