@@ -479,6 +479,17 @@ Is an error reported for `with()` when compiling with an earlier language versio
 
 ## Open questions
 
+### Syntax
+
+Which syntax should be used for collection arguments?
+
+Options include:
+1. Variations on `with()`:
+   1. `[with(args), x, y]`
+   1. `[args(args), x, y]`
+   1. `[init(args), x, y]`
+1. `list = new(args)[x, y];`
+
 ### Target types where arguments are *required*
 
 Should collection expression conversions be supported to target types where arguments must be supplied because all of the constructors or factory methods require at least one argument?
@@ -545,6 +556,11 @@ Using the accessible constructors from a well-known type has the following impli
 
 For target types such as *arrays* and *span types* that do not allow arguments, should an explicit empty argument list, `with()`, be allowed?
 
+```csharp
+int[] x = [with(), 1, 2, 3];  // ok?
+Span<int> y = [with(), 4, 5]; // ok?
+```
+
 ### `__arglist`
 
 Should `__arglist` be supported in `with()` elements?
@@ -557,6 +573,6 @@ class MyCollection : IEnumerable
 }
 
 MyCollection c;
-c = [with(__arglist())];    // ok
-c = [with(__arglist(x, y)]; // ok
+c = [with(__arglist())];    // ok?
+c = [with(__arglist(x, y)]; // ok?
 ```
