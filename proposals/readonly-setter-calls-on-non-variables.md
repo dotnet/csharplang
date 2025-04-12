@@ -120,18 +120,11 @@ It's desirable for this error to remain, because the setter _does_ mutate the st
 
 ## Specification
 
-### Waiting for v8 and corrected v7 specification
+The current v8 specification draft does not yet specify readonly members (<https://github.com/dotnet/csharplang/blob/main/proposals/csharp-8.0/readonly-instance-members.md>). The following updates intend to leverage the concept of a _readonly member_. A _readonly member_ is a member which either is directly marked with the `readonly` modifier or which is contained inside a _struct_type_ which is marked with the `readonly` modifier.
 
-The published v7 spec and the draft specs are all missing the wording that removed the CS1612 error for invocation expressions. This is tracked by <https://github.com/dotnet/csharpstandard/issues/1277> which suggests the following addition to describe the current behavior:
+[§12.21.2](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/expressions.md#12212-simple-assignment) _Simple assignment_ is updated:
 
-[§12.21.2](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/expressions.md#12212-simple-assignment) _Simple assignment_
-> When a property or indexer declared in a _struct_type_ is the target of an assignment, **unless the _struct_type_ has the `readonly` modifier ([§16.2.2](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/structs.md#1622-struct-modifiers)) and the instance expression is an invocation**, the instance expression associated with the property or indexer access shall be classified as a variable. If the instance expression is classified as a value, a binding-time error occurs.
-
-Then, the v8 spec is still in draft and the updates for readonly members have not yet merged. When it merges, it will need to redefine the condition as whether the setter itself is readonly, directly or indirectly.
-
-### Spec updates
-
-This proposal would remove the text "**and the instance expression is an invocation**" from the paragraph mentioned above in [Waiting for v8 and corrected v7 specification](#waiting-for-v8-and-corrected-v7-specification).
+> When a property or indexer declared in a _struct_type_ is the target of an assignment, **either** the instance expression associated with the property or indexer access shall be classified as a variable, **or the set accessor of the property or indexer shall be a readonly member ([§16.2.2](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/structs.md#1622-struct-modifiers))**. If the instance expression is classified as a value **and the set accessor is not a readonly member**, a binding-time error occurs.
 
 ## Expansions
 
