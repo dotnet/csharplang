@@ -4,7 +4,7 @@ Champion issue: <https://github.com/dotnet/csharplang/issues/9174>
 
 ## Summary
 
-Permits a readonly setter to be called on _all_ non-variable expressions:
+Permits a readonly setter to be called on non-variable expressions, and permits object initializers to be used with value types:
 
 ```cs
 var c = new C();
@@ -16,6 +16,14 @@ c.ArraySegmentMethod()[10] = new object();
 
 // In limited cases, ref-returning indexers can be used to work around this:
 c.RefReturningIndexerWorkaround[10] = new object();
+
+_ = new C
+{
+    // Remove the current CS1918 error:
+    ArraySegmentProp = { [10] = new object() },
+    // Remove the current CS1918 error:
+    RefReturningIndexerWorkaround = { [10] = new object() },
+};
 
 class C
 {
@@ -75,7 +83,9 @@ These use cases would no longer be blocked if CS1612 is fully updated with an un
 
 ## Detailed design
 
-The CS1612 error is not produced for assignments where the setter is readonly. (If the whole struct is readonly, then the setter is also readonly.) The setter call is emitted the same way as any non-accessor readonly instance method call.
+For part 1, the CS1612 error is not produced for assignments where the setter is readonly. (If the whole struct is readonly, then the setter is also readonly.) The setter call is emitted the same way as any non-accessor readonly instance method call.
+
+For part 2, object initializers are now permitted to be used on value types. This means that the CS1918 error will no longer be produced at all. This opens the door to assignments using readonly setters or using refs returned by getters. However, this does not open the door to assignments that would not be permitted in the desugared form. Errors such as CS1612 and CS0313 will be updated to appear within object initializers now that CS1918 is no longer blocking off the entire space.
 
 ### Null-conditional assignment
 
@@ -120,11 +130,23 @@ It's desirable for this error to remain, because the setter _does_ mutate the st
 
 ## Specification
 
+Insertions are in **bold**, deletions are in ~~strikethrough~~.
+
+### Updates permitting readonly setter calls on non-variables
+
 The current v8 specification draft does not yet specify readonly members (<https://github.com/dotnet/csharplang/blob/main/proposals/csharp-8.0/readonly-instance-members.md>). The following updates intend to leverage the concept of a _readonly member_. A _readonly member_ is a member which either is directly marked with the `readonly` modifier or which is contained inside a _struct_type_ which is marked with the `readonly` modifier.
 
 [§12.21.2](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/expressions.md#12212-simple-assignment) _Simple assignment_ is updated:
 
 > When a property or indexer declared in a _struct_type_ is the target of an assignment, **either** the instance expression associated with the property or indexer access shall be classified as a variable, **or the set accessor of the property or indexer shall be a readonly member ([§16.2.2](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/structs.md#1622-struct-modifiers))**. If the instance expression is classified as a value **and the set accessor is not a readonly member**, a binding-time error occurs.
+
+### Updates permitting object initializers for value types
+
+The CS1918 error is completely removed. There is no need to block value types. "\[T]he assignments in the nested object initializer are treated as assignments to members of the field or property." Such assignments must already conform to rules such as the one enforced by CS1612, including when inside an object initializer.
+
+[§12.8.16.3](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/expressions.md#128163-object-initializers) _Object initializers_ is updated:
+
+> A member initializer that specifies an object initializer after the equals sign is a ***nested object initializer***, i.e., an initialization of an embedded object. Instead of assigning a new value to the field or property, the assignments in the nested object initializer are treated as assignments to members of the field or property. ~~Nested object initializers cannot be applied to properties with a value type, or to read-only fields with a value type.~~
 
 ## Downsides
 
