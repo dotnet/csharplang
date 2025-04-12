@@ -126,39 +126,6 @@ The current v8 specification draft does not yet specify readonly members (<https
 
 > When a property or indexer declared in a _struct_type_ is the target of an assignment, **either** the instance expression associated with the property or indexer access shall be classified as a variable, **or the set accessor of the property or indexer shall be a readonly member ([§16.2.2](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/structs.md#1622-struct-modifiers))**. If the instance expression is classified as a value **and the set accessor is not a readonly member**, a binding-time error occurs.
 
-## Expansions
-
-There's another location where this kind of assignment is blocked, which is in object initializers:
-
-```cs
-// ❌ CS1918 Members of property 'C.ArraySegmentProp' of type 'ArraySegment<object>' cannot be assigned with an object
-// initializer because it is of a value type
-_ = new C { ArraySegmentProp = { [42] = new object() } };
-//          ~~~~~~~~~~~~~~~~
-
-class C
-{
-    public ArraySegment<object> ArraySegmentProp { get; set; }
-}
-```
-
-For the same reasons as above, this error is unnecessary when the properties being initialized have readonly `set`/`init` accessors. The error could be made more granular, placed on each property initializer which calls a _non-readonly_ setter.
-
-Even in the limited cases where a ref-returning indexer is applicable, it does not help with CS1918, where it still unnecessarily broad:
-
-```cs
-// ❌ CS1918 Members of property 'C.StructWithRefReturningIndexer' of type 'Span<object>' cannot be assigned with an object
-// initializer because it is of a value type
-_ = new C { StructWithRefReturningIndexer = { [42] = new object() } };
-//          ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-class C
-{
-    public ArraySegment<object> ArraySegmentProp { get; set; }
-    public Span<object> StructWithRefReturningIndexer => ArraySegmentProp.AsSpan();
-}
-```
-
 ## Downsides
 
 If this proposal is taken, it becomes a source-breaking change to remove the `readonly` keyword from a struct or setter. Without the `readonly` keyword, the errors would then be relevant and would reappear.
@@ -188,3 +155,48 @@ public struct S2
     public int Prop { get => 0; readonly set { } }
 }
 ```
+
+## Answered LDM questions
+
+### Should similar assignments be permitted in object initializers?
+
+There's a separate error, CS1918 that blocks assignments through readonly setters when the assignments appear in object initializers. In addition, this error even blocks assignments to ref-returning properties and indexers, and those assignments are not blocked when they appear outside of object initializers.
+
+```cs
+// ❌ CS1918 Members of property 'C.ArraySegmentProp' of type 'ArraySegment<object>' cannot be assigned with an object
+// initializer because it is of a value type
+_ = new C { ArraySegmentProp = { [42] = new object() } };
+//          ~~~~~~~~~~~~~~~~
+
+// ❌ CS1918 Members of property 'C.StructWithRefReturningIndexer' of type 'Span<object>' cannot be assigned with an object
+// initializer because it is of a value type
+_ = new C { StructWithRefReturningIndexer = { [42] = new object() } };
+//          ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+class C
+{
+    public ArraySegment<object> ArraySegmentProp { get; set; }
+    public Span<object> StructWithRefReturningIndexer => ArraySegmentProp.AsSpan();
+}
+```
+
+Such assignments desugar to the following form, the same form in which the CS1612 warning is being removed:
+
+```cs
+var temp = new C();
+// Warning being removed:
+// CS1612 Cannot modify the return value of 'C.ArraySegmentProp' because it is not a variable
+temp.ArraySegmentProp[42] = new object();
+```
+
+```cs
+var temp = new C();
+// Permitted today
+temp.StructWithRefReturningIndexer[42] = new object();
+```
+
+Should this check be made more granular, so that members of struct types may be assigned when they would be allowed to be assigned in the desugared form?
+
+#### Answer
+
+Yes. This expansion will be included. [(LDM 2025-04-02)](https://github.com/dotnet/csharplang/blob/main/meetings/2025/LDM-2025-04-02.md#expansions)
