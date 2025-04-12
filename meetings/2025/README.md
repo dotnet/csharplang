@@ -4,9 +4,6 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ## Schedule ASAP
 
-- Open questions: [dictionary expressions](https://github.com/dotnet/csharplang/blob/main/proposals/dictionary-expressions.md#open-questions), [collection arguments](https://github.com/dotnet/csharplang/blob/main/proposals/collection-expression-arguments.md#open-questions) (cston, CyrusNajmabadi)
-- Extensions [open issues](https://github.com/dotnet/csharplang/blob/main/proposals/extensions.md#open-issues) (Julien)
-
 ## Schedule when convenient
 
 - Triage (working set)
@@ -30,7 +27,11 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ### Wed Apr 16, 2025
 
+- Extensions [open issues](https://github.com/dotnet/csharplang/blob/main/proposals/extensions.md#open-issues) (Julien)
+
 ### Mon Apr 14, 2025
+
+- Open questions: [dictionary expressions](https://github.com/dotnet/csharplang/blob/main/proposals/dictionary-expressions.md#open-questions), [collection arguments](https://github.com/dotnet/csharplang/blob/main/proposals/collection-expression-arguments.md#open-questions) (cston, CyrusNajmabadi)
 
 ## C# Language Design Notes for 2025
 
