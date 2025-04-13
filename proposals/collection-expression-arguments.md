@@ -543,11 +543,12 @@ Using the accessible constructors from a well-known type has the following impli
 
 ### Allow empty argument list for any target type
 
-For target types such as *arrays* and *span types* that do not allow arguments, should an explicit empty argument list, `with()`, be allowed?
+Should an explicit empty argument list be allowed for target types, including target types such as *arrays* and *span types* that do not allow arguments?
 
 ```csharp
-int[] x = [with(), 1, 2, 3];  // ok?
-Span<int> y = [with(), 4, 5]; // ok?
+List<int> x = [with(), 1, 2]; // ok? new List() { 1, 2 }
+int[] y =     [with(), 3, 4]; // ok? new int[] { 3, 4 }
+Span<int> z = [with(), 5, 6]; // ok? new Span<int>(new[] { 5, 6 })
 ```
 
 ### `__arglist`
