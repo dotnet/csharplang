@@ -479,17 +479,6 @@ Is an error reported for `with()` when compiling with an earlier language versio
 
 ## Open questions
 
-### Syntax
-
-Which syntax should be used for collection arguments?
-
-Options include:
-1. Variations on `with()`:
-   1. `[with(args), x, y]`
-   1. `[args(args), x, y]`
-   1. `[init(args), x, y]`
-1. `list = new(args)[x, y];`
-
 ### Target types where arguments are *required*
 
 Should collection expression conversions be supported to target types where arguments must be supplied because all of the constructors or factory methods require at least one argument?
