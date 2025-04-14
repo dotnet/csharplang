@@ -533,18 +533,35 @@ For **mutable** interface types, the options are:
 1. Use the accessible constructors from the well-known type required for instantation: `List<T>` or `Dictionary<K, V>`.
 1. Use signatures independent of specific type, for instance using `new()` and `new(int capacity)` for `ICollection<T>` and `IList<T>` (see [*Construction*](#construction) for potential signatures for each interface).
 
-For **non-mutable** interface types, the options are similar:
-1. Use the accessible constructors from a well-known type in each case: for instance `List<T>` or `Dictionary<K, V>`.
-1. Use signatures independent of specific type, although the only scenario may be `new(IEqualityComparer<K> comparer)` for `IReadOnlyDictionary<K, V>`.
-
 Using the accessible constructors from a well-known type has the following implications:
 - Parameter names, optional-ness, `params`, are taken from the parameters directly.
 - All accessible constructors are included, even though that may not be useful for collection expressions, such as `List(IEnumerable<T>)` which would allow `IList<int> list = [with(1, 2, 3)];`.
 - The set of constructors may depend on the BCL version.
 
+Recomendation: Use the accessible constructors from the well-known types.  We have guaranteed we would use these types, so this just 'falls out' and is the clearest and simplest path to constructing these values.  
+
+
+For **non-mutable** interface types, the options are similar:
+1. Do nothing.  This 
+1. Use signatures independent of specific type, although the only scenario may be `new(IEqualityComparer<K> comparer)` for `IReadOnlyDictionary<K, V>` for C#14..
+
+
+Using accessible constructors from some well known type (the strategy for mutable-interface-types) is not viable as there is no relation to any particular existing type, and the final type we may use and/or synthesize.  As such, there would have to be odd new requirements that the compiler be able to map any existing constructor of said type (even as it evolves) over to the non-mutable instance it actually generates.
+
+Recomendation: Use signatures independent of a specific type.  And, for C# 14, only support `new(IEqualityComparer<K> comparer)` for `IReadOnlyDictionary<K, V>` as that is the only non-mutable interface where we feel it is critical for usability/semantics to allow users to provide this.  Future C# releases can consider expanding on this set based on solid justifications provided.
+
 ### Allow empty argument list for any target type
 
 For target types such as *arrays* and *span types* that do not allow arguments, should an explicit empty argument list, `with()`, be allowed?
+
+Recomendation: *arrays* and *span types* should not allow arguments in the first place.  The set of types that allow arguments should be specifically:
+
+1. Types with constructors, where `with(...)` will map to one of the constructors.
+2. Types with `CollectionBuilderAttribute`, where `with(...)` will map to the first N-1 parameters of some assocaited builder method.
+3. Well known mutable interface types, where `with(...)` maps to the well known corresponding concrete type that will be used to instantiate that type.
+4. Non-mutable interface types with a specified set of allowed `with(...)` signatures.
+
+All other cases should not allow `with()`.
 
 ### `__arglist`
 
@@ -561,3 +578,5 @@ MyCollection c;
 c = [with(__arglist())];    // ok
 c = [with(__arglist(x, y)]; // ok
 ```
+
+Recomendation: If this falls out as effectively 'free' to implement and 'extremely low cost' for the compiler to test, then support.  However, if it is not, we should just block this to keep costs low as there have been no requests for this and time is limited.  This matches other decisions in the collection/dictionary expression space where we have limited some of the design space due to lack of any requested need.  We can revisit in the future if compelling scenarios are brought to our attention.
