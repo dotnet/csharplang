@@ -551,6 +551,15 @@ int[] y =     [with(), 3, 4]; // ok? new int[] { 3, 4 }
 Span<int> z = [with(), 5, 6]; // ok? new Span<int>(new[] { 5, 6 })
 ```
 
+**Recommendation:**
+
+An explicit empty argument list is supported for the following collection expression target types:
+- types with `CollectionBuilderAttribute` with a factory method callable with no additional arguments,
+- *class* and *struct* types that implement `IEnumerable`, etc. with an applicable constructor callable with no arguments,
+- *interface* types.
+
+For other target types, including *arrays* and *spans*, an explicit empty argument list is an error.
+
 ### `__arglist`
 
 Should `__arglist` be supported in `with()` elements?
@@ -566,3 +575,6 @@ MyCollection c;
 c = [with(__arglist())];    // ok?
 c = [with(__arglist(x, y)]; // ok?
 ```
+
+**Recommendation:**
+No support for `__arglist` in collection arguments.
