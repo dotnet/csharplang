@@ -503,7 +503,6 @@ class MyBuilder
 The same question applies for when the constructor is called directly as in the example below.
 
 However, for the target types where the constructor is called directly, the collection expression *conversion* currently **requires a constructor callable with no arguments**, but the collection *arguments* are ignored when determining convertibility.
-Would we relax or change the constructor requirement, or does this question (of supporting types where arguments are required) only apply to builder types?
 
 ```csharp
 c = [];                  // error: no arguments
@@ -516,6 +515,8 @@ class MyCollection<T> : IEnumerable<T>
     // ...
 }
 ```
+
+Recomendation: Conversions are supported for collection expressions, and the user is required to supply those argument in a `with(...)` element.  The type cannot be used fo r a `params` parameter.
 
 ### Arguments for *interface types*
 
