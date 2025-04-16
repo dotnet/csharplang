@@ -496,6 +496,23 @@ Types and aliases may not be named "extension".
 
 - ~~Confirm `extension` vs. `extensions` as the keyword~~ (answer: `extension`, LDM 2025-03-24)
 
+### Nullability
+
+- Confirm the current design, ie. maximal portability/compatibility
+
+```csharp
+    extension([System.Diagnostics.CodeAnalysis.DoesNotReturnIf(false)] bool b)
+    {
+        public void AssertTrue() => throw null!;
+    }
+```
+```csharp
+    extension([System.Diagnostics.CodeAnalysis.NotNullIfNotNull("o")] ref int? i)
+    {
+        public void M(object? o)  => throw null!;
+    }
+```
+
 ### Metadata
 
 - Should skeleton methods throw `NotSupportedException` or some other standard exception (right now we do `throw null;`)?
