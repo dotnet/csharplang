@@ -52,6 +52,38 @@ receiver_parameter // add
 Extension declarations shall only be declared in non-generic, non-nested static classes.  
 It is an error for a type to be named `extension`.  
 
+### Scoping rules
+
+The type parameters and receiver parameter of an extension declaration are in scope within the body of the extension declaration. It is an error to refer to the receiver parameter from within a static member, except within a `nameof` expression. It is an error for members to declare type parameters or parameters (as well as local variables and local functions directly within the member body) with the same name as a type parameter or receiver parameter of the extension declaration.
+
+``` c#
+public static class E
+{
+    extension<T>(T[] ts)
+    {
+        public bool M1(T t) => ts.Contains(t);        // `T` and `ts` are in scope
+        public static bool M2(T t) => ts.Contains(t); // Error: Cannot refer to `ts` from static context
+        public void M3(int T, string ts) { }          // Error: Cannot reuse names `T` and `ts`
+        public void M4<T, ts>(string s) { }           // Error: Cannot reuse names `T` and `ts`
+    }
+}
+```
+
+It is not an error for the members themselves to have the same name as the type parameters or receiver parameter of the enclosing extension declaration. Member names are not directly found in a simple name lookup from within the extension declaration; lookup will thus find the type parameter or receiver parameter of that name, rather than the member. 
+
+Members do give rise to static methods being declared directly on the enclosing static class, and those can be found via simple name lookup; however, an extension declaration type parameter or receiver parameter of the same name will be found first.
+
+``` c#
+public static class E
+{
+    extension<T>(T[] ts)
+    {
+        public void T() { M(ts); } // Generated static method M<T>(T[]) is found
+        public void M() { T(ts); } // Error: T is a type parameter
+    }
+}
+```
+
 ### Static classes as extension containers
 
 Extensions are declared inside top-level non-generic static classes, just like extension methods today, 
