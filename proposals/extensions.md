@@ -52,7 +52,7 @@ It is an error for a type to be named `extension`.
 
 ### Scoping rules
 
-The type parameters and receiver parameter of an extension declaration are in scope within the body of the extension declaration. It is an error to refer to the receiver parameter from within a static member. It is an error for members to declare type parameters or parameters with the same name as a type parameter or receiver parameter of the extension declaration.
+The type parameters and receiver parameter of an extension declaration are in scope within the body of the extension declaration. It is an error to refer to the receiver parameter from within a static member, except within a `nameof` expression. It is an error for members to declare type parameters or parameters (as well as local variables and local functions directly within the member body) with the same name as a type parameter or receiver parameter of the extension declaration.
 
 ``` c#
 public static class E
