@@ -25,6 +25,7 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ### Wed, Apr 23, 2025
 
+- Extensions [open issues](https://github.com/dotnet/csharplang/blob/main/proposals/extensions.md#open-issues) (Julien)
 - Open questions: [dictionary expressions](https://github.com/dotnet/csharplang/blob/main/proposals/dictionary-expressions.md#open-questions), [collection arguments](https://github.com/dotnet/csharplang/blob/main/proposals/collection-expression-arguments.md#open-questions) (cston, CyrusNajmabadi)
 
 ### Wed Apr 16, 2025
