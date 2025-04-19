@@ -615,6 +615,7 @@ static class E
     }
 }
 ```
+- Revisit question of lookup on type parameter ([discussion](https://github.com/dotnet/csharplang/discussions/8696#discussioncomment-12817547))
 
 ### Accessibility
 
