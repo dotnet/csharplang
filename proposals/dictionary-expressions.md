@@ -317,28 +317,28 @@ If the target type is an *array*, a *span*, a type with a *[create method](#crea
 * An *initialization instance* is created as follows:
   * If the target type is an *array* and the collection expression has a *known length*, an array is allocated with the expected length.
   * If the target type is a *span* or a type with a *create method*, and the collection has a *known length*, a span with the expected length is created referring to contiguous storage.
-  * Otherwise intermediate storage is allocated.
+  * Otherwise intermediate storage is allocated. The intermediate storage has an indexer for element assignment.
 
 * **If the *iteration type* is a type `KeyValuePair<K, V>`, then:**
   * **For each element in order:**
     * **If the element is a *key value pair element* `Kᵢ:Vᵢ` then:**
       * **First `Kᵢ` is evaluated, then `Vᵢ` is evaluated.**
-      * **The indexer is invoked on the collection instance with the converted values of `Kᵢ` and `Vᵢ`.**
+      * **The initialization instance *indexer* is invoked on the collection instance with the converted values of `Kᵢ` and `Vᵢ`.**
     * **If the element is an *expression element* `Eᵢ`, then:**
       * **If `Eᵢ` is implicitly convertible to `KeyValuePair<K, V>`, then:**
         * **`Eᵢ` is evaluated and converted to a `KeyValuePair<K, V>`.**
-        * **The indexer is invoked on the collection instance with `Key` and `Value` of the converted value.**
+        * **The initialization instance *indexer* is invoked on the collection instance with `Key` and `Value` of the converted value.**
       * **Otherwise, `Eᵢ` has a type `KeyValuePair<Kᵢ, Vᵢ>`, in which case:**
         * **`Eᵢ` is evaluated.**
-        * **The indexer is invoked on the collection instance with `Key` and `Value` of the value, converted to `K` and `V`.**
+        * **The initialization instance *indexer* is invoked on the collection instance with `Key` and `Value` of the value, converted to `K` and `V`.**
     * **If the element is a *spread element* where the spread element *expression* has an [*iteration type*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/statements.md#1295-the-foreach-statement) `Tᵢ` then:**
       * **An applicable `GetEnumerator` instance or extension method is invoked on the spread element *expression***.
       * **For each item from the enumerator:**
         * **If `Tᵢ` is implicitly convertible to `KeyValuePair<K, V>` then:**
           * **The item is converted to a `KeyValuePair<K, V>`.**
-          * **The indexer is invoked on the collection instance with `Key` and `Value` of the converted item.**
+          * **The initialization instance *indexer* is invoked on the collection instance with `Key` and `Value` of the converted item.**
         * **Otherwise, `Tᵢ` is a type `KeyValuePair<Kᵢ, Vᵢ>`, in which case:**
-          * **The indexer is invoked on the collection instance with `Key` and `Value` of the item, converted to `K` and `V`.**
+          * **The initialization instance *indexer* is invoked on the collection instance with `Key` and `Value` of the item, converted to `K` and `V`.**
       * **If the enumerator implements `IDisposable`, then `Dispose` will be called after enumeration, regardless of exceptions.**
 
 * Otherwise, the *iteration type* is *not* a `KeyValuePair<K, V>` type, in which case:
