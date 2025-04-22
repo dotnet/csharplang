@@ -514,7 +514,7 @@ class MyCollection<T> : IEnumerable<T>
 }
 ```
 
-Recomendation: Conversions are supported for collection expressions, and the user is required to supply those argument in a `with(...)` element.  The type cannot be used fo r a `params` parameter.
+**Resolution:** Support conversions to target types where all constructors or factory methods require arguments, and require `with()` for the conversion. [LDM-2025-03-05](https://github.com/dotnet/csharplang/blob/main/meetings/2025/LDM-2025-04-14.md#conclusion-2)
 
 ### `__arglist`
 
@@ -532,7 +532,7 @@ c = [with(__arglist())];    // ok
 c = [with(__arglist(x, y)]; // ok
 ```
 
-Recomendation: If this falls out as effectively 'free' to implement and 'extremely low cost' for the compiler to test, then support.  However, if it is not, we should just block this to keep costs low as there have been no requests for this and time is limited.  This matches other decisions in the collection/dictionary expression space where we have limited some of the design space due to lack of any requested need.  We can revisit in the future if compelling scenarios are brought to our attention.
+**Resolution:** No support for `__arglist` in collection arguments unless free. [LDM-2025-03-05](https://github.com/dotnet/csharplang/blob/main/meetings/2025/LDM-2025-04-14.md#conclusion-3)
 
 ## Open questions
 
