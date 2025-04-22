@@ -716,6 +716,26 @@ Options include:
 
 **Resolution:** If the target type is a struct or class type that implements `IEnumerable` and has an iteration type of `KeyValuePair<K, V>`, and the type has the expected instance indexer (see [*Conversions*](#conversions)), then the indexer is used for initialization rather than any `Add` methods. [LDM-2025-03-05](https://github.com/dotnet/csharplang/blob/main/meetings/2025/LDM-2025-03-05.md#conclusion)
 
+### Question: Parsing ambiguity
+
+Parsing ambiguity around: `[a ? [b] : c]`
+
+Working group recommendation: Use normal parsing here.  So this would be the same as `[a ? ([b]) : (c)]` (a collection expression containing a conditional expression).
+If the user wants a `key_value_pair_element` here, they can write: `[(a?[b]) : c]`.  This code already will exist today in a collection expression, and it should not
+change meaning.
+
+### Question: Implement non-generic `IDictionary` when targeting `IReadOnlyDictionary<,>`
+
+Collection expressions specified explicitly:
+
+> Given a target type which does not contain mutating members, namely `IEnumerable<T>`, `IReadOnlyCollection<T>`, and `IReadOnlyList<T>`, a compliant implementation is required to produce a value that implements that interface. ...
+>
+> In addition, the value must implement the nongeneric `ICollection` and `IList` interfaces. This enables collection expressions to support dynamic introspection in scenarios such as data binding.
+
+Do we want a similar correspondance when the target type is `IReadOnlyDictionary<,>`?  Specifically, should the value be required to implement the non-generic `IDictionary` interface?
+
+Working group recomendation: Yes, implement `IDictionary`.  All existing non-mutable dictionary types the compiler might use (`ReadOnlyDictionary<,>`, `FrozenDictionary<,>` or `ImmutableDictionary<,>`) implement `IDictionary`.  It is normal for our non-mutable types to expose this interface, and requiring it ensures maximal compatibility with any existing consumption code.
+
 ## Retracted Designs/Questions
 
 ### Question: Should `k:v` elements force dictionary semantics?
@@ -773,23 +793,3 @@ What are the rules when types have multiple indexers and multiple implementation
 This concern already exists with *collection types*.  For those types, the rule is that we must have an *element type* as per the existing language rules.  This follows for *dictionary types*, along with the rule that there must be a corresponding indexer for this *element type*.  If those hold, the type can be used as a *dictionary type*.  If these don't hold, it cannot be.
 
 ## Open Questions
-
-### Question: Parsing ambiguity
-
-Parsing ambiguity around: `[a ? [b] : c]`
-
-Working group recommendation: Use normal parsing here.  So this would be the same as `[a ? ([b]) : (c)]` (a collection expression containing a conditional expression).
-If the user wants a `key_value_pair_element` here, they can write: `[(a?[b]) : c]`.  This code already will exist today in a collection expression, and it should not
-change meaning.
-
-### Question: Implement non-generic `IDictionary` when targeting `IReadOnlyDictionary<,>`
-
-Collection expressions specified explicitly:
-
-> Given a target type which does not contain mutating members, namely `IEnumerable<T>`, `IReadOnlyCollection<T>`, and `IReadOnlyList<T>`, a compliant implementation is required to produce a value that implements that interface. ...
->
-> In addition, the value must implement the nongeneric `ICollection` and `IList` interfaces. This enables collection expressions to support dynamic introspection in scenarios such as data binding.
-
-Do we want a similar correspondance when the target type is `IReadOnlyDictionary<,>`?  Specifically, should the value be required to implement the non-generic `IDictionary` interface?
-
-Working group recomendation: Yes, implement `IDictionary`.  All existing non-mutable dictionary types the compiler might use (`ReadOnlyDictionary<,>`, `FrozenDictionary<,>` or `ImmutableDictionary<,>`) implement `IDictionary`.  It is normal for our non-mutable types to expose this interface, and requiring it ensures maximal compatibility with any existing consumption code.
