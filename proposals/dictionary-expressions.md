@@ -720,9 +720,7 @@ Options include:
 
 Parsing ambiguity around: `[a ? [b] : c]`
 
-Working group recommendation: Use normal parsing here.  So this would be the same as `[a ? ([b]) : (c)]` (a collection expression containing a conditional expression).
-If the user wants a `key_value_pair_element` here, they can write: `[(a?[b]) : c]`.  This code already will exist today in a collection expression, and it should not
-change meaning.
+**Resolution:** Parse as `[a ? ([b]) : (c)]`. [LDM-2025-04-14](https://github.com/dotnet/csharplang/blob/main/meetings/2025/LDM-2025-04-14.md#conclusion)
 
 ### Question: Implement non-generic `IDictionary` when targeting `IReadOnlyDictionary<,>`
 
@@ -734,7 +732,7 @@ Collection expressions specified explicitly:
 
 Do we want a similar correspondance when the target type is `IReadOnlyDictionary<,>`?  Specifically, should the value be required to implement the non-generic `IDictionary` interface?
 
-Working group recomendation: Yes, implement `IDictionary`.  All existing non-mutable dictionary types the compiler might use (`ReadOnlyDictionary<,>`, `FrozenDictionary<,>` or `ImmutableDictionary<,>`) implement `IDictionary`.  It is normal for our non-mutable types to expose this interface, and requiring it ensures maximal compatibility with any existing consumption code.
+**Resolution:** The type used to implement `IReadOnlyDictionary<K, V>` should implement `System.Collections.IDictionary`. [LDM-2025-04-14](https://github.com/dotnet/csharplang/blob/main/meetings/2025/LDM-2025-04-14.md#conclusion-1)
 
 ## Retracted Designs/Questions
 
