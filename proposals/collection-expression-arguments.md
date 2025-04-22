@@ -477,8 +477,6 @@ Is an error reported for `with()` when compiling with an earlier language versio
 
 **Resolution:** No breaking change for `with` inside a collection expression when compiling with earlier language versions. [LDM-2025-03-17](https://github.com/dotnet/csharplang/blob/main/meetings/2025/LDM-2025-03-17.md#conclusion)
 
-## Open questions
-
 ### Target types where arguments are *required*
 
 Should collection expression conversions be supported to target types where arguments must be supplied because all of the constructors or factory methods require at least one argument?
@@ -516,7 +514,27 @@ class MyCollection<T> : IEnumerable<T>
 }
 ```
 
-Recomendation: Conversions are supported for collection expressions, and the user is required to supply those argument in a `with(...)` element.  The type cannot be used fo r a `params` parameter.
+**Resolution:** Support conversions to target types where all constructors or factory methods require arguments, and require `with()` for the conversion. [LDM-2025-03-05](https://github.com/dotnet/csharplang/blob/main/meetings/2025/LDM-2025-04-14.md#conclusion-2)
+
+### `__arglist`
+
+Should `__arglist` be supported in `with()` elements?
+
+```csharp
+class MyCollection : IEnumerable
+{
+    public MyCollection(__arglist) { ... }
+    public void Add(object o) { }
+}
+
+MyCollection c;
+c = [with(__arglist())];    // ok
+c = [with(__arglist(x, y)]; // ok
+```
+
+**Resolution:** No support for `__arglist` in collection arguments unless free. [LDM-2025-03-05](https://github.com/dotnet/csharplang/blob/main/meetings/2025/LDM-2025-04-14.md#conclusion-3)
+
+## Open questions
 
 ### Arguments for *interface types*
 
@@ -562,21 +580,3 @@ Recomendation: *arrays* and *span types* should not allow arguments in the first
 4. Non-mutable interface types with a specified set of allowed `with(...)` signatures.
 
 All other cases should not allow `with()`.
-
-### `__arglist`
-
-Should `__arglist` be supported in `with()` elements?
-
-```csharp
-class MyCollection : IEnumerable
-{
-    public MyCollection(__arglist) { ... }
-    public void Add(object o) { }
-}
-
-MyCollection c;
-c = [with(__arglist())];    // ok
-c = [with(__arglist(x, y)]; // ok
-```
-
-Recomendation: If this falls out as effectively 'free' to implement and 'extremely low cost' for the compiler to test, then support.  However, if it is not, we should just block this to keep costs low as there have been no requests for this and time is limited.  This matches other decisions in the collection/dictionary expression space where we have limited some of the design space due to lack of any requested need.  We can revisit in the future if compelling scenarios are brought to our attention.
