@@ -23,6 +23,8 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ### Wed May 7, 2025
 
+### Mon May 5, 2025
+
 ### Wed, Apr 23, 2025
 
 - Extensions [open issues](https://github.com/dotnet/csharplang/blob/main/proposals/extensions.md#open-issues) (Julien)
