@@ -794,7 +794,7 @@ This concern already exists with *collection types*.  For those types, the rule 
 
 ### Question: Special case 'comparer' support for dictionaries (and regular collections)?
 
-[Collection expression arguments](https://github.com/dotnet/csharplang/blob/main/proposals/collection-expression-arguments.md) proposes a generalized system for providing arguments for constructible (`new(...)`) collection types, collection builder types, and for a subset of interface types.  This solves the problem of how can a comparer be passed to a dictionary-like type, as well as for other collections that can benefit from customization (like hash sets and the like).  However, in the absense of an approved language change to support a generalized argument passing system, do we want to be able to have special support for passing *only* comparers along?
+[Collection expression arguments](https://github.com/dotnet/csharplang/blob/main/proposals/collection-expression-arguments.md) proposes a generalized system for providing arguments for constructible (`new(...)`) collection types, collection builder types, and for a subset of interface types.  This solves the problem of how can a comparer be passed to a dictionary-like type, as well as for other collections that can benefit from customization (like hash sets and the like).  However, in the absence of an approved language change to support a generalized argument passing system, do we want to be able to have special support for passing *only* comparers along?
 
 For example, a hypothetical syntax could be something like:
 
@@ -815,7 +815,7 @@ Possible syntactic options here are:
 
 1. `[comparer: StringComparer.OrginalIgnoreCase]`.  Simple and clear.  But a long contextual keyword for 'comparer'.
 2. `[comp: StringComparer.OrginalIgnoreCase]`. A bit less clear, but generally readable in context.  Similar to `init` where we truncate a word to something reasonable in context.
-3. `[...] with StringCompaer.OrdinalIgnoreCase`.  Not desirable.  Collections may be quite large, and having to get to the end to understand core behavior/semantics of how the collection operates is not great.  This especially clashes with all existing forms to make collections today, where the comparer will be at the start.
+3. `[...] with StringComparer.OrdinalIgnoreCase`.  Not desirable.  Collections may be quite large, and having to get to the end to understand core behavior/semantics of how the collection operates is not great.  This especially clashes with all existing forms to make collections today, where the comparer will be at the start.
 4. `[ == StringComparer.OrdinalIgnoreCase]`.  Cutesy syntax.  `==` represents 'equality', and thus this is a special element saying "equality is provided by this comparer"
 5. `[ == : StringComparer.OrdinalIgnoreCase]`.  Similarly cutesy, just using a colon to indicate "provided by".
 6. `[ <=> StringComparer.OrdinalIgnoreCase]`.  Cutesy, and in line with C++ (and potential future language changes) where the "spaceship operator" represents the way things compare against each other.
@@ -825,7 +825,7 @@ Note: Any solution should support both `IComparer<>` (for `SortedSet<>`, `Sorted
 If we do special case comparers, the rules would say something intuitively akin to the following:
 
 > If a comparer element is provided, then:
-> 1. If generating a `new()` type, the type must have a constructor that that comparer can be passed to.
-> 2. If generating a collection builder type, their must be a factory method references that can take the comparer as the first argument, and the elements as the second.
+> 1. If generating a `new()` type, the type must have a constructor callable with the single comparer argument.
+> 2. If generating a collection builder type, there must be a factory method referenced that can take the comparer as the first argument, and the elements as the second.
 > 3. If generating an interface, the only supported interfaces are `IDictionary<,>` and `IReadOnlyDictionary<,>`.  For the former, the comparer will be passed to the `new(IEqualityComparer<>)` constructor on `Dictionary<>`.  For the latter, the dictionary created by the compiler will be guaranteed to use the specified equality comparer to perform hashing and equality checks of the provided keys.
 
