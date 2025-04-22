@@ -808,7 +808,8 @@ Dictionary<string, object> nameToOptions = [
 ```
 
 Pros: A specialized syntax can be clearer and more focused to the exact problem at hand, side stepping lots of complexity related to arbitrary argument passing (for example, out/ref arguments, named arguments, optional arguments, and the like).
-Cons: Some user will still want to pass arbitrary arguments along (for cases like '.Capacity', and for collections that capture/wrap some other collection).  They will still be left out if we do not have a general system.  And, if we add a general system later, there would be multiple ways to support passing a comparer along.
+
+Cons: Some user will still want to pass arbitrary arguments along (for cases like 'capacity: ...', and for collections that capture/wrap some other collection).  They will still be left out if we do not have a general system.  And, if we add a general system later, there would be multiple ways to support passing a comparer along.
 
 Possible syntactic options here are:
 
