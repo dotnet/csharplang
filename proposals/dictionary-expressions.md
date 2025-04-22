@@ -317,28 +317,28 @@ If the target type is an *array*, a *span*, a type with a *[create method](#crea
 * An *initialization instance* is created as follows:
   * If the target type is an *array* and the collection expression has a *known length*, an array is allocated with the expected length.
   * If the target type is a *span* or a type with a *create method*, and the collection has a *known length*, a span with the expected length is created referring to contiguous storage.
-  * Otherwise intermediate storage is allocated.
+  * Otherwise intermediate storage is allocated. The intermediate storage has an indexer for element assignment.
 
 * **If the *iteration type* is a type `KeyValuePair<K, V>`, then:**
   * **For each element in order:**
     * **If the element is a *key value pair element* `Kᵢ:Vᵢ` then:**
       * **First `Kᵢ` is evaluated, then `Vᵢ` is evaluated.**
-      * **The indexer is invoked on the collection instance with the converted values of `Kᵢ` and `Vᵢ`.**
+      * **The initialization instance *indexer* is invoked on the collection instance with the converted values of `Kᵢ` and `Vᵢ`.**
     * **If the element is an *expression element* `Eᵢ`, then:**
       * **If `Eᵢ` is implicitly convertible to `KeyValuePair<K, V>`, then:**
         * **`Eᵢ` is evaluated and converted to a `KeyValuePair<K, V>`.**
-        * **The indexer is invoked on the collection instance with `Key` and `Value` of the converted value.**
+        * **The initialization instance *indexer* is invoked on the collection instance with `Key` and `Value` of the converted value.**
       * **Otherwise, `Eᵢ` has a type `KeyValuePair<Kᵢ, Vᵢ>`, in which case:**
         * **`Eᵢ` is evaluated.**
-        * **The indexer is invoked on the collection instance with `Key` and `Value` of the value, converted to `K` and `V`.**
+        * **The initialization instance *indexer* is invoked on the collection instance with `Key` and `Value` of the value, converted to `K` and `V`.**
     * **If the element is a *spread element* where the spread element *expression* has an [*iteration type*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/statements.md#1295-the-foreach-statement) `Tᵢ` then:**
       * **An applicable `GetEnumerator` instance or extension method is invoked on the spread element *expression***.
       * **For each item from the enumerator:**
         * **If `Tᵢ` is implicitly convertible to `KeyValuePair<K, V>` then:**
           * **The item is converted to a `KeyValuePair<K, V>`.**
-          * **The indexer is invoked on the collection instance with `Key` and `Value` of the converted item.**
+          * **The initialization instance *indexer* is invoked on the collection instance with `Key` and `Value` of the converted item.**
         * **Otherwise, `Tᵢ` is a type `KeyValuePair<Kᵢ, Vᵢ>`, in which case:**
-          * **The indexer is invoked on the collection instance with `Key` and `Value` of the item, converted to `K` and `V`.**
+          * **The initialization instance *indexer* is invoked on the collection instance with `Key` and `Value` of the item, converted to `K` and `V`.**
       * **If the enumerator implements `IDisposable`, then `Dispose` will be called after enumeration, regardless of exceptions.**
 
 * Otherwise, the *iteration type* is *not* a `KeyValuePair<K, V>` type, in which case:
@@ -716,6 +716,24 @@ Options include:
 
 **Resolution:** If the target type is a struct or class type that implements `IEnumerable` and has an iteration type of `KeyValuePair<K, V>`, and the type has the expected instance indexer (see [*Conversions*](#conversions)), then the indexer is used for initialization rather than any `Add` methods. [LDM-2025-03-05](https://github.com/dotnet/csharplang/blob/main/meetings/2025/LDM-2025-03-05.md#conclusion)
 
+### Question: Parsing ambiguity
+
+Parsing ambiguity around: `[a ? [b] : c]`
+
+**Resolution:** Parse as `[a ? ([b]) : (c)]`. [LDM-2025-04-14](https://github.com/dotnet/csharplang/blob/main/meetings/2025/LDM-2025-04-14.md#conclusion)
+
+### Question: Implement non-generic `IDictionary` when targeting `IReadOnlyDictionary<,>`
+
+Collection expressions specified explicitly:
+
+> Given a target type which does not contain mutating members, namely `IEnumerable<T>`, `IReadOnlyCollection<T>`, and `IReadOnlyList<T>`, a compliant implementation is required to produce a value that implements that interface. ...
+>
+> In addition, the value must implement the nongeneric `ICollection` and `IList` interfaces. This enables collection expressions to support dynamic introspection in scenarios such as data binding.
+
+Do we want a similar correspondance when the target type is `IReadOnlyDictionary<,>`?  Specifically, should the value be required to implement the non-generic `IDictionary` interface?
+
+**Resolution:** The type used to implement `IReadOnlyDictionary<K, V>` should implement `System.Collections.IDictionary`. [LDM-2025-04-14](https://github.com/dotnet/csharplang/blob/main/meetings/2025/LDM-2025-04-14.md#conclusion-1)
+
 ## Retracted Designs/Questions
 
 ### Question: Should `k:v` elements force dictionary semantics?
@@ -774,26 +792,6 @@ This concern already exists with *collection types*.  For those types, the rule 
 
 ## Open Questions
 
-### Question: Parsing ambiguity
-
-Parsing ambiguity around: `[a ? [b] : c]`
-
-Working group recommendation: Use normal parsing here.  So this would be the same as `[a ? ([b]) : (c)]` (a collection expression containing a conditional expression).
-If the user wants a `key_value_pair_element` here, they can write: `[(a?[b]) : c]`.  This code already will exist today in a collection expression, and it should not
-change meaning.
-
-### Question: Implement non-generic `IDictionary` when targeting `IReadOnlyDictionary<,>`
-
-Collection expressions specified explicitly:
-
-> Given a target type which does not contain mutating members, namely `IEnumerable<T>`, `IReadOnlyCollection<T>`, and `IReadOnlyList<T>`, a compliant implementation is required to produce a value that implements that interface. ...
->
-> In addition, the value must implement the nongeneric `ICollection` and `IList` interfaces. This enables collection expressions to support dynamic introspection in scenarios such as data binding.
-
-Do we want a similar correspondance when the target type is `IReadOnlyDictionary<,>`?  Specifically, should the value be required to implement the non-generic `IDictionary` interface?
-
-Working group recomendation: Yes, implement `IDictionary`.  All existing non-mutable dictionary types the compiler might use (`ReadOnlyDictionary<,>`, `FrozenDictionary<,>` or `ImmutableDictionary<,>`) implement `IDictionary`.  It is normal for our non-mutable types to expose this interface, and requiring it ensures maximal compatibility with any existing consumption code.
-
 ### Question: Special case 'comparer' support for dictionaries (and regular collections)?
 
 [Collection expression arguments](https://github.com/dotnet/csharplang/blob/main/proposals/collection-expression-arguments.md) proposes a generalized system for providing arguments for constructible (`new(...)`) collection types, collection builder types, and for a subset of interface types.  This solves the problem of how can a comparer be passed to a dictionary-like type, as well as for other collections that can benefit from customization (like hash sets and the like).  However, in the absense of an approved language change to support a generalized argument passing system, do we want to be able to have special support for passing *only* comparers along?
@@ -829,3 +827,4 @@ If we do special case comparers, the rules would say something intuitively akin 
 > 1. If generating a `new()` type, the type must have a constructor that that comparer can be passed to.
 > 2. If generating a collection builder type, their must be a factory method references that can take the comparer as the first argument, and the elements as the second.
 > 3. If generating an interface, the only supported interfaces are `IDictionary<,>` and `IReadOnlyDictionary<,>`.  For the former, the comparer will be passed to the `new(IEqualityComparer<>)` constructor on `Dictionary<>`.  For the latter, the dictionary created by the compiler will be guaranteed to use the specified equality comparer to perform hashing and equality checks of the provided keys.
+
