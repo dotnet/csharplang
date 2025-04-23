@@ -579,7 +579,21 @@ public static class Extensions
     }
 }
 ```
-
+- Should ORPA apply to new extension properties?
+```
+public static class Extensions
+{
+    extension(int[] i)
+    {
+        public P { get => }
+    }
+    extension(ReadOnlySpan<int> r)
+    {
+       [OverloadResolutionPriority(1)]
+       public P { get => }
+    }
+}
+```
 - How to retcon the classic extension resolution rules? Do we 
   1. update the standard for classic extension methods, and use that to also describe new extension methods,
   2. keep the existing language for classic extension methods, use that to also describe new extension methods, but have a known spec deviation for both,
