@@ -153,7 +153,7 @@ Dictionary<string, int> nameToAge4 = [with(comparer), .. d1, .. d2, .. d3];
 Dictionary<string, int> nameToAge = [with(comparer), kvp1, k1: v2, .. d1];
 ```
 
-These forms seem to "read" reasonable well.  In all those cases, the code is "creating a collection expression,
+These forms seem to "read" reasonably well.  In all those cases, the code is "creating a collection expression,
 'with' the following arguments to pass along to control the final instance, and then the subsequent elements
 used to populate it.  For example, the first line "creates a list of strings 'with' a capacity of two times the
 count of the values about to be spread into it"
@@ -229,7 +229,7 @@ Dictionary<string, int> nameToAge4 = [args(comparer), .. d1, .. d2, .. d3];
 Dictionary<string, int> nameToAge = [args(comparer), kvp1, k1: v2, .. d1];
 ```
 
-These forms seem to "read" reasonable well.  In all those cases, the code is "creating a collection expression,
+These forms seem to "read" reasonably well.  In all those cases, the code is "creating a collection expression,
 with the following 'args' to pass along to control the final instance, and then the subsequent elements used to
 populate it.  For example, the first line "creates a list of strings with a capacity 'arg' of two times the count
 of the values about to be spread into it"
@@ -286,7 +286,8 @@ If *collection_arguments* is included and is not the first element in the collec
 If the *argument list* contains any values with *dynamic* type, a compile-time error is reported ([LDM-2025-01-22](https://github.com/dotnet/csharplang/blob/main/meetings/2025/LDM-2025-01-22.md#conclusion-1)).
 
 If the target type is a *struct* or *class type* that implements `System.Collections.IEnumerable`, and the target type does not have a *create method*, and the target type is not a *generic parameter type* then:
-* [*Overload resolution*](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/expressions.md#1264-overload-resolution) is used to determine the best instance constructor from the *argument list*.
+* [*Overload resolution*](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/expressions.md#1264-overload-resolution) is used to determine the best instance constructor from the candidates.
+* The set of candidate constructors is all accessible instance constructors declared on the target type that are applicable with respect to the *argument list* as defined in [*applicable function member*](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/expressions.md#12642-applicable-function-member).
 * If a best instance constructor is found, the constructor is invoked with the *argument list*.
   * If the constructor has a `params` parameter, the invocation may be in expanded form.
 * Otherwise, a binding error is reported.
@@ -303,10 +304,9 @@ l = [with(default)];           // error: ambiguous constructor
 ```
 
 If the target type is a type with a *create method*, then:
-* The *argument list* is the `with()` *argument list* followed by a *collection expression* containing the elements only (no arguments).
-* [*Overload resolution*](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/expressions.md#1264-overload-resolution) is used to determine the best factory method from the *argument list* from the [*applicable create methods*](#applicable-create-method):
-* If a best factory method is found, the method is invoked with the *argument list*.
-  * If the factory method has a `params` parameter, the invocation may be in expanded form.
+* [*Overload resolution*](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/expressions.md#1264-overload-resolution) is used to determine the best factory method from the candidates.
+* The set of candidate factory methods is the [*create method candidates*](#create-method-candidates) for the target type that are applicable with respect to the *argument list* as defined in [*applicable create methods*](#applicable-create-method).
+* If a best factory method is found, the method is invoked with the *argument list* appended with a `ReadOnlySpan<T>` containing the elements.
 * Otherwise, a binding error is reported.
 
 ```csharp
@@ -326,21 +326,17 @@ class MyBuilder
 ```
 
 If the target type is an *interface type*, then:
-* [*Overload resolution*](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/expressions.md#1264-overload-resolution) is used to determine the best instance constructor from the *argument list* from the following candidate signatures:
-  * If the target type is `IEnumerable<E>`, `IReadOnlyCollection<E>`, or `IReadOnlyList<E>`, the candidates are:
-    * `new()`
-  * If the target type is `ICollection<E>`, or `IList<E>`, the candidates are:
-    * `new()`
-    * `new(int capacity)`
-  * If the target type is `IReadOnlyDictionary<K, V>`, the candidates are:
-    * `new()`
-    * `new(IEqualityComparer<K> comparer)`
-  * If the target type is `IDictionary<K, V>`, the candidates are:
-    * `new()`
-    * `new(int capacity)`
-    * `new(IEqualityComparer<K> comparer)`
-    * `new(int capacity, IEqualityComparer<K> comparer)`
-* If a best factory method is found, the method is invoked with the *argument list*.
+* [*Overload resolution*](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/expressions.md#1264-overload-resolution) is used to determine the best candidate method signature.
+* The set of candidate signatures is the signatures below for the target interface that are applicable with respect to the *argument list* as defined in [*applicable function member*](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/expressions.md#12642-applicable-function-member).
+
+  |Interfaces|Candidate signatures|
+  |:---:|:---:|
+  |`IEnumerable<E>`<br>`IReadOnlyCollection<E>`<br>`IReadOnlyList<E>`|*None*|
+  |`ICollection<E>`<br>`IList<E>`|`(int capacity)`|
+  |`IReadOnlyDictionary<K, V>`|`(IEqualityComparer<K> comparer)`|
+  |`IDictionary<K, V>`|`(int capacity)`<br>`(IEqualityComparer<K> comparer)`<br>`(int capacity, IEqualityComparer<K> comparer)`|
+
+* If a best factory method is found, a method with that signature *or an equivalent initialization* is invoked with the *argument list*.
 * Otherwise, a binding error is reported.
 
 ```csharp
@@ -352,12 +348,13 @@ r = [with(StringComparer.Ordinal)]; // new $PrivateImpl<string, int>(StringCompa
 
 d = [with(capacity: 2)]; // new Dictionary<string, int>(capacity: 2)
 r = [with(capacity: 2)]; // error: 'capacity' parameter not recognized
+d = [with()];            // error: empty arguments not supported
 ```
 
-If the target type is any other type, and the *argument list* is not empty, a binding error is reported.
+If the target type is any other type, then a binding error is reported for the *argument list*, even if empty.
 
 ```csharp
-Span<int> a = [with(), 1, 2, 3]; // ok
+Span<int> a = [with(), 1, 2, 3]; // error: arguments not supported
 Span<int> b = [with([1, 2]), 3]; // error: arguments not supported
 ```
 
@@ -570,13 +567,22 @@ Recomendation: Use signatures independent of a specific type.  And, for C# 14, o
 
 ### Allow empty argument list for any target type
 
-For target types such as *arrays* and *span types* that do not allow arguments, should an explicit empty argument list, `with()`, be allowed?
+For which target types should an explicit empty argument list, `with()`, be allowed?
+
+```csharp
+int[] a =               [with()]; // error?
+Span<int> s =           [with()]; // error?
+List<int> l =           [with()]; // ok: new List()
+ImmutableArray<int> m = [with()]; // ok: ImmutableArray.Create([])
+IList<int> i =          [with()]; // error?
+IEnumerable<int> e =    [with()]; // error?
+```
 
 Recomendation: *arrays* and *span types* should not allow arguments in the first place.  The set of types that allow arguments should be specifically:
 
 1. Types with constructors, where `with(...)` will map to one of the constructors.
-2. Types with `CollectionBuilderAttribute`, where `with(...)` will map to the first N-1 parameters of some assocaited builder method.
-3. Well known mutable interface types, where `with(...)` maps to the well known corresponding concrete type that will be used to instantiate that type.
+2. Types with `CollectionBuilderAttribute`, where `with(...)` will map to the first N-1 parameters of some associated builder method.
+3. Well-known mutable interface types, where `with(...)` maps to the well known corresponding concrete type that will be used to instantiate that type.
 4. Non-mutable interface types with a specified set of allowed `with(...)` signatures.
 
 All other cases should not allow `with()`.
