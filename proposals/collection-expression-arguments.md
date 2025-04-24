@@ -573,7 +573,16 @@ Recomendation: Use signatures independent of a specific type.  And, for C# 14, o
 
 ### Allow empty argument list for any target type
 
-For target types such as *arrays* and *span types* that do not allow arguments, should an explicit empty argument list, `with()`, be allowed?
+For which target types should an explicit empty argument list, `with()`, be allowed?
+
+```csharp
+int[] a =               [with()]; // error?
+Span<int> s =           [with()]; // error?
+List<int> l =           [with()]; // ok: new List()
+ImmutableArray<int> m = [with()]; // ok: ImmutableArray.Create([])
+IList<int> i =          [with()]; // error?
+IEnumerable<int> e =    [with()]; // error?
+```
 
 Recomendation: *arrays* and *span types* should not allow arguments in the first place.  The set of types that allow arguments should be specifically:
 
