@@ -355,7 +355,9 @@ d = [with(capacity: 2)]; // new Dictionary<string, int>(capacity: 2)
 r = [with(capacity: 2)]; // error: 'capacity' parameter not recognized
 ```
 
-If the target type is any other type, and the *argument list* is empty, the *argument list* has no effect. Otherwise, a binding error is reported.
+If the target type is any other type, then:
+* If the *argument list* is empty, the *argument list* has no effect.
+* Otherwise, a binding error is reported.
 
 ```csharp
 Span<int> a = [with(), 1, 2, 3]; // ok
