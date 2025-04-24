@@ -153,7 +153,7 @@ Dictionary<string, int> nameToAge4 = [with(comparer), .. d1, .. d2, .. d3];
 Dictionary<string, int> nameToAge = [with(comparer), kvp1, k1: v2, .. d1];
 ```
 
-These forms seem to "read" reasonable well.  In all those cases, the code is "creating a collection expression,
+These forms seem to "read" reasonably well.  In all those cases, the code is "creating a collection expression,
 'with' the following arguments to pass along to control the final instance, and then the subsequent elements
 used to populate it.  For example, the first line "creates a list of strings 'with' a capacity of two times the
 count of the values about to be spread into it"
@@ -229,7 +229,7 @@ Dictionary<string, int> nameToAge4 = [args(comparer), .. d1, .. d2, .. d3];
 Dictionary<string, int> nameToAge = [args(comparer), kvp1, k1: v2, .. d1];
 ```
 
-These forms seem to "read" reasonable well.  In all those cases, the code is "creating a collection expression,
+These forms seem to "read" reasonably well.  In all those cases, the code is "creating a collection expression,
 with the following 'args' to pass along to control the final instance, and then the subsequent elements used to
 populate it.  For example, the first line "creates a list of strings with a capacity 'arg' of two times the count
 of the values about to be spread into it"
@@ -578,8 +578,8 @@ For target types such as *arrays* and *span types* that do not allow arguments, 
 Recomendation: *arrays* and *span types* should not allow arguments in the first place.  The set of types that allow arguments should be specifically:
 
 1. Types with constructors, where `with(...)` will map to one of the constructors.
-2. Types with `CollectionBuilderAttribute`, where `with(...)` will map to the first N-1 parameters of some assocaited builder method.
-3. Well known mutable interface types, where `with(...)` maps to the well known corresponding concrete type that will be used to instantiate that type.
+2. Types with `CollectionBuilderAttribute`, where `with(...)` will map to the first N-1 parameters of some associated builder method.
+3. Well-known mutable interface types, where `with(...)` maps to the well known corresponding concrete type that will be used to instantiate that type.
 4. Non-mutable interface types with a specified set of allowed `with(...)` signatures.
 
 All other cases should not allow `with()`.
