@@ -327,17 +327,15 @@ class MyBuilder
 
 If the target type is an *interface type*, then:
 * [*Overload resolution*](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/expressions.md#1264-overload-resolution) is used to determine the best candidate method signature.
-* The set of candidate signatures is the signatures below for the target interface that are applicable with respect to the *argument list* as defined in [*applicable function member*](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/expressions.md#12642-applicable-function-member). The signatures below use `new()` but are not necessarily constructors.
-  * If the target type is `IEnumerable<E>`, `IReadOnlyCollection<E>`, or `IReadOnlyList<E>`, the candidates are:
-    * *No candidates*
-  * If the target type is `ICollection<E>`, or `IList<E>`, the candidates are:
-    * `new(int capacity)`
-  * If the target type is `IReadOnlyDictionary<K, V>`, the candidates are:
-    * `new(IEqualityComparer<K> comparer)`
-  * If the target type is `IDictionary<K, V>`, the candidates are:
-    * `new(int capacity)`
-    * `new(IEqualityComparer<K> comparer)`
-    * `new(int capacity, IEqualityComparer<K> comparer)`
+* The set of candidate signatures is the signatures below for the target interface that are applicable with respect to the *argument list* as defined in [*applicable function member*](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/expressions.md#12642-applicable-function-member).
+
+  |Interfaces|Candidate signatures|
+  |:---:|:---:|
+  |`IEnumerable<E>`<br>`IReadOnlyCollection<E>`<br>`IReadOnlyList<E>`|*None*|
+  |`ICollection<E>`<br>`IList<E>`|`(int capacity)`|
+  |`IReadOnlyDictionary<K, V>`|`(IEqualityComparer<K> comparer)`|
+  |`IDictionary<K, V>`|`(int capacity)`<br>`(IEqualityComparer<K> comparer)`<br>`(int capacity, IEqualityComparer<K> comparer)`|
+
 * If a best factory method is found, a method with that signature *or an equivalent initialization* is invoked with the *argument list*.
 * Otherwise, a binding error is reported.
 
