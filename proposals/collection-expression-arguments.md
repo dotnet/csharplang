@@ -286,7 +286,8 @@ If *collection_arguments* is included and is not the first element in the collec
 If the *argument list* contains any values with *dynamic* type, a compile-time error is reported ([LDM-2025-01-22](https://github.com/dotnet/csharplang/blob/main/meetings/2025/LDM-2025-01-22.md#conclusion-1)).
 
 If the target type is a *struct* or *class type* that implements `System.Collections.IEnumerable`, and the target type does not have a *create method*, and the target type is not a *generic parameter type* then:
-* [*Overload resolution*](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/expressions.md#1264-overload-resolution) is used to determine the best instance constructor from the *argument list*.
+* [*Overload resolution*](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/expressions.md#1264-overload-resolution) is used to determine the best instance constructor from the candidates.
+* The set of candidate constructors is all accessible instance constructors declared on the target type that are applicable with respect to the *argument list* as defined in [*applicable function member*](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/expressions.md#12642-applicable-function-member).
 * If a best instance constructor is found, the constructor is invoked with the *argument list*.
   * If the constructor has a `params` parameter, the invocation may be in expanded form.
 * Otherwise, a binding error is reported.
@@ -303,10 +304,9 @@ l = [with(default)];           // error: ambiguous constructor
 ```
 
 If the target type is a type with a *create method*, then:
-* The *argument list* is the `with()` *argument list* followed by a *collection expression* containing the elements only (no arguments).
-* [*Overload resolution*](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/expressions.md#1264-overload-resolution) is used to determine the best factory method from the *argument list* from the [*applicable create methods*](#applicable-create-method):
-* If a best factory method is found, the method is invoked with the *argument list*.
-  * If the factory method has a `params` parameter, the invocation may be in expanded form.
+* [*Overload resolution*](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/expressions.md#1264-overload-resolution) is used to determine the best factory method from the candidates.
+* The set of candidate factory methods is the [*create method candidates*](#create-method-candidates) for the target type that are applicable with respect to the *argument list* as defined in [*applicable create methods*](#applicable-create-method).
+* If a best factory method is found, the method is invoked with the *argument list* appended with a `ReadOnlySpan<T>` containing the elements.
 * Otherwise, a binding error is reported.
 
 ```csharp
@@ -326,7 +326,8 @@ class MyBuilder
 ```
 
 If the target type is an *interface type*, then:
-* [*Overload resolution*](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/expressions.md#1264-overload-resolution) is used to determine the best instance constructor from the *argument list* from the following candidate signatures:
+* [*Overload resolution*](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/expressions.md#1264-overload-resolution) is used to determine the best candidate method signature.
+* The set of candidate signatures is the signatures below for the target interface that are applicable with respect to the *argument list* as defined in [*applicable function member*](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/expressions.md#12642-applicable-function-member). The signatures below use `new()` but are not necessarily constructors.
   * If the target type is `IEnumerable<E>`, `IReadOnlyCollection<E>`, or `IReadOnlyList<E>`, the candidates are:
     * `new()`
   * If the target type is `ICollection<E>`, or `IList<E>`, the candidates are:
@@ -340,7 +341,7 @@ If the target type is an *interface type*, then:
     * `new(int capacity)`
     * `new(IEqualityComparer<K> comparer)`
     * `new(int capacity, IEqualityComparer<K> comparer)`
-* If a best factory method is found, the method is invoked with the *argument list*.
+* If a best factory method is found, a method with that signature *or an equivalent initialization* is invoked with the *argument list*.
 * Otherwise, a binding error is reported.
 
 ```csharp
@@ -354,7 +355,7 @@ d = [with(capacity: 2)]; // new Dictionary<string, int>(capacity: 2)
 r = [with(capacity: 2)]; // error: 'capacity' parameter not recognized
 ```
 
-If the target type is any other type, and the *argument list* is not empty, a binding error is reported.
+If the target type is any other type, and the *argument list* is empty, the *argument list* has no effect. Otherwise, a binding error is reported.
 
 ```csharp
 Span<int> a = [with(), 1, 2, 3]; // ok
