@@ -356,7 +356,7 @@ d = [with()];            // error: empty arguments not supported
 If the target type is any other type, then a binding error is reported for the *argument list*, even if empty.
 
 ```csharp
-int[] a = [with(), 1, 2, 3];     // error: arguments not supported
+Span<int> a = [with(), 1, 2, 3]; // error: arguments not supported
 Span<int> b = [with([1, 2]), 3]; // error: arguments not supported
 ```
 
