@@ -843,7 +843,7 @@ PrintMany([kvp]); // ok!
 PrintMany(kvp);   // ok?
 
 static void PrintOne(KeyValuePair<object, int?> arg) { }
-static void PrintMany(params IReadOnlyDictionary<object, int?> args) { }
+static void PrintMany(params KeyValuePair<object, int?>[] args) { }
 ```
 
 If so, [*params collections*](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-13.0/params-collections.md#parameter-collections) will need to be **updated** to allow implicit conversions for key and value types.
