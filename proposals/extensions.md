@@ -374,6 +374,13 @@ static class E2
 Static extension methods will be resolved like instance extension methods (we will consider an extra argument of the receiver type).  
 Extension properties will be resolved like extension methods, with a single parameter (the receiver parameter) and a single argument (the actual receiver value).  
 
+### OverloadResolutionPriorityAttribute
+
+Extension members within an enclosing static class are subject to prioritization according to ORPA values. The enclosing static
+class is considered the "containing type" which ORPA rules consider.  
+Any ORPA attribute present on an extension property is copied onto the implementation methods for the property's accessors,
+so that the prioritization is respected when those accessors are used via diambiguation syntax.  
+
 ## Lowering
 
 The lowering strategy for extension declarations is not a language level decision. 
@@ -579,7 +586,7 @@ public static class Extensions
     }
 }
 ```
-- Should ORPA apply to new extension properties?
+- ~~Should ORPA apply to new extension properties?~~ (answer: yes and ORPA should be copied onto implementation methods, LDM 2025-04-23)
 ```
 public static class Extensions
 {
