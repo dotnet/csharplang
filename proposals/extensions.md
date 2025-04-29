@@ -718,6 +718,34 @@ Do we stil need the first part of the rules?
 - Are we supposed to copy doc comments to the implementation methods with speakable names?
 - Should `<param>` element corresponding to receiver parameter be copied from extension container for instance methods? Anything else should be copied from container to implementation methods (`<typeparam>` etc.) ?
 
+### nameof
+
+- Should we disallow extension properties in nameof like we do classic and new extension methods?
+```
+C c = null;
+_ = nameof(c.M); // Extension method groups are not allowed as an argument to 'nameof'.
+_ = nameof(c.M2); // Extension method groups are not allowed as an argument to 'nameof'.
+_ = nameof(c.P);
+
+_ = nameof(C.M3); // Extension method groups are not allowed as an argument to 'nameof'.
+_ = nameof(C.P2);
+
+class C { }
+
+static class E
+{
+    public static void M(this C c) { }
+    extension(C c)
+    {
+        public void M2() { }
+        public int P => 42;
+
+        public static void M3() { }
+        public static int P2 => 42;
+    }
+}
+```
+
 ### Add support for more member kinds
 
 We do not need to implement all of this design at once, but can approach it one or a few member kinds at a time. 
