@@ -746,6 +746,10 @@ static class E
 }
 ```
 
+### entry point
+
+- Should we skip extension blocks when looking for entry points?
+
 ### Add support for more member kinds
 
 We do not need to implement all of this design at once, but can approach it one or a few member kinds at a time. 
