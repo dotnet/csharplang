@@ -3,6 +3,7 @@
 All schedule items must have a public issue or checked-in proposal that can be linked from the notes.
 
 ## Schedule ASAP
+- Extension [open issues](https://github.com/dotnet/csharplang/blob/main/proposals/extensions.md) (xml docs, pattern-based constructs) (Julien)
 
 ## Schedule when convenient
 
