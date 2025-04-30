@@ -830,3 +830,33 @@ If we do special case comparers, the rules would say something intuitively akin 
 > 3. If generating an interface, the only supported interfaces are `IDictionary<,>` and `IReadOnlyDictionary<,>`.  For the former, the comparer will be passed to the `new(IEqualityComparer<>)` constructor on `Dictionary<>`.  For the latter, the dictionary created by the compiler will be guaranteed to use the specified equality comparer to perform hashing and equality checks of the provided keys.
 
 Note: real rules would be tbd.  The above is just a light sketch to motivate discussion.
+
+### Support `KeyValuePair<,>` variance with `params`?
+
+Should key and value variance be supported for expanded calls for a `params` collection of `KeyValuePair<K, V>`?
+
+```csharp
+KeyValuePair<string, int> kvp = new("one", 1);
+
+PrintOne(kvp);    // error: cannot convert from KeyValuePair<string, int> to KeyValuePair<object, int?>
+PrintMany([kvp]); // ok!
+PrintMany(kvp);   // ok?
+
+static void PrintOne(KeyValuePair<object, int?> arg) { }
+static void PrintMany(params KeyValuePair<object, int?>[] args) { }
+```
+
+If so, [*params collections*](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-13.0/params-collections.md#parameter-collections) will need to be **updated** to allow implicit conversions for key and value types.
+
+> A parameter collection permits arguments to be specified in one of two ways in a method invocation:
+> 
+> - The argument given for a parameter collection can be a single expression that is implicitly convertible to the parameter collection type.
+>   In this case, the parameter collection acts precisely like a value parameter.
+> - Alternatively, the invocation can specify zero or more arguments for the parameter collection, where each argument is an expression
+>   that is implicitly convertible to the parameter collection's *element type*, **or**
+>   **the argument is an expression of type `KeyValuePair<Kᵢ, Vᵢ>` and the collection *element type* is `KeyValuePair<Kₑ, Vₑ>` and there is a implicit conversion from `Kᵢ` to `Kₑ` and an implicit conversion from `Vᵢ` to `Vₑ`.**
+>   In this case, the invocation creates an instance of the parameter collection type according to the rules specified in
+>   [Collection expressions](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-12.0/collection-expressions.md)
+>   as though the arguments were used as expression elements in a collection expression in the same order,
+>   and uses the newly created collection instance as the actual argument.
+>   When constructing the collection instance, the original *unconverted* arguments are used.
