@@ -145,9 +145,14 @@ The emphasis on the receiver parameter reinforces the new syntax, and is necessa
 
 ### Unspeakable extension skeletons
 
-The compiler generates a skeleton class containing a declaration for the receiver parameter and all extension members. The skeleton class and its receiver field are declared using an unspeakable name. See the example under [implementation](https://github.com/dotnet/csharplang/blob/main/proposals/extensions.md#implementations) in the feature spec.
+The compiler generates a public skeleton class that defines prototypes for extension members. The skeleton class has an unspeakable name and contains the following prototypes:
 
-The unspeakable skeleton provides the prototypes for the extension members and the receiver type. The nodes of the skeleton provide a location for the XML output from the `///` comments on the extension members and the receiver parameter.
+- A private static unspeakable method declaration starting with `<Extension>`. This private static method includes one parameter that represents the receiver for the extension members declared in the skeleton.
+- Protypes for all extension members defined for the receiver. These prototypes show the declarations as though declared on the receiver type.
+
+The unspeakable skeleton provides the prototypes for the extension members and the receiver type. The nodes of the skeleton provide a location for the XML output from the `///` comments on the extension members and the receiver parameter. The `///` comments on the extension declaration are written as XML on the node for the unspeakable member declaring the receiver. The `///` comments on each extension member are written as XML on the node for the embedded member of the unspeakable containing class.
+
+See the example under [implementation](https://github.com/dotnet/csharplang/blob/main/proposals/extensions.md#implementations) in the feature spec for more details.
 
 ### XML Output for `///` comments
 
