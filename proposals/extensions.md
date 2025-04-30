@@ -720,7 +720,7 @@ Do we stil need the first part of the rules?
 
 ### nameof
 
-- Should we disallow extension properties in nameof like we do classic and new extension methods?
+- ~~Should we disallow extension properties in nameof like we do classic and new extension methods?~~ (answer: no, that's the only way to refer to the name of the property)
 ```
 C c = null;
 _ = nameof(c.M); // Extension method groups are not allowed as an argument to 'nameof'.
