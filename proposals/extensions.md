@@ -571,26 +571,33 @@ static class E
 
 The guideline so far is that if classic extension methods come into play, then new extension methods should also come into play.  
 This includes: 
-- `GetEnumerator` in `foreach` (and corresponding in async flavor)
-- `Deconstruct` in deconstruction and in positional pattern
+- `GetEnumerator`/`GetAsyncEnumerator()` in `foreach`
+- `Deconstruct` in deconstruction, in positional pattern and foreach
 - `Add` in collection initializers
-- `Dispose` in `using` (on ref struct or in asynchronous `using`)
+- `Dispose` in `using` (on ref struct or in asynchronous `using`??)
 - `GetPinnableReference` in `fixed`
-- `GetAwaiter` and `GetResult` in `await`
+- `GetAwaiter` in `await`
 
 This excludes:
-- `MoveNext` in `foreach` (and corresponding in async flavor)
-- `Slice` and `int` indexers in implicit indexers
+- `MoveNext`/`MoveNextAsync` in `foreach`
+- `Slice` and `int` indexers in implicit indexers (and possibly list-patterns?)
 - `Dispose` in `foreach`
+- `GetResult` in `await`
 
-This leaves some questions about properties:
-- `Current` in `foreach`?
-- in object initializer: `new C() { ExtensionProperty = ... }`
-- in `with`: `x with { ExtensionProperty = ... }`
-- in property patterns: `x is { ExtensionProperty: ... }`
-- `Count` and `Length` in list-pattern
+This leaves some questions about properties and indexers.  
+I propose we support the following:
+- object initializer: `new C() { ExtensionProperty = ... }`
+- dictionary intializer: `new C() { [0] = ... }`
+- `with`: `x with { ExtensionProperty = ... }`
+- property patterns: `x is { ExtensionProperty: ... }`
+
+I'm not sure about:
+- `Count`/`Length` properties and indexers in list-pattern
+- `Count`/`Length` properties and indexers in implicit indexers
+
+I'd propose to exclude:
+- `Current` in `foreach`
 - `IsCompleted` in `await`
-- `Count` and `Length` in implicit indexers
 
 And when we look for a method (like `GetEnumerator`), should we accept a delegate-returning property?
 
