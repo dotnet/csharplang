@@ -5,7 +5,7 @@ Extensions introduce new requirements for our API reference pipeline. The additi
 - The docs term is "Extension Methods". That term currently means "extension methods with an instance receiver". Now, extensions can be properties, indexers, or operators. These extension members can be accessed as either an instance member on the extended type, or as a static member on the extended type.
 - Readers need to know if the receiver is an instance of a type, or the type itself.
 - Readers occasionally need to know the class name of holding the extension, typically for disambiguation.
-- The extension block isn't emitted as part of the output. All extension members become members of the containing static class. An additional "skeleton" nested class (described later in the document) provides the organization for extension blocks.
+- The extension block is emitted as a nested classes with skeleton members and xml doc comments. The nested class is given an unspeakable name.
 
 The new extensions experience should be built on the framework used for the existing extension methods. In fact, when a new extension member is a method whose receiver is an instance, both forms are binary compatible. The document describes the new experience as a set of enhancements to the existing extension method documentation.
 
@@ -152,7 +152,62 @@ The compiler generates a public skeleton class that defines prototypes for exten
 
 The unspeakable skeleton provides the prototypes for the extension members and the receiver type. The nodes of the skeleton provide a location for the XML output from the `///` comments on the extension members and the receiver parameter. The `///` comments on the extension declaration are written as XML on the node for the unspeakable member declaring the receiver. The `///` comments on each extension member are written as XML on the node for the embedded member of the unspeakable containing class.
 
-See the example under [implementation](https://github.com/dotnet/csharplang/blob/main/proposals/extensions.md#implementations) in the feature spec for more details.
+See the following code and xml for an example of extension members and the resulting XML output.
+
+```csharp
+/// <summary>Summary for E</summary>
+static class E
+{
+    /// <summary>Summary for extension block</summary>
+    /// <typeparam name="T">Description for T</typeparam>
+    /// <param name="t">Description for t</param>
+    extension<T>(T t)
+    {
+        /// <summary>Summary for M</summary>
+        /// <typeparam name="U">Description for U</typeparam>
+        /// <param name="u">Description for u</param>
+        public void M<U>(U u) => throw null!;
+
+        /// <summary>Summary for P</summary>
+        public int P => 0;
+    }
+}
+```
+
+produces the following XML output:
+
+```xml
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>Test</name>
+    </assembly>
+    <members>
+        <member name="T:E">
+            <summary>Summary for E</summary>
+        </member>
+        <member name="T:E.<>E__0`1">
+            <summary>Summary for extension block</summary>
+            <typeparam name="T">Description for T</typeparam>
+            <param name="t">Description for t</param>
+        </member>
+        <member name="M:E.<>E__0`1.M``1(``0)">
+            <summary>Summary for M</summary>
+            <typeparam name="U">Description for U</typeparam>
+            <param name="u">Description for u</param>
+        </member>
+        <member name="P:E.<>E__0`1.P">
+            <summary>Summary for P</summary>
+        </member>
+        <member name="M:E.M``2(``0,``1)">
+            <inheritdoc cref="M:E.<>E__0`1.M``1(``0)"/>
+        </member>
+        <member name="M:E.get_P``1(``0)">
+            <inheritdoc cref="P:E.<>E__0`1.P"/>
+        </member>
+    </members>
+</doc>
+```
 
 ### XML Output for `///` comments
 
