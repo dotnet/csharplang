@@ -535,6 +535,81 @@ Types and aliases may not be named "extension".
 
 - ~~Confirm `extension` vs. `extensions` as the keyword~~ (answer: `extension`, LDM 2025-03-24)
 
+### nameof
+
+- ~~Should we disallow extension properties in nameof like we do classic and new extension methods?~~ (answer: no, that's the only way to refer to the name of the property)
+```
+C c = null;
+_ = nameof(c.M); // Extension method groups are not allowed as an argument to 'nameof'.
+_ = nameof(c.M2); // Extension method groups are not allowed as an argument to 'nameof'.
+_ = nameof(c.P);
+
+_ = nameof(C.M3); // Extension method groups are not allowed as an argument to 'nameof'.
+_ = nameof(C.P2);
+
+class C { }
+
+static class E
+{
+    public static void M(this C c) { }
+    extension(C c)
+    {
+        public void M2() { }
+        public int P => 42;
+
+        public static void M3() { }
+        public static int P2 => 42;
+    }
+}
+```
+
+### entry point
+
+- Should we skip extension blocks when looking for entry points?
+
+### pattern-based constructs
+
+The guideline so far is that if classic extension methods come into play, then new extension methods should also come into play.  
+This includes: 
+- `GetEnumerator` in `foreach` (and corresponding in async flavor)
+- `Deconstruct` in deconstruction and in positional pattern
+- `Add` in collection initializers
+- `Dispose` in `using` (on ref struct or in asynchronous `using`)
+- `GetPinnableReference` in `fixed`
+- `GetAwaiter` and `GetResult` in `await`
+
+This excludes:
+- `MoveNext` in `foreach` (and corresponding in async flavor)
+- `Slice` and `int` indexers in implicit indexers
+- `Dispose` in `foreach`
+
+This leaves some questions about properties:
+- `Current` in `foreach`?
+- in object initializer: `new C() { ExtensionProperty = ... }`
+- in `with`: `x with { ExtensionProperty = ... }`
+- in property patterns: `x is { ExtensionProperty: ... }`
+- `Count` and `Length` in list-pattern
+- `IsCompleted` in `await`
+- `Count` and `Length` in implicit indexers
+
+And when we look for a method (like `GetEnumerator`), should we accept a delegate-returning property?
+
+#### [Collection expressions](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-12.0/collection-expressions.md)
+
+- Extension `Add` works
+- Extension `GetEnumerator` works for spread
+- Extension `GetEnumerator` does not affect the determination of the element type (must be instance)
+- Extensions `Create` does not count as a blessed **create** method
+- Should extension countable properties affect collection expressions?
+
+#### [`params` collections](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-13.0/params-collections.md)
+
+- Extensions `Add` does not affect what types are allowed with `params`
+
+#### [dictionary expressions](https://github.com/dotnet/csharplang/blob/main/proposals/dictionary-expressions.md)
+
+- Extension indexers?
+
 ### Nullability
 
 - ~~Confirm the current design, ie. maximal portability/compatibility~~ (answer: yes, LDM 2025-04-17)
@@ -709,46 +784,12 @@ static class E
 }
 ```
 The current conflict rules are: 1. check no conflict within similar extensions using class/struct rules, 2. check no conflict between implementation methods across various extensions declarations.  
-Do we stil need the first part of the rules?
-
 
 ### XML docs
 
 - Is `paramref` to receiver parameter supported on extension members? Even on static? How is it encoded in the output? Probably standard way `<paramref name="..."/>` would work for a human,  but there is a risk that some existing tools won't be happy to not find it among the parameters on the API.
 - Are we supposed to copy doc comments to the implementation methods with speakable names?
 - Should `<param>` element corresponding to receiver parameter be copied from extension container for instance methods? Anything else should be copied from container to implementation methods (`<typeparam>` etc.) ?
-
-### nameof
-
-- ~~Should we disallow extension properties in nameof like we do classic and new extension methods?~~ (answer: no, that's the only way to refer to the name of the property)
-```
-C c = null;
-_ = nameof(c.M); // Extension method groups are not allowed as an argument to 'nameof'.
-_ = nameof(c.M2); // Extension method groups are not allowed as an argument to 'nameof'.
-_ = nameof(c.P);
-
-_ = nameof(C.M3); // Extension method groups are not allowed as an argument to 'nameof'.
-_ = nameof(C.P2);
-
-class C { }
-
-static class E
-{
-    public static void M(this C c) { }
-    extension(C c)
-    {
-        public void M2() { }
-        public int P => 42;
-
-        public static void M3() { }
-        public static int P2 => 42;
-    }
-}
-```
-
-### entry point
-
-- Should we skip extension blocks when looking for entry points?
 
 ### Add support for more member kinds
 
