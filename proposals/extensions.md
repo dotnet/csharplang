@@ -571,17 +571,16 @@ static class E
 
 The guideline so far is that if classic extension methods come into play, then new extension methods should also come into play.  
 This includes: 
-- `GetEnumerator`/`GetAsyncEnumerator()` in `foreach`
+- `GetEnumerator`/`GetAsyncEnumerator` in `foreach`
 - `Deconstruct` in deconstruction, in positional pattern and foreach
 - `Add` in collection initializers
-- `Dispose` in `using` (on ref struct or in asynchronous `using`??)
 - `GetPinnableReference` in `fixed`
 - `GetAwaiter` in `await`
 
 This excludes:
+- `Dispose`/`DisposeAsync` in `using` and `foreach`
 - `MoveNext`/`MoveNextAsync` in `foreach`
 - `Slice` and `int` indexers in implicit indexers (and possibly list-patterns?)
-- `Dispose` in `foreach`
 - `GetResult` in `await`
 
 This leaves some questions about properties and indexers.  
