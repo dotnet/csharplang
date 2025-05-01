@@ -5,9 +5,9 @@ Extensions introduce new requirements for our API reference pipeline. The additi
 - The docs term is "Extension Methods". That term currently means "extension methods with an instance receiver". Now, extensions can be properties, indexers, or operators. These extension members can be accessed as either an instance member on the extended type, or as a static member on the extended type.
 - Readers need to know if the receiver is an instance of a type, or the type itself.
 - Readers occasionally need to know the class name of holding the extension, typically for disambiguation.
-- The extension container becomes an unspeakable name, and it should be elided in documentation.
+- The extension block is emitted as a nested class with skeleton members and XML doc comments. The nested class is given an unspeakable name.
 
-The new extensions experience should be built on the framework used for the existing extension methods. The document describes the new experience as a set of enhancements to the existing extension method documentation.
+The new extensions experience should be built on the framework used for the existing extension methods. In fact, when a new extension member is a method whose receiver is an instance, both forms are binary compatible. The document describes the new experience as a set of enhancements to the existing extension method documentation.
 
 ## Existing Extension methods
 
@@ -63,7 +63,7 @@ The presentation for C# 14 extensions needs to account for several new types of 
 
 This proposal currently assumes no changes to the presentation for existing extension methods.
 
-> Alternative:  [Compatibility with existing extension methods](./compat-mode-in-extensions.md) is still subject to [refinement](./Compatibility%20through%20coexistence%20between%20extension%20types%20and%20extension%20methods.md). One proposal makes existing extension methods indistinguishable from new extension members when consumed. If that proposal is adopted, we should experiment with displaying all extension members using this updated format. Readers can give feedback on whether they prefer a unified presentation, or want to know if a method follows the new or old format.
+> Alternative:  We could experiment with displaying all extension members using this updated format. Readers can give feedback on whether they prefer a unified presentation, or want to know if a method follows the new or old format. There is no reason a consumer needs to know which format was used to declare an extension. The declarations are binary compatible.
 
 ### Extension member prototypes
 
@@ -143,21 +143,82 @@ There should be a new style for extension members. This should be modeled after 
 
 The emphasis on the receiver parameter reinforces the new syntax, and is necessary for readers to see the extended type on the new extension member.
 
-### Unspeakable extension type
+### Unspeakable extension skeletons
 
-The compiler generates a nested type with an unspeakable name, and an unspeakable member, for each extension container. See the example under [implementation](https://github.com/dotnet/csharplang/blob/main/proposals/extensions.md#implementations) in the feature spec.
+The compiler generates a public skeleton class that defines prototypes for extension members. The skeleton class has an unspeakable name and contains the following prototypes:
 
-The unspeakable nested type requires the following behavior:
+- A private static unspeakable method declaration starting with `<Extension>`. This private static method includes one parameter that represents the receiver for the extension members declared in the skeleton.
+- Prototypes for all extension members defined for the receiver. These prototypes show the declarations as though declared on the receiver type.
 
-- The unspeakable type, for example `<>E__1<T>`, should not be displayed in the API docs.
-- The unspeakable member, for example `public static <Extension>$(IEnumerable<T> source)` should not be displayed in the API docs. However, the single parameter for this method defines the receiver type and name for all extensions in this container.
-- The public members of the unspeakable nested class provides the prototypes for all extensions. Those are important in the docs.
+The unspeakable skeleton provides the prototypes for the extension members and the receiver type. The nodes of the skeleton provide a location for the XML output from the `///` comments on the extension members and the receiver parameter. The `///` comments on the extension declaration are written as XML on the node for the unspeakable member declaring the receiver. The `///` comments on each extension member are written as XML on the node for the embedded member of the unspeakable containing class.
 
-### XML comments on the receiver parameter
+See the following code and XML for an example of extension members and the resulting XML output.
 
-Developers use the `<param>` and (optionally) `<typeparam>` tags on the `extension` container to provide information about the receiver type.
+```csharp
+/// <summary>Summary for E</summary>
+static class E
+{
+    /// <summary>Summary for extension block</summary>
+    /// <typeparam name="T">Description for T</typeparam>
+    /// <param name="t">Description for t</param>
+    extension<T>(T t)
+    {
+        /// <summary>Summary for M</summary>
+        /// <typeparam name="U">Description for U</typeparam>
+        /// <param name="u">Description for u</param>
+        public void M<U>(U u) => throw null!;
 
-The compiler needs to emit these nodes somewhere in the XML output. Suggestion: On the unspeakable member that notes the receiver. The pipeline needs to read that XML and emit the proper HTML.
+        /// <summary>Summary for P</summary>
+        public int P => 0;
+    }
+}
+```
+
+produces the following XML output:
+
+```xml
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>Test</name>
+    </assembly>
+    <members>
+        <member name="T:E">
+            <summary>Summary for E</summary>
+        </member>
+        <member name="T:E.<>E__0`1">
+            <summary>Summary for extension block</summary>
+            <typeparam name="T">Description for T</typeparam>
+            <param name="t">Description for t</param>
+        </member>
+        <member name="M:E.<>E__0`1.M``1(``0)">
+            <summary>Summary for M</summary>
+            <typeparam name="U">Description for U</typeparam>
+            <param name="u">Description for u</param>
+        </member>
+        <member name="P:E.<>E__0`1.P">
+            <summary>Summary for P</summary>
+        </member>
+        <member name="M:E.M``2(``0,``1)">
+            <inheritdoc cref="M:E.<>E__0`1.M``1(``0)"/>
+        </member>
+        <member name="M:E.get_P``1(``0)">
+            <inheritdoc cref="P:E.<>E__0`1.P"/>
+        </member>
+    </members>
+</doc>
+```
+
+### XML Output for `///` comments
+
+The compiler uses the skeleton declarations to produce the XML output for all `///` comments on the extension node and the embedded extension members:
+
+- Comments from the `extension` block are applied to the embedded receiver field in the unspeakable nested class. This can include type parameter information and parameter information for the receiver.
+- Comments from extension members are output to the skeleton prototypes embedded in the unspeakable nested class.
+- Any extension member declaration that includes `typeparamref` or `paramref` nodes in the extension block resolve to the corresponding `typeparam` and `param` nodes on the extension block.
+- The implementation nodes for the extension members use the `<inheritdoc cref="skeleton-member" />` node to point to the generated XML output from the skeleton member.
+
+The nodes on the receiver and each member must be merged by the tools that consume the XML (for example, Visual Studio IntelliSense, or the MS Learn build process).
 
 ## Disambiguation and API docs
 
