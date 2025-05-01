@@ -5,7 +5,7 @@ Extensions introduce new requirements for our API reference pipeline. The additi
 - The docs term is "Extension Methods". That term currently means "extension methods with an instance receiver". Now, extensions can be properties, indexers, or operators. These extension members can be accessed as either an instance member on the extended type, or as a static member on the extended type.
 - Readers need to know if the receiver is an instance of a type, or the type itself.
 - Readers occasionally need to know the class name of holding the extension, typically for disambiguation.
-- The extension block is emitted as a nested classes with skeleton members and xml doc comments. The nested class is given an unspeakable name.
+- The extension block is emitted as a nested class with skeleton members and XML doc comments. The nested class is given an unspeakable name.
 
 The new extensions experience should be built on the framework used for the existing extension methods. In fact, when a new extension member is a method whose receiver is an instance, both forms are binary compatible. The document describes the new experience as a set of enhancements to the existing extension method documentation.
 
@@ -152,7 +152,7 @@ The compiler generates a public skeleton class that defines prototypes for exten
 
 The unspeakable skeleton provides the prototypes for the extension members and the receiver type. The nodes of the skeleton provide a location for the XML output from the `///` comments on the extension members and the receiver parameter. The `///` comments on the extension declaration are written as XML on the node for the unspeakable member declaring the receiver. The `///` comments on each extension member are written as XML on the node for the embedded member of the unspeakable containing class.
 
-See the following code and xml for an example of extension members and the resulting XML output.
+See the following code and XML for an example of extension members and the resulting XML output.
 
 ```csharp
 /// <summary>Summary for E</summary>
@@ -218,7 +218,7 @@ The compiler uses the skeleton declarations to produce the XML output for all `/
 - The extension member declaration can include `typeparamref` and `paramref` nodes on the extension block source to describe the receiver parameter.
 - The implementation nodes for the extension members use the `<inheritdoc cref="skeleton-member" />` node to point to the generated XML output from the skeleton member.
 
-The nodes on the receiver and each member must be merged by the tools that consume the XML (for example, Visual Studio intellisense, or the MS Learn build process).
+The nodes on the receiver and each member must be merged by the tools that consume the XML (for example, Visual Studio IntelliSense, or the MS Learn build process).
 
 ## Disambiguation and API docs
 
