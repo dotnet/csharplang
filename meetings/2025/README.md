@@ -3,7 +3,6 @@
 All schedule items must have a public issue or checked-in proposal that can be linked from the notes.
 
 ## Schedule ASAP
-- Extensions [open issues](https://github.com/dotnet/csharplang/blob/main/proposals/extensions.md) (xml docs, pattern-based constructs) (Julien)
 
 ## Schedule when convenient
 
@@ -24,7 +23,11 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ### Wed May 7, 2025
 
+- Dictionary expressions: [applicable methods for args](https://github.com/dotnet/csharplang/blob/main/proposals/collection-expression-arguments.md#construction), [KeyValuePair<,> variance with params](https://github.com/dotnet/csharplang/blob/main/proposals/dictionary-expressions.md#support-keyvaluepair-variance-with-params) (cston, CyrusNajmabadi)
+ 
 ### Mon May 5, 2025
+
+- Extensions [open issues](https://github.com/dotnet/csharplang/blob/main/proposals/extensions.md) (xml docs, pattern-based constructs) (Julien)
 
 ### Wed, Apr 23, 2025
 
