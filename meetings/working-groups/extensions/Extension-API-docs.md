@@ -215,7 +215,7 @@ The compiler uses the skeleton declarations to produce the XML output for all `/
 
 - Comments from the `extension` block are applied to the embedded receiver field in the unspeakable nested class. This can include type parameter information and parameter information for the receiver.
 - Comments from extension members are output to the skeleton prototypes embedded in the unspeakable nested class.
-- The extension member declaration can include `typeparamref` and `paramref` nodes on the extension block source to describe the receiver parameter.
+- Any extension member declaration that includes `typeparamref` or `paramref` nodes in the extension block resolve to the corresponding `typeparam` and `param` nodes on the extension block.
 - The implementation nodes for the extension members use the `<inheritdoc cref="skeleton-member" />` node to point to the generated XML output from the skeleton member.
 
 The nodes on the receiver and each member must be merged by the tools that consume the XML (for example, Visual Studio IntelliSense, or the MS Learn build process).
