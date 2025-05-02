@@ -60,7 +60,7 @@ Furthermore, the compiler should report a warning if the `#!` directive is not p
 Compilers are also free to report errors if these directives are used in unsupported scenarios,
 e.g., Roslyn will report an error if these directives are present in a file compiled as part of "project-based programs" as opposed to "file-based programs"
 (and tooling will remove these directives when migrating file-based programs to project-based programs).
-That error should not be reported for the `#!` directive, it can be placed on any file because it might invoke some other tool than `dotnet run`.
+If needed, we might consider not reporting that error for the `#!` directive, as it might invoke some other tool than `dotnet run`, so there is no need to restrict it to scripts and file-based programs only.
 
 Similarly, the compiler or SDK should still error/warn on unrecognized directives to "reserve" them for future use by the official .NET tooling.
 
