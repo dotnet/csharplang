@@ -618,8 +618,10 @@ And when we look for a method (like `GetEnumerator`), should we accept a delegat
 
 ### Naming/numbering scheme for skeleton type
 
+[Issue](https://github.com/dotnet/roslyn/issues/78416)  
 The current numbering system causes problems with the [validation of public APIs](https://learn.microsoft.com/en-us/dotnet/fundamentals/apicompat/package-validation/overview#validator-types)
 which ensures that public APIs match between reference-only assemblies and implementation assemblies.
+
 
 We could:
 - adjust the tool
@@ -629,6 +631,7 @@ We could:
 
 ### New generic extension Cast method still can't work in LINQ
 
+[Issue](https://github.com/dotnet/roslyn/issues/78415)  
 In earlier designs of roles/extensions, it was possible to only specify the type arguments of the method explicitly.  
 But now that we're focusing on seemless transition from classic extension methods, all the type arguments must be given explicitly.  
 This fails to address a problem with extension Cast method usage in LINQ.
