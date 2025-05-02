@@ -225,21 +225,13 @@ class C1
 An instance increment operator can override an operator with the same signature declared in a base class,
 an `override` modifier can be used for this purpose.
 
-ECMA-335 already "reserved" the following special names for user defined increment operators:
+The following "reserved" special names should be added to ECMA-335 to support instance versions of increment/decrement operators:
 | Name | Operator |
 | -----| -------- |
-|op_Decrement|`--`|
-|op_Increment|`++`|
-
-However, it states that CLS compliance requires the operator methods to be non-void static methods with a single parameter,
-i.e. matches what static increment operators are. We should consider relaxing the CLS compliance requirements
-to allow the operators to be void returning parameter-less instance methods.
-
-The following names should be added to support checked versions of the operators:
-| Name | Operator |
-| -----| -------- |
-|op_CheckedDecrement| checked `--` |
-|op_CheckedIncrement| checked `++` |
+|op_DecrementAssignment| `--` |
+|op_IncrementAssignment| `++` |
+|op_CheckedDecrementAssignment| checked `--` |
+|op_CheckedIncrementAssignment| checked `++` |
 
 ### Compound assignment operators
 [compound-assignment-operators]: #compound-assignment-operators
