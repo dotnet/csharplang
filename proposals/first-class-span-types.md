@@ -494,6 +494,8 @@ class Derived : Base
 }
 ```
 
+See also: https://github.com/dotnet/roslyn/issues/78314
+
 #### Extension method lookup
 
 By allowing _implicit span conversions_ in extension method lookup, we can potentially change what extension method is resolved by overload resolution.
