@@ -497,36 +497,6 @@ Whenever extension members are used in source, we will emit those as reference t
 For example: an invocation of `enumerableOfInt.Method()` would be emitted as a static call 
 to `IEnumerableExtensions.Method<int>(enumerableOfInt)`.  
 
-Note: the metadata representation supports static extension methods that differ in return type.
-For example:
-```csharp
-static class CollectionExtensions
-{
-    extension<T>(List<T>)
-    {
-        public static List<T> Create() { ... }
-    }
-    extension<T>(HashSet<T>)
-    {
-        public static HashSet<T> Create() { ... }
-    }
-}
-```
-But if the return types match too, the signatures will conflict.
-```csharp
-static class CollectionExtensions
-{
-    extension<T>(List<T>)
-    {
-        public static T[] Create() { ... }
-    }
-    extension<T>(HashSet<T>)
-    {
-        public static T[] Create() { ... }
-    }
-}
-```
-
 ## Breaking changes
 
 Types and aliases may not be named "extension".
