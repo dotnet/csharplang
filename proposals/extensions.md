@@ -616,6 +616,23 @@ And when we look for a method (like `GetEnumerator`), should we accept a delegat
 
 - Extension indexers?
 
+### Naming/numbering scheme for skeleton type
+
+The current numbering system causes problems with the [validation of public APIs](https://learn.microsoft.com/en-us/dotnet/fundamentals/apicompat/package-validation/overview#validator-types)
+which ensures that public APIs match between reference-only assemblies and implementation assemblies.
+
+We could:
+- adjust the tool
+- use a number relative to the declared extension blocks (first, second, etc in syntactic order)
+- use some hashing scheme (TBD)
+- let the name be controlled via some attribute
+
+### New generic extension Cast method still can't work in LINQ
+
+In earlier designs of roles/extensions, it was possible to only specify the type arguments of the method explicitly.  
+But now that we're focusing on seemless transition from classic extension methods, all the type arguments must be given explicitly.  
+This fails to address a problem with extension Cast method usage in LINQ.
+
 ### Nullability
 
 - ~~Confirm the current design, ie. maximal portability/compatibility~~ (answer: yes, LDM 2025-04-17)
