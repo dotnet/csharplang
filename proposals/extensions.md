@@ -714,7 +714,6 @@ static class E
 public class C<T> { }
 ```
 
-
 ### Nullability
 
 - ~~Confirm the current design, ie. maximal portability/compatibility~~ (answer: yes, LDM 2025-04-17)
