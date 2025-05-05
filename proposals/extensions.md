@@ -535,13 +535,13 @@ Note: you may not document the extension parameter or type parameters (with `<pa
 
 Tools consuming the xml docs are responsible for copying the `<param>` and `<typeparam>` from the extension block onto the extension members as appropriate (ie. the parameter information should only be copied for instance members).  
 
-An `<inheritdoc>` is emitted on implementation methods and it refers to the relevant skeleton member with a `cref`. For example, the implementation method for a getter refers to the documentation of the skeleton property.  
+An `<inheritdoc>` is emitted on implementation methods and it refers to the relevant skeleton member with a `cref`. For example, the implementation method for a getter refers to the documentation of the skeleton property. 
+If the skeleton member has not doc comments, then the `<inheritdoc>` is omitted. 
 
 For extension blocks and extension members, we don't presently warn if:
 - the extension parameter is documented, but the parameters on the extension member aren't
 - or vice-versa
-- or in the equivalent scenarios with an undocumented type parameter
-
+- or in the equivalent scenarios with undocumented type parameters
 
 For instance, the following doc comments:
 ```
