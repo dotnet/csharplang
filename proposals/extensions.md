@@ -698,6 +698,23 @@ In earlier designs of roles/extensions, it was possible to only specify the type
 But now that we're focusing on seemless transition from classic extension methods, all the type arguments must be given explicitly.  
 This fails to address a problem with extension Cast method usage in LINQ.
 
+### Constraining the extension parameter on an extension member
+
+Should we allow the following?
+
+```csharp
+static class E
+{
+    extension<T>(T t)
+    {
+        public void M<U>(U u) where T : C<U>  { } // error: 'E.extension<T>(T).M<U>(U)' does not define type parameter 'T'
+    }
+}
+
+public class C<T> { }
+```
+
+
 ### Nullability
 
 - ~~Confirm the current design, ie. maximal portability/compatibility~~ (answer: yes, LDM 2025-04-17)
