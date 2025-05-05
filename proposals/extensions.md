@@ -689,7 +689,7 @@ And when we look for a method (like `GetEnumerator`), should we accept a delegat
 ### Naming/numbering scheme for skeleton type
 
 [Issue](https://github.com/dotnet/roslyn/issues/78416)  
-The current numbering system causes problems with the [validation of public APIs](https://learn.microsoft.com/en-us/dotnet/fundamentals/apicompat/package-validation/overview#validator-types)
+The current numbering system causes problems with the [validation of public APIs](https://learn.microsoft.com/dotnet/fundamentals/apicompat/package-validation/overview#validator-types)
 which ensures that public APIs match between reference-only assemblies and implementation assemblies.
 
 
