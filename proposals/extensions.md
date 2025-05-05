@@ -639,7 +639,8 @@ static class E
 
 ### pattern-based constructs
 
-The guideline so far is that if classic extension methods come into play, then new extension methods should also come into play.  
+#### Methods
+- ~~Where should new extension methods come into play?~~ (answer: same places where classic extension methods come into play, LDM 2025-05-05) 
 This includes: 
 - `GetEnumerator`/`GetAsyncEnumerator` in `foreach`
 - `Deconstruct` in deconstruction, in positional pattern and foreach
@@ -653,22 +654,21 @@ This excludes:
 - `Slice` and `int` indexers in implicit indexers (and possibly list-patterns?)
 - `GetResult` in `await`
 
-This leaves some questions about properties and indexers.  
-I propose we support the following:
+#### Properties and indexers
+- ~~Where should extension properties and indexers come into play?~~  (answer: let's start with the four, LDM 2025-05-05) 
+We'd include:
 - object initializer: `new C() { ExtensionProperty = ... }`
 - dictionary intializer: `new C() { [0] = ... }`
 - `with`: `x with { ExtensionProperty = ... }`
 - property patterns: `x is { ExtensionProperty: ... }`
 
-I'm not sure about:
+We'd exclude:
+- `Current` in `foreach`
+- `IsCompleted` in `await`
 - `Count`/`Length` properties and indexers in list-pattern
 - `Count`/`Length` properties and indexers in implicit indexers
 
-I'd propose to exclude:
-- `Current` in `foreach`
-- `IsCompleted` in `await`
-
-And when we look for a method (like `GetEnumerator`), should we accept a delegate-returning property?
+- Where should delegate-returning properties come into play?  
 
 #### [Collection expressions](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-12.0/collection-expressions.md)
 
@@ -692,12 +692,11 @@ And when we look for a method (like `GetEnumerator`), should we accept a delegat
 The current numbering system causes problems with the [validation of public APIs](https://learn.microsoft.com/dotnet/fundamentals/apicompat/package-validation/overview#validator-types)
 which ensures that public APIs match between reference-only assemblies and implementation assemblies.
 
-
 We could:
 - adjust the tool
 - use a number relative to the declared extension blocks (first, second, etc in syntactic order)
 - use some hashing scheme (TBD)
-- let the name be controlled via some attribute
+- let the name be controlled via some syntax
 
 ### New generic extension Cast method still can't work in LINQ
 
@@ -900,9 +899,12 @@ The current conflict rules are: 1. check no conflict within similar extensions u
 
 ### XML docs
 
-- Is `paramref` to receiver parameter supported on extension members? Even on static? How is it encoded in the output? Probably standard way `<paramref name="..."/>` would work for a human,  but there is a risk that some existing tools won't be happy to not find it among the parameters on the API.
-- Are we supposed to copy doc comments to the implementation methods with speakable names?
-- Should `<param>` element corresponding to receiver parameter be copied from extension container for instance methods? Anything else should be copied from container to implementation methods (`<typeparam>` etc.) ?
+- ~~Is `paramref` to receiver parameter supported on extension members? Even on static? How is it encoded in the output? Probably standard way `<paramref name="..."/>` would work for a human,  but there is a risk that some existing tools won't be happy to not find it among the parameters on the API.~~ (answer: yes paramref is to extension parameter is allowed on extension members, LDM 2025-05-05)
+- ~~Are we supposed to copy doc comments to the implementation methods with speakable names?~~ (answer: no copying, LDM 2025-05-05)
+- ~~Should `<param>` element corresponding to receiver parameter be copied from extension container for instance methods? Anything else should be copied from container to implementation methods (`<typeparam>` etc.) ?~~ (answer: no copying, LDM 2025-05-05)
+- ~~Should `<param>` for extension parameter be allowed on extension members as an override?~~ (answer: no, for now, LDM 2025-05-05)
+- Will the summary on extension blocks would appear anywhere?
+- Can extension (skeleton) members be referenced by `cref`?
 
 ### Add support for more member kinds
 
