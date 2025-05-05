@@ -810,6 +810,7 @@ static class E
 }
 ```
 The current conflict rules are: 1. check no conflict within similar extensions using class/struct rules, 2. check no conflict between implementation methods across various extensions declarations.  
+- ~~Do we stil need the first part of the rules?~~ (answer: yes, we're keeping this structure as it helps with consumption of the APIs, LDM 2025-03-24)
 
 ### XML docs
 
