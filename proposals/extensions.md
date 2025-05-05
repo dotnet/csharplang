@@ -527,6 +527,76 @@ static class CollectionExtensions
 }
 ```
 
+## XML docs
+
+The doc comments on the extension block are emitted for the unspeakable named type (`<>E__0'1` in the example below).  
+The doc comments on the extension members are emitted for the skeleton members. They are allowed to reference the extension parameter and type parameters using `<paramref>` and `<typeparamref>` respectively).  
+Note: you may not document the extension parameter or type parameters (with `<param>` and `<typeparam>`) on an extension member.  
+
+Tools consuming the xml docs are responsible for copying the `<param>` and `<typeparam>` from the extension block onto the extension members as appropriate (ie. the parameter information should only be copied for instance members).  
+
+An `<inheritdoc>` is emitted on implementation methods and it refers to the relevant skeleton member with a `cref`. For example, the implementation method for a getter refers to the documentation of the skeleton property. 
+If the skeleton member has not doc comments, then the `<inheritdoc>` is omitted. 
+
+For extension blocks and extension members, we don't presently warn if:
+- the extension parameter is documented, but the parameters on the extension member aren't
+- or vice-versa
+- or in the equivalent scenarios with undocumented type parameters
+
+For instance, the following doc comments:
+```
+/// <summary>Summary for E</summary>
+static class E
+{
+    /// <summary>Summary for extension block</summary>
+    /// <typeparam name="T">Description for T</typeparam>
+    /// <param name="t">Description for t</param>
+    extension<T>(T t)
+    {
+        /// <summary>Summary for M, which may refer to <paramref name="t"/> and <typeparamref name="T"/></summary>
+        /// <typeparam name="U">Description for U</typeparam>
+        /// <param name="u">Description for u</param>
+        public void M<U>(U u) => throw null!;
+
+        /// <summary>Summary for P</summary>
+        public int P => 0;
+    }
+}
+```
+yield the following xml:
+```
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>Test</name>
+    </assembly>
+    <members>
+        <member name="T:E">
+            <summary>Summary for E</summary>
+        </member>
+        <member name="T:E.<>E__0`1">
+            <summary>Summary for extension block</summary>
+            <typeparam name="T">Description for T</typeparam>
+            <param name="t">Description for t</param>
+        </member>
+        <member name="M:E.<>E__0`1.M``1(``0)">
+            <summary>Summary for M, which may refer to <paramref name="t"/> and <typeparamref name="T"/></summary>
+            <typeparam name="U">Description for U</typeparam>
+            <param name="u">Description for u</param>
+        </member>
+        <member name="P:E.<>E__0`1.P">
+            <summary>Summary for P</summary>
+        </member>
+        <member name="M:E.M``2(``0,``1)">
+            <inheritdoc cref="M:E.<>E__0`1.M``1(``0)"/>
+        </member>
+        <member name="M:E.get_P``1(``0)">
+            <inheritdoc cref="P:E.<>E__0`1.P"/>
+        </member>
+    </members>
+</doc>
+```
+
 ## Breaking changes
 
 Types and aliases may not be named "extension".
@@ -534,6 +604,123 @@ Types and aliases may not be named "extension".
 ## Open issues
 
 - ~~Confirm `extension` vs. `extensions` as the keyword~~ (answer: `extension`, LDM 2025-03-24)
+
+### nameof
+
+- ~~Should we disallow extension properties in nameof like we do classic and new extension methods?~~ (answer: no, that's the only way to refer to the name of the property)
+```
+C c = null;
+_ = nameof(c.M); // Extension method groups are not allowed as an argument to 'nameof'.
+_ = nameof(c.M2); // Extension method groups are not allowed as an argument to 'nameof'.
+_ = nameof(c.P);
+
+_ = nameof(C.M3); // Extension method groups are not allowed as an argument to 'nameof'.
+_ = nameof(C.P2);
+
+class C { }
+
+static class E
+{
+    public static void M(this C c) { }
+    extension(C c)
+    {
+        public void M2() { }
+        public int P => 42;
+
+        public static void M3() { }
+        public static int P2 => 42;
+    }
+}
+```
+
+### entry point
+
+- Should we skip extension blocks when looking for entry points?
+
+### pattern-based constructs
+
+The guideline so far is that if classic extension methods come into play, then new extension methods should also come into play.  
+This includes: 
+- `GetEnumerator`/`GetAsyncEnumerator` in `foreach`
+- `Deconstruct` in deconstruction, in positional pattern and foreach
+- `Add` in collection initializers
+- `GetPinnableReference` in `fixed`
+- `GetAwaiter` in `await`
+
+This excludes:
+- `Dispose`/`DisposeAsync` in `using` and `foreach`
+- `MoveNext`/`MoveNextAsync` in `foreach`
+- `Slice` and `int` indexers in implicit indexers (and possibly list-patterns?)
+- `GetResult` in `await`
+
+This leaves some questions about properties and indexers.  
+I propose we support the following:
+- object initializer: `new C() { ExtensionProperty = ... }`
+- dictionary intializer: `new C() { [0] = ... }`
+- `with`: `x with { ExtensionProperty = ... }`
+- property patterns: `x is { ExtensionProperty: ... }`
+
+I'm not sure about:
+- `Count`/`Length` properties and indexers in list-pattern
+- `Count`/`Length` properties and indexers in implicit indexers
+
+I'd propose to exclude:
+- `Current` in `foreach`
+- `IsCompleted` in `await`
+
+And when we look for a method (like `GetEnumerator`), should we accept a delegate-returning property?
+
+#### [Collection expressions](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-12.0/collection-expressions.md)
+
+- Extension `Add` works
+- Extension `GetEnumerator` works for spread
+- Extension `GetEnumerator` does not affect the determination of the element type (must be instance)
+- Extensions `Create` does not count as a blessed **create** method
+- Should extension countable properties affect collection expressions?
+
+#### [`params` collections](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-13.0/params-collections.md)
+
+- Extensions `Add` does not affect what types are allowed with `params`
+
+#### [dictionary expressions](https://github.com/dotnet/csharplang/blob/main/proposals/dictionary-expressions.md)
+
+- Extension indexers?
+
+### Naming/numbering scheme for skeleton type
+
+[Issue](https://github.com/dotnet/roslyn/issues/78416)  
+The current numbering system causes problems with the [validation of public APIs](https://learn.microsoft.com/en-us/dotnet/fundamentals/apicompat/package-validation/overview#validator-types)
+which ensures that public APIs match between reference-only assemblies and implementation assemblies.
+
+
+We could:
+- adjust the tool
+- use a number relative to the declared extension blocks (first, second, etc in syntactic order)
+- use some hashing scheme (TBD)
+- let the name be controlled via some attribute
+
+### New generic extension Cast method still can't work in LINQ
+
+[Issue](https://github.com/dotnet/roslyn/issues/78415)  
+In earlier designs of roles/extensions, it was possible to only specify the type arguments of the method explicitly.  
+But now that we're focusing on seemless transition from classic extension methods, all the type arguments must be given explicitly.  
+This fails to address a problem with extension Cast method usage in LINQ.
+
+### Constraining the extension parameter on an extension member
+
+Should we allow the following?
+
+```csharp
+static class E
+{
+    extension<T>(T t)
+    {
+        public void M<U>(U u) where T : C<U>  { } // error: 'E.extension<T>(T).M<U>(U)' does not define type parameter 'T'
+    }
+}
+
+public class C<T> { }
+```
 
 ### Nullability
 
@@ -709,8 +896,7 @@ static class E
 }
 ```
 The current conflict rules are: 1. check no conflict within similar extensions using class/struct rules, 2. check no conflict between implementation methods across various extensions declarations.  
-Do we stil need the first part of the rules?
-
+- ~~Do we stil need the first part of the rules?~~ (answer: yes, we're keeping this structure as it helps with consumption of the APIs, LDM 2025-03-24)
 
 ### XML docs
 
