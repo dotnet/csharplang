@@ -527,6 +527,68 @@ static class CollectionExtensions
 }
 ```
 
+## XML docs
+
+The doc comments on the extension block are emitted for the unspeakable named type (`<>E__0'1` in the example below).  
+The doc comments on the extension members are emitted for the skeleton members. They are allowed to reference the extension parameter and type parameters using `<paramref>` and `<typeparamref>` respectively).  
+Tools consuming the xml docs are responsible for copying the `<param>` and `<typeparam>` from the extension block onto the extension members as appropriate (ie. the parameter information should only be copied for instance members).  
+
+An `<inheritdoc>` is emitted on implementation methods and it refers to the relevant skeleton member with a `cref`. For example, the implementation method for a getter refers to the documentation of the skeleton property.  
+
+For instance, the following doc comments:
+```
+/// <summary>Summary for E</summary>
+static class E
+{
+    /// <summary>Summary for extension block</summary>
+    /// <typeparam name="T">Description for T</typeparam>
+    /// <param name="t">Description for t</param>
+    extension<T>(T t)
+    {
+        /// <summary>Summary for M, which may refer to <paramref name="t"/> and <typeparamref name="T"/></summary>
+        /// <typeparam name="U">Description for U</typeparam>
+        /// <param name="u">Description for u</param>
+        public void M<U>(U u) => throw null!;
+
+        /// <summary>Summary for P</summary>
+        public int P => 0;
+    }
+}
+```
+yield the following xml:
+```
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>Test</name>
+    </assembly>
+    <members>
+        <member name="T:E">
+            <summary>Summary for E</summary>
+        </member>
+        <member name="T:E.<>E__0`1">
+            <summary>Summary for extension block</summary>
+            <typeparam name="T">Description for T</typeparam>
+            <param name="t">Description for t</param>
+        </member>
+        <member name="M:E.<>E__0`1.M``1(``0)">
+            <summary>Summary for M, which may refer to <paramref name="t"/> and <typeparamref name="T"/></summary>
+            <typeparam name="U">Description for U</typeparam>
+            <param name="u">Description for u</param>
+        </member>
+        <member name="P:E.<>E__0`1.P">
+            <summary>Summary for P</summary>
+        </member>
+        <member name="M:E.M``2(``0,``1)">
+            <inheritdoc cref="M:E.<>E__0`1.M``1(``0)"/>
+        </member>
+        <member name="M:E.get_P``1(``0)">
+            <inheritdoc cref="P:E.<>E__0`1.P"/>
+        </member>
+    </members>
+</doc>
+```
+
 ## Breaking changes
 
 Types and aliases may not be named "extension".
