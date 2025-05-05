@@ -531,9 +531,17 @@ static class CollectionExtensions
 
 The doc comments on the extension block are emitted for the unspeakable named type (`<>E__0'1` in the example below).  
 The doc comments on the extension members are emitted for the skeleton members. They are allowed to reference the extension parameter and type parameters using `<paramref>` and `<typeparamref>` respectively).  
+Note: you may not document the extension parameter or type parameters (with `<param>` and `<typeparam>`) on an extension member.  
+
 Tools consuming the xml docs are responsible for copying the `<param>` and `<typeparam>` from the extension block onto the extension members as appropriate (ie. the parameter information should only be copied for instance members).  
 
 An `<inheritdoc>` is emitted on implementation methods and it refers to the relevant skeleton member with a `cref`. For example, the implementation method for a getter refers to the documentation of the skeleton property.  
+
+For extension blocks and extension members, we don't presently warn if:
+- the extension parameter is documented, but the parameters on the extension member aren't
+- or vice-versa
+- or in the equivalent scenarios with an undocumented type parameter
+
 
 For instance, the following doc comments:
 ```
