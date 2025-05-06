@@ -17,7 +17,7 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ### Wed May 28, 2025
 
-### Wed May 14, 2025
+### Wed May 14, 2025 (second hour only)
 
 ### Mon May 12, 2025
 
