@@ -24,6 +24,7 @@ All schedule items must have a public issue or checked-in proposal that can be l
 ### Wed May 7, 2025
 
 - Dictionary expressions: [applicable methods for args](https://github.com/dotnet/csharplang/blob/main/proposals/collection-expression-arguments.md#construction), [KeyValuePair<,> variance with params](https://github.com/dotnet/csharplang/blob/main/proposals/dictionary-expressions.md#support-keyvaluepair-variance-with-params) (cston, CyrusNajmabadi)
+- [Collection expression arguments](https://github.com/dotnet/csharplang/blob/main/proposals/collection-expression-arguments.md) (cston, CyrusNajmabadi)
  
 ### Mon May 5, 2025
 
