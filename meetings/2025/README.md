@@ -25,13 +25,18 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 - Dictionary expressions: [applicable methods for args](https://github.com/dotnet/csharplang/blob/main/proposals/collection-expression-arguments.md#construction), [KeyValuePair<,> variance with params](https://github.com/dotnet/csharplang/blob/main/proposals/dictionary-expressions.md#support-keyvaluepair-variance-with-params) (cston, CyrusNajmabadi)
 - [Collection expression arguments](https://github.com/dotnet/csharplang/blob/main/proposals/collection-expression-arguments.md) (cston, CyrusNajmabadi)
+
+## C# Language Design Notes for 2025
  
 ### Mon May 5, 2025
 
-- Extensions [open issues](https://github.com/dotnet/csharplang/blob/main/proposals/extensions.md) (xml docs, pattern-based constructs) (Julien)
+[C# Language Design Meeting for May 5th, 2025](https://github.com/dotnet/csharplang/blob/main/meetings/2025/LDM-2025-05-05.md)
 
-
-## C# Language Design Notes for 2025
+- Extensions
+    - XML Docs
+    - Participation in pattern-based constructs
+    - Skeleton type metadata
+    - Single-phase consequences
 
 ### Wed, Apr 23, 2025
 
