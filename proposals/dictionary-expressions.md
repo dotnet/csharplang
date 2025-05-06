@@ -790,7 +790,6 @@ What are the rules when types have multiple indexers and multiple implementation
 
 This concern already exists with *collection types*.  For those types, the rule is that we must have an *element type* as per the existing language rules.  This follows for *dictionary types*, along with the rule that there must be a corresponding indexer for this *element type*.  If those hold, the type can be used as a *dictionary type*.  If these don't hold, it cannot be.
 
-## Open Questions
 
 ### Question: Special case 'comparer' support for dictionaries (and regular collections)?
 
@@ -811,6 +810,7 @@ Pros: A specialized syntax can be clearer and more focused to the exact problem 
 
 Cons: Some user will still want to pass arbitrary arguments along (for cases like 'capacity: ...', and for collections that capture/wrap some other collection).  They will still be left out if we do not have a general system.  And, if we add a general system later, there would be multiple ways to support passing a comparer along.
 
+<details>
 Possible syntactic options here are:
 
 1. `[comparer: StringComparer.OrginalIgnoreCase]`.  Simple and clear.  But a long contextual keyword for 'comparer'.
@@ -830,6 +830,11 @@ If we do special case comparers, the rules would say something intuitively akin 
 > 3. If generating an interface, the only supported interfaces are `IDictionary<,>` and `IReadOnlyDictionary<,>`.  For the former, the comparer will be passed to the `new(IEqualityComparer<>)` constructor on `Dictionary<>`.  For the latter, the dictionary created by the compiler will be guaranteed to use the specified equality comparer to perform hashing and equality checks of the provided keys.
 
 Note: real rules would be tbd.  The above is just a light sketch to motivate discussion.
+</details>
+
+Resolution: We do not believe specialized syntax is worth it.  We prefer this space be fully subsumed by the [Collection Expression Arguments](https://github.com/dotnet/csharplang/blob/main/proposals/collection-expression-arguments.md) feature. [LDM-2025-04-23](https://github.com/dotnet/csharplang/blob/main/meetings/2025/LDM-2025-04-23.md#conclusion-2)
+
+## Open Questions
 
 ### Support `KeyValuePair<,>` variance with `params`?
 
