@@ -278,6 +278,8 @@ If *collection_arguments* is included and is not the first element in the collec
 
 If the *argument list* contains any values with *dynamic* type, a compile-time error is reported ([LDM-2025-01-22](https://github.com/dotnet/csharplang/blob/main/meetings/2025/LDM-2025-01-22.md#conclusion-1)).
 
+#### Constructors
+
 If the target type is a *struct* or *class type* that implements `System.Collections.IEnumerable`, and the target type does not have a *create method*, and the target type is not a *generic parameter type* then:
 * [*Overload resolution*](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/expressions.md#1264-overload-resolution) is used to determine the best instance constructor from the candidates.
 * The set of candidate constructors is all accessible instance constructors declared on the target type that are applicable with respect to the *argument list* as defined in [*applicable function member*](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/expressions.md#12642-applicable-function-member).
@@ -295,6 +297,8 @@ l = [with(capacity: 3), 1, 2]; // new List<int>(capacity: 3)
 l = [with([1, 2]), 3];         // new List<int>(IEnumerable<int> collection)
 l = [with(default)];           // error: ambiguous constructor
 ```
+
+#### CollectionBuilderAttribute methods
 
 If the target type is a type with a *create method*, then:
 * [*Overload resolution*](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/expressions.md#1264-overload-resolution) is used to determine the best factory method from the candidates.
@@ -345,6 +349,8 @@ d = [with(capacity: 2)]; // new Dictionary<string, int>(capacity: 2)
 r = [with(capacity: 2)]; // error: 'capacity' parameter not recognized
 d = [with()];            // error: empty arguments not supported
 ```
+
+#### Other target types
 
 If the target type is any other type, then a binding error is reported for the *argument list*, even if empty.
 
@@ -569,15 +575,15 @@ The expected list (which still needs to be LDM ratified) is [Interface target ty
 
 ## Open questions
 
-### Allow empty argument list for any target type
+### Empty argument lists
 
 For which target types should an explicit empty argument list, `with()`, be allowed?
 
 ```csharp
 int[] a =               [with()]; // error?
 Span<int> s =           [with()]; // error?
-List<int> l =           [with()]; // ok: new List()
-ImmutableArray<int> m = [with()]; // ok: ImmutableArray.Create([])
+List<int> l =           [with()]; // ok? new List()
+ImmutableArray<int> m = [with()]; // ok? ImmutableArray.Create([])
 IList<int> i =          [with()]; // error?
 IEnumerable<int> e =    [with()]; // error?
 ```
