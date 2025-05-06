@@ -29,30 +29,23 @@ used to determine the appropriate `Create` overload, and are passed along accord
 This syntax was chosen as it:
 
 1. Keeps all information within the `[...]` syntax.  Ensuring that the code still clearly indicates a collection being created.
-2. Does not imply calling a `new` constructor (when that isn't how all collections are created).
-3. Does not imply creating/copying the values of the collection multiple times (like a postfix `with { ... }` might.
-4. Is both not subtle, while also not being excessively verbose.  For example, using `;` instead of `,` to indicate
+1. Does not imply calling a `new` constructor (when that isn't how all collections are created).
+1. Does not imply creating/copying the values of the collection multiple times (like a postfix `with { ... }` might.
+1. Does not contort order of operations, especially with C#'s consistent left-to-right expression evaluation ordering semantics.
+   For example, it does not evaluate the arguments used to construct a collection *after* evaluating the expressions used to
+   populate the collection.
+1. Does not force a user to read to the end of a (potentially large) collection expression to determine core behavioral semantics.
+   For example, having to see to the end of a hundred-line dictionary, only to find that, yes, it was using the right key comparer.
+1. Is both not subtle, while also not being excessively verbose.  For example, using `;` instead of `,` to indicate
    arguments is a very easy piece of syntax to miss.  `with()` only adds 6 characters, and will easily stand out,
    especially with syntax coloring of the `with` keyword.
-6. Reads nicely.  "This is a collection expression 'with' these arguments, consisting of these elements."
-7. Solves the need for comparers for both dictionaries and sets.
-8. Ensures any user need for passing arguments, or any needs we ourselves have beyond comparers in the future are already handled.
-9. Does not conflict with any existing code (using https://grep.app/ to search).
+1. Reads nicely.  "This is a collection expression 'with' these arguments, consisting of these elements."
+1. Solves the need for comparers for both dictionaries and sets.
+1. Ensures any user need for passing arguments, or any needs we ourselves have beyond comparers in the future are already handled.
+1. Does not conflict with any existing code (using https://grep.app/ to search).
 
 A minor question exists if the preferred form would be `args(...)` or `init(...)` instead of `with(...)`.  But the forms are
 otherwise identical.
-
-Open question: Should any support for passing a comparer be provided at all?  Yes/No.
-
-Working group recommendation: Yes.  Comparers are critical for proper behaving of collections, and examination of many packages
-indicates usage of them to customize collection behavior.
-
-Open question: If support for comparers is desired, should it be through a feature specific to *only* comparers?  Or should it
-handle arbitrary arguments?
-
-Working group recommendation: Support arbitrary arguments.  This solves both the 'comparer' issue, while nipping all present and
-future argument concerns in the bud.  For example, users who need to customize performance-oriented arguments (like 'capacity')
-now have a solution beyond waiting for the compiler to support the patterns they are using with the codegen they desire.
 
 ## Design Philosophy
 
@@ -325,6 +318,8 @@ class MyBuilder
 }
 ```
 
+#### Interface target type
+
 If the target type is an *interface type*, then:
 * [*Overload resolution*](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/expressions.md#1264-overload-resolution) is used to determine the best candidate method signature.
 * The set of candidate signatures is the signatures below for the target interface that are applicable with respect to the *argument list* as defined in [*applicable function member*](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/expressions.md#12642-applicable-function-member).
@@ -531,8 +526,6 @@ c = [with(__arglist(x, y)]; // ok
 
 **Resolution:** No support for `__arglist` in collection arguments unless free. [LDM-2025-03-05](https://github.com/dotnet/csharplang/blob/main/meetings/2025/LDM-2025-04-14.md#conclusion-3)
 
-## Open questions
-
 ### Arguments for *interface types*
 
 Should arguments be supported for interface target types?
@@ -542,6 +535,7 @@ ICollection<int> c = [with(capacity: 4)];
 IReadOnlyDictionary<string, int> d = [with(comparer: StringComparer.Ordinal), ..values];
 ```
 
+<details>
 If so, which method signatures are used when binding the arguments?
 
 For **mutable** interface types, the options are:
@@ -564,6 +558,16 @@ For **non-mutable** interface types, the options are similar:
 Using accessible constructors from some well known type (the strategy for mutable-interface-types) is not viable as there is no relation to any particular existing type, and the final type we may use and/or synthesize.  As such, there would have to be odd new requirements that the compiler be able to map any existing constructor of said type (even as it evolves) over to the non-mutable instance it actually generates.
 
 Recomendation: Use signatures independent of a specific type.  And, for C# 14, only support `new(IEqualityComparer<K> comparer)` for `IReadOnlyDictionary<K, V>` as that is the only non-mutable interface where we feel it is critical for usability/semantics to allow users to provide this.  Future C# releases can consider expanding on this set based on solid justifications provided.
+</details>
+
+**Resolution:** https://github.com/dotnet/csharplang/blob/main/meetings/2025/LDM-2025-04-23.md
+
+Arguments are supported for interface target types.  For both mutable and non-mutable interfaces the set of arguments will be curated.  
+
+The expected list (which still needs to be LDM ratified) is [Interface target type](#Interface-target-type)
+
+
+## Open questions
 
 ### Allow empty argument list for any target type
 
