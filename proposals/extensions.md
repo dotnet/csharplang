@@ -899,7 +899,7 @@ The current conflict rules are: 1. check no conflict within similar extensions u
 
 ### XML docs
 
-- ~~Is `paramref` to receiver parameter supported on extension members? Even on static? How is it encoded in the output? Probably standard way `<paramref name="..."/>` would work for a human,  but there is a risk that some existing tools won't be happy to not find it among the parameters on the API.~~ (answer: yes paramref is to extension parameter is allowed on extension members, LDM 2025-05-05)
+- ~~Is `paramref` to receiver parameter supported on extension members? Even on static? How is it encoded in the output? Probably standard way `<paramref name="..."/>` would work for a human,  but there is a risk that some existing tools won't be happy to not find it among the parameters on the API.~~ (answer: yes paramref to extension parameter is allowed on extension members, LDM 2025-05-05)
 - ~~Are we supposed to copy doc comments to the implementation methods with speakable names?~~ (answer: no copying, LDM 2025-05-05)
 - ~~Should `<param>` element corresponding to receiver parameter be copied from extension container for instance methods? Anything else should be copied from container to implementation methods (`<typeparam>` etc.) ?~~ (answer: no copying, LDM 2025-05-05)
 - ~~Should `<param>` for extension parameter be allowed on extension members as an override?~~ (answer: no, for now, LDM 2025-05-05)
