@@ -832,7 +832,7 @@ If we do special case comparers, the rules would say something intuitively akin 
 Note: real rules would be tbd.  The above is just a light sketch to motivate discussion.
 </details>
 
-Resolution: We do not believe specialized syntax is worth it.  We prefer this space be fully subsumed by the [Collection Expression Arguments](https://github.com/dotnet/csharplang/blob/main/proposals/collection-expression-arguments.md) feature.
+Resolution: We do not believe specialized syntax is worth it.  We prefer this space be fully subsumed by the [Collection Expression Arguments](https://github.com/dotnet/csharplang/blob/main/proposals/collection-expression-arguments.md) feature. [LDM-2025-04-23](https://github.com/dotnet/csharplang/blob/main/meetings/2025/LDM-2025-04-23.md#conclusion-2)
 
 ## Open Questions
 
