@@ -31,13 +31,16 @@ This syntax was chosen as it:
 1. Keeps all information within the `[...]` syntax.  Ensuring that the code still clearly indicates a collection being created.
 2. Does not imply calling a `new` constructor (when that isn't how all collections are created).
 3. Does not imply creating/copying the values of the collection multiple times (like a postfix `with { ... }` might.
-4. Is both not subtle, while also not being excessively verbose.  For example, using `;` instead of `,` to indicate
+4. Does not contort order of operations, especially with C#'s consistent left-to-right expression evaluation ordering semantics.
+   For example, it does not evaluate the arguments used to construct a collection *after* evaluating the expressions used to
+   populate the collection.
+6. Is both not subtle, while also not being excessively verbose.  For example, using `;` instead of `,` to indicate
    arguments is a very easy piece of syntax to miss.  `with()` only adds 6 characters, and will easily stand out,
    especially with syntax coloring of the `with` keyword.
-6. Reads nicely.  "This is a collection expression 'with' these arguments, consisting of these elements."
-7. Solves the need for comparers for both dictionaries and sets.
-8. Ensures any user need for passing arguments, or any needs we ourselves have beyond comparers in the future are already handled.
-9. Does not conflict with any existing code (using https://grep.app/ to search).
+7. Reads nicely.  "This is a collection expression 'with' these arguments, consisting of these elements."
+8. Solves the need for comparers for both dictionaries and sets.
+9. Ensures any user need for passing arguments, or any needs we ourselves have beyond comparers in the future are already handled.
+10. Does not conflict with any existing code (using https://grep.app/ to search).
 
 A minor question exists if the preferred form would be `args(...)` or `init(...)` instead of `with(...)`.  But the forms are
 otherwise identical.
