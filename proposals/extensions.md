@@ -668,7 +668,12 @@ We'd exclude:
 - `Count`/`Length` properties and indexers in list-pattern
 - `Count`/`Length` properties and indexers in implicit indexers
 
-- Where should delegate-returning properties come into play?  
+##### Where should delegate-returning properties come into play?
+Instance properties of this shape don't come into play, except in LINQ queries.
+
+##### Should `Index` and `Range` extension indexers contribute to list and spread patterns?
+
+##### Revisit where `Count`/`Length` extension properties come into play  
 
 #### [Collection expressions](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-12.0/collection-expressions.md)
 
