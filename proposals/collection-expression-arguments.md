@@ -580,12 +580,12 @@ The expected list (which still needs to be LDM ratified) is [Interface target ty
 For which target types should an explicit empty argument list, `with()`, be allowed?
 
 ```csharp
-int[] a =               [with()]; // error?
-Span<int> s =           [with()]; // error?
 List<int> l =           [with()]; // ok? new List()
 ImmutableArray<int> m = [with()]; // ok? ImmutableArray.Create([])
 IList<int> i =          [with()]; // error?
 IEnumerable<int> e =    [with()]; // error?
+int[] a =               [with()]; // error?
+Span<int> s =           [with()]; // error?
 ```
 
 Recomendation: *arrays* and *span types* should not allow arguments in the first place.  The set of types that allow arguments should be specifically:
