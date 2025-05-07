@@ -335,7 +335,7 @@ If the target type is an *interface type*, then:
   |`IReadOnlyDictionary<K, V>`|`(IEqualityComparer<K>? comparer)`|
   |`IDictionary<K, V>`|`(int capacity)`<br>`(IEqualityComparer<K>? comparer)`<br>`(int capacity, IEqualityComparer<K>? comparer)`|
 
-* If a best factory method is found, a method with that signature *or an equivalent initialization* is invoked with the *argument list*.
+* If a best method signature is found, a method with that signature *or an equivalent initialization* is invoked with the *argument list*.
 * Otherwise, a binding error is reported.
 
 ```csharp
