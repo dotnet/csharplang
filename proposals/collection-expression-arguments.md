@@ -564,22 +564,23 @@ The expected list (which still needs to be LDM ratified) is [Interface target ty
 
 ### Empty argument lists
 
-For which target types should an explicit empty argument list, `with()`, be allowed?
+Should we allow empty argument lists for some or all target types?
+
+An empty `with()` would be equivalent to no `with()`. It might provide some consistency with non-empty cases, but it wouldn’t add any new capability.
+
+The meaning of an empty `with()` might be clearer for some target types than others:
+- For types where **constructors** are used, call the applicable constructor with no arguments.
+- For types with **`CollectionBuilderAttribute`**, call the applicable factory method with elements only.
+- For **interface types**, construct the well-known or implementation-defined type with no arguments.
+- However, for **arrays** and **spans**, where collection arguments are not otherwise supported, `with()` may be confusing.
 
 ```csharp
-List<int> l =           [with()]; // ok? new List()
-ImmutableArray<int> m = [with()]; // ok? ImmutableArray.Create([])
-IList<int> i =          [with()]; // error?
-IEnumerable<int> e =    [with()]; // error?
-int[] a =               [with()]; // error?
-Span<int> s =           [with()]; // error?
+List<int>           l = [with()]; // ok? new List<int>()
+ImmutableArray<int> m = [with()]; // ok? ImmutableArray.Create<int>()
+
+IList<int>       i = [with()]; // ok? new List<int>() or equivalent
+IEnumerable<int> e = [with()]; // ok?
+
+int[]     a = [with()]; // ok?
+Span<int> s = [with()]; // ok?
 ```
-
-Recomendation: *arrays* and *span types* should not allow arguments in the first place.  The set of types that allow arguments should be specifically:
-
-1. Types with constructors, where `with(...)` will map to one of the constructors.
-2. Types with `CollectionBuilderAttribute`, where `with(...)` will map to the first N-1 parameters of some associated builder method.
-3. Well-known mutable interface types, where `with(...)` maps to the well known corresponding concrete type that will be used to instantiate that type.
-4. Non-mutable interface types with a specified set of allowed `with(...)` signatures.
-
-All other cases should not allow `with()`.
