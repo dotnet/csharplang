@@ -301,9 +301,10 @@ l = [with(default)];           // error: ambiguous constructor
 #### CollectionBuilderAttribute methods
 
 If the target type is a type with a *create method*, then:
-* [*Overload resolution*](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/expressions.md#1264-overload-resolution) is used to determine the best factory method from the candidates.
-* The set of candidate factory methods is the [*create method candidates*](#create-method-candidates) for the target type that are applicable with respect to the *argument list* as defined in [*applicable create methods*](#applicable-create-method).
-* If a best factory method is found, the method is invoked with the *argument list* appended with a `ReadOnlySpan<T>` containing the elements.
+* [*Overload resolution*](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/expressions.md#1264-overload-resolution) is used to determine the best create method from the candidates.
+* For each [*create method*](#create-methods) for the target type, we define a *projection method* with an identical signature to the create method but *without the last parameter*.
+* The set of *candidate projection methods* is the projection methods that are applicable with respect to the *argument list* as defined in [*applicable function member*](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/expressions.md#12642-applicable-function-member).
+* If a best projection method is found, the corresponding create method is invoked with the *argument list* appended with a `ReadOnlySpan<T>` containing the elements.
 * Otherwise, a binding error is reported.
 
 ```csharp
@@ -359,9 +360,9 @@ Span<int> a = [with(), 1, 2, 3]; // error: arguments not supported
 Span<int> b = [with([1, 2]), 3]; // error: arguments not supported
 ```
 
-### Create method candidates
+### Create methods
 
-For a collection expression where the target type *definition* has a `[CollectionBuilder]` attribute, the *create method candidates* for overload resolution are the following, **updated** from [*collection expressions: create methods*](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-12.0/collection-expressions.md#create-methods).
+For a collection expression where the target type *definition* has a `[CollectionBuilder]` attribute, the *create methods* are the following, **updated** from [*collection expressions: create methods*](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-12.0/collection-expressions.md#create-methods).
 
 > A `[CollectionBuilder(...)]` attribute specifies the *builder type* and *method name* of a method to be invoked to construct an instance of the collection type.
 > 
@@ -383,22 +384,8 @@ For a collection expression where the target type *definition* has a `[Collectio
 > For a *collection expression* with a target type <code>C&lt;S<sub>0</sub>, S<sub>1</sub>, &mldr;&gt;</code> where the *type declaration* <code>C&lt;T<sub>0</sub>, T<sub>1</sub>, &mldr;&gt;</code> has an associated *builder method* <code>B.M&lt;U<sub>0</sub>, U<sub>1</sub>, &mldr;&gt;()</code>, the *generic type arguments* from the target type are applied in order &mdash; and from outermost containing type to innermost &mdash; to the *builder method*.
 
 The key differences from the earlier algorithm are:
-* Candidate methods may have additional parameters *before* the `ReadOnlySpan<E>` parameter.
-* Multiple candidate methods are supported.
-
-### Applicable create method
-
-The definition of *applicable create method*, given a *collection arguments* list, is adapted from [*applicable function member*](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/expressions.md#12642-applicable-function-member):
-
-> **A method candidate is an *applicable create method* with respect to *collection arguments* `A`, possibly empty, when all of the following are true:**
-> * Each argument in `A` corresponds to a parameter **from the create method *excluding the last parameter***, at most one argument corresponds to each parameter, and any parameter to which no argument corresponds is an optional parameter.
-> * For each argument in `A`, the parameter-passing mode of the argument is identical to the parameter-passing mode of the corresponding parameter, and
->   * for a value parameter ~~or a parameter array~~, an implicit conversion exists from the argument expression to the type of the corresponding parameter, or
->   * for a reference or output parameter, there is an identity conversion between the type of the argument expression (if any) and the type of the corresponding parameter, or
->   * for an input parameter when the corresponding argument has the `in` modifier, there is an identity conversion between the type of the argument expression (if any) and the type of the corresponding parameter, or
->   * for an input parameter when the corresponding argument omits the `in` modifier, an implicit conversion exists from the argument expression to the type of the corresponding parameter.
-> 
-> **The *parameter list* cannot contain a `params` parameter since the last parameter of the *create method* is excluded, so the candidate must be applicable in *normal form*.**
+* Create methods may have additional parameters *before* the `ReadOnlySpan<E>` parameter.
+* Multiple create methods are supported.
 
 ## Answered questions
 
