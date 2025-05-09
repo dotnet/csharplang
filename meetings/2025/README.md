@@ -15,7 +15,27 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ## Schedule
 
+### Wed Jul 2, 2025
+
+### Mon Jun 30, 2025
+
+### Wed Jun 25, 2025
+
+### Mon Jun 23, 2025
+
+### Wed Jun 18, 2025
+
+### Mon Jun 16, 2025
+
+### Wed Jun 11, 2025
+
+### Mon Jun 9, 2025
+
+### Wed Jun 4, 2025
+
 ### Wed May 28, 2025
+
+- Nominal type unions (Matt and Mads)
 
 ### Wed May 14, 2025 (second hour only)
 
