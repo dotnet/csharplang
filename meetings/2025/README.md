@@ -37,13 +37,18 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 - Nominal type unions (Matt and Mads)
 
+## C# Language Design Notes for 2025
+
 ### Mon May 12, 2025
 
-- Dictionary expressions: [collection arguments](https://github.com/dotnet/csharplang/blob/main/proposals/collection-expression-arguments.md#open-questions), [dictionary expressions open questions](https://github.com/dotnet/csharplang/blob/main/proposals/dictionary-expressions.md#open-questions) (cston, CyrusNajmabadi)
-- [KeyValuePair<,> variance with params](https://github.com/dotnet/csharplang/blob/main/proposals/dictionary-expressions.md#support-keyvaluepair-variance-with-params) (cston, CyrusNajmabadi)
+[C# Language Design Meeting for May 12th, 2025](https://github.com/dotnet/csharplang/blob/main/meetings/2025/LDM-2025-05-12.md)
 
-## C# Language Design Notes for 2025
- 
+- Collection expression arguments
+    - Empty argument lists
+    - Constructor binding behavior
+    - Syntax
+- Dictionary expressions
+
 ### Wed May 7, 2025
 
 [C# Language Design Meeting for May 7th, 2025](https://github.com/dotnet/csharplang/blob/main/meetings/2025/LDM-2025-05-07.md)
