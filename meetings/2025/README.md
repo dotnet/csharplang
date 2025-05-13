@@ -37,8 +37,6 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 - Nominal type unions (Matt and Mads)
 
-### Wed May 14, 2025 (second hour only)
-
 ### Mon May 12, 2025
 
 - Dictionary expressions: [collection arguments](https://github.com/dotnet/csharplang/blob/main/proposals/collection-expression-arguments.md#open-questions), [dictionary expressions open questions](https://github.com/dotnet/csharplang/blob/main/proposals/dictionary-expressions.md#open-questions) (cston, CyrusNajmabadi)
