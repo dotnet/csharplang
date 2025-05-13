@@ -655,23 +655,25 @@ This excludes:
 - `GetResult` in `await`
 
 #### Properties and indexers
-- ~~Where should extension properties and indexers come into play?~~  (answer: let's start with the four, LDM 2025-05-05) 
+- ~~Where should extension properties and indexers come into play?~~  (answer: let's start with the four, LDM 2025-05-05)  
+
 We'd include:
 - object initializer: `new C() { ExtensionProperty = ... }`
 - dictionary intializer: `new C() { [0] = ... }`
 - `with`: `x with { ExtensionProperty = ... }`
-- property patterns: `x is { ExtensionProperty: ... }`
-
+- property patterns: `x is { ExtensionProperty: ... }`  
+  
 We'd exclude:
 - `Current` in `foreach`
 - `IsCompleted` in `await`
 - `Count`/`Length` properties and indexers in list-pattern
 - `Count`/`Length` properties and indexers in implicit indexers
 
-##### Where should delegate-returning properties come into play?
-Instance properties of this shape don't come into play, except in LINQ queries.
+##### Delegate-returning properties
+- Confirm that extension properties of this shape should only come into play in LINQ queries, to match what instance properties do.
 
-##### Should `Index` and `Range` extension indexers contribute to list and spread patterns?
+##### List and spread pattern
+- Confirm that extension `Index`/`Range` indexers should play in list-patterns
 
 ##### Revisit where `Count`/`Length` extension properties come into play  
 
@@ -680,7 +682,7 @@ Instance properties of this shape don't come into play, except in LINQ queries.
 - Extension `Add` works
 - Extension `GetEnumerator` works for spread
 - Extension `GetEnumerator` does not affect the determination of the element type (must be instance)
-- Extensions `Create` does not count as a blessed **create** method
+- Static `Create` extension methods should not count as a blessed **create** method
 - Should extension countable properties affect collection expressions?
 
 #### [`params` collections](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-13.0/params-collections.md)
@@ -689,7 +691,7 @@ Instance properties of this shape don't come into play, except in LINQ queries.
 
 #### [dictionary expressions](https://github.com/dotnet/csharplang/blob/main/proposals/dictionary-expressions.md)
 
-- Extension indexers?
+- Confirm that extension indexers don't play in dictionary expressions, as the presence of the indexer is an integral part of what defines a dictionary type.
 
 ### Naming/numbering scheme for skeleton type
 
