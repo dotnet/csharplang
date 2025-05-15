@@ -942,8 +942,6 @@ The current conflict rules are: 1. check no conflict within similar extensions u
 - Will the summary on extension blocks would appear anywhere?
 - Review proposal for referencing extension (skeleton) members by `cref`
 
-TODO2
-
 ### Add support for more member kinds
 
 We do not need to implement all of this design at once, but can approach it one or a few member kinds at a time. 
