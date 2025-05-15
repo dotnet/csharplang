@@ -597,6 +597,28 @@ yield the following xml:
 </doc>
 ```
 
+### CREF references
+
+We can treat extension blocks like nested types, that can be address by their signature (as if it were a method with a single extension parameter).
+Example: `E.extension(ref int).M()`.
+
+```csharp
+static class E
+{
+  extension(ref int i)
+  {
+    void M() { } // can be addressed by cref="E.extension(ref int).M()"
+  }
+  extension(ref  int i)
+  {
+    void M(int i2) { } // can be addressed by cref="E.extension(ref int).M(int)"
+  }
+}
+```
+
+The lookup knowns to look in all matching extension blocks.  
+As we disallow unqualified references to extension members, cref would also disallow them.
+
 ## Breaking changes
 
 Types and aliases may not be named "extension".
@@ -889,8 +911,11 @@ public static class Extensions
 
 ### Extension declaration validation
 
-- ~~Should we relax the type parameter validation (inferrability: all the type parameters must appear in the type of the extension parameter) where there are only methods?  This would allow porting 100% of classic extension methods.  
-If you have `TResult M<TResult, TSource>(this TSource source)`, you could port it as `extension<TResult, TSource>(TSource source) { TResult M() ... }`.~~ (answer: no, LDM 2025-03-17)
+- Should we relax the type parameter validation (inferrability: all the type parameters must appear in the type of the extension parameter) where there are only methods?  This would allow porting 100% of classic extension methods.  
+If you have `TResult M<TResult, TSource>(this TSource source)`, you could port it as `extension<TResult, TSource>(TSource source) { TResult M() ... }`. (answer: no, but should revisit, LDM 2025-03-17)
+
+The WG proposes to relax this restriction for extension methods (for increased portability), but keep it for members that disallow explicit type arguments (properties/indexers/operators).
+
 - ~~Confirm whether init-only accessors should be allowed in extensions~~  (answer: okay to disallow for now, LDM 2025-04-17)
 - ~~Should the only difference in receiver ref-ness be allowed `extension(int receiver) { public void M2() {} }`    `extension(ref int receiver) { public void M2() {} }`?~~ (answer: no, keep spec'ed rule, LDM 2025-03-24)
 - ~~Should we complain about a conflict like this `extension(object receiver) { public int P1 => 1; }`   `extension(object receiver) { public int P1 {set{}} }`?~~ (answer: yes, keep spec'ed rule, LDM 2025-03-24)
@@ -915,7 +940,9 @@ The current conflict rules are: 1. check no conflict within similar extensions u
 - ~~Should `<param>` element corresponding to receiver parameter be copied from extension container for instance methods? Anything else should be copied from container to implementation methods (`<typeparam>` etc.) ?~~ (answer: no copying, LDM 2025-05-05)
 - ~~Should `<param>` for extension parameter be allowed on extension members as an override?~~ (answer: no, for now, LDM 2025-05-05)
 - Will the summary on extension blocks would appear anywhere?
-- Can extension (skeleton) members be referenced by `cref`?
+- Review proposal for referencing extension (skeleton) members by `cref`
+
+TODO2
 
 ### Add support for more member kinds
 
