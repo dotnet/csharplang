@@ -693,6 +693,10 @@ We'd exclude:
 
 - Confirm that extension indexers don't play in dictionary expressions, as the presence of the indexer is an integral part of what defines a dictionary type.
 
+### `extern`
+
+- Consider allowing `extern` for portability: https://github.com/dotnet/roslyn/issues/78572
+
 ### Naming/numbering scheme for skeleton type
 
 [Issue](https://github.com/dotnet/roslyn/issues/78416)  
