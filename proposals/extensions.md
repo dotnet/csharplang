@@ -173,6 +173,8 @@ It is an error to specify the following modifiers on a member of an extension de
 Properties in extension declarations may not have `init` accessors.  
 The instance members are disallowed if the _receiver parameter_ is unnamed.  
 
+It is an error to decorate an extension member with the `[ModuleInitializer]` attribute.
+
 ### Refness
 
 By default the receiver is passed to instance extension members by value, just like other parameters. 
@@ -626,6 +628,7 @@ Types and aliases may not be named "extension".
 ## Open issues
 
 - ~~Confirm `extension` vs. `extensions` as the keyword~~ (answer: `extension`, LDM 2025-03-24)
+- Confirm that we want to disallow `[ModuleInitializer]`
 
 ### nameof
 
