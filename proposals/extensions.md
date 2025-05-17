@@ -173,6 +173,8 @@ It is an error to specify the following modifiers on a member of an extension de
 Properties in extension declarations may not have `init` accessors.  
 The instance members are disallowed if the _receiver parameter_ is unnamed.  
 
+It is an error to decorate an extension member with the `[ModuleInitializer]` attribute.
+
 ### Refness
 
 By default the receiver is passed to instance extension members by value, just like other parameters. 
@@ -567,6 +569,28 @@ yield the following xml:
 </doc>
 ```
 
+### CREF references
+
+We can treat extension blocks like nested types, that can be address by their signature (as if it were a method with a single extension parameter).
+Example: `E.extension(ref int).M()`.
+
+```csharp
+static class E
+{
+  extension(ref int i)
+  {
+    void M() { } // can be addressed by cref="E.extension(ref int).M()"
+  }
+  extension(ref  int i)
+  {
+    void M(int i2) { } // can be addressed by cref="E.extension(ref int).M(int)"
+  }
+}
+```
+
+The lookup knowns to look in all matching extension blocks.  
+As we disallow unqualified references to extension members, cref would also disallow them.
+
 ## Breaking changes
 
 Types and aliases may not be named "extension".
@@ -574,6 +598,7 @@ Types and aliases may not be named "extension".
 ## Open issues
 
 - ~~Confirm `extension` vs. `extensions` as the keyword~~ (answer: `extension`, LDM 2025-03-24)
+- Confirm that we want to disallow `[ModuleInitializer]`
 
 ### nameof
 
@@ -625,27 +650,34 @@ This excludes:
 - `GetResult` in `await`
 
 #### Properties and indexers
-- ~~Where should extension properties and indexers come into play?~~  (answer: let's start with the four, LDM 2025-05-05) 
+- ~~Where should extension properties and indexers come into play?~~  (answer: let's start with the four, LDM 2025-05-05)  
+
 We'd include:
 - object initializer: `new C() { ExtensionProperty = ... }`
 - dictionary intializer: `new C() { [0] = ... }`
 - `with`: `x with { ExtensionProperty = ... }`
-- property patterns: `x is { ExtensionProperty: ... }`
-
+- property patterns: `x is { ExtensionProperty: ... }`  
+  
 We'd exclude:
 - `Current` in `foreach`
 - `IsCompleted` in `await`
 - `Count`/`Length` properties and indexers in list-pattern
 - `Count`/`Length` properties and indexers in implicit indexers
 
-- Where should delegate-returning properties come into play?  
+##### Delegate-returning properties
+- Confirm that extension properties of this shape should only come into play in LINQ queries, to match what instance properties do.
+
+##### List and spread pattern
+- Confirm that extension `Index`/`Range` indexers should play in list-patterns
+
+##### Revisit where `Count`/`Length` extension properties come into play  
 
 #### [Collection expressions](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-12.0/collection-expressions.md)
 
 - Extension `Add` works
 - Extension `GetEnumerator` works for spread
 - Extension `GetEnumerator` does not affect the determination of the element type (must be instance)
-- Extensions `Create` does not count as a blessed **create** method
+- Static `Create` extension methods should not count as a blessed **create** method
 - Should extension countable properties affect collection expressions?
 
 #### [`params` collections](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-13.0/params-collections.md)
@@ -654,7 +686,11 @@ We'd exclude:
 
 #### [dictionary expressions](https://github.com/dotnet/csharplang/blob/main/proposals/dictionary-expressions.md)
 
-- Extension indexers?
+- Confirm that extension indexers don't play in dictionary expressions, as the presence of the indexer is an integral part of what defines a dictionary type.
+
+### `extern`
+
+- Consider allowing `extern` for portability: https://github.com/dotnet/roslyn/issues/78572
 
 ### Naming/numbering scheme for skeleton type
 
@@ -848,8 +884,11 @@ public static class Extensions
 
 ### Extension declaration validation
 
-- ~~Should we relax the type parameter validation (inferrability: all the type parameters must appear in the type of the extension parameter) where there are only methods?  This would allow porting 100% of classic extension methods.  
-If you have `TResult M<TResult, TSource>(this TSource source)`, you could port it as `extension<TResult, TSource>(TSource source) { TResult M() ... }`.~~ (answer: no, LDM 2025-03-17)
+- Should we relax the type parameter validation (inferrability: all the type parameters must appear in the type of the extension parameter) where there are only methods?  This would allow porting 100% of classic extension methods.  
+If you have `TResult M<TResult, TSource>(this TSource source)`, you could port it as `extension<TResult, TSource>(TSource source) { TResult M() ... }`. (answer: no, but should revisit, LDM 2025-03-17)
+
+The WG proposes to relax this restriction for extension methods (for increased portability), but keep it for members that disallow explicit type arguments (properties/indexers/operators).
+
 - ~~Confirm whether init-only accessors should be allowed in extensions~~  (answer: okay to disallow for now, LDM 2025-04-17)
 - ~~Should the only difference in receiver ref-ness be allowed `extension(int receiver) { public void M2() {} }`    `extension(ref int receiver) { public void M2() {} }`?~~ (answer: no, keep spec'ed rule, LDM 2025-03-24)
 - ~~Should we complain about a conflict like this `extension(object receiver) { public int P1 => 1; }`   `extension(object receiver) { public int P1 {set{}} }`?~~ (answer: yes, keep spec'ed rule, LDM 2025-03-24)
@@ -874,7 +913,7 @@ The current conflict rules are: 1. check no conflict within similar extensions u
 - ~~Should `<param>` element corresponding to receiver parameter be copied from extension container for instance methods? Anything else should be copied from container to implementation methods (`<typeparam>` etc.) ?~~ (answer: no copying, LDM 2025-05-05)
 - ~~Should `<param>` for extension parameter be allowed on extension members as an override?~~ (answer: no, for now, LDM 2025-05-05)
 - Will the summary on extension blocks would appear anywhere?
-- Can extension (skeleton) members be referenced by `cref`?
+- Review proposal for referencing extension (skeleton) members by `cref`
 
 ### Add support for more member kinds
 
