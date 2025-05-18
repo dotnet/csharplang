@@ -8,6 +8,8 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 - Triage (working set)
 
+- Letting lambdas be iterator (sync and async) https://github.com/dotnet/csharplang/discussions/9393
+
 ## Recurring topics
 
 - *Triage championed features and milestones*
