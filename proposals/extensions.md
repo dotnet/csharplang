@@ -382,6 +382,10 @@ class is considered the "containing type" which ORPA rules consider.
 Any ORPA attribute present on an extension property is copied onto the implementation methods for the property's accessors,
 so that the prioritization is respected when those accessors are used via diambiguation syntax.  
 
+### Entry points
+
+Methods of extension blocks do not qualify as entry point candidates (see "7.1 Application startup").
+
 ## Lowering
 
 The lowering strategy for extension declarations is not a language level decision. 
@@ -628,6 +632,7 @@ Types and aliases may not be named "extension".
 
 - ~~Confirm `extension` vs. `extensions` as the keyword~~ (answer: `extension`, LDM 2025-03-24)
 - Confirm that we want to disallow `[ModuleInitializer]`
+- Confirm that we're okay to discard extension blocks as entry point candidates
 
 ### nameof
 
