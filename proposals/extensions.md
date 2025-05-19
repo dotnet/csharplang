@@ -384,7 +384,7 @@ so that the prioritization is respected when those accessors are used via diambi
 
 ### Entry points
 
-Methods of extension blocks do not qualify as entry point candidates (see "7.1 Application startup").
+Methods in extension blocks and their implementation methods do not qualify as entry point candidates (see "7.1 Application startup").
 
 ## Lowering
 
