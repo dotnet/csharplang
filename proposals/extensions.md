@@ -40,7 +40,6 @@ extension_body // add
 extension_member_declaration // add
     : method_declaration
     | property_declaration
-    | indexer_declaration
     | operator_declaration
     ;
 
@@ -155,7 +154,7 @@ public static class Enumerable
 }
 ```
 
-It is an error to specify an instance extension member (method, property, indexer or event)
+It is an error to specify an instance extension member
 if the enclosing extension declaration does not specify a receiver parameter:
 
 ``` c#
@@ -408,7 +407,7 @@ Each extension declaration in source is emitted as an extension declaration in m
 - Its type parameters are those declared in source (including attributes).  
 - Its accessibility is public.  
 
-Method/property/indexer declarations in an extension declaration in source are represented as skeleton members in metadata.  
+Method/property declarations in an extension declaration in source are represented as skeleton members in metadata.  
 The signatures of the original methods are maintained (including attributes), but their bodies are replaced with `throw null`.  
 Those should not be referenced in IL.  
 
@@ -426,7 +425,7 @@ Note: we may choose to only emit one extension skeleton type in metadata when du
 
 #### Implementations
 
-The method bodies for method/property/indexer declarations in an extension declaration in source are emitted 
+The method bodies for method/property declarations in an extension declaration in source are emitted 
 as static implementation methods in the top-level static class.  
 - An implementation method has the same name as the original method.  
 - It has type parameters derived from the extension declaration prepended to the type parameters of the original method (including attributes).  
