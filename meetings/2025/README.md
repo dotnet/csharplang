@@ -35,9 +35,11 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ### Wed Jun 4, 2025
 
+- Extensions (Julien)
+
 ### Wed May 28, 2025
 
-- Nominal type unions (Matt and Mads)
+- Nominal type unions (Matt and Mads): [nominal-type-unions.md](https://github.com/dotnet/csharplang/blob/ab60b97b53381e6934fcbc65e92e9798db641227/proposals/nominal-type-unions.md)
 
 ## C# Language Design Notes for 2025
 
