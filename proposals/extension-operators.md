@@ -113,3 +113,73 @@ public static class Extensions
 This makes such operator declarations somewhat useless, they won't ever be consumed on `null` instances,
 and, therefore, no real reason to have nullable parameter types. Should declarations like this be disallowed?
 
+### Applicability of bitwise operators during evaluation of user-defined conditional logical operators
+
+Language adds extra [restrictions](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/expressions.md#12143-user-defined-conditional-)
+to bitwise operators suitable for evaluation of user-defined conditional logical operators:
+
+>When the operands of `&&` or `||` are of types that declare an applicable user-defined `operator &` or `operator |`, both of the following shall be true, where `T` is the type in which the selected operator is declared:
+>
+>- The return type and the type of each parameter of the selected operator shall be `T`. In other words, the operator shall compute the logical AND or the logical OR of two operands of type `T`, and shall return a result of type `T`.
+>- `T` shall contain declarations of `operator true` and `operator false`.
+
+However, the specification isn't clear whether the restriction should eliminate a candidate bitwise operator
+as inapplicable when the requirements are not satisfied, or the requirements should be applied to the best
+bitwise operator after overload resolution among the candidates is complete. Right now, compiler 
+implements the latter, which leads to the following behavior:
+``` c#
+ S1 s1 = new S1();
+ S2 s2 = new S2();
+        
+ // error CS0217: In order to be applicable as a short circuit operator
+ //               a user-defined logical operator ('S1.operator &(S1, S2)')
+ //               must have the same return type and parameter types
+ _ = s1 && s2;
+ 
+struct S1
+{
+    // If this operator is removed, candidate from S2 is successfully used
+    public static S2 operator &(S1 x, S2 y) => y;
+}
+
+struct S2
+{
+    public static S2 operator &(S2 x, S2 y) => y;
+    public static bool operator true(S2 x) => false;
+    public static bool operator false(S2 x) => true;
+    
+    public static implicit operator S2(S1 x) => default;
+}
+```
+
+Here is another example that could benefit from the former approach:
+``` C#
+S1 s1 = new S1();
+S2 s2 = new S2();
+
+// error CS0034: Operator '&&' is ambiguous on operands of type 'S1' and 'S2'
+_ = s1 && s2;
+
+struct S1
+{
+    // If this operator is removed, candidate from S2 is successfully used
+    public static S1 operator &(S1 x, S1 y) => y;
+    public static implicit operator S1(S2 x) => default;
+}
+
+struct S2
+{
+    public static S2 operator &(S2 x, S2 y) => y;
+    public static bool operator true(S2 x) => false;
+    public static bool operator false(S2 x) => true;
+    
+    public static implicit operator S2(S1 x) => default;
+}
+```
+
+The precise applicability rules are even more important for extension operators. Extension operators are considered
+only when there are no applicable regular user-defined operators. And, only when there are no applicable
+extension operators in the given extension scope, candidates from next extension scope are considered. 
+
+Hence the question, should the restrictions be part of a candidate applicability check during overload 
+resolution rather than a post validation after the overload resolution is complete?
