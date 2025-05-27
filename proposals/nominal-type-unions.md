@@ -602,6 +602,42 @@ This is an interesting area to consider perhaps adding a compile-time only const
 ## Optional Features
 The rest of the proposal includes optional features that may enhance capability or improve performance of nominal type unions.
 
+#### Features that improve the representation or access of the value
+  - Access Patterns
+    - [Discriminator Access Pattern](#discriminator-access-pattern)  
+    - [TryGet Access Pattern](#tryget-access-pattern)  
+    - [Generic TryGet Access Pattern](#generic-tryget-access-pattern)
+  - Storage Layouts
+    - [Discriminated Boxed Layout](#discriminated-boxed-layout)  
+    - [Fat Layout](#fat-layout)  
+    - [Skim Layout](#skim-layout)  
+    - [Overlapped Layout](#overlapped-layout)
+    - [Deconstructed Layout](#deconstructed-layout)  
+    - [Overlapped Deconstructed Layout](#overlapped-deconstructed-layout)  
+    - [Hybrid Layout](#hybrid-layout)  
+  
+#### Features that make the union behave more like the value in more places
+  - More Conversions
+    - [Conversion from unknown case to union](#type-pattern-match-unknown-to-union)  
+    - [Conversion from union to union](#type-pattern-match-from-union-to-union)  
+    - [Implicit conversion from union to union](#implicit-conversion-from-union-to-union)  
+  - Common Members 
+    - [Common Member Proxies](#common-member-proxies)  
+    - [Common Member Access](#common-member-access)
+    - [Common Base Types](#common-base-types)  
+    - [Common Interface Implementation](#common-interface-implementation)  
+    - [ToString](#tostring)  
+    - [Equality](#equality)  
+  
+#### Features that help with interop or reflection
+  - [Common Helper Methods](#common-helper-methods)  
+  - [Common Interfaces](#common-interface)  
+
+#### Miscellaneous
+  - [Default Unions](#default-unions)
+  - [Combined Unions](#combined-unions)
+</br>
+
 ----
 ### Type Pattern Match Unknown to Union
 To enable conversion of a value not statically known to be a case type to a union type, a special translation exists.
