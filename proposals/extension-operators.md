@@ -71,3 +71,45 @@ var i = 2 * 3;       // predefined operator *(int, int)
 var v = numbers * 4; // extension operator *(int[], int)
 v *= 5;              // extension operator *=(int)
 ```
+
+## Open design questions
+
+### Should extension operators on Nullable of extended type be disallowed?
+
+It is allowed to declare a regular user-defined operator on Nullable of containing type.
+Such operator can be consumed on an instance of containing type, as well as on an 
+instance of Nullable of containing type.
+``` c#
+S1? s1 = new S1();
+s1 = +s1; // Ok
+s1 = +s1.Value; // Ok
+
+struct S1
+{
+    public static S1? operator +(S1? x) => x;
+}
+```
+
+Similarly, it is allowed to declare an extension user-defined operator on Nullable of extended type. 
+However, such operator can be consumed only on an instance of extended type. Consumption on an 
+instance of Nullable of extended type is not allowed because a conversion from ```Nullable<T>``` to 
+```T``` is not a valid extension receiver type conversion.
+``` c#
+S1? s1 = new S1();
+s1 = +s1; // Error: no matching operator
+s1 = +s1.Value; // Ok
+
+struct S1;
+
+public static class Extensions
+{
+    extension(S1)
+    {
+        public static S1? operator +(S1? x) => x;
+    }
+}
+```
+
+This makes such operator declarations somewhat useless, they won't ever be consumed on `null` instances,
+and, therefore, no real reason to have nullable parameter types. Should declarations like this be disallowed?
+
