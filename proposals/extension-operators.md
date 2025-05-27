@@ -224,3 +224,11 @@ public static class Extensions
 public struct S1
 {}
 ``` 
+
+### Extension compound assignment operators
+
+Compound assignment operators are instance operators and are supposed to mutate the instance.
+Therefore, the following restrictions are proposed for extension compound assignment operators:
+- Receiver type must be known to be either a reference type or a value type. I.e. cannot be an unconstrained type parameter.
+- If receiver type is a value type, the receiver parameter must be a 'ref' parameter.
+- If receiver type is a reference type, the receiver parameter must be a value parameter.
