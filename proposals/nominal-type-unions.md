@@ -571,7 +571,7 @@ However, doing the equivalent manually in a context that sees the type union wil
 ---
 ### Union Constraints
 
-It may seem to make sense to specify a type-union type in a generic type parameter constrain in order to constraint a type parameter to be one of the type union's case types.
+It may seem to make sense to specify a type-union type in a generic type parameter constraint in order to constrain a type parameter to be one of the type union's case types.
 
 ```csharp
     TPet Feed<TPet>(TPet pet) where TPet : Pet {...}
