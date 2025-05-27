@@ -232,3 +232,28 @@ Therefore, the following restrictions are proposed for extension compound assign
 - Receiver type must be known to be either a reference type or a value type. I.e. cannot be an unconstrained type parameter.
 - If receiver type is a value type, the receiver parameter must be a 'ref' parameter.
 - If receiver type is a reference type, the receiver parameter must be a value parameter.
+
+### Dynamic evaluation
+
+Extension operators are not used by dynamic evaluation. This might lead to compile time errors.
+For example:
+``` c#
+dynamic s1 = new object();
+var s2 = new object();
+
+// error CS7083: Expression must be implicitly convertible to Boolean or its type 'object' must define operator 'false'.
+_ = s2 && s1;
+
+public static class Extensions
+{
+    extension(object)
+    {
+        public static object operator &(object x, object y) => x;
+        public static bool operator false(object x) => false;
+        public static bool operator true(object x) => throw null;
+    }
+}
+```
+
+An attempt to do a compile time optimization using non-dynamic static type of 's2' ignores true/false extensions.
+One might say this is desirable because runtime binder wouldn't be able to use them as well.
