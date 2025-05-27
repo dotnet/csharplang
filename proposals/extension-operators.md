@@ -183,3 +183,44 @@ extension operators in the given extension scope, candidates from next extension
 
 Hence the question, should the restrictions be part of a candidate applicability check during overload 
 resolution rather than a post validation after the overload resolution is complete?
+
+### Extension user-defined conditional logical operators
+
+The following [restrictions](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/expressions.md#12143-user-defined-conditional-)
+are specified for regular user-defined operators:
+
+>When the operands of `&&` or `||` are of types that declare an applicable user-defined `operator &` or `operator |`, both of the following shall be true, where `T` is the type in which the selected operator is declared:
+>
+>- The return type and the type of each parameter of the selected operator shall be `T`. In other words, the operator shall compute the logical AND or the logical OR of two operands of type `T`, and shall return a result of type `T`.
+>- `T` shall contain declarations of `operator true` and `operator false`.
+
+By analogy, the following restrictions are proposed for extension operators:
+When the operands of `&&` or `||` are of types that declare an applicable user-defined extension `operator &` or
+extension `operator |`, both of the following shall be true:
+
+- The operator shall compute the logical AND or the logical OR of two operands of type `T`, and shall return a result of type `T`.
+- The enclosing static class shall contain declarations of extension `operator true` and extension `operator false` applicable to
+  an instance of type `T`.
+
+ For example, these declarations satisfy the restrictions, given that lifted form of `operator &` is used:
+ ``` c#
+S1? s11 = new S1();
+S1? s12 = new S1();
+_ = s11 && s12;
+  
+public static class Extensions
+{
+    extension(S1)
+    {
+        public static S1 operator &(S1 x, S1 y) => x;
+    }
+    extension(S1?)
+    {
+        public static bool operator false(S1? x) => false;
+        public static bool operator true(S1? x) => true;
+    }
+}
+
+public struct S1
+{}
+``` 
