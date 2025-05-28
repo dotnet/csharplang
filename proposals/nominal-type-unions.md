@@ -179,7 +179,7 @@ They may even declare their case types as nested declarations:
 ```csharp
     public union Option<TValue>(Some<TValue>, None)
     {
-        public record struct Some<TValue>(TValue Value);
+        public record struct Some(TValue Value);
         public record struct None();
     }
 ```
