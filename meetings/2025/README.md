@@ -33,6 +33,8 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ### Mon Jun 9, 2025
 
+- Nominal type unions (Matt and Mads)
+
 ### Wed Jun 4, 2025
 
 - Extensions (Julien) and [extensions operators](https://github.com/dotnet/csharplang/blob/main/proposals/extension-operators.md#open-design-questions) (Aleksey)
