@@ -35,7 +35,7 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ### Wed Jun 4, 2025
 
-- Extensions (Julien)
+- Extensions (Julien) and [extensions operators](https://github.com/dotnet/csharplang/blob/main/proposals/extension-operators.md#open-design-questions) (Aleksey)
 
 ### Wed May 28, 2025
 
