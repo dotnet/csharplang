@@ -168,7 +168,7 @@ public static class Enumerable
 ```
 
 It is an error to specify the following modifiers on a member of an extension declaration:
-`abstract`, `virtual`, `override`, `new`, `sealed`, `extern`, `partial`, and `protected` (and related accessibility modifiers).  
+`abstract`, `virtual`, `override`, `new`, `sealed`, `partial`, and `protected` (and related accessibility modifiers).  
 Properties in extension declarations may not have `init` accessors.  
 The instance members are disallowed if the _receiver parameter_ is unnamed.  
 
@@ -662,10 +662,6 @@ static class E
 }
 ```
 
-### entry point
-
-- Should we skip extension blocks when looking for entry points?
-
 ### pattern-based constructs
 
 #### Methods
@@ -724,7 +720,7 @@ We'd exclude:
 
 ### `extern`
 
-- Consider allowing `extern` for portability: https://github.com/dotnet/roslyn/issues/78572
+- we're planning to allow `extern` for portability: https://github.com/dotnet/roslyn/issues/78572
 
 ### Naming/numbering scheme for skeleton type
 
@@ -732,11 +728,10 @@ We'd exclude:
 The current numbering system causes problems with the [validation of public APIs](https://learn.microsoft.com/dotnet/fundamentals/apicompat/package-validation/overview#validator-types)
 which ensures that public APIs match between reference-only assemblies and implementation assemblies.
 
-We could:
-- adjust the tool
-- use a number relative to the declared extension blocks (first, second, etc in syntactic order)
-- use some hashing scheme (TBD)
-- let the name be controlled via some syntax
+~~Should we make one of the following changes?~~ (answer: we'll adjust the tool and tweak the implementation of numbering, LDM 2025-05-05)
+1. adjust the tool
+2. use some hashing scheme (TBD)
+3. let the name be controlled via some syntax
 
 ### New generic extension Cast method still can't work in LINQ
 
@@ -745,9 +740,11 @@ In earlier designs of roles/extensions, it was possible to only specify the type
 But now that we're focusing on seemless transition from classic extension methods, all the type arguments must be given explicitly.  
 This fails to address a problem with extension Cast method usage in LINQ.
 
+~~Should we make a change to extensions feature to accomodate this scenario?~~ (answer: no, this does not cause us to revisit the extension resolution design, LDM 2025-05-05)
+
 ### Constraining the extension parameter on an extension member
 
-Should we allow the following?
+~~Should we allow the following?~~ (answer: no, this could be added later)
 
 ```csharp
 static class E
@@ -895,7 +892,7 @@ static class E
     }
 }
 ```
-- Revisit question of lookup on type parameter ([discussion](https://github.com/dotnet/csharplang/discussions/8696#discussioncomment-12817547))
+- ~~Should we allow lookup on type parameter?~~ ([discussion](https://github.com/dotnet/csharplang/discussions/8696#discussioncomment-12817547)) (answer: no, we're going to wait on feedback, LDM 2025-04-16)
 
 ### Accessibility
 
