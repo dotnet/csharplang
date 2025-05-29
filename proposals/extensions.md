@@ -270,8 +270,10 @@ This allows type parameters to be declared and inferred, and is analogous to how
 
 ## Checking
 
-__Inferrability:__ All the type parameters of an extension declaration must be used in the receiver type. 
-This makes it always possible to infer the type arguments when applied to a receiver of the given receiver type.
+__Inferrability:__ All the type parameters of an extension block must be used in the receiver type when the extension block
+contains a non-method member. 
+This makes it always possible to infer the type arguments when applied to a receiver of the given receiver type and
+the member doesn't allow explicit type arguments.
 
 __Uniqueness:__ Within a given enclosing static class, the set of extension member declarations with the same receiver type 
 (modulo identity conversion and type parameter name substitution) are treated as a single declaration space 
