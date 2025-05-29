@@ -65,7 +65,7 @@ void Use(ref Data data)
 
 ```
 
-This is accomplished by giving every `ref scoped` parameter a new escape scope named _current parameter N_ where _N_ is the numeric order of the parameter. For example the first parameter has a _safe-to-escape_ of _current parameter 1_. An escape scope of _current parameter N_ can be converted to _current method_ but has no other defined relationship. That serves to restrict their usage to the current method. 
+This is accomplished by giving every `ref scoped` parameter a new escape scope named _current parameter N_ where _N_ is the numeric order of the parameter. For example the first parameter has a _safe-to-escape_ of _current parameter 1_. An escape scope of _current parameter N_ can be converted to _current method_ but has no other defined relationship. That serves to restrict their usage to the current method.
 
 It's important to note each parameter has a different _current parameter N_ scope. That means they cannot be assigned to each other. This is necessary to prevent `ref scoped` parameters from returning each others data.
 
@@ -110,6 +110,12 @@ Detailed notes:
 
 - A `ref scoped` parameter is implicitly `scoped ref`
 - An `out scoped` parameter declaration is an error
+
+### ref scoped locals
+
+The language will allow for locals to be declared as `ref scoped`. This will serve to have the lifetime of the value be _current method_. This lifetime is exactly _current method_ unlike paramteers which are just known to be wider than _current method_.
+
+This is mostly useful in combination with `ref readonly` locals and their variance rules described in a later section.
 
 ### ref field to ref struct
 
@@ -173,6 +179,13 @@ ref struct S
         // Error: safe-to-escape is current-ref-field-1 which isn't returnable 
         return ref field;
     }
+
+    // In an unsafe context the diagnostic is a warning.
+    unsafe ref RefStruct M3_Unsafe()
+    {
+        // Warning: safe-to-escape is current-ref-field-1 which isn't returnable 
+        return ref field;
+    }
 }
 ```
 
@@ -182,8 +195,72 @@ The language will also allow for `ref` fields to be declared as `scoped ref`. Th
 
 Detailed notes:
 
-- A `ref` field where the type is a `ref struct` must be `ref scoped`
+- A `ref` field where the type is a `ref struct` must be `ref scoped` or `ref readonly scoped`
 - A `ref` field may be marked `scoped ref`
+
+### ref readonly and variance
+
+The lifetime of a value pointed to by a `ref` is invariant. This is imporant because the _exact_ lifetime of the value must be known in order to validate that assignments into that value are safe. If the lifetime were variant then it would be possible to assign a value with a narrower lifetime into a `ref` with a wider lifetime.
+
+```csharp
+void Example(ref Span<int> p)
+{
+    Span<int> local = stackalloc int[42];
+    ref Span<int> refLocal = ref local;
+
+    // Error:
+    // The lifetime refLocal is narrower than p. For a non-ref reassignment 
+    // this would be allowed as its safe to assign wider lifetimes to narrower ones.
+    // In the case of ref reassignment though this rule prevents it as the 
+    // safe-context values are different.
+    refLocal = ref p;
+
+    // If it were allowed this would be legal as the lifetime of refLocal
+    // is current method and that is satisfied by stackalloc. At the same time
+    // it would be assigning through p and escaping the stackalloc to the calling
+    // method
+    // 
+    // This is equivalent of saying p = stackalloc int[13]!!! 
+    refLocal = stackalloc int[13];
+}
+```
+
+This variance problem only exists for writes because we need to know the _exact_ lifetime in order to validate writes. There is no such issue for reads. Those are legal as long as the lifetime of the read is equal to or narrower than the value being read from. This means that the lifetime of the value referred to by `ref readonly` is variant.
+
+```csharp
+void ReadOnlyExample(ref Span<int> p)
+{
+    Span<int> local = stackalloc int[42];
+    Span<int> local2;
+
+    // The lifetime of the value is current method
+    ref readonly Span<int> refLocal = ref local;
+
+    // Legal because the lifetime of p is wider than current method hence the variance check succeeeds
+    refLocal = ref p;
+
+    // This is reading p into local which is legal as the lifetime is narrower
+    local = refLocal;
+}
+```
+
+This `ref readonly` variance applies to any `ref` including `ref` fields. This allows for safe consumption of a `ref` field of a `ref struct` as a `ref readonly` value.
+
+```csharp
+ref struct S
+{
+    public ref scoped Span<int> Span;
+}
+
+void M(S s)
+{
+    // Error: cannot access a ref field of ref struct as ref
+    ref Span<int> refSpat = ref s.Span;
+
+    // Okay: the lifetime of the value is implcitily current method
+    ref readonly Span<int> refReadOnlySpan = ref s.Span;
+}
+```
 
 ### Sunset restricted types
 
@@ -201,6 +278,53 @@ To support this our `ref` safety rules will be updated as follows:
 - `__arglist(...)` as an expression will have a _ref-safe-to-escape_ and _safe-to-escape_ of _current method_.
 
 Conforming runtimes will ensure that `TypedReference`, `RuntimeArgumentHandle` and `ArgIterator` are defined as `ref struct`. Further `TypedReference` must be viewed as having a `ref` field to a `ref struct` for any possible type (it can store any value). That combined with the above rules will ensure references to the stack do not escape beyond their lifetime.
+
+```csharp
+
+// This is the logical equivalent of the __makeref call in terms of lifetime semantics
+TypeReference CreateTypedReference(ref object value, Type type);
+
+TypedReference M1()
+{
+    int x = 42;
+    // This is logically the same as the following which means the lifetime is current method
+    // TypedReference tr = Create(ref x, typeof(int)); 
+    TypedReference tr = __makeref(x);
+
+    // Error: safe-to-escape is current method which is not returnable
+    return tr;
+}
+
+ref int M2(TypedReference tr)
+{
+    // Logically safe as
+    // ref tr.Field;
+    return __refvalue(tr, int);
+}
+
+void M3(TypedReference tr)
+{
+    // The type of this call is `ref scoped Span<int>` hence this is legal but the value 
+    // is implicitly scoped to the current method.
+    Span<int> span = __refvalue(tr, Span<int>);
+
+    // This identical to the above but with the explicit `scoped` annotation.
+    scoped Span<int> scopedSpan = __refvalue(tr, Span<int>);
+
+    // Error: cannot access a ref field of ref struct as ref
+    ref Span<int> refSpan = __refvalue(tr, Span<int>);
+
+    unsafe
+    {
+        // Warning: accessing a ref field of ref struct as ref 
+        ref span = ref __refvalue(tr, Span<int>);
+    }
+
+    // Okay: this ref readonly allows for variance and the lifetime of the value is 
+    // known to be wider than current method
+    ref readonly scoped Span<int> refReadOnlySpan = ref __refvalue(tr, Span<int>);
+}
+```
 
 Note: strictly speaking this is a compiler implementation detail vs. part of the language. But given the relationship with `ref` fields it is being included in the language proposal for simplicity.
 
@@ -297,5 +421,4 @@ The proposal does not provide any way to mark `this` as `ref scoped` for a given
 
 Certain readers are likely to be disappointed that `ref` field to `ref struct` must be `ref scoped`. That limits the number of scenarios which can assign `ref` data into such fields. 
 
-This is unfortunately necessary given the constraints of the design. Having a plain `ref` effectively requires that explicit lifetime annotations exist in the language. There is no other way to safely express the relationship between the value and the container. 
-
+This is unfortunately necessary given the constraints of the design. Having a plain `ref` effectively requires that explicit lifetime annotations exist in the language. There is no other way to safely express the relationship between the value and the container.
