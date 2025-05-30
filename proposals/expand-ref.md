@@ -113,7 +113,7 @@ Detailed notes:
 
 ### ref scoped locals
 
-The language will allow for locals to be declared as `ref scoped`. This will serve to have the lifetime of the value be _current method_. This lifetime is exactly _current method_ unlike paramteers which are just known to be wider than _current method_.
+The language will allow for locals to be declared as `ref scoped`. This will serve to have the lifetime of the value be _current method_. This lifetime is exactly _current method_ unlike parameters which are just known to be wider than _current method_.
 
 This is mostly useful in combination with `ref readonly` locals and their variance rules described in a later section.
 
@@ -231,7 +231,6 @@ This variance problem only exists for writes because we need to know the _exact_
 void ReadOnlyExample(ref Span<int> p)
 {
     Span<int> local = stackalloc int[42];
-    Span<int> local2;
 
     // The lifetime of the value is current method
     ref readonly Span<int> refLocal = ref local;
