@@ -787,7 +787,7 @@ public class C<T> { }
 - ~~Should the extension marker or speakable implementation methods be marked with special name?~~ (answer: the marker method should be marked with special name and we should check it, but not implementation methods, LDM 2025-04-17)
 - ~~Should we add `[Extension]` attribute on the static class even when there is no instance extension method inside?~~ (answer: yes, LDM 2025-03-10)
 - ~~Confirm we should add `[Extension]` attribute to implementation getters and setters too.~~ (answer: no, LDM 2025-03-10)
-- Confirm that the skeleton types should be marked with special name
+- Confirm that the skeleton types should be marked with special name. When we do, should the compiler require this flag in metadata? (this is a breaking change from preview)
 
 #### static factory scenario
 
