@@ -638,7 +638,10 @@ Types and aliases may not be named "extension".
 
 ### nameof
 
-- ~~Should we disallow extension properties in nameof like we do classic and new extension methods?~~ (answer: no, that's the only way to refer to the name of the property)
+- Should we disallow extension properties in nameof like we do classic and new extension methods?  
+We should probably allow since this is the only way to get the name of an extension property via `nameof`.  
+If we do allow, we'd allow static reference to an instance property, in the context of `nameof`: you could do `nameof(object.InstanceExtensionProperty)`. This is consistent with `name(C.InstanceProperty)`.  
+
 ```
 C c = null;
 _ = nameof(c.M); // Extension method groups are not allowed as an argument to 'nameof'.
