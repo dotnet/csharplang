@@ -635,6 +635,7 @@ Types and aliases may not be named "extension".
 - ~~Confirm `extension` vs. `extensions` as the keyword~~ (answer: `extension`, LDM 2025-03-24)
 - Confirm that we want to disallow `[ModuleInitializer]`
 - Confirm that we're okay to discard extension blocks as entry point candidates
+- Confirm LangVer logic (skip new extensions, vs. consider and report them when picked)
 
 ### nameof
 
