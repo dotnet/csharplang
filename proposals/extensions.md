@@ -581,24 +581,24 @@ yield the following xml:
         <member name="T:E">
             <summary>Summary for E</summary>
         </member>
-        <member name="T:E.<>E__0`1">
+        <member name="T:E.&lt;&gt;E__0`1">
             <summary>Summary for extension block</summary>
             <typeparam name="T">Description for T</typeparam>
             <param name="t">Description for t</param>
         </member>
-        <member name="M:E.<>E__0`1.M``1(``0)">
+        <member name="M:E.&lt;&gt;E__0`1.M``1(``0)">
             <summary>Summary for M, which may refer to <paramref name="t"/> and <typeparamref name="T"/></summary>
             <typeparam name="U">Description for U</typeparam>
             <param name="u">Description for u</param>
         </member>
-        <member name="P:E.<>E__0`1.P">
+        <member name="P:E.&lt;&gt;E__0`1.P">
             <summary>Summary for P</summary>
         </member>
         <member name="M:E.M``2(``0,``1)">
-            <inheritdoc cref="M:E.<>E__0`1.M``1(``0)"/>
+            <inheritdoc cref="M:E.&lt;&gt;E__0`1.M``1(``0)"/>
         </member>
         <member name="M:E.get_P``1(``0)">
-            <inheritdoc cref="P:E.<>E__0`1.P"/>
+            <inheritdoc cref="P:E.&lt;&gt;E__0`1.P"/>
         </member>
     </members>
 </doc>
@@ -787,7 +787,7 @@ public class C<T> { }
 - ~~Should the extension marker or speakable implementation methods be marked with special name?~~ (answer: the marker method should be marked with special name and we should check it, but not implementation methods, LDM 2025-04-17)
 - ~~Should we add `[Extension]` attribute on the static class even when there is no instance extension method inside?~~ (answer: yes, LDM 2025-03-10)
 - ~~Confirm we should add `[Extension]` attribute to implementation getters and setters too.~~ (answer: no, LDM 2025-03-10)
-- Confirm that the skeleton types should be marked with special name. When we do, should the compiler require this flag in metadata? (this is a breaking change from preview)
+- Confirm that the skeleton types should be marked with special name and the compiler will require this flag in metadata (this is a breaking change from preview)
 
 #### static factory scenario
 
@@ -951,6 +951,7 @@ The current conflict rules are: 1. check no conflict within similar extensions u
 - ~~Should `<param>` for extension parameter be allowed on extension members as an override?~~ (answer: no, for now, LDM 2025-05-05)
 - Will the summary on extension blocks would appear anywhere?
 - Review proposal for referencing extension (skeleton) members by `cref`
+- Confirm it's okay that both references to skeleton and implementation methods are possible: `E.M` vs. `E.extension(int).M`
 
 ### Add support for more member kinds
 
