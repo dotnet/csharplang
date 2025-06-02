@@ -27,7 +27,7 @@ ref struct ByRef<inout $a, T>
 }
 ```
 
-Note that `T` still remains invariant. This is for two reasons. First, because the intent of this doc is only to change struct variance for lifetimes, not for non-lifetime type parameters. Second, `ByRef` is a very special type of struct: it contains a pointer. Variance restrictions are due to a combination of two factors: mutability and aliasing. When a variable may be aliased but only allows reading, it is covariant. When it may be aliased but only allows writing, it is invariant. When it may be aliased and it allows both reading and writing, it is invariant. When it does not allow aliasing, it is bivariant, regardless of access. Because `T` exists behind a read/write pointer, it is invariant.
+Note that `T` still remains invariant. This is for two reasons. First, because the intent of this doc is only to change struct variance for lifetimes, not for non-lifetime type parameters. Second, `ByRef` is a very special type of struct: it contains a pointer. Variance restrictions are due to a combination of two factors: mutability and aliasing. When a variable may be aliased but only allows reading, it is covariant. When it may be aliased but only allows writing, it is contravariant. When it may be aliased and it allows both reading and writing, it is invariant. When it does not allow aliasing, it is bivariant, regardless of access. Because `T` exists behind a read/write pointer, it is invariant.
 
 However, `$a` is not behind the pointer -- it is a property of the `ByRef`, not the target. This means it remains `inout`.
 
