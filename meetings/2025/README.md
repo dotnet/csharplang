@@ -40,11 +40,13 @@ All schedule items must have a public issue or checked-in proposal that can be l
 - [Extensions operators](https://github.com/dotnet/csharplang/blob/main/proposals/extension-operators.md#open-design-questions) (Aleksey)
 - [Extensions](https://github.com/dotnet/csharplang/blob/main/proposals/extensions.md#open-issues) (Julien)
 
+## C# Language Design Notes for 2025
+
 ### Wed May 28, 2025
 
-- Nominal type unions (Matt and Mads): [nominal-type-unions.md](https://github.com/dotnet/csharplang/blob/ab60b97b53381e6934fcbc65e92e9798db641227/proposals/nominal-type-unions.md)
+[C# Language Design Meeting for May 28th, 2025](https://github.com/dotnet/csharplang/blob/main/meetings/2025/LDM-2025-05-28.md)
 
-## C# Language Design Notes for 2025
+- Nominal type unions
 
 ### Mon May 12, 2025
 
