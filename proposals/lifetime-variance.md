@@ -40,7 +40,7 @@ ref struct ByRefReadonly<inout $a, out T>
 }
 ```
 
-Note that, once again, the lifetime is behind the pointer and therefore the variance of the lifetime is unchanged. The only change is to the `T` variable -- `out` instead of invariant.
+Note that, once again, the lifetime is part of the pointer (not the target) and therefore the variance of the lifetime is unchanged. The only change is to the `T` variable -- `out` instead of invariant.
 
 Having defined the base case of `ByRef`, we can extend the lifetime variance rules to all ref structs. Ref structs don't differ from structs except in allow ref structs as fields, so the only change to variance is in their ref-struct fields. Specifically, after inference every ref struct will be of the form
 
