@@ -953,7 +953,9 @@ The current conflict rules are: 1. check no conflict within similar extensions u
 - ~~Should `<param>` for extension parameter be allowed on extension members as an override?~~ (answer: no, for now, LDM 2025-05-05)
 - Will the summary on extension blocks would appear anywhere?
 - Review proposal for referencing extension (skeleton) members by `cref`
-- Confirm it's okay that both references to skeleton and implementation methods are possible: `E.M` vs. `E.extension(int).M`
+- Are extension metadata names problematic for versioning docs?
+- Should we use different characters for unspeakable name, to avoid XML escaping?  
+- Confirm it's okay that both references to skeleton and implementation methods are possible: `E.M` vs. `E.extension(int).M`  
 
 ### Add support for more member kinds
 
