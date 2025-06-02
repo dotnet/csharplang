@@ -400,7 +400,7 @@ These requirements need more refinement as implementation progresses, and may ne
 
 ### Metadata for declarations
 
-Each extension declaration is emitted as a nested private static class with a marker method and skeleton members.  
+Each extension declaration is emitted as a skeleton type with a marker method and skeleton members.  
 Each skeleton member is accompanied by a top-level static implementation method with a modified signature.    
 The containing static class for an extension declaration is marked with an `[Extension]` attribute.  
 
@@ -411,7 +411,8 @@ Each extension declaration in source is emitted as an extension declaration in m
   The name is not guaranteed to remain stable across re-compilation. 
   Below we use `<>E__` followed by an index. For example: `<>E__2`.  
 - Its type parameters are those declared in source (including attributes).  
-- Its accessibility is public.  
+- Its accessibility is public.
+- It is marked with the `specialname` flag.  
 
 Method/property declarations in an extension declaration in source are represented as skeleton members in metadata.  
 The signatures of the original methods are maintained (including attributes), but their bodies are replaced with `throw null`.  
