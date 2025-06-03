@@ -537,7 +537,7 @@ static class CollectionExtensions
 
 ## XML docs
 
-The doc comments on the extension block are emitted for the unspeakable named type (`<>E__0'1` in the example below).  
+The doc comments on the extension block are emitted for the unspeakable named type (the DocID for the extension block is `<>E__0'1` in the example below).  
 The doc comments on the extension members are emitted for the skeleton members. They are allowed to reference the extension parameter and type parameters using `<paramref>` and `<typeparamref>` respectively).  
 Note: you may not document the extension parameter or type parameters (with `<param>` and `<typeparam>`) on an extension member.  
 
@@ -626,6 +626,34 @@ static class E
 
 The lookup knowns to look in all matching extension blocks.  
 As we disallow unqualified references to extension members, cref would also disallow them.
+
+The syntax would be:
+```
+member_cref
+  : conversion_operator_member_cref
+  | extension_member_cref // added
+  | indexer_member_cref
+  | name_member_cref
+  | operator_member_cref
+  ;
+
+extension_member_cref // added
+ : 'extension' type_argument_list? cref_parameter_list '.' member_cref
+ ;
+
+qualified_cref
+  : type '.' member_cref
+  ;
+
+cref
+  : member_cref
+  | qualified_cref
+  | type_cref
+  ;
+```
+
+It's an error to use `extension_member_cref` at top-level (`extension(int).M`) or nested in another extension (`E.extension(int).extension(string).M`).  
+Note: this does not allow cref to the extension block, as `E.extension(int)` refers to a method named "extension" in type `E`.  
 
 ## Breaking changes
 
@@ -953,6 +981,8 @@ The current conflict rules are: 1. check no conflict within similar extensions u
 - ~~Should `<param>` for extension parameter be allowed on extension members as an override?~~ (answer: no, for now, LDM 2025-05-05)
 - Will the summary on extension blocks would appear anywhere?
 - Review proposal for referencing extension (skeleton) members by `cref`
+- Should it be possible to refer to an extension block (`E.extension(int)`)?
+- Should it be possible to refer to a member using an unqualified syntax: `extension(int).Member`?
 - Are extension metadata names problematic for versioning docs?
 - Should we use different characters for unspeakable name, to avoid XML escaping?  
 - Confirm it's okay that both references to skeleton and implementation methods are possible: `E.M` vs. `E.extension(int).M`  
