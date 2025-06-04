@@ -636,6 +636,8 @@ Types and aliases may not be named "extension".
 - Confirm that we want to disallow `[ModuleInitializer]`
 - Confirm that we're okay to discard extension blocks as entry point candidates
 - Confirm LangVer logic (skip new extensions, vs. consider and report them when picked)
+- Should we adjust receiver requirements when accessing an extension member? ([comment](https://github.com/dotnet/roslyn/pull/78685#discussion_r2126534632))
+For instance, `new Struct() { Property = 42 }`.
 
 ### nameof
 
