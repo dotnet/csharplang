@@ -270,10 +270,8 @@ This allows type parameters to be declared and inferred, and is analogous to how
 
 ## Checking
 
-__Inferrability:__ All the type parameters of an extension block must be used in the receiver type when the extension block
-contains a non-method member. 
-This makes it always possible to infer the type arguments when applied to a receiver of the given receiver type and
-the member doesn't allow explicit type arguments.
+__Inferrability:__ For each non-method extension member, all the type parameters of its extension block must be used in the combined set of parmeters
+from the extension and the member.
 
 __Uniqueness:__ Within a given enclosing static class, the set of extension member declarations with the same receiver type 
 (modulo identity conversion and type parameter name substitution) are treated as a single declaration space 
@@ -702,7 +700,7 @@ We'd exclude:
 - `Count`/`Length` properties and indexers in implicit indexers
 
 ##### Delegate-returning properties
-- Confirm that extension properties of this shape should only come into play in LINQ queries, to match what instance properties do.
+- ~~Confirm that extension properties of this shape should only come into play in LINQ queries, to match what instance properties do.~~ (answer: makes sense, LDM 2025-04-06)
 
 ##### List and spread pattern
 - Confirm that extension `Index`/`Range` indexers should play in list-patterns
@@ -923,20 +921,9 @@ public static class Extensions
 
 ### Extension declaration validation
 
-- Should we relax the type parameter validation (inferrability: all the type parameters must appear in the type of the extension parameter) where there are only methods?  This would allow porting 100% of classic extension methods.  
-If you have `TResult M<TResult, TSource>(this TSource source)`, you could port it as `extension<TResult, TSource>(TSource source) { TResult M() ... }`. (answer: no, but should revisit, LDM 2025-03-17)
-
-The WG proposed to relax this restriction for extension methods (for increased portability), but keep it for members that disallow explicit type arguments (properties/indexers/operators).
-Later on, we also discussed broader relaxation for [operator scenarios](https://github.com/dotnet/roslyn/issues/78472#issuecomment-2864841779):
-```
-// would require to relax inferrability for operators, but also improved type inference
-extension<TTensor, TScalar>(TTensor)
-    where TTensor : IReadOnlyTensor<TTensor, TScalar>
-    where TScalar : IAdditionOperators<TScalar, TScalar, TScalar>
-{
-    public static TTensor operator +(TTensor left, TScalar right);
-}
-```
+- ~~Should we relax the type parameter validation (inferrability: all the type parameters must appear in the type of the extension parameter) where there are only methods?~~ (answer: yes, LDM 2025-04-06) 
+This would allow porting 100% of classic extension methods.  
+If you have `TResult M<TResult, TSource>(this TSource source)`, you could port it as `extension<TResult, TSource>(TSource source) { TResult M() ... }`. 
 
 - ~~Confirm whether init-only accessors should be allowed in extensions~~  (answer: okay to disallow for now, LDM 2025-04-17)
 - ~~Should the only difference in receiver ref-ness be allowed `extension(int receiver) { public void M2() {} }`    `extension(ref int receiver) { public void M2() {} }`?~~ (answer: no, keep spec'ed rule, LDM 2025-03-24)
