@@ -4,10 +4,11 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ## Schedule ASAP
 
+- [Extensions](https://github.com/dotnet/csharplang/blob/main/proposals/extensions.md#open-issues) (Julien)
+
 ## Schedule when convenient
 
 - Triage (working set)
-
 - Letting lambdas be iterator (sync and async) https://github.com/dotnet/csharplang/discussions/9393
 
 ## Recurring topics
