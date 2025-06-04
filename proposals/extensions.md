@@ -387,6 +387,7 @@ so that the prioritization is respected when those accessors are used via diambi
 ### Entry points
 
 Methods of extension blocks do not qualify as entry point candidates (see "7.1 Application startup").
+Note: the implementation method may still be a candidate.  
 
 ## Lowering
 
@@ -669,6 +670,7 @@ Types and aliases may not be named "extension".
 ### nameof
 
 - Should we disallow extension properties in nameof like we do classic and new extension methods?  
+
 We should probably allow since this is the only way to get the name of an extension property via `nameof`.  
 If we do allow, we'd allow static reference to an instance property, in the context of `nameof`: you could do `nameof(object.InstanceExtensionProperty)`. This is consistent with `name(C.InstanceProperty)`.  
 
@@ -765,7 +767,7 @@ which ensures that public APIs match between reference-only assemblies and imple
 
 ~~Should we make one of the following changes?~~ (answer: we'll adjust the tool and tweak the implementation of numbering, LDM 2025-05-05)
 1. adjust the tool
-2. use some hashing scheme (TBD)
+2. use some content-based naming scheme (TBD)
 3. let the name be controlled via some syntax
 
 ### New generic extension Cast method still can't work in LINQ
@@ -954,7 +956,17 @@ public static class Extensions
 - Should we relax the type parameter validation (inferrability: all the type parameters must appear in the type of the extension parameter) where there are only methods?  This would allow porting 100% of classic extension methods.  
 If you have `TResult M<TResult, TSource>(this TSource source)`, you could port it as `extension<TResult, TSource>(TSource source) { TResult M() ... }`. (answer: no, but should revisit, LDM 2025-03-17)
 
-The WG proposes to relax this restriction for extension methods (for increased portability), but keep it for members that disallow explicit type arguments (properties/indexers/operators).
+The WG proposed to relax this restriction for extension methods (for increased portability), but keep it for members that disallow explicit type arguments (properties/indexers/operators).
+Later on, we also discussed broader relaxation for [operator scenarios](https://github.com/dotnet/roslyn/issues/78472#issuecomment-2864841779):
+```
+// would require to relax inferrability for operators, but also improved type inference
+extension<TTensor, TScalar>(TTensor)
+    where TTensor : IReadOnlyTensor<TTensor, TScalar>
+    where TScalar : IAdditionOperators<TScalar, TScalar, TScalar>
+{
+    public static TTensor operator +(TTensor left, TScalar right);
+}
+```
 
 - ~~Confirm whether init-only accessors should be allowed in extensions~~  (answer: okay to disallow for now, LDM 2025-04-17)
 - ~~Should the only difference in receiver ref-ness be allowed `extension(int receiver) { public void M2() {} }`    `extension(ref int receiver) { public void M2() {} }`?~~ (answer: no, keep spec'ed rule, LDM 2025-03-24)
@@ -982,10 +994,40 @@ The current conflict rules are: 1. check no conflict within similar extensions u
 - Will the summary on extension blocks would appear anywhere?
 - Review proposal for referencing extension (skeleton) members by `cref`
 - Should it be possible to refer to an extension block (`E.extension(int)`)?
+
+```csharp
+/// <see cref="E.extension(int)"/> 
+public static class E
+{
+  /// <param name="parameter">...</param>
+  extension(int parameter)
+  {
+  }
+}
+```
+  
 - Should it be possible to refer to a member using an unqualified syntax: `extension(int).Member`?
-- Are extension metadata names problematic for versioning docs?
+
+```csharp
+public static class E
+{
+  extension(int)
+  {
+    public static void M() { }
+    /// <see cref="M"/>
+    public static void M2() { }
+  }
+  extension(long)
+  {
+    /// <see cref="extension(int).M"/>
+    public static void M3() { }
+  }
+}
+```
+
 - Should we use different characters for unspeakable name, to avoid XML escaping?  
 - Confirm it's okay that both references to skeleton and implementation methods are possible: `E.M` vs. `E.extension(int).M`  
+- Are extension metadata names problematic for versioning docs?
 
 ### Add support for more member kinds
 
