@@ -40,7 +40,6 @@ extension_body // add
 extension_member_declaration // add
     : method_declaration
     | property_declaration
-    | indexer_declaration
     | operator_declaration
     ;
 
@@ -155,7 +154,7 @@ public static class Enumerable
 }
 ```
 
-It is an error to specify an instance extension member (method, property, indexer or event)
+It is an error to specify an instance extension member
 if the enclosing extension declaration does not specify a receiver parameter:
 
 ``` c#
@@ -169,9 +168,11 @@ public static class Enumerable
 ```
 
 It is an error to specify the following modifiers on a member of an extension declaration:
-`abstract`, `virtual`, `override`, `new`, `sealed`, `extern`, `partial`, and `protected` (and related accessibility modifiers).  
+`abstract`, `virtual`, `override`, `new`, `sealed`, `partial`, and `protected` (and related accessibility modifiers).  
 Properties in extension declarations may not have `init` accessors.  
 The instance members are disallowed if the _receiver parameter_ is unnamed.  
+
+It is an error to decorate an extension member with the `[ModuleInitializer]` attribute.
 
 ### Refness
 
@@ -269,8 +270,10 @@ This allows type parameters to be declared and inferred, and is analogous to how
 
 ## Checking
 
-__Inferrability:__ All the type parameters of an extension declaration must be used in the receiver type. 
-This makes it always possible to infer the type arguments when applied to a receiver of the given receiver type.
+__Inferrability:__ All the type parameters of an extension block must be used in the receiver type when the extension block
+contains a non-method member. 
+This makes it always possible to infer the type arguments when applied to a receiver of the given receiver type and
+the member doesn't allow explicit type arguments.
 
 __Uniqueness:__ Within a given enclosing static class, the set of extension member declarations with the same receiver type 
 (modulo identity conversion and type parameter name substitution) are treated as a single declaration space 
@@ -381,6 +384,11 @@ class is considered the "containing type" which ORPA rules consider.
 Any ORPA attribute present on an extension property is copied onto the implementation methods for the property's accessors,
 so that the prioritization is respected when those accessors are used via diambiguation syntax.  
 
+### Entry points
+
+Methods of extension blocks do not qualify as entry point candidates (see "7.1 Application startup").
+Note: the implementation method may still be a candidate.  
+
 ## Lowering
 
 The lowering strategy for extension declarations is not a language level decision. 
@@ -393,7 +401,7 @@ These requirements need more refinement as implementation progresses, and may ne
 
 ### Metadata for declarations
 
-Each extension declaration is emitted as a nested private static class with a marker method and skeleton members.  
+Each extension declaration is emitted as a skeleton type with a marker method and skeleton members.  
 Each skeleton member is accompanied by a top-level static implementation method with a modified signature.    
 The containing static class for an extension declaration is marked with an `[Extension]` attribute.  
 
@@ -404,9 +412,10 @@ Each extension declaration in source is emitted as an extension declaration in m
   The name is not guaranteed to remain stable across re-compilation. 
   Below we use `<>E__` followed by an index. For example: `<>E__2`.  
 - Its type parameters are those declared in source (including attributes).  
-- Its accessibility is public.  
+- Its accessibility is public.
+- It is marked with the `specialname` flag.  
 
-Method/property/indexer declarations in an extension declaration in source are represented as skeleton members in metadata.  
+Method/property declarations in an extension declaration in source are represented as skeleton members in metadata.  
 The signatures of the original methods are maintained (including attributes), but their bodies are replaced with `throw null`.  
 Those should not be referenced in IL.  
 
@@ -424,7 +433,7 @@ Note: we may choose to only emit one extension skeleton type in metadata when du
 
 #### Implementations
 
-The method bodies for method/property/indexer declarations in an extension declaration in source are emitted 
+The method bodies for method/property declarations in an extension declaration in source are emitted 
 as static implementation methods in the top-level static class.  
 - An implementation method has the same name as the original method.  
 - It has type parameters derived from the extension declaration prepended to the type parameters of the original method (including attributes).  
@@ -499,7 +508,7 @@ to `IEnumerableExtensions.Method<int>(enumerableOfInt)`.
 
 ## XML docs
 
-The doc comments on the extension block are emitted for the unspeakable named type (`<>E__0'1` in the example below).  
+The doc comments on the extension block are emitted for the unspeakable named type (the DocID for the extension block is `<>E__0'1` in the example below).  
 The doc comments on the extension members are emitted for the skeleton members. They are allowed to reference the extension parameter and type parameters using `<paramref>` and `<typeparamref>` respectively).  
 Note: you may not document the extension parameter or type parameters (with `<param>` and `<typeparam>`) on an extension member.  
 
@@ -544,28 +553,78 @@ yield the following xml:
         <member name="T:E">
             <summary>Summary for E</summary>
         </member>
-        <member name="T:E.<>E__0`1">
+        <member name="T:E.&lt;&gt;E__0`1">
             <summary>Summary for extension block</summary>
             <typeparam name="T">Description for T</typeparam>
             <param name="t">Description for t</param>
         </member>
-        <member name="M:E.<>E__0`1.M``1(``0)">
+        <member name="M:E.&lt;&gt;E__0`1.M``1(``0)">
             <summary>Summary for M, which may refer to <paramref name="t"/> and <typeparamref name="T"/></summary>
             <typeparam name="U">Description for U</typeparam>
             <param name="u">Description for u</param>
         </member>
-        <member name="P:E.<>E__0`1.P">
+        <member name="P:E.&lt;&gt;E__0`1.P">
             <summary>Summary for P</summary>
         </member>
         <member name="M:E.M``2(``0,``1)">
-            <inheritdoc cref="M:E.<>E__0`1.M``1(``0)"/>
+            <inheritdoc cref="M:E.&lt;&gt;E__0`1.M``1(``0)"/>
         </member>
         <member name="M:E.get_P``1(``0)">
-            <inheritdoc cref="P:E.<>E__0`1.P"/>
+            <inheritdoc cref="P:E.&lt;&gt;E__0`1.P"/>
         </member>
     </members>
 </doc>
 ```
+
+### CREF references
+
+We can treat extension blocks like nested types, that can be address by their signature (as if it were a method with a single extension parameter).
+Example: `E.extension(ref int).M()`.
+
+```csharp
+static class E
+{
+  extension(ref int i)
+  {
+    void M() { } // can be addressed by cref="E.extension(ref int).M()"
+  }
+  extension(ref  int i)
+  {
+    void M(int i2) { } // can be addressed by cref="E.extension(ref int).M(int)"
+  }
+}
+```
+
+The lookup knowns to look in all matching extension blocks.  
+As we disallow unqualified references to extension members, cref would also disallow them.
+
+The syntax would be:
+```antlr
+member_cref
+  : conversion_operator_member_cref
+  | extension_member_cref // added
+  | indexer_member_cref
+  | name_member_cref
+  | operator_member_cref
+  ;
+
+extension_member_cref // added
+ : 'extension' type_argument_list? cref_parameter_list '.' member_cref
+ ;
+
+qualified_cref
+  : type '.' member_cref
+  ;
+
+cref
+  : member_cref
+  | qualified_cref
+  | type_cref
+  ;
+```
+
+It's an error to use `extension_member_cref` at top-level (`extension(int).M`) or nested in another extension (`E.extension(int).extension(string).M`).  
+Note: this does not allow cref to the extension block, as `E.extension(int)` refers to a method named "extension" in type `E`.  
 
 ## Breaking changes
 
@@ -574,10 +633,17 @@ Types and aliases may not be named "extension".
 ## Open issues
 
 - ~~Confirm `extension` vs. `extensions` as the keyword~~ (answer: `extension`, LDM 2025-03-24)
+- Confirm that we want to disallow `[ModuleInitializer]`
+- Confirm that we're okay to discard extension blocks as entry point candidates
+- Confirm LangVer logic (skip new extensions, vs. consider and report them when picked)
 
 ### nameof
 
-- ~~Should we disallow extension properties in nameof like we do classic and new extension methods?~~ (answer: no, that's the only way to refer to the name of the property)
+- Should we disallow extension properties in nameof like we do classic and new extension methods?  
+
+We should probably allow since this is the only way to get the name of an extension property via `nameof`.  
+If we do allow, we'd allow static reference to an instance property, in the context of `nameof`: you could do `nameof(object.InstanceExtensionProperty)`. This is consistent with `name(C.InstanceProperty)`.  
+
 ```
 C c = null;
 _ = nameof(c.M); // Extension method groups are not allowed as an argument to 'nameof'.
@@ -603,10 +669,6 @@ static class E
 }
 ```
 
-### entry point
-
-- Should we skip extension blocks when looking for entry points?
-
 ### pattern-based constructs
 
 #### Methods
@@ -625,27 +687,34 @@ This excludes:
 - `GetResult` in `await`
 
 #### Properties and indexers
-- ~~Where should extension properties and indexers come into play?~~  (answer: let's start with the four, LDM 2025-05-05) 
+- ~~Where should extension properties and indexers come into play?~~  (answer: let's start with the four, LDM 2025-05-05)  
+
 We'd include:
 - object initializer: `new C() { ExtensionProperty = ... }`
 - dictionary intializer: `new C() { [0] = ... }`
 - `with`: `x with { ExtensionProperty = ... }`
-- property patterns: `x is { ExtensionProperty: ... }`
-
+- property patterns: `x is { ExtensionProperty: ... }`  
+  
 We'd exclude:
 - `Current` in `foreach`
 - `IsCompleted` in `await`
 - `Count`/`Length` properties and indexers in list-pattern
 - `Count`/`Length` properties and indexers in implicit indexers
 
-- Where should delegate-returning properties come into play?  
+##### Delegate-returning properties
+- Confirm that extension properties of this shape should only come into play in LINQ queries, to match what instance properties do.
+
+##### List and spread pattern
+- Confirm that extension `Index`/`Range` indexers should play in list-patterns
+
+##### Revisit where `Count`/`Length` extension properties come into play  
 
 #### [Collection expressions](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-12.0/collection-expressions.md)
 
 - Extension `Add` works
 - Extension `GetEnumerator` works for spread
 - Extension `GetEnumerator` does not affect the determination of the element type (must be instance)
-- Extensions `Create` does not count as a blessed **create** method
+- Static `Create` extension methods should not count as a blessed **create** method
 - Should extension countable properties affect collection expressions?
 
 #### [`params` collections](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-13.0/params-collections.md)
@@ -654,7 +723,11 @@ We'd exclude:
 
 #### [dictionary expressions](https://github.com/dotnet/csharplang/blob/main/proposals/dictionary-expressions.md)
 
-- Extension indexers?
+- Confirm that extension indexers don't play in dictionary expressions, as the presence of the indexer is an integral part of what defines a dictionary type.
+
+### `extern`
+
+- we're planning to allow `extern` for portability: https://github.com/dotnet/roslyn/issues/78572
 
 ### Naming/numbering scheme for skeleton type
 
@@ -662,11 +735,10 @@ We'd exclude:
 The current numbering system causes problems with the [validation of public APIs](https://learn.microsoft.com/dotnet/fundamentals/apicompat/package-validation/overview#validator-types)
 which ensures that public APIs match between reference-only assemblies and implementation assemblies.
 
-We could:
-- adjust the tool
-- use a number relative to the declared extension blocks (first, second, etc in syntactic order)
-- use some hashing scheme (TBD)
-- let the name be controlled via some syntax
+~~Should we make one of the following changes?~~ (answer: we'll adjust the tool and tweak the implementation of numbering, LDM 2025-05-05)
+1. adjust the tool
+2. use some content-based naming scheme (TBD)
+3. let the name be controlled via some syntax
 
 ### New generic extension Cast method still can't work in LINQ
 
@@ -675,9 +747,11 @@ In earlier designs of roles/extensions, it was possible to only specify the type
 But now that we're focusing on seemless transition from classic extension methods, all the type arguments must be given explicitly.  
 This fails to address a problem with extension Cast method usage in LINQ.
 
+~~Should we make a change to extensions feature to accomodate this scenario?~~ (answer: no, this does not cause us to revisit the extension resolution design, LDM 2025-05-05)
+
 ### Constraining the extension parameter on an extension member
 
-Should we allow the following?
+~~Should we allow the following?~~ (answer: no, this could be added later)
 
 ```csharp
 static class E
@@ -715,6 +789,7 @@ public class C<T> { }
 - ~~Should the extension marker or speakable implementation methods be marked with special name?~~ (answer: the marker method should be marked with special name and we should check it, but not implementation methods, LDM 2025-04-17)
 - ~~Should we add `[Extension]` attribute on the static class even when there is no instance extension method inside?~~ (answer: yes, LDM 2025-03-10)
 - ~~Confirm we should add `[Extension]` attribute to implementation getters and setters too.~~ (answer: no, LDM 2025-03-10)
+- Confirm that the skeleton types should be marked with special name and the compiler will require this flag in metadata (this is a breaking change from preview)
 
 #### static factory scenario
 
@@ -824,7 +899,7 @@ static class E
     }
 }
 ```
-- Revisit question of lookup on type parameter ([discussion](https://github.com/dotnet/csharplang/discussions/8696#discussioncomment-12817547))
+- ~~Should we allow lookup on type parameter?~~ ([discussion](https://github.com/dotnet/csharplang/discussions/8696#discussioncomment-12817547)) (answer: no, we're going to wait on feedback, LDM 2025-04-16)
 
 ### Accessibility
 
@@ -848,8 +923,21 @@ public static class Extensions
 
 ### Extension declaration validation
 
-- ~~Should we relax the type parameter validation (inferrability: all the type parameters must appear in the type of the extension parameter) where there are only methods?  This would allow porting 100% of classic extension methods.  
-If you have `TResult M<TResult, TSource>(this TSource source)`, you could port it as `extension<TResult, TSource>(TSource source) { TResult M() ... }`.~~ (answer: no, LDM 2025-03-17)
+- Should we relax the type parameter validation (inferrability: all the type parameters must appear in the type of the extension parameter) where there are only methods?  This would allow porting 100% of classic extension methods.  
+If you have `TResult M<TResult, TSource>(this TSource source)`, you could port it as `extension<TResult, TSource>(TSource source) { TResult M() ... }`. (answer: no, but should revisit, LDM 2025-03-17)
+
+The WG proposed to relax this restriction for extension methods (for increased portability), but keep it for members that disallow explicit type arguments (properties/indexers/operators).
+Later on, we also discussed broader relaxation for [operator scenarios](https://github.com/dotnet/roslyn/issues/78472#issuecomment-2864841779):
+```
+// would require to relax inferrability for operators, but also improved type inference
+extension<TTensor, TScalar>(TTensor)
+    where TTensor : IReadOnlyTensor<TTensor, TScalar>
+    where TScalar : IAdditionOperators<TScalar, TScalar, TScalar>
+{
+    public static TTensor operator +(TTensor left, TScalar right);
+}
+```
+
 - ~~Confirm whether init-only accessors should be allowed in extensions~~  (answer: okay to disallow for now, LDM 2025-04-17)
 - ~~Should the only difference in receiver ref-ness be allowed `extension(int receiver) { public void M2() {} }`    `extension(ref int receiver) { public void M2() {} }`?~~ (answer: no, keep spec'ed rule, LDM 2025-03-24)
 - ~~Should we complain about a conflict like this `extension(object receiver) { public int P1 => 1; }`   `extension(object receiver) { public int P1 {set{}} }`?~~ (answer: yes, keep spec'ed rule, LDM 2025-03-24)
@@ -874,7 +962,42 @@ The current conflict rules are: 1. check no conflict within similar extensions u
 - ~~Should `<param>` element corresponding to receiver parameter be copied from extension container for instance methods? Anything else should be copied from container to implementation methods (`<typeparam>` etc.) ?~~ (answer: no copying, LDM 2025-05-05)
 - ~~Should `<param>` for extension parameter be allowed on extension members as an override?~~ (answer: no, for now, LDM 2025-05-05)
 - Will the summary on extension blocks would appear anywhere?
-- Can extension (skeleton) members be referenced by `cref`?
+- Review proposal for referencing extension (skeleton) members by `cref`
+- Should it be possible to refer to an extension block (`E.extension(int)`)?
+
+```csharp
+/// <see cref="E.extension(int)"/> 
+public static class E
+{
+  /// <param name="parameter">...</param>
+  extension(int parameter)
+  {
+  }
+}
+```
+  
+- Should it be possible to refer to a member using an unqualified syntax: `extension(int).Member`?
+
+```csharp
+public static class E
+{
+  extension(int)
+  {
+    public static void M() { }
+    /// <see cref="M"/>
+    public static void M2() { }
+  }
+  extension(long)
+  {
+    /// <see cref="extension(int).M"/>
+    public static void M3() { }
+  }
+}
+```
+
+- Should we use different characters for unspeakable name, to avoid XML escaping?  
+- Confirm it's okay that both references to skeleton and implementation methods are possible: `E.M` vs. `E.extension(int).M`  
+- Are extension metadata names problematic for versioning docs?
 
 ### Add support for more member kinds
 
