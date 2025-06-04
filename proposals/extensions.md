@@ -628,7 +628,7 @@ The lookup knowns to look in all matching extension blocks.
 As we disallow unqualified references to extension members, cref would also disallow them.
 
 The syntax would be:
-```
+```antlr
 member_cref
   : conversion_operator_member_cref
   | extension_member_cref // added
