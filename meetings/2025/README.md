@@ -36,12 +36,20 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 - Nominal type unions (Matt and Mads)
 
+## C# Language Design Notes for 2025
+
 ### Wed Jun 4, 2025
 
-- [Extensions operators](https://github.com/dotnet/csharplang/blob/main/proposals/extension-operators.md#open-design-questions) (Aleksey)
-- [Extensions](https://github.com/dotnet/csharplang/blob/main/proposals/extensions.md#open-issues) (Julien)
+[C# Language Design Meeting for June 4th, 2025](https://github.com/dotnet/csharplang/blob/main/meetings/2025/LDM-2025-06-04.md)
 
-## C# Language Design Notes for 2025
+- Extensions
+    - Should extension operators on nullable of extended type be disallowed
+    - Applicability of bitwise operators during evaluation of user-defined conditional logical operators
+    - Extension user-defined conditional logical operators
+    - Extension compound assignment operators
+    - Delegate returning properties
+    - Extension declaration validation
+    - Cref references
 
 ### Wed May 28, 2025
 
