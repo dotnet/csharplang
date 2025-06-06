@@ -4,7 +4,6 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ## Schedule ASAP
 
-- [Extensions](https://github.com/dotnet/csharplang/blob/main/proposals/extensions.md#open-issues) (Julien)
 
 ## Schedule when convenient
 
@@ -32,7 +31,12 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ### Wed Jun 11, 2025
 
+- [Extension operators](https://github.com/dotnet/csharplang/blob/main/proposals/extension-operators.md#dynamic-evaluation) (Aleksey)
+- [Extensions](https://github.com/dotnet/csharplang/blob/main/proposals/extensions.md#open-issues) (Julien)
+
 ### Mon Jun 9, 2025
+
+- [Extensions](https://github.com/dotnet/csharplang/blob/main/proposals/extensions.md#open-issues) (Julien)
 
 ## C# Language Design Notes for 2025
 
