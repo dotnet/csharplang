@@ -34,8 +34,6 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ### Mon Jun 9, 2025
 
-- Nominal type unions (Matt and Mads)
-
 ## C# Language Design Notes for 2025
 
 ### Wed Jun 4, 2025
