@@ -964,9 +964,20 @@ The current conflict rules are: 1. check no conflict within similar extensions u
 - ~~Should `<param>` element corresponding to receiver parameter be copied from extension container for instance methods? Anything else should be copied from container to implementation methods (`<typeparam>` etc.) ?~~ (answer: no copying, LDM 2025-05-05)
 - ~~Should `<param>` for extension parameter be allowed on extension members as an override?~~ (answer: no, for now, LDM 2025-05-05)
 - Will the summary on extension blocks would appear anywhere?
+
+#### CREF
+
 - Review proposal for referencing extension (skeleton) members by `cref`
+
+- Syntax options
+
+1. `extension(int)`
+2. `E.M` (too much ambiguity; doesn't allow referencing extension block)
+3. `int.M` (not  worse in terms of ambiguities than `nameof` for properties, worse for methods; doesn't allow referencing extension block)
+
 - Should it be possible to refer to an extension block (`E.extension(int)`)?
 
+Example:
 ```csharp
 /// <see cref="E.extension(int)"/> 
 public static class E
@@ -975,6 +986,36 @@ public static class E
   extension(int parameter)
   {
   }
+}
+```
+
+But the likelihood of ambiguity is fairly  high. Example with parameter name differences:
+```
+cref="E.extension(int)" // ambiguous
+static class E
+{
+    extension(int a) { }
+    extension(int b) { }
+}
+```
+
+Example with nullability differences:
+```
+cref="E.extension(string)" // ambiguous
+static class E
+{
+    extension(string s) { }
+    extension(string? s) { }
+}
+```
+
+Example with constraint differences:
+```
+cref="E.extension{T}(T)" // ambiguous (doesn't have an equivalent before extensions)
+class E
+{
+  extension<T>(T t)  {  }
+  extension<T>(T t) where T : ...   {  }
 }
 ```
   
@@ -998,7 +1039,7 @@ public static class E
 ```
 
 - Should we use different characters for unspeakable name, to avoid XML escaping?  
-- Confirm it's okay that both references to skeleton and implementation methods are possible: `E.M` vs. `E.extension(int).M`  
+- Confirm it's okay that both references to skeleton and implementation methods are possible: `E.M` vs. `E.extension(int).M`. Both seem necessary (extension properties and portability of classic extension methods).    
 - Are extension metadata names problematic for versioning docs?
 
 ### Add support for more member kinds
