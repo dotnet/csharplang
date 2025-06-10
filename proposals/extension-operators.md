@@ -21,9 +21,16 @@ Extension operator declarations generally follow the rules for non-extension [us
 
 Generally speaking, the rules pertaining to the *containing type* of the declaration instead apply to the *extended type*. 
 
-A static extension operator for the extended type `T` must take at least one parameter of type `S` or `S?`, where `S` and `T` are identity convertible.
+A static extension operator for the extended type `T` must take at least one parameter of type `S`, where `S` and `T` are identity convertible.
+Note, that, unlike for regular user-defined operators, ```Nullable<T>``` is not a valid type for `S`.
 
 For operators that require pair-wise declaration, the two declarations are allowed to occur in separate extension blocks for extended types `S` and `T` respectively, as long as `S` and `T` are identity convertible and the extension blocks occur in the same static class.
+
+Instance compound assignment and increment operators are supposed to mutate the instance.
+Therefore, the following restrictions are applied for such extension operators:
+- Receiver type must be known to be either a reference type or a value type. I.e. cannot be an unconstrained type parameter.
+- If receiver type is a value type, the receiver parameter must be a 'ref' parameter.
+- If receiver type is a reference type, the receiver parameter must be a value parameter.
 
 Like other extension members, extension operators cannot use the `abstract`, `virtual`, `override` or `sealed` modifiers.
 
@@ -72,9 +79,50 @@ var v = numbers * 4; // extension operator *(int[], int)
 v *= 5;              // extension operator *=(int)
 ```
 
+## Extension user-defined conditional logical operators
+
+The following [restrictions](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/expressions.md#12143-user-defined-conditional-)
+are specified for regular user-defined operators:
+
+>When the operands of `&&` or `||` are of types that declare an applicable user-defined `operator &` or `operator |`, both of the following shall be true, where `T` is the type in which the selected operator is declared:
+>
+>- The return type and the type of each parameter of the selected operator shall be `T`. In other words, the operator shall compute the logical AND or the logical OR of two operands of type `T`, and shall return a result of type `T`.
+>- `T` shall contain declarations of `operator true` and `operator false`.
+
+By analogy, the following restrictions are used for extension operators:
+When the operands of `&&` or `||` are of types that declare an applicable user-defined extension `operator &` or
+extension `operator |`, both of the following shall be true:
+
+- The operator shall compute the logical AND or the logical OR of two operands of type `T`, and shall return a result of type `T`.
+- The enclosing static class shall contain declarations of extension `operator true` and extension `operator false` applicable to
+  an instance of type `T`.
+
+ For example, these declarations satisfy the restrictions, given that lifted form of `operator &` is used:
+ ``` c#
+S1? s11 = new S1();
+S1? s12 = new S1();
+_ = s11 && s12;
+  
+public static class Extensions
+{
+    extension(S1)
+    {
+        public static S1 operator &(S1 x, S1 y) => x;
+    }
+    extension(S1?)
+    {
+        public static bool operator false(S1? x) => false;
+        public static bool operator true(S1? x) => true;
+    }
+}
+
+public struct S1
+{}
+```
+
 ## Open design questions
 
-### Should extension operators on Nullable of extended type be disallowed?
+### [Resolved] Should extension operators on Nullable of extended type be disallowed?
 
 It is allowed to declare a regular user-defined operator on Nullable of containing type.
 Such operator can be consumed on an instance of containing type, as well as on an 
@@ -113,7 +161,10 @@ public static class Extensions
 This makes such operator declarations somewhat useless, they won't ever be consumed on `null` instances,
 and, therefore, no real reason to have nullable parameter types. Should declarations like this be disallowed?
 
-### Applicability of bitwise operators during evaluation of user-defined conditional logical operators
+[Resolution:](https://github.com/dotnet/csharplang/blob/main/meetings/2025/LDM-2025-06-04.md#should-extension-operators-on-nullable-of-extended-type-be-disallowed)
+>Restriction accepted: extension operators can only be declared for the type being extended in an extension block, not for the nullable underlying type.
+
+### [Resolved] Applicability of bitwise operators during evaluation of user-defined conditional logical operators
 
 Language adds extra [restrictions](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/expressions.md#12143-user-defined-conditional-)
 to bitwise operators suitable for evaluation of user-defined conditional logical operators:
@@ -184,7 +235,10 @@ extension operators in the given extension scope, candidates from next extension
 Hence the question, should the restrictions be part of a candidate applicability check during overload 
 resolution rather than a post validation after the overload resolution is complete?
 
-### Extension user-defined conditional logical operators
+[Resolution:](https://github.com/dotnet/csharplang/blob/main/meetings/2025/LDM-2025-06-04.md#applicability-of-bitwise-operators-during-evaluation-of-user-defined-conditional-logical-operators)
+> We're not doing anything here for now. Rejected until we see use cases.
+
+### [Resolved] Extension user-defined conditional logical operators
 
 The following [restrictions](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/expressions.md#12143-user-defined-conditional-)
 are specified for regular user-defined operators:
@@ -225,13 +279,19 @@ public struct S1
 {}
 ``` 
 
-### Extension compound assignment operators
+[Resolution:](https://github.com/dotnet/csharplang/blob/main/meetings/2025/LDM-2025-06-04.md#extension-user-defined-conditional-logical-operators)
+> Proposal accepted.
+
+### [Resolved] Extension compound assignment operators
 
 Compound assignment operators are instance operators and are supposed to mutate the instance.
 Therefore, the following restrictions are proposed for extension compound assignment operators:
 - Receiver type must be known to be either a reference type or a value type. I.e. cannot be an unconstrained type parameter.
 - If receiver type is a value type, the receiver parameter must be a 'ref' parameter.
 - If receiver type is a reference type, the receiver parameter must be a value parameter.
+
+[Resolution:](https://github.com/dotnet/csharplang/blob/main/meetings/2025/LDM-2025-06-04.md#extension-compound-assignment-operators)
+> Restriction adopted, we can look at it again in the future when there is more bandwidth.
 
 ### Dynamic evaluation
 
@@ -257,3 +317,38 @@ public static class Extensions
 
 An attempt to do a compile time optimization using non-dynamic static type of 's2' ignores true/false extensions.
 One might say this is desirable because runtime binder wouldn't be able to use them as well.
+
+### Use of extension operators in Linq Expression Trees
+
+When an expression utilizing a user-defined operator is used in a lambda that is converted to a Linq Expression tree,
+an expression node that compiler creates includes a `MethodInfo` pointing to the operator method.
+
+For example:
+``` c#
+public class C1
+{
+    public static C1 operator +(C1 x, int y) => x;
+}
+
+public class Program
+{
+    static void Main()
+    {
+        Expression<System.Func<C1, C1>> x = (c1) => c1 + 1;
+    } 
+}
+```
+
+uses [Expression.Add(Expression left, Expression right, MethodInfo? method)](https://learn.microsoft.com/en-us/dotnet/api/system.linq.expressions.expression.add?view=net-9.0#system-linq-expressions-expression-add(system-linq-expressions-expression-system-linq-expressions-expression-system-reflection-methodinfo)) factory.
+
+The question is what should we do when the operator is an extension operator.
+We cannot use a MethodInfo referencing the extension operator itself because IL is not allowed
+to refer to any declaration from an extension block.
+
+Proposal: Use MethodInfo referring to a corresponding implementation method in the enclosing class.
+          A quick smoke test confirmed that an expression tree like that can be compiled, executed,
+          and execution calls the implementation method.
+
+## Design meetings
+
+- https://github.com/dotnet/csharplang/blob/main/meetings/2025/LDM-2025-06-04.md
