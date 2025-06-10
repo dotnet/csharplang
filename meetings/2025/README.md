@@ -36,11 +36,13 @@ All schedule items must have a public issue or checked-in proposal that can be l
 - [Extension operators](https://github.com/dotnet/csharplang/blob/main/proposals/extension-operators.md#dynamic-evaluation) (Aleksey)
 - [Extensions](https://github.com/dotnet/csharplang/blob/main/proposals/extensions.md#open-issues) (Julien)
 
+## C# Language Design Notes for 2025
+
 ### Mon Jun 9, 2025
 
-- [Extensions](https://github.com/dotnet/csharplang/blob/main/proposals/extensions.md#open-issues) (Julien)
+[C# Language Design Meeting for June 9th, 2025](https://github.com/dotnet/csharplang/blob/main/meetings/2025/LDM-2025-06-09.md)
 
-## C# Language Design Notes for 2025
+- Extensions - crefs
 
 ### Wed Jun 4, 2025
 
