@@ -8,7 +8,6 @@ All schedule items must have a public issue or checked-in proposal that can be l
 ## Schedule when convenient
 
 - Triage (working set)
-- Letting lambdas be iterator (sync and async) https://github.com/dotnet/csharplang/discussions/9393
 
 ## Recurring topics
 
@@ -26,6 +25,8 @@ All schedule items must have a public issue or checked-in proposal that can be l
 ### Mon Jun 23, 2025
 
 ### Wed Jun 18, 2025
+
+- Letting lambdas be (sync and async) iterators (Jared) https://github.com/dotnet/csharplang/discussions/9393
 
 ### Mon Jun 16, 2025
 
