@@ -349,6 +349,37 @@ Proposal: Use MethodInfo referring to a corresponding implementation method in t
           A quick smoke test confirmed that an expression tree like that can be compiled, executed,
           and execution calls the implementation method.
 
+### Is the rule "an extension operator may not have the same signature as a predefined operator." worth having as specified?
+
+If our goal is to prevent users from declaring an operator that would be shadowed by a predefined operator,
+then it doesn't look like the rule as specified achieves it.
+For example, the rule is going to prevent a user from defining ```operator –(int x)``` and ```operator –(long x)```,
+but it is not going to prevent declaration of ```operator –(byte x)```. However, in the following code it would be
+shadowed by predefined ```operator –(int x)```.
+``` c#
+byte x = 0;
+var y = -x;
+```
+
+Perhaps the rule should be changed to something like the following instead?
+> If operator overload resolution with an argument list consisting of expressions with types
+> matching declared parameters in the same order against the set of predefined operators of
+> the same kind succeeds, then the signature of declared extension operator is considered illegal. 
+
+For ```operator –(byte x)```, we would perform an operator overload resolution with an argument list
+[byte] against predefined unary `-` operators. It would succeed with predefined ```operator –(int x)``` as 
+the result. Therefore, an error would be reported for extension ```operator –(byte x)```.
+
+For ```operator +(byte x, byte y)```, we would perform an operator overload resolution with an argument list
+[byte, byte] against predefined binary `+` operators. It would succeed with predefined ```operator +(int x, int y)``` as 
+the result. Therefore, an error would be reported for extension ```operator +(byte x, byte y)```.
+
+When considering signatures of instance compound assignment operators, the receiver parameter is going to
+contribute to the argument list. For ```extension(byte).operator+=(short)```, we would perform an operator overload
+resolution with an argument list [byte, short] against predefined binary `+` operators. It would succeed with
+predefined ```operator +(int x, int y)``` as the result. Therefore, an error would be reported for
+```extension(byte).operator+=(short)```.
+
 ## Design meetings
 
 - https://github.com/dotnet/csharplang/blob/main/meetings/2025/LDM-2025-06-04.md
