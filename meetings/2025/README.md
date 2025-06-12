@@ -35,7 +35,7 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ### Wed Jun 11, 2025
 
-[C# Language Design Meeting for June 9th, 2025](https://github.com/dotnet/csharplang/blob/main/meetings/2025/LDM-2025-06-11.md)
+[C# Language Design Meeting for June 11th, 2025](https://github.com/dotnet/csharplang/blob/main/meetings/2025/LDM-2025-06-11.md)
 
 - Extensions
     - Dynamic resolution of operator `true`/`false`
