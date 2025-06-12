@@ -34,8 +34,6 @@ Therefore, the following restrictions are applied for such extension operators:
 
 Like other extension members, extension operators cannot use the `abstract`, `virtual`, `override` or `sealed` modifiers.
 
-An extension operator may not have the same signature as a predefined operator.
-
 ``` c#
 public static class Operators
 {
@@ -43,7 +41,6 @@ public static class Operators
     {
         public static int[] operator +(int[] vector, int scalar) { ... }    // OK; parameter and extended type agree
         public static int operator +(int scalar1, int scalar2) { ... }      // ERROR: extended type not used as parameter type
-                                                                            // and ERROR: same signature as predefined +(int, int)
         public static bool operator ==(int[] vector1, int[] vector2){ ... } // ERROR: '!=' declaration missing
         public static bool operator <(int[] vector1, int[] vector2){ ... }  // OK: `>` is declared below
     }
@@ -119,6 +116,31 @@ public static class Extensions
 public struct S1
 {}
 ```
+
+## Use of extension operators in Linq Expression Trees
+
+When an expression utilizing a user-defined operator is used in a lambda that is converted to a Linq Expression tree,
+an expression node that compiler creates includes a `MethodInfo` pointing to the operator method.
+
+For example:
+``` c#
+public class C1
+{
+    public static C1 operator +(C1 x, int y) => x;
+}
+
+public class Program
+{
+    static void Main()
+    {
+        Expression<System.Func<C1, C1>> x = (c1) => c1 + 1;
+    } 
+}
+```
+
+uses [Expression.Add(Expression left, Expression right, MethodInfo? method)](https://learn.microsoft.com/en-us/dotnet/api/system.linq.expressions.expression.add?view=net-9.0#system-linq-expressions-expression-add(system-linq-expressions-expression-system-linq-expressions-expression-system-reflection-methodinfo)) factory.
+
+When the operator is an extension operator, a MethodInfo referring to the corresponding implementation method in the enclosing class will be used.
 
 ## Open design questions
 
@@ -293,7 +315,7 @@ Therefore, the following restrictions are proposed for extension compound assign
 [Resolution:](https://github.com/dotnet/csharplang/blob/main/meetings/2025/LDM-2025-06-04.md#extension-compound-assignment-operators)
 > Restriction adopted, we can look at it again in the future when there is more bandwidth.
 
-### Dynamic evaluation
+### [Resolved] Dynamic evaluation
 
 Extension operators are not used by dynamic evaluation. This might lead to compile time errors.
 For example:
@@ -318,7 +340,10 @@ public static class Extensions
 An attempt to do a compile time optimization using non-dynamic static type of 's2' ignores true/false extensions.
 One might say this is desirable because runtime binder wouldn't be able to use them as well.
 
-### Use of extension operators in Linq Expression Trees
+[Resolution:](https://github.com/dotnet/csharplang/blob/main/meetings/2025/LDM-2025-06-11.md#dynamic-resolution-of-operator-truefalse)
+Restriction accepted. Extension operator `true`/`false` are not used for `dynamic` `&&` or `||`.
+
+### [Resolved] Use of extension operators in Linq Expression Trees
 
 When an expression utilizing a user-defined operator is used in a lambda that is converted to a Linq Expression tree,
 an expression node that compiler creates includes a `MethodInfo` pointing to the operator method.
@@ -349,7 +374,10 @@ Proposal: Use MethodInfo referring to a corresponding implementation method in t
           A quick smoke test confirmed that an expression tree like that can be compiled, executed,
           and execution calls the implementation method.
 
-### Is the rule "an extension operator may not have the same signature as a predefined operator." worth having as specified?
+[Resolution:](https://github.com/dotnet/csharplang/blob/main/meetings/2025/LDM-2025-06-11.md#extension-operators-in-linq-expression-trees)
+Accepted.
+
+### [Resolved] Is the rule "an extension operator may not have the same signature as a predefined operator." worth having as specified?
 
 If our goal is to prevent users from declaring an operator that would be shadowed by a predefined operator,
 then it doesn't look like the rule as specified achieves it.
@@ -380,6 +408,10 @@ resolution with an argument list [byte, short] against predefined binary `+` ope
 predefined ```operator +(int x, int y)``` as the result. Therefore, an error would be reported for
 ```extension(byte).operator+=(short)```.
 
+[Resolution:](https://github.com/dotnet/csharplang/blob/main/meetings/2025/LDM-2025-06-11.md#built-in-operator-protection-rules)
+Rule is abandoned. We will not have built-in errors or warnings here.
+
 ## Design meetings
 
 - https://github.com/dotnet/csharplang/blob/main/meetings/2025/LDM-2025-06-04.md
+- https://github.com/dotnet/csharplang/blob/main/meetings/2025/LDM-2025-06-11.md
