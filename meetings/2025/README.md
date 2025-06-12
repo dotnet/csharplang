@@ -7,6 +7,7 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ## Schedule when convenient
 
+- [Extensions](https://github.com/dotnet/csharplang/blob/main/proposals/extensions.md#open-issues) (alternative naming, metadata format and merging/conflict rules; Wednesday 18th or later preferred, Julien)
 - Triage (working set)
 
 ## Recurring topics
