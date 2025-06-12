@@ -31,12 +31,20 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ### Mon Jun 16, 2025
 
+## C# Language Design Notes for 2025
+
 ### Wed Jun 11, 2025
 
-- [Extension operators](https://github.com/dotnet/csharplang/blob/main/proposals/extension-operators.md#dynamic-evaluation) (Aleksey)
-- [Extensions](https://github.com/dotnet/csharplang/blob/main/proposals/extensions.md#open-issues) (Julien)
+[C# Language Design Meeting for June 9th, 2025](https://github.com/dotnet/csharplang/blob/main/meetings/2025/LDM-2025-06-11.md)
 
-## C# Language Design Notes for 2025
+- Extensions
+    - Dynamic resolution of operator `true`/`false`
+    - Extension operators in LINQ expression trees
+    - Built-in operator protection rules
+    - Extension module initializers
+    - Extension methods as entry points
+    - Langversion behavior for new extensions
+    - `nameof`
 
 ### Mon Jun 9, 2025
 
