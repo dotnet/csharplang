@@ -7,7 +7,6 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ## Schedule when convenient
 
-- [Extensions](https://github.com/dotnet/csharplang/blob/main/proposals/extensions.md#open-issues) (alternative naming, metadata format and merging/conflict rules; Wednesday 18th or later preferred, Julien)
 - Triage (working set)
 
 ## Recurring topics
@@ -28,7 +27,7 @@ All schedule items must have a public issue or checked-in proposal that can be l
 ### Wed Jun 18, 2025
 
 - Letting lambdas be (sync and async) iterators (Jared) https://github.com/dotnet/csharplang/discussions/9393
-
+- [Extensions](https://github.com/dotnet/csharplang/blob/main/proposals/extensions.md#open-issues): Alternative naming, metadata format and merging/conflict rules (Julien)
 ### Mon Jun 16, 2025
 
 ## C# Language Design Notes for 2025
