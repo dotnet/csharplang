@@ -16,6 +16,18 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ## Schedule
 
+### Wed Jul 30, 2025
+
+### Mon Jul 28, 2025
+
+### Wed Jul 23, 2025
+
+### Mon Jul 14, 2025
+
+### Wed Jul 9, 2025
+
+### Mon Jul 7, 2025
+
 ### Wed Jul 2, 2025
 
 ### Mon Jun 30, 2025
