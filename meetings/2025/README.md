@@ -28,7 +28,6 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 - Letting lambdas be (sync and async) iterators (Jared) https://github.com/dotnet/csharplang/discussions/9393
 - [Extensions](https://github.com/dotnet/csharplang/blob/main/proposals/extensions.md#open-issues): Alternative naming, metadata format and merging/conflict rules (Julien)
-### Mon Jun 16, 2025
 
 ## C# Language Design Notes for 2025
 
