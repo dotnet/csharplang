@@ -24,6 +24,8 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ### Mon Jun 23, 2025
 
+- Extensions _2hrs_ (Julien and Aleksey)
+
 ### Wed Jun 18, 2025
 
 - Letting lambdas be (sync and async) iterators (Jared) https://github.com/dotnet/csharplang/discussions/9393
