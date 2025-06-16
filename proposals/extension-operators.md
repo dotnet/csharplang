@@ -142,6 +142,10 @@ uses [Expression.Add(Expression left, Expression right, MethodInfo? method)](htt
 
 When the operator is an extension operator, a MethodInfo referring to the corresponding implementation method in the enclosing class will be used.
 
+Note, `&&`/`||` operators utilizing extension operators will be blocked in Linq Expression trees due to limitations of
+factory methods. The [issue](https://github.com/dotnet/runtime/issues/115674) illustrates the failure mode for the factory
+methods.  
+
 ## Open design questions
 
 ### [Resolved] Should extension operators on Nullable of extended type be disallowed?
