@@ -4,6 +4,7 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ## Schedule ASAP
 
+- https://github.com/dotnet/csharplang/blob/main/proposals/extension-operators.md#use-of-extension-operators-in-linq-expression-trees (Aleksey)
 
 ## Schedule when convenient
 
