@@ -51,8 +51,6 @@ public static class Operators
 }
 ```
 
-**Open question:** Should we disallow user-defined extension operators where the types of all parameters and receivers are type parameters? Otherwise specific instantiations could have the same signature as a predefined operator.
-
 ## Overload resolution
 
 Like other extension members, extension operators are only considered if no applicable predefined or non-extension user-defined operators were found. The search then proceeds outwards scope by scope, starting with the innermost namespace within which the operator application occurs, until at least one applicable extension operator declaration is found. For compound assignment operators, this involves looking for first user-defined compound assignment operators and then, if none found, non-assignment operators, before moving on to the next scope.
