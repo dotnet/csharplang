@@ -11,7 +11,7 @@ the bounds of type variables to participate in the inference process. An example
 List<int> l = [1, 2, 3];
 M(l); // Today: TElement cannot be inferred. With this proposal, successful call.
 
-void M<TEnumerable, TElement>(TEnumerable t) where TEnumerable : IEnumerable<T>
+void M<TEnumerable, TElement>(TEnumerable t) where TEnumerable : IEnumerable<TElement>
 {
     Console.WriteLine(string.Join(",", t));
 }
