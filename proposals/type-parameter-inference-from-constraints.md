@@ -38,7 +38,8 @@ breaking. Since then, C# has taken larger breaking change steps; most notably fo
 also adding things like target-typing for ternary expressions, adding span conversions as first-class conversions in the language, the `field` keyword, and others. Given this,
 now is an excellent time to re-examine the concern on the breaking change here, and potentially move forward with the proposal.
 
-Credit to [@HellBrick](https://github.com/HellBrick) for the [proposed mechanics](https://github.com/dotnet/roslyn/issues/5023#issuecomment-154728796) of the design, which have been formalized here.
+Credit to [@HellBrick](https://github.com/HellBrick) for the [original proposed mechanics](https://github.com/dotnet/roslyn/issues/5023#issuecomment-154728796) of the design.
+This proposal has been further refined from their original starting point.
 
 ### Use cases this supports:
 
@@ -63,28 +64,33 @@ private static void CallMyFunction()
 ### Changes to Type Inference Algorithm
 
 We modify the type inference process described in [§12.6.3](https://github.com/dotnet/csharpstandard/blob/draft-v9/standard/expressions.md#1263-type-inference) to include
-constraint promotion.
+constraint relationships in the dependence relationship between type variables.
 
-#### Enhanced Type Inference Process - Modified Spec Text
+#### Enhanced Dependence Relationship - Modified Spec Text
 
-The following text from [§12.6.3.3 The second phase](https://github.com/dotnet/csharpstandard/blob/draft-v9/standard/expressions.md#126333-the-second-phase) is modified:
+The following text from [§12.6.3.6 Dependence](https://github.com/dotnet/csharpstandard/blob/draft-v9/standard/expressions.md#12636-dependence) is modified:
 
-> **12.6.3.3 The second phase**
+> **12.6.3.6 Dependence**
 >
-> The second phase proceeds as follows:
+> An *unfixed* type variable `Xᵢ` *depends directly on* an *unfixed* type variable `Xₑ` if one of the following holds:
 >
-> - All *unfixed* type variables `Xᵢ` which do not *depend on* ([§12.6.3.6](https://github.com/dotnet/csharpstandard/blob/draft-v9/standard/expressions.md#12636-dependence)) any `Xₑ` are fixed ([§12.6.3.12](https://github.com/dotnet/csharpstandard/blob/draft-v9/standard/expressions.md#126312-fixing)).
-> - If no such type variables exist, all *unfixed* type variables `Xᵢ` are *fixed* for which all of the following hold:
->   - There is at least one type variable `Xₑ` that *depends on* `Xᵢ`
->   - `Xᵢ` has a non-empty set of bounds
-> - **If any type variables were fixed in the previous steps, for each newly fixed type variable `Xᵢ` with fixed type `Tᵢ`, and for each constraint `C` on `Xᵢ` that has not previously been promoted, add a synthetic argument to the argument list where the argument type is `Tᵢ`, and the corresponding parameter type is `C`. No conversions from expression shall apply to this synthetic argument. Mark constraint `C` as promoted for `Xᵢ`. Then restart the inference process from the first phase ([§12.6.3.2](https://github.com/dotnet/csharpstandard/blob/draft-v9/standard/expressions.md#12632-the-first-phase)).**
-> - If no such type variables exist and there are still *unfixed* type variables, type inference fails.
-> - Otherwise, if no further *unfixed* type variables exist, type inference succeeds.
-> - Otherwise, for all arguments `Eᵢ` with corresponding parameter type `Tᵢ` where the *output types* ([§12.6.3.5](https://github.com/dotnet/csharpstandard/blob/draft-v9/standard/expressions.md#12635-output-types)) contain *unfixed* type variables `Xₑ` but the *input types* ([§12.6.3.4](https://github.com/dotnet/csharpstandard/blob/draft-v9/standard/expressions.md#12634-input-types)) do not, an *output type inference* ([§12.6.3.7](https://github.com/dotnet/csharpstandard/blob/draft-v9/standard/expressions.md#12637-output-type-inferences)) is made *from* `Eᵢ` *to* `Tᵢ`. Then the second phase is repeated.
+> - For some argument `Eᵥ` with type `Tᵥ` `Xₑ` occurs in an *input type* of `Eᵥ` with type `Tᵥ` and `Xᵢ` occurs in an *output type* of `Eᵥ` with type `Tᵥ`.
+> - **`Xᵢ` occurs in a constraint for `Xₑ`.**
+>
+> `Xₑ` *depends on* `Xᵢ` if `Xₑ` *depends directly on* `Xᵢ` or if `Xᵢ` *depends directly on* `Xᵥ` and `Xᵥ` *depends on* `Xₑ`. Thus "*depends on*" is the transitive but not reflexive closure of "*depends directly on*".
 
-### Algorithm Implementation Details
+#### Enhanced Fixing Process - Modified Spec Text
 
-The constraint promotion algorithm integrates seamlessly into the existing type inference process through a goto-based loop mechanism.
+The following text from [§12.6.3.12 Fixing](https://github.com/dotnet/csharpstandard/blob/draft-v9/standard/expressions.md#126312-fixing) is modified:
+
+> **12.6.3.12 Fixing**
+>
+> An *unfixed* type variable `Xᵢ` with a set of bounds is *fixed* as follows:
+>
+> - The set of *candidate types* `Uₑ` starts out as the set of all types in the set of bounds for `Xᵢ`.
+> - Each bound for `Xᵢ` is examined in turn: For each exact bound U of `Xᵢ` all types `Uₑ` that are not identical to `U` are removed from the candidate set. For each lower bound `U` of `Xᵢ` all types `Uₑ` to which there is *not* an implicit conversion from `U` are removed from the candidate set. For each upper-bound U of `Xᵢ` all types `Uₑ` from which there is *not* an implicit conversion to `U` are removed from the candidate set.
+> - If among the remaining candidate types `Uₑ` there is a unique type `V` to which there is an implicit conversion from all the other candidate types, then `Xᵢ` is fixed to `V` **and a lower-bound inference is performed from `V` to each of the types in `Xᵢ`'s constraints, if any**.
+> - Otherwise, type inference fails.
 
 ## Drawbacks
 
