@@ -36,6 +36,8 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ### Wed Jun 25, 2025
 
+- Unions _1.5 hrs_ (Mads and Matt)
+
 ### Mon Jun 23, 2025
 
 - Extensions _2hrs_ (Julien and Aleksey)
