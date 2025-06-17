@@ -15,17 +15,20 @@ This proposal wants to revamp our approach to skeleton assembly metadata such th
 3. The C# compiler should be able to fully rehydrate the original extension block from metadata. This means for each skeleton member the compiler can recreate the _exact_ type name that was written in source. This includes items like the original type parameter names, nullable annotations, etc ...
 
 This will be achieved by moving to a content based naming scheme for skeleton types and members.
+
 ## Detailed Design
 
 This proposal relies heavily on using content based naming for skeleton types and members.  The proposal is going to focus on what items are included in the content name, it will not discuss the actual name produced. That is because the specific hashing algorithm used will be an implementation detail of the compiler.
 
 For an extension block the content name of the skeleton type will be determined by using the following parts of the extension type declaration:
 
-- The fully qualified CLR name of the type. This will include namespaces, type constraints, named constraints (like `new`). Constraints will be ordered in the content name such that reordering them in source code does not change the name. Specifically: 
+- The fully qualified CLR name of the type. This will include namespaces, type constraints, named constraints (like `new`). Constraints will be ordered in the content name such that reordering them in source code does not change the name. Specifically:
     - Type parameter constraints will be listed in declaration order. The constraints for the Nth type parameter will occur before the Nth+1 type parameter.
     - Base type and interface constraints will be sorted by comparing the full names ordinally
     - Non-type constraints will be sorted by comparing the C# text ordinally
 - This will not include any C# isms like tuple names, nullability, etc ... 
+
+The type parameters of the skeleton type will match those of the extension block. The exception being that the name of the type parameters will be normalized to `T0`, `T1`, etc ... based on the order they appear in the type declaration. This means an extension block with a type parameter `Dictionary<TKey, TValue>` will result in a skeleton type with type parameters `T0` and `T1` in that order.
 
 This will achieve the goal that the name of skeleton types will only change when the underlying CLR type of an extension type changes. Any change to C# parts of the type such as adding nullable annotations or tuple names will impact the skeleton type name.
 
@@ -35,6 +38,9 @@ For an extension block a `private` method, referred to as the source type method
 - The name of the extension `this` parameter
 - The ref-ness of the extension `this` parameter
 - The fully qualified name + attribute arguments for any attributes applied to the extension `this` parameter.
+- The names of any type parametercs declared on the extension block. These will be sorted in declaration order.
+
+The source type method will also have an attribute, `TypeParameterNames`, which contains the names of the type parameters in the declaration. This will be listed in the order declared in source.
 
 For every member in an extension block, the generated skeleton member will have an attribute which contains the name of the source type method that represents the original extension `this` parameter. This allows the compiler to fully rehydrate the C# extension `this` parameter for any skeleton member.
 
@@ -55,10 +61,10 @@ class E
         public bool NullToEmpty() => this ??= [];
     }
 
-    extension<T>(IEnumerable<T> source)
-        where T : IEquatable<T>
+    extension<T>(IEnumerable<U> source)
+        where T : IEquatable<U>
     {
-        public bool IsPresent(T value) => source.Any(x => x.Equals(value));
+        public bool IsPresent(U value) => source.Any(x => x.Equals(value));
     }
 }
 ```
@@ -68,10 +74,13 @@ This would generate the following:
 ```cs
 class E
 {
-    public class <>ContentName_For_IEnumerable_T<T>
+    public class <>ContentName_For_IEnumerable_T<T0>
     {
-        private void <>ContentName1(IEnumerable<T> source) { }
-        private void <>ContentName2(ref IEnumerable<T?> p) { }
+        [TypeParameterNames("T")]
+        private void <>ContentName1(IEnumerable<T0> source) { }
+
+        [TypeParameterNamess("T")]
+        private void <>ContentName2(ref IEnumerable<T0?> p) { }
 
         [SourceTypeMethod("ContentName1")]
         public bool IsEmpty => throw null!;
@@ -86,18 +95,19 @@ class E
         public bool NullToEmpty() => throw null!;
     }
   
-    public class <>ContentName_For_IEnumerable_T_With_Constraint<T>
-       where T : IEquatable<T>
+    public class <>ContentName_For_IEnumerable_T_With_Constraint<T0>
+       where T : IEquatable<T0>
     {
-        private void <>ContentName3(IEnumerable<T> source) { }
+        [TypeParameterNames("U")]
+        private void <>ContentName3(IEnumerable<T0> source) { }
 
         [SourceTypeMethod("ContentName3")]
-        public static bool IsPresent(T value) => throw null!;
+        public static bool IsPresent(T0 value) => throw null!;
     }
 }
 ```
 
-This approach will result in stable names for our skeleton types and members that will make it much more consumable for the existing C# ecosystem. 
+This approach will result in stable names for our skeleton types and members that will make it much more consumable for the existing C# ecosystem.
 
 The content hash algorithm will be left as an implementation detail to the compiler. The _recommendation_ is picking a hash that has the following properties:
 
@@ -111,7 +121,6 @@ The only _requirement_ of the hash is that it cannot be a cryptographic hash. Be
 
 This design will result in the following restrictions for extension blocks:
 
-- All extension blocks that map to the same skeleton type must have type parameters with the same name. This mirrors the existing restrictions that we have for `partial` types
 - All extension blocks which generate a skeleton type name X must refer to the same CLR type. Essentially there cannot be two extension blocks in the same container over different types with the same fully qualified name. This is not resolvable with `extern alias`. Instead such extension block declarations must be put into different containing types.
 - Changing constraints on an extension block will result in breaking changes for existing CREF in the ecosystem
 
@@ -149,6 +158,7 @@ The exact details would be involved but we could identify a naming scheme that l
 This design though would require us to generate _invalid_ metadata. For example we'd need to map attributes from the property declaration to the generated method. In the case these were marked as `AttributeTargets.Property` that would be invalid. This is a case where the binary would execute as the CLR does not verify attribute targets are correct but it is likely that it would cause friction in the ecosystem for tools that assume such target are correct. 
 
 That is the biggest issue with this approach. There are several aspects like this where there is no clean mapping. Also there a lot of items like this were are likely missing. We'd need to go through every aspect of metadata and language, find every part that is specific to properties and rationalize them with this approach. This is why the working group discarded this idea (previously and in the context of this specific discussion).
+
 ## Miscellaneous
 
 ### Why not use a Cryptographic Hash?
@@ -156,7 +166,12 @@ That is the biggest issue with this approach. There are several aspects like thi
 The generated names must be the same through the lifetime of this feature in C#. This is not compatible with any use of cryptography which must be agile. Specifically the compiler must assume there is a future where SHA-256, the current defacto crypto algorithm, will be broken and banned in applications. That would leave the compiler in a place where it's using a banned cryptographic algorithm. This is just not compatible with our current security posture.
 
 The only downside to using a non-cryptographic hashing algorithm is that the compiler cannot take uniqueness for granted. It instead must be verified during compilation time to ensure there are no accidental collisions which is straight forward to implement in the compiler.
+
 ## Open Questions
+
+### Type Parameter Names
+
+This design normalizes type parameter names to `T0`, `T1`, etc ... The original names are encoded in an attribute on the source type method. Need to validate from the compiler team if this is a workable solution for rehydrating the original type parameter names.
 
 ### Categorizing the breaking change
 
