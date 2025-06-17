@@ -1,6 +1,6 @@
 # Type Parameter Inference from Constraints
 
-Champion issue: https://github.com/dotnet/csharplang/issues/[TBD]
+Champion issue: https://github.com/dotnet/csharplang/issues/9453
 
 ## Summary
 
