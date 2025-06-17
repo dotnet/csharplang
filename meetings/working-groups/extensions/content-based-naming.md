@@ -171,7 +171,11 @@ The only downside to using a non-cryptographic hashing algorithm is that the com
 
 ### Type Parameter Names
 
-This design normalizes type parameter names to `T0`, `T1`, etc ... The original names are encoded in an attribute on the source type method. Need to validate from the compiler team if this is a workable solution for rehydrating the original type parameter names.
+This design normalizes type parameter names to `T0`, `T1`, etc ... The original names are encoded in an attribute on the source type method. Need to validate from the compiler team if this is a workable solution for rehydrating the original type parameter names. If this is not viable then we will need to consider adding the following restriction:
+
+- All extension blocks that map to the same skeleton type must have type parameters with the same name.
+
+At a glance this may seem like an unreasonable restriction but there is precedence as this is what we require for `partial` types today.
 
 ### Categorizing the breaking change
 
