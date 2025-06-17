@@ -8,6 +8,7 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ## Schedule when convenient
 
+- Type parameter inference from constraints (333fred) - https://github.com/dotnet/csharplang/blob/9b89d17e372243d99acd32988cc5e823baafe64c/proposals/type-parameter-inference-from-constraints.md
 - Triage (working set)
 
 ## Recurring topics
