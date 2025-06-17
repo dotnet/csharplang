@@ -631,43 +631,15 @@ Types and aliases may not be named "extension".
 ## Open issues
 
 - ~~Confirm `extension` vs. `extensions` as the keyword~~ (answer: `extension`, LDM 2025-03-24)
-- Confirm that we want to disallow `[ModuleInitializer]`
-- Confirm that we're okay to discard extension blocks as entry point candidates
-- Confirm LangVer logic (skip new extensions, vs. consider and report them when picked)
+- ~~Confirm that we want to disallow `[ModuleInitializer]`~~ (answer: yes, disallow, LDM 2025-06-11)
+- ~~Confirm that we're okay to discard extension blocks as entry point candidates~~ (answer: yes, discard, LDM 2025-06-11)
+- ~~Confirm LangVer logic (skip new extensions, vs. consider and report them when picked)~~ (answert: bind unconditionally and report LangVer error except for instance extension methods, LDM 2025-06-11)
 - Should we adjust receiver requirements when accessing an extension member? ([comment](https://github.com/dotnet/roslyn/pull/78685#discussion_r2126534632))
 For instance, `new Struct() { Property = 42 }`.
 
 ### nameof
 
-- Should we disallow extension properties in nameof like we do classic and new extension methods?  
-
-We should probably allow since this is the only way to get the name of an extension property via `nameof`.  
-If we do allow, we'd allow static reference to an instance property, in the context of `nameof`: you could do `nameof(object.InstanceExtensionProperty)`. This is consistent with `name(C.InstanceProperty)`.  
-
-```
-C c = null;
-_ = nameof(c.M); // Extension method groups are not allowed as an argument to 'nameof'.
-_ = nameof(c.M2); // Extension method groups are not allowed as an argument to 'nameof'.
-_ = nameof(c.P);
-
-_ = nameof(C.M3); // Extension method groups are not allowed as an argument to 'nameof'.
-_ = nameof(C.P2);
-
-class C { }
-
-static class E
-{
-    public static void M(this C c) { }
-    extension(C c)
-    {
-        public void M2() { }
-        public int P => 42;
-
-        public static void M3() { }
-        public static int P2 => 42;
-    }
-}
-```
+- ~~Should we disallow extension properties in nameof like we do classic and new extension methods?~~ (answer: we'd like to use `nameof(EnclosingStaticClass.ExtensionMember). Needs design, likely punt from .NET 10. LDM 2025-06-11)
 
 ### pattern-based constructs
 
