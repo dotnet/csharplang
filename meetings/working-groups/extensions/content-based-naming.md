@@ -41,9 +41,6 @@ For an extension block a `private` method, referred to as the source type method
 - The name of the extension `this` parameter
 - The ref-ness of the extension `this` parameter
 - The fully qualified name + attribute arguments for any attributes applied to the extension `this` parameter.
-- The names of any type parametercs declared on the extension block. These will be sorted in declaration order.
-
-The source type method will also have an attribute, `TypeParameterNames`, which contains the names of the type parameters in the declaration. This will be listed in the order declared in source.
 
 For every member in an extension block, the generated marker member will have an attribute which contains the name of the source type method that represents the original extension `this` parameter. This allows the compiler to fully rehydrate the C# extension `this` parameter for any marker member.
 
@@ -77,13 +74,11 @@ This would generate the following:
 ```cs
 class E
 {
-    public class <>ContentName_For_IEnumerable_T<T0>
+    public class <>ContentName_For_IEnumerable_T<T>
     {
-        [TypeParameterNames("T")]
-        private void <>ContentName1(IEnumerable<T0> source) { }
+        private void <>ContentName1(IEnumerable<T> source) { }
 
-        [TypeParameterNamess("T")]
-        private void <>ContentName2(ref IEnumerable<T0?> p) { }
+        private void <>ContentName2(ref IEnumerable<T?> p) { }
 
         [SourceTypeMethod("ContentName1")]
         public bool IsEmpty => throw null!;
@@ -98,14 +93,13 @@ class E
         public bool NullToEmpty() => throw null!;
     }
   
-    public class <>ContentName_For_IEnumerable_T_With_Constraint<T0>
-       where T : IEquatable<T0>
+    public class <>ContentName_For_IEnumerable_T_With_Constraint<U>
+       where U : IEquatable<U>
     {
-        [TypeParameterNames("U")]
-        private void <>ContentName3(IEnumerable<T0> source) { }
+        private void <>ContentName3(IEnumerable<U> source) { }
 
         [SourceTypeMethod("ContentName3")]
-        public static bool IsPresent(T0 value) => throw null!;
+        public static bool IsPresent(U value) => throw null!;
     }
 }
 ```
@@ -124,6 +118,7 @@ The only _requirement_ of the hash is that it cannot be a cryptographic hash. Be
 
 This design will result in the following restrictions for extension blocks:
 
+- All extension blocks that map to the same skeleton type must have type parameters with the same name. This mirrors the existing restrictions that we have for `partial` types.
 - All extension blocks which generate a marker type name X must refer to the same CLR type. Essentially there cannot be two extension blocks in the same container over different types with the same fully qualified name. This is not resolvable with `extern alias`. Instead such extension block declarations must be put into different containing types.
 - Changing constraints on an extension block will result in breaking changes for existing CREF in the ecosystem
 
@@ -161,6 +156,16 @@ The exact details would be involved but we could identify a naming scheme that l
 This design though would require us to generate _invalid_ metadata. For example we'd need to map attributes from the property declaration to the generated method. In the case these were marked as `AttributeTargets.Property` that would be invalid. This is a case where the binary would execute as the CLR does not verify attribute targets are correct but it is likely that it would cause friction in the ecosystem for tools that assume such target are correct. 
 
 That is the biggest issue with this approach. There are several aspects like this where there is no clean mapping. Also there a lot of items like this were are likely missing. We'd need to go through every aspect of metadata and language, find every part that is specific to properties and rationalize them with this approach. This is why the working group discarded this idea (previously and in the context of this specific discussion).
+
+### Remove the matching type parameter name restriction
+
+The design could be altered such that the restriction on all extension blocks that map to the same marker type must have type parameters with the same name is removed. This would roughly mean that the code generation would do the following:
+
+1. Type parameter names would be normalized to `T0`, `T1`, etc ... in the marker type name.
+2. Type parameter names would be part of the source type marker method content hash.
+3. An attribute would be generated on the source type method that contains the original type parameter names.
+
+This would allow us to remove this restriction but at the extra cost to the compiler code generation strategy.
 
 ## Miscellaneous
 
