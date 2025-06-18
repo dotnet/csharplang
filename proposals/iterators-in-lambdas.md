@@ -8,7 +8,7 @@ This proposal will remove the restriction that lambda expressions cannot be iter
 
 Over the years the idea of allowing lambdas to be iterators has come up several times. The proposal has generally [garnered lack luster support][iterator-meeting]. The conclusion is that it's not harmful to the language but also not a high priority.
 
-However, the [use of async streams][iterator-discussion-async-streams] in minimal API programs have made this proposal signifantly more relevant. `IAsyncEnumerato<T>` is now used heavily in streaming APIs, including AI relate services. This means that the ability to create such APIs cannot be done with the existing style of top level statements. Developers must refactor their code out to a local method once they want to use async streaming.
+However, the [use of async streams][iterator-discussion-async-streams] in minimal API programs have made this proposal signifantly more relevant. `IAsyncEnumerator<T>` is now used heavily in streaming APIs, including AI related services. This means that the ability to create such APIs cannot be done with the existing style of top level statements. Developers must refactor their code out to a local method once they want to use async streaming.
 
 ```cs
 
@@ -39,7 +39,7 @@ This motivation is simalar to the motivation for [lambdas to have optional param
 
 ## Detailed Design
 
-This will allow lambdas that have a return type that is a recoginzed iterator type and contains a `yield` statement to be considered an iterator. Such lambdas will have all of the functionality and restrictions of method based iterators:
+This will allow lambdas that have a return type that is a recognized iterator type and contains a `yield` statement to be considered an iterator. Such lambdas will have all of the functionality and restrictions of method based iterators:
 
 - The `yield type` will be determined from the iterator type.
 - The iterator cannot have any `in / ref / out` parameters.
@@ -49,7 +49,7 @@ This will allow lambdas that have a return type that is a recoginzed iterator ty
 The return type can be explicit or inferred. For example both of the following are valid iterator lambdas:
 
 ```cs
-var lambda1 = IEnumerable<int> MyIterator()
+var lambda1 = () =>
 {
     yield return 1;
     yield return 2;
