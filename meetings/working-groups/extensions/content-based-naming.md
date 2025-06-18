@@ -1,15 +1,17 @@
+# Content Based Naming
+
 ## Summary
 
-The current metadata strategy for skeleton assemblies relies on ordinals to group skeleton types generated from extension blocks. The use of ordinals causes friction in a few parts of the C# ecosystem: 
+The current metadata strategy for marker methods relies on ordinals to create marker types from extension blocks. The use of ordinals causes friction in a few parts of the C# ecosystem:
 
 - Edit and Continue: any use of ordinals tied to source ordering means that adding or removing elements can create unnecessary, and possibly unresolvable, conflicts during ENC operations. Natural operations like adding a new extension block in the middle of two others can lead to renaming of existing blocks which is difficult to reconcile.
-- Public API Tracking: the skeleton assemblies are necessarily generated as `public` APIs and there are many tools in the .NET ecosystem that track `public` API usage. The current design means moving types around in source can observably change the set of `public` API in an assembly. Shipping with this design would mean this ecosystem of tools would need to change to treat this `public` API as _special_ in some way.
-- CREF generate an observable reference to skeleton assemblies via `inheritdoc`. This means source reordering can break any place CREFs are treated as a durable item. 
+- Public API Tracking: the mraker methods are necessarily generated as `public` APIs and there are many tools in the .NET ecosystem that track `public` API usage. The current design means moving extension blocks around in source can observably change the set of `public` API in an assembly. Shipping with this design would mean this ecosystem of tools would need to change to treat this `public` API as _special_ in some way.
+- CREF generate an observable reference to marker methods via `inheritdoc`. This means source reordering can break any place CREFs are treated as a durable item.
 
-This proposal wants to revamp our approach to skeleton assembly metadata such that the following goals are achieved:
+This proposal wants to revamp our approach to marker method metadata such that the following goals are achieved:
 
-1. The set of skeleton methods and types that will be generated for a given extension member can be determined by looking at solely that extension member. There is no need to consider other members in the same extension block, `partial` declarations in the containing type, etc ...
-2. Skeleton assemblies are treated like `public`. This proposal accepts that skeleton types and members will be observable by design and build time processes. This means they need to have, as much as possible, the same characteristics as other `public` API. Specifically the following types of actions should **not** break ABI compatibility for `public` members in a skeleton type:
+1. The set of marker types and methods and types that will be generated for a given extension member can be determined by looking at solely that extension member. There is no need to consider other members in the same extension block, `partial` declarations in the containing type, etc ...
+2. Marker types and methods are treated like `public`. This proposal accepts that marker types and members will be observable by design and build time processes. This means they need to have, as much as possible, the same characteristics as other `public` API. Specifically the following types of actions should **not** break runtime binary compatibility for `public` members in a marker type:
     1. Reordering members in source code
     2. Changing C# specific aspects of the type like adding / removing nullable annotations, changing tuple names, etc ...
 3. The C# compiler should be able to fully rehydrate the original extension block from metadata. This means for each skeleton member the compiler can recreate the _exact_ type name that was written in source. This includes items like the original type parameter names, nullable annotations, etc ...
@@ -22,19 +24,20 @@ This proposal relies heavily on using content based naming for skeleton types an
 
 For an extension block the content name of the skeleton type will be determined by using the following parts of the extension type declaration:
 
-- The fully qualified CLR name of the type. This will include namespaces, type constraints, named constraints (like `new`). Constraints will be ordered in the content name such that reordering them in source code does not change the name. Specifically:
+- The fully qualified CLR name of the type. This will include namespaces, type constraints, named constraints (like `new`).
+    - Type parameter names will be normalized to `T0`, `T1`, etc ... based on the order they appear in the type declaration. This means an extension block with a type parameter `Dictionary<TKey, TValue>` will result in the fully qualified name being `System.Collections.Generic.Dictionary<T0, T1>`.
+    - The fully qualified name will not include the containing assembly. It is common for types to be moved between assemblies and that should not break the public API.
+- Constraints will included and sorted such that reordering them in source code does not change the name. Specifically:
     - Type parameter constraints will be listed in declaration order. The constraints for the Nth type parameter will occur before the Nth+1 type parameter.
     - Base type and interface constraints will be sorted by comparing the full names ordinally
     - Non-type constraints will be sorted by comparing the C# text ordinally
-- This will not include any C# isms like tuple names, nullability, etc ... 
+- This will not include any C# isms like tuple names, nullability, etc ...
 
-The type parameters of the skeleton type will match those of the extension block. The exception being that the name of the type parameters will be normalized to `T0`, `T1`, etc ... based on the order they appear in the type declaration. This means an extension block with a type parameter `Dictionary<TKey, TValue>` will result in a skeleton type with type parameters `T0` and `T1` in that order.
+This will achieve the goal that the name of marker types will only change when the underlying CLR type of an extension type changes. Any change to C# parts of the type such as adding nullable annotations or tuple names will impact the skeleton type name.
 
-This will achieve the goal that the name of skeleton types will only change when the underlying CLR type of an extension type changes. Any change to C# parts of the type such as adding nullable annotations or tuple names will impact the skeleton type name.
+For an extension block a `private` method, referred to as the source type method, will be generated in the marker type. This method will have a single parameter which mirrors the extension `this` parameter. Specifically it will have the same attributes, ref declaration, parameter name and C# type. The name of this method will be a content name that is determined by using the following parts of the extension parameter declaration:
 
-For an extension block a `private` method, referred to as the source type method, will be generated in the skeleton type. This method will have a single parameter which mirrors the extension `this` parameter. Specifically it will have the same attributes, ref declaration, parameter name and C# type. The name of this method will be a content name that is determined by using the following parts of the extension parameter declaration:
-
-- The fully qualified C# name of the type. This will include items like nullable annotations, tuple names, etc ... The constraints will have the same ordering as CLR types for the skeleton type name.
+- The fully qualified C# name of the type. This will include items like nullable annotations, tuple names, etc ... The constraints will have the same ordering as CLR types for the marker type name.
 - The name of the extension `this` parameter
 - The ref-ness of the extension `this` parameter
 - The fully qualified name + attribute arguments for any attributes applied to the extension `this` parameter.
@@ -42,7 +45,7 @@ For an extension block a `private` method, referred to as the source type method
 
 The source type method will also have an attribute, `TypeParameterNames`, which contains the names of the type parameters in the declaration. This will be listed in the order declared in source.
 
-For every member in an extension block, the generated skeleton member will have an attribute which contains the name of the source type method that represents the original extension `this` parameter. This allows the compiler to fully rehydrate the C# extension `this` parameter for any skeleton member.
+For every member in an extension block, the generated marker member will have an attribute which contains the name of the source type method that represents the original extension `this` parameter. This allows the compiler to fully rehydrate the C# extension `this` parameter for any marker member.
 
 Here is an example of how this approach would look in real code:
 
@@ -107,7 +110,7 @@ class E
 }
 ```
 
-This approach will result in stable names for our skeleton types and members that will make it much more consumable for the existing C# ecosystem.
+This approach will result in stable names for our marker types and members that will make it much more consumable for the existing C# ecosystem.
 
 The content hash algorithm will be left as an implementation detail to the compiler. The _recommendation_ is picking a hash that has the following properties:
 
@@ -116,26 +119,26 @@ The content hash algorithm will be left as an implementation detail to the compi
 
 The only _requirement_ of the hash is that it cannot be a cryptographic hash. Because this is a non-cryptographic hash the compiler will be responsible for doing collision detection. Specifically: 
 
-- When the extension type for two extension blocks have different CLR types but produce the same skeleton type name an error must be produced. 
+- When the extension type for two extension blocks have different CLR types but produce the same marker type name an error must be produced. 
 - When the extension type for two extension blocks have different C# types but produce the same source type method name an error must be produced.
 
 This design will result in the following restrictions for extension blocks:
 
-- All extension blocks which generate a skeleton type name X must refer to the same CLR type. Essentially there cannot be two extension blocks in the same container over different types with the same fully qualified name. This is not resolvable with `extern alias`. Instead such extension block declarations must be put into different containing types.
+- All extension blocks which generate a marker type name X must refer to the same CLR type. Essentially there cannot be two extension blocks in the same container over different types with the same fully qualified name. This is not resolvable with `extern alias`. Instead such extension block declarations must be put into different containing types.
 - Changing constraints on an extension block will result in breaking changes for existing CREF in the ecosystem
 
 ## Alternatives
 
 ### Reduce scope of constraint breaking changes to non-methods
 
-The biggest challenge with constraints and breaking changes is that for member types like properties the only place constraints can exist is on the type. That means changing constraints means that constraints on the containing type must change. That, combined with other requirements of the design, force the name of the skeleton type to change as constraints change.
+The biggest challenge with constraints and breaking changes is that for member types like properties the only place constraints can exist is on the type. That means changing constraints means that constraints on the containing type must change. That, combined with other requirements of the design, force the name of the marker type to change as constraints change.
 
 This problem does not _inherently_ exist for methods. Those can declare their own type parameters and hence be independent of the type parameter / constraints on the containing type. 
 
-This means that we could do the following to make constraint changes for extension methods only non-breaking. Extension blocks would generate into two skeleton types: 
+This means that we could do the following to make constraint changes for extension methods only non-breaking. Extension blocks would generate into two marker types: 
 
-1. A skeleton type which contained all extension members that were methods. This skeleton type would be non-generic. Type parameters on the original extension type would be copied to each skeleton method.
-2. A skeleton type which contained all extension members that were not methods. This skeleton type would be as previously described in this document.
+1. A marker type which contained all extension members that were methods. This marker type would be non-generic. Type parameters on the original extension type would be copied to each marker method.
+2. A marker type which contained all extension members that were not methods. This marker type would be as previously described in this document.
 
 This design has a few downsides:
 
@@ -144,11 +147,11 @@ This design has a few downsides:
 
 The working group does not feel the extra complexity is justified by the limited relief of CREF breaking changes.
 
-### Emit everything as methods in the skeleton types
+### Emit everything as methods in the marker types
 
 As mentioned above when dealing with methods it's easier to avoid breaking changes around constraints. One strategy could be to simply emit everything in an extension block as a method and move all the type parameters to these methods.
 
-For example: when emitting the skeleton member for a property named `Example` declared in an extension block we could find a strategy where:
+For example: when emitting the marker member for a property named `Example` declared in an extension block we could find a strategy where:
 
 1. Pick a naming scheme that identifies it as property like prefix with `<>Property_Example` 
 2. Emit the accessors with a naming scheme like `<>Property_Example_get`
@@ -173,13 +176,13 @@ The only downside to using a non-cryptographic hashing algorithm is that the com
 
 This design normalizes type parameter names to `T0`, `T1`, etc ... The original names are encoded in an attribute on the source type method. Need to validate from the compiler team if this is a workable solution for rehydrating the original type parameter names. If this is not viable then we will need to consider adding the following restriction:
 
-- All extension blocks that map to the same skeleton type must have type parameters with the same name.
+- All extension blocks that map to the same marker type must have type parameters with the same name.
 
 At a glance this may seem like an unreasonable restriction but there is precedence as this is what we require for `partial` types today.
 
 ### Categorizing the breaking change
 
-Changes to the source code that result in only changes to the skeleton assemblies are a new kind of breaking change.  Let's consider concretely a case where a constraint on a type parameter is removed. 
+Changes to the source code that result in only changes to the marker types are a new kind of breaking change.  Let's consider concretely a case where a constraint on a type parameter is removed.
 
 ```cs
 // Before
@@ -201,14 +204,15 @@ class E
     }
 }
 ```
-This source change will only result in a change to the skeleton assemblies. That means it is **not** a runtime ABI breaking change as that would bind against the implementation methods. This change to the skeleton assembly is also not a source breaking change (yes modifying constraints can break source but there is nothing about the skeleton types / methods itself that are used in source).
+
+This source change will only result in a change to the marker types. That means it is **not** a runtime binary breaking change as that would bind against the implementation methods. This change to the marker type is also not a source breaking change (yes modifying constraints can break source but there is nothing about the marker types / methods itself that are used in source).
 
 This is a breaking change for the following items:
 
-- CREF: changing the skeleton type / method can break generated CREF in the wild. These would be fixed upon recompilation against the new assembly.
-- Design Time: the Roslyn API can be used to observe the skeleton assemblies, CREF being one case.
+- CREF: changing the marker type / method can break generated CREF in the wild. These would be fixed upon recompilation against the new assembly.
+- Design Time: the Roslyn API can be used to observe the marker types, CREF being one case.
 
-Time should be taken to better outline and categorize these type of breaks so teams like .NET libraries can make informed decisions about changing aspects of skeleton assemblies between releases.
+Time should be taken to better outline and categorize these type of breaks so teams like .NET libraries can make informed decisions about changing aspects of marker types between releases.
 
 ### The SourceTypeMethodAttribute name
 
