@@ -4,8 +4,6 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ## Schedule ASAP
 
-- https://github.com/dotnet/csharplang/blob/main/proposals/extension-operators.md#use-of-extension-operators-in-linq-expression-trees (Aleksey)
-
 ## Schedule when convenient
 
 - Type parameter inference from constraints (333fred) - https://github.com/dotnet/csharplang/blob/9b89d17e372243d99acd32988cc5e823baafe64c/proposals/type-parameter-inference-from-constraints.md
@@ -40,6 +38,7 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ### Mon Jun 23, 2025
 
+- [Extension operators in LINQ expression trees](https://github.com/dotnet/csharplang/blob/main/proposals/extension-operators.md#use-of-extension-operators-in-linq-expression-trees) (Aleksey)
 - Extensions _2hrs_ (Julien and Aleksey)
 
 ### Wed Jun 18, 2025
