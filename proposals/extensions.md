@@ -405,7 +405,7 @@ The containing static class for an extension declaration is marked with an `[Ext
 
 #### Extension types
 
-Each extension declaration in source is emitted as an extension declaration in metadata.  
+Each extension declaration in source is emitted as an extension declaration in metadata (sometimes referred to as skeleton type).  
 - Its name is unspeakable and determined based on the lexical order in the program.  
   The name is not guaranteed to remain stable across re-compilation. 
   Below we use `<>E__` followed by an index. For example: `<>E__2`.  
