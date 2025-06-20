@@ -1,5 +1,7 @@
 # Iterators in lambdas
 
+Champion issue: https://github.com/dotnet/csharplang/issues/9467
+
 ## Summary
 
 This proposal will remove the restriction that lambda expressions cannot be iterators.

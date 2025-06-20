@@ -41,12 +41,14 @@ All schedule items must have a public issue or checked-in proposal that can be l
 - [Extension operators in LINQ expression trees](https://github.com/dotnet/csharplang/blob/main/proposals/extension-operators.md#use-of-extension-operators-in-linq-expression-trees) (Aleksey)
 - Extensions _2hrs_ (Julien and Aleksey)
 
+## C# Language Design Notes for 2025
+
 ### Wed Jun 18, 2025
 
-- Letting lambdas be (sync and async) iterators (Jared) https://github.com/dotnet/csharplang/discussions/9393
-- [Extensions](https://github.com/dotnet/csharplang/blob/main/proposals/extensions.md#open-issues): Alternative naming, metadata format and merging/conflict rules (Julien)
+[C# Language Design Meeting for June 18th, 2025](https://github.com/dotnet/csharplang/blob/main/meetings/2025/LDM-2025-06-18.md)
 
-## C# Language Design Notes for 2025
+- Iterators in lambdas
+- Extensions
 
 ### Wed Jun 11, 2025
 
