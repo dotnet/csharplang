@@ -399,13 +399,13 @@ These requirements need more refinement as implementation progresses, and may ne
 
 ### Metadata for declarations
 
-Each extension declaration is emitted as a skeleton type with a marker method and skeleton members.  
-Each skeleton member is accompanied by a top-level static implementation method with a modified signature.    
+Each extension declaration is emitted as an extension type with a marker method and extension members.  
+Each extension member is accompanied by a top-level static implementation method with a modified signature.    
 The containing static class for an extension declaration is marked with an `[Extension]` attribute.  
 
-#### Skeletons
+#### Extension types
 
-Each extension declaration in source is emitted as an extension declaration in metadata.  
+Each extension declaration in source is emitted as an extension declaration in metadata (sometimes referred to as skeleton type).  
 - Its name is unspeakable and determined based on the lexical order in the program.  
   The name is not guaranteed to remain stable across re-compilation. 
   Below we use `<>E__` followed by an index. For example: `<>E__2`.  
@@ -413,7 +413,7 @@ Each extension declaration in source is emitted as an extension declaration in m
 - Its accessibility is public.
 - It is marked with the `specialname` flag.  
 
-Method/property declarations in an extension declaration in source are represented as skeleton members in metadata.  
+Method/property declarations in an extension declaration in source are represented as members of the extension type in metadata.  
 The signatures of the original methods are maintained (including attributes), but their bodies are replaced with `throw null`.  
 Those should not be referenced in IL.  
 
@@ -427,7 +427,7 @@ The extension marker method encodes the receiver parameter.
 
 Note: This allows roundtripping of extension declaration symbols through metadata (full and reference assemblies).  
 
-Note: we may choose to only emit one extension skeleton type in metadata when duplicate extension declarations are found in source.  
+Note: we may choose to only emit one extension type in metadata when duplicate extension declarations are found in source.  
 
 #### Implementations
 
@@ -507,13 +507,13 @@ to `IEnumerableExtensions.Method<int>(enumerableOfInt)`.
 ## XML docs
 
 The doc comments on the extension block are emitted for the unspeakable named type (the DocID for the extension block is `<>E__0'1` in the example below).  
-The doc comments on the extension members are emitted for the skeleton members. They are allowed to reference the extension parameter and type parameters using `<paramref>` and `<typeparamref>` respectively).  
+They are allowed to reference the extension parameter and type parameters using `<paramref>` and `<typeparamref>` respectively).  
 Note: you may not document the extension parameter or type parameters (with `<param>` and `<typeparam>`) on an extension member.  
 
 Tools consuming the xml docs are responsible for copying the `<param>` and `<typeparam>` from the extension block onto the extension members as appropriate (ie. the parameter information should only be copied for instance members).  
 
-An `<inheritdoc>` is emitted on implementation methods and it refers to the relevant skeleton member with a `cref`. For example, the implementation method for a getter refers to the documentation of the skeleton property. 
-If the skeleton member has not doc comments, then the `<inheritdoc>` is omitted. 
+An `<inheritdoc>` is emitted on implementation methods and it refers to the relevant extension member with a `cref`. For example, the implementation method for a getter refers to the documentation of the extension property. 
+If the extension member has not doc comments, then the `<inheritdoc>` is omitted. 
 
 For extension blocks and extension members, we don't presently warn if:
 - the extension parameter is documented, but the parameters on the extension member aren't
@@ -701,7 +701,7 @@ We'd exclude:
 
 - we're planning to allow `extern` for portability: https://github.com/dotnet/roslyn/issues/78572
 
-### Naming/numbering scheme for skeleton type
+### Naming/numbering scheme for extension type
 
 [Issue](https://github.com/dotnet/roslyn/issues/78416)  
 The current numbering system causes problems with the [validation of public APIs](https://learn.microsoft.com/dotnet/fundamentals/apicompat/package-validation/overview#validator-types)
@@ -761,7 +761,7 @@ public class C<T> { }
 - ~~Should the extension marker or speakable implementation methods be marked with special name?~~ (answer: the marker method should be marked with special name and we should check it, but not implementation methods, LDM 2025-04-17)
 - ~~Should we add `[Extension]` attribute on the static class even when there is no instance extension method inside?~~ (answer: yes, LDM 2025-03-10)
 - ~~Confirm we should add `[Extension]` attribute to implementation getters and setters too.~~ (answer: no, LDM 2025-03-10)
-- Confirm that the skeleton types should be marked with special name and the compiler will require this flag in metadata (this is a breaking change from preview)
+- Confirm that the extension types should be marked with special name and the compiler will require this flag in metadata (this is a breaking change from preview)
 
 #### static factory scenario
 
