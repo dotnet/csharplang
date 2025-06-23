@@ -762,6 +762,34 @@ public class C<T> { }
 - ~~Should we add `[Extension]` attribute on the static class even when there is no instance extension method inside?~~ (answer: yes, LDM 2025-03-10)
 - ~~Confirm we should add `[Extension]` attribute to implementation getters and setters too.~~ (answer: no, LDM 2025-03-10)
 - Confirm that the extension types should be marked with special name and the compiler will require this flag in metadata (this is a breaking change from preview)
+- Confirm that `ref` should not be included in extension type name:
+```
+public static class E
+{
+  extension(ref int)
+  {
+    public static void M()
+  }
+}
+```
+
+It is emitted as:
+
+```
+public static class E
+{
+  public static class <>ExtensionTypeXYZ
+  {
+    .. marker method ...
+    void M()
+  }
+}
+```
+
+And third-party CREF reference for `E.extension(ref int).M` are emitted as `M:E.<>ExtensionTypeXYZ.M()`
+
+If `ref` is removed or added to an extension parameter, we probably don't want the CREF to break.
+
 
 #### static factory scenario
 
