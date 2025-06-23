@@ -636,6 +636,7 @@ Types and aliases may not be named "extension".
 - ~~Confirm LangVer logic (skip new extensions, vs. consider and report them when picked)~~ (answert: bind unconditionally and report LangVer error except for instance extension methods, LDM 2025-06-11)
 - Should we adjust receiver requirements when accessing an extension member? ([comment](https://github.com/dotnet/roslyn/pull/78685#discussion_r2126534632))
 For instance, `new Struct() { Property = 42 }`.
+- Revisit grouping/conflict rules in light of portability issue: https://github.com/dotnet/roslyn/issues/79043
 
 ### nameof
 
@@ -699,7 +700,7 @@ We'd exclude:
 
 ### `extern`
 
-- we're planning to allow `extern` for portability: https://github.com/dotnet/roslyn/issues/78572
+- ~~we're planning to allow `extern` for portability: https://github.com/dotnet/roslyn/issues/78572~~ (answer: approved, LDM 2025-06-23)
 
 ### Naming/numbering scheme for extension type
 
@@ -761,8 +762,8 @@ public class C<T> { }
 - ~~Should the extension marker or speakable implementation methods be marked with special name?~~ (answer: the marker method should be marked with special name and we should check it, but not implementation methods, LDM 2025-04-17)
 - ~~Should we add `[Extension]` attribute on the static class even when there is no instance extension method inside?~~ (answer: yes, LDM 2025-03-10)
 - ~~Confirm we should add `[Extension]` attribute to implementation getters and setters too.~~ (answer: no, LDM 2025-03-10)
-- Confirm that the extension types should be marked with special name and the compiler will require this flag in metadata (this is a breaking change from preview)
-- Confirm that `ref` should not be included in extension type name:
+- ~~Confirm that the extension types should be marked with special name and the compiler will require this flag in metadata (this is a breaking change from preview)~~ (answer: approved, LDM 2025-06-23)
+- Confirm that `ref` should not be included in extension type name (needs further discussion after WG revisits grouping/conflict rules, LDM 2025-06-23)
 ```
 public static class E
 {
@@ -849,7 +850,7 @@ static class E
     }
 }
 ```
-- Confirm that we want betterness rules to apply even when the receiver is a type
+- ~~Confirm that we want betterness rules to apply even when the receiver is a type~~ (answer: a type-only extension parameter should be considered when resolving static extension members, LDM 2025-06-23)
 ```csharp
 int.M();
 
@@ -868,7 +869,8 @@ static class E2
     }
 }
 ```
-- Confirm that we don't want some betterness across all members before we determine the winning member kind:
+- Confirm that we're okay with having an ambiguity when both methods and properties are applicable (answer: we should design a proposal to do better than the status quo, not blocking for .NET 10, LDM 2025-06-23)
+- Confirm that we don't want some betterness across all members before we determine the winning member kind 
 ```
 string s = null;
 s.M(); // error
