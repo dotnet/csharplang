@@ -75,7 +75,7 @@ The runtime is aware of a special union type that is used only descriptively in 
 System.Union<T1, T2>
 ```
 The runtime is aware of a special abstract generic class `System.Union<T1, T2>`. 
-This type can never be allocated, but it can be used in signatures, fields and local variables as a way to provide more information a value that is ultimately just an object reference.
+This type can never be allocated, but it can be used in signatures, fields and local variables as a way to provide more information for a value that is ultimately just an object reference.
 
 This type has two generic type parameters, both of which can either describe a case type or another union type when constructed.
 
