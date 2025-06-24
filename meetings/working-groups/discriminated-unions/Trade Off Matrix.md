@@ -2,7 +2,7 @@
 
 ## Solution Space
 
-There are only three possible ways to represent a type that behaves like a discriminated union or type union in the dotnet runtime without large impractical changes.
+There are only three possible ways to represent a type that behaves like a discriminated union or type union in C# without a large runtime overhaul.
 
 1) As a class Hierarchy
 ```csharp
