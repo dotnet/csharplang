@@ -7,7 +7,7 @@
 
 ## Summary
 
-Allow a class to be declared `closed`. This prevents directly derived classes from being declared in a different compilation unit:
+Allow a class to be declared `closed`. This prevents directly derived classes from being declared in a different assembly:
 
 ``` c#
 // Assembly 1
