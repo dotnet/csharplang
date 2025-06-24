@@ -55,24 +55,25 @@ The following proposals offer solutions for exhaustiveness and more, with a matr
 | Existing Cases                       	| **Yes**              | **Yes**             |                    |
 | Anonymous Syntax                      | **Yes**              |                     |                    |
 | Pattern Matching                      | **Yes**              | **Yes**             | **Yes**            |
-| Weak Pattern Matching                 | **Yes**		       |                     | **Yes**            |
+| Dynamic Pattern Matching              | **Yes**		       |                     | **Yes**            |
 | Subtype Relationship                  |                      |                     | **Yes**            |
 | Conversion Relationship               | **Yes**              |                     | **Yes**            |
 | Back-Compat       			        |                      | **Yes**		     | **Yes**            |
+| Non-ABI Breaking                      | *named only*         | **Yes**             | **Yes**            |
 | Non-Allocating/Boxing			        |                      | *future*            |                    |
 | Custom Unions 	                    |                      | *future*            |                    |
 | Any Time Soon                         |	                   | **Yes**             | **Yes**            |
-
 
 - *Declared Cases* - Case types can be declared as part of the union type declaration.
 - *Singleton Cases* - Singleton cases can be declared and used without additional allocations.
 - *Existing Cases* - Existing types can be used as cases w/o declaring and allocating case type wrappers.
 - *Anonymous Syntax* - A type expression syntax exists to refer to a union without declaring a named typed.
 - *Pattern Matching* - Pattern matching works directly on union instance.
-- *Weak Pattern Matching* - Pattern matching works in contexts where the source is not statically known to be a union.
+- *Dynamic Pattern Matching* - Pattern matching works when union types are not statically known.
 - *Subtype Relationship* - A subtype relationship exists between Union and Case types.
 - *Conversion Relationship* - A conversion relationship exists between Union and Case types. 
 - *Back-Compat* - Union types can be used with older runtimes and older language versions.
+- *Non-ABI Breaking* - Adding or reordering cases does not cause binary breaks.
 - *Non-Allocating/Boxing* - Union and case values can be used without any kind of allocation or boxing.
 - *Custom Unions* - Possible to declare a type that behaves like a union type in the language but has a custom implementation.
 - *Any Time Soon* - Could appear in next few C# releases.
