@@ -6,11 +6,12 @@ There are only three possible ways to represent a type that behaves like a discr
 
 1) As a class Hierarchy
 ```csharp
+    // example: a record hierarchy
     public abstract record MyUnion
     {
-        public record Case1(...);
-        public record Case2(...);
-        public record Case3(...);
+        public record Case1(...) : MyUnion;
+        public record Case2(...) : MyUnion;
+        public record Case3(...) : MyUnion;
     }
 
     MyUnion union = new MyUnion.Case1(...);
@@ -25,6 +26,7 @@ There are only three possible ways to represent a type that behaves like a discr
 
 3) As a wrapper type
 ```csharp
+    // example: a struct wrapper with constructors and a value property
     public struct MyUnion
     {
         public MyUnion(Case1 value) {...}
