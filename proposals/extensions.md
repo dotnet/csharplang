@@ -399,54 +399,194 @@ These requirements need more refinement as implementation progresses, and may ne
 
 ### Metadata for declarations
 
-Each extension declaration is emitted as an extension type with a marker method and extension members.  
-Each extension member is accompanied by a top-level static implementation method with a modified signature.    
-The containing static class for an extension declaration is marked with an `[Extension]` attribute.  
+Extension blocks are grouped by their CLR-level signature. Each CLR equivalency group is emitted as an **extension grouping type** with a content-based name.
+Extension blocks within a CLR equivalency group are then sub-grouped by C# equivalency. Each C# equivalency group is emitted as an **extension marker type** with a content-based name, nested in its corresponding extension grouping type.
+An extension marker type contains a single **extension marker method** which encodes an extension parameter.
+Each extension member is emitted with a stub implementation in the right extension grouping type, refers back to an extension marker type by its name via an attribute, and is accompanied by a top-level static **implementation method** with a modified signature.    
 
-#### Extension types
+Here's a schematized overview of metadata encoding:
+```
+[Extension]
+static class EnclosingStaticClass
+{
+    [Extension]
+    public class ExtensionGroupingType1 // has type parameters with minimal constraints sufficient to keep extension member declarations below valid
+    {
+        private static class ExtensionMarkerType1 // has re-declared type parameters with full fidelity of C# constraints
+        {
+            private static void <Extension>$(... extension parameter ...) // extension marker method
+        }
+        ... ExtensionMarkerType2, etc ...
 
-Each extension declaration in source is emitted as an extension declaration in metadata (sometimes referred to as skeleton type).  
-- Its name is unspeakable and determined based on the lexical order in the program.  
-  The name is not guaranteed to remain stable across re-compilation. 
-  Below we use `<>E__` followed by an index. For example: `<>E__2`.  
-- Its type parameters are those declared in source (including attributes).  
-- Its accessibility is public.
-- It is marked with the `specialname` flag.  
+        ... extension members for ExtensionGroupingType1, each points to its corresponding extension marker type ...
+    }
 
-Method/property declarations in an extension declaration in source are represented as members of the extension type in metadata.  
-The signatures of the original methods are maintained (including attributes), but their bodies are replaced with `throw null`.  
-Those should not be referenced in IL.  
+    ... ExtensionGroupingType2, etc ...
 
-Note: This is similar to ref assemblies. The reason for using `throw null` bodies (as opposed to no bodies) 
-is so that IL verification could run and pass (thus validating the completeness of the metadata).
+    ... implementation methods ...
+}
+```
 
-The extension marker method encodes the receiver parameter.  
-- It is private and static, and is called `<Extension>$`.  
-- It has the attributes, refness, type and name from the receiver parameter on the extension declaration.  
-- If the receiver parameter doesn't specify a name, then the parameter name is empty.  
+The enclosing static class is emitted with an `[Extension]` attribute.  
 
 Note: This allows roundtripping of extension declaration symbols through metadata (full and reference assemblies).  
 
-Note: we may choose to only emit one extension type in metadata when duplicate extension declarations are found in source.  
+### CLR-level signature vs. C#-level signature
 
-#### Implementations
+The CLR-level signature of an extension block results from:
+- normalizing type parameter names to `T0`, `T1`, etc ...
+- removing attributes
+- erasing the parameter name
+- erasing parameter modifiers (like `ref`, `in`, `scoped`, ...)
+- erasing tuple names
+- erasing nullability annotations
+- erasing `notnull` constraints
 
-The method bodies for method/property declarations in an extension declaration in source are emitted 
+Note: other constraints are preserved, such as `new()`, `struct`, `class`, `allows ref struct`, `unmanaged`, and type constraints.
+
+#### Extension grouping types
+
+Each extension block with a distinct CLR-level signature in source is emitted as an extension grouping type in metadata (extension grouping types are an evolution of the previous "skeleton type" design).  
+- Its name is unspeakable and determined based on the contents of the CLR-level signature. More details below.  
+- Its type parameters have normalized names (`T0`, `T1`, ...) and have no attributes.  
+- Its accessibility is public.
+- It is marked with the `specialname` flag and an `[Extension]` attribute.  
+
+The content-based name of the extension grouping type is based on the CLR-level signature and includes the following:
+- The fully qualified CLR name of the type. This will include namespaces, type constraints, named constraints (like `new`).
+    - Type parameter names will be normalized to `T0`, `T1`, etc ... based on the order they appear in the type declaration. This means an extension block with a type parameter `Dictionary<TKey, TValue>` will result in the fully qualified name being `System.Collections.Generic.Dictionary<T0, T1>`.
+    - The fully qualified name will not include the containing assembly. It is common for types to be moved between assemblies and that should not break the public API.
+- Constraints will included and sorted such that reordering them in source code does not change the name. Specifically:
+    - Type parameter constraints will be listed in declaration order. The constraints for the Nth type parameter will occur before the Nth+1 type parameter.
+    - Base type and interface constraints will be sorted by comparing the full names ordinally
+    - Non-type constraints will be sorted by comparing the C# text ordinally
+- Since this does not include attributes, it intentionally ignores C#-isms like tuple names, nullability, etc ...
+
+Note: The name is guaranteed to remain stable across re-compilations, re-orderings and changes of C#-isms (ie. that don't affect the CLR-level signature).   
+
+#### Extension marker types
+
+The marker type re-declares the type parameters of its containing type (an extension grouping type) to get full fidelity of the C# view of extension blocks.
+
+Each extension block with a distinct C#-level signature in source results in an extension marker type in metadata.  
+- Its name is unspeakable and determined based on the contents of the C#-level signature of the extension block. More details below.  
+- It redeclares the type parameters for its containing type to be those declared in source (including name and attributes).
+- It is private and static.
+- It is marked with the `specialname` flag.  
+
+The content-based name of the extension marker type is based on the following:
+- The fully qualified C# name of the type. 
+    - This will include items like nullable annotations, tuple names, etc ... 
+    - The constraints will have the same ordering as CLR types for the grouping type name
+    - The fully qualified name will not include the containing assembly
+- The name of the extension parameter
+- The modifiers of the extension parameter (`ref`, `ref readonly`, `scoped`, ...)
+- The fully qualified name and attribute arguments for any attributes applied to the extension parameter.
+
+Note: The name is guaranteed to remain stable across re-compilation and re-orderings.
+
+#### Extension marker method
+
+The purpose of the marker method is to encode the extension parameter of the extension block. 
+Because it is a member of the extension marker type, it can refer to the re-declared type parameters of the extension marker type.
+
+Each extension marker type contains a single method, the extension marker method.
+- It is private, static, non-generic, void-returning, and is called `<Extension>$`.  
+- Its single parameter has the attributes, refness, type and name from the extension parameter.  
+  If the extension parameter doesn't specify a name, then the parameter name is empty.  
+- It is marked with the `specialname` flag.  
+
+#### Extension members
+
+Method/property declarations in an extension block in source are represented as members of the extension grouping type in metadata.  
+- The signatures of the original methods are maintained (including attributes), but their bodies are replaced with `throw NotImplementedException()`.  
+- Those should not be referenced in IL.  
+- They are marked with `[ExtensionMarkerName("...")]` referring to the name of the extension marker type corresponding to the extension block for that member.  
+
+#### Implementation methods
+
+The method bodies for method/property declarations in an extension block in source are emitted 
 as static implementation methods in the top-level static class.  
 - An implementation method has the same name as the original method.  
-- It has type parameters derived from the extension declaration prepended to the type parameters of the original method (including attributes).  
+- It has type parameters derived from the extension block prepended to the type parameters of the original method (including attributes).  
 - It has the same accessibility and attributes as the original method.  
 - If it implements a static method, it has the same parameters and return type. 
 - It if implements an instance method, it has a prepended parameter to the signature of the original method. 
-  This parameter's attributes, refness, type, and name are derived from the receiver parameter declared in the relevant extension declaration.
-- The parameters in implementation methods refer to type parameters owned by implementation method, instead of those of an extension declaration.  
+  This parameter's attributes, refness, type, and name are derived from the extension parameter declared in the relevant extension block.
+- The parameters in implementation methods refer to type parameters owned by implementation method, instead of those of an extension block.  
 - If the original member is an instance ordinary method, the implementation method is marked with an `[Extension]` attribute.
 
-For example:
+#### Example
+
+Note: we use simplified content-based names for the example, for readability.
+Note: since C# cannot represent type parameter re-declaration, the code representing metadata is not valid C# code.
+
+Here's an example illustrating how grouping works, without members:
+
+```
+class E
+{
+    extension<T>(IEnumerable<T> source)
+    {
+        ... member in extension<T>(IEnumerable<T> source)
+    }
+
+    extension<U>(ref IEnumerable<U?> p)
+    {
+        ... member in extension<U>(ref IEnumerable<U?> p)
+    }
+
+    extension<T>(IEnumerable<U> source)
+        where T : IEquatable<U>
+    {
+        ... member in extension<T>(IEnumerable<U> source) where T : IEquatable<U>
+    }
+}
+```
+is emitted as
+```
+class E
+{
+    public class <>E__ContentName_For_IEnumerable_T<T0>
+    {
+        private static class <>E__ContentName1 // note: re-declares type parameters
+        {
+            private static void <Extension>$(IEnumerable<T> source) { }
+        }
+
+        private static class <>E__ContentName2 // note: re-declares type parameters
+        {
+            private static void <Extension>$(ref IEnumerable<U?> p) { }
+        }
+
+        [MarkerMethodName("<>E__ContentName1")]
+        ... member in extension<T>(IEnumerable<T> source)
+
+        [MarkerMethodName("<>E__ContentName2")]
+        ... member in extension<U>(ref IEnumerable<U?> p)
+    }
+
+    public class <>ContentName_For_IEnumerable_T_With_Constraint<T0>
+       where T0 : IEquatable<T0>
+    {
+        private static class <>E__ContentName3 // note: re-declares type parameters
+        {
+            private static void <Extension>$(IEnumerable<U> source) { }
+        }
+
+        [MarkerMethodName("ContentName3")]
+        public static bool IsPresent(U value) => throw null!;
+    }
+
+    ... implementation methods
+}
+```
+
+Here's an example illustrating how members are emitted:
 ```
 static class IEnumerableExtensions
 {
-    extension<T>(IEnumerable<T> source)
+    extension<T>(IEnumerable<T> source) where T : notnull
     {
         public void Method() { ... }
         internal static int Property { get => ...; set => ...; }
@@ -466,17 +606,36 @@ is emitted as
 [Extension]
 static class IEnumerableExtensions
 {
-    public class <>E__1<T>
+    public class <>E__ContentName_For_IEnumerable_T<T0>
     {
-        private static <Extension>$(IEnumerable<T> source) => throw null;
+        // Extension marker type is emitted as a nested type and re-declares its type parameters to include C#-isms
+        // In this example, the type parameter `T0` is re-declared as `T` with a `notnull` constraint:
+        // .class <>E__IEnumerableOfT<T>.<>E__ContentName_For_IEnumerable_T_Source
+        // .typeparam T
+        //     .custom instance void NullableAttribute::.ctor(uint8) = (...)
+        public static class <>E__ContentName_For_IEnumerable_T_Source
+        {
+            public static <Extension>$(IEnumerable<T> source) => throw null;
+        }
+
+        [ExtensionMarkerName("<>E__ContentName_For_IEnumerable_T_Source")]
         public void Method() => throw null;
+
+        [ExtensionMarkerName("<>E__ContentName_For_IEnumerable_T_Source")]
         internal static int Property { get => throw null; set => throw null; }
+
+        [ExtensionMarkerName("<>E__ContentName_For_IEnumerable_T_Source")]
         public int Property2 { get => throw null; set => throw null; }
     }
 
-    public class <>E__2
+    public class <>E__ContentName_For_IAsyncEnumerable_Int
     {
-        private static <Extension>$(IAsyncEnumerable<int> values) => throw null;
+        public static class <>E__ContentName_For_IAsyncEnumerable_Int_Values
+        {
+            public static <Extension>$(IAsyncEnumerable<int> values) => throw null;
+        }
+
+        [ExtensionMarkerName("<>E__ContentName_For_IAsyncEnumerable_Int_Values")]
         public Task<int> SumAsync() => throw null;
     }
 
