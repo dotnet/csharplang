@@ -35,6 +35,12 @@ All schedule items must have a public issue or checked-in proposal that can be l
 ### Wed Jun 25, 2025
 
 - Unions _1.5 hrs_ (Mads and Matt)
+    - [CLosed Enums](https://github.com/dotnet/csharplang/blob/0809d6632e3f8d15d3ead205bfc83bd35816aa8f/meetings/working-groups/discriminated-unions/Closed%20Enums.md)
+    - [Closed Hierarchies](https://github.com/dotnet/csharplang/blob/0809d6632e3f8d15d3ead205bfc83bd35816aa8f/meetings/working-groups/discriminated-unions/Closed%20Hierarchies.md)
+    - [Case Classes](https://github.com/dotnet/csharplang/blob/0809d6632e3f8d15d3ead205bfc83bd35816aa8f/meetings/working-groups/discriminated-unions/Case%20Classes.md)
+    - [Runtime Type Unions](https://github.com/dotnet/csharplang/blob/0809d6632e3f8d15d3ead205bfc83bd35816aa8f/meetings/working-groups/discriminated-unions/Runtime%20Type%20Unions.md)
+    - [Nominal Type Unions](https://github.com/dotnet/csharplang/blob/0809d6632e3f8d15d3ead205bfc83bd35816aa8f/meetings/working-groups/discriminated-unions/Nominal%20Type%20Unions.md)
+    - [Trade-off Matrix](https://github.com/dotnet/csharplang/blob/0809d6632e3f8d15d3ead205bfc83bd35816aa8f/meetings/working-groups/discriminated-unions/Trade%20Off%20Matrix.md)
 
 ### Mon Jun 23, 2025
 
