@@ -33,17 +33,13 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ### Mon Jun 30, 2025
 
-### Wed Jun 25, 2025
-
-- Unions _1.5 hrs_ (Mads and Matt)
-    - [Closed Enums](https://github.com/dotnet/csharplang/blob/0809d6632e3f8d15d3ead205bfc83bd35816aa8f/meetings/working-groups/discriminated-unions/Closed%20Enums.md)
-    - [Closed Hierarchies](https://github.com/dotnet/csharplang/blob/0809d6632e3f8d15d3ead205bfc83bd35816aa8f/meetings/working-groups/discriminated-unions/Closed%20Hierarchies.md)
-    - [Case Classes](https://github.com/dotnet/csharplang/blob/0809d6632e3f8d15d3ead205bfc83bd35816aa8f/meetings/working-groups/discriminated-unions/Case%20Classes.md)
-    - [Runtime Type Unions](https://github.com/dotnet/csharplang/blob/0809d6632e3f8d15d3ead205bfc83bd35816aa8f/meetings/working-groups/discriminated-unions/Runtime%20Type%20Unions.md)
-    - [Nominal Type Unions](https://github.com/dotnet/csharplang/blob/0809d6632e3f8d15d3ead205bfc83bd35816aa8f/meetings/working-groups/discriminated-unions/Nominal%20Type%20Unions.md)
-    - [Trade-off Matrix](https://github.com/dotnet/csharplang/blob/0809d6632e3f8d15d3ead205bfc83bd35816aa8f/meetings/working-groups/discriminated-unions/Trade%20Off%20Matrix.md)
-
 ## C# Language Design Notes for 2025
+
+[C# Language Design Meeting for June 25rd, 2025](https://github.com/dotnet/csharplang/blob/main/meetings/2025/LDM-2025-06-25.md)
+
+- [Unions](#unions)
+    - [Stand-alone issues](#stand-alone-issues)
+    - [Mutually exclusive issues](#mutually-exclusive-issues)
 
 ### Mon Jun 23, 2025
 

@@ -1,10 +1,5 @@
 # Case Classes
 
-* [ ] Proposed
-* [ ] Prototype: [Not Started](pr/1)
-* [ ] Implementation: [Not Started](pr/1)
-* [ ] Specification: [Not Started](pr/1)
-
 ## Summary
 
 A case class is a shorthand syntax for declaring a nested case of a closed type.

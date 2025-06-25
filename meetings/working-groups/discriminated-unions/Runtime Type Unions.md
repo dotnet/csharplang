@@ -1,10 +1,5 @@
 # Runtime Type Unions
 
-* [ ] Proposed
-* [ ] Prototype: [Not Started](pr/1)
-* [ ] Implementation: [Not Started](pr/1)
-* [ ] Specification: [Not Started](pr/1)
-
 ## Summary
 
 Runtime type unions are C# type unions built on top of support for type unions in the runtime. Each union has a closed "list" of case types.

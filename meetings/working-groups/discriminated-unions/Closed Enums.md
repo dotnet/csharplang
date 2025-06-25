@@ -1,10 +1,5 @@
 # Closed Enums
 
-* [ ] Proposed
-* [ ] Prototype: [Not Started](pr/1)
-* [ ] Implementation: [Not Started](pr/1)
-* [ ] Specification: [Not Started](pr/1)
-
 ## Summary
 
 Allow an enum type to be declared closed: 

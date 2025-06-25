@@ -1,10 +1,5 @@
 # Nominal Type Unions
 
-* [ ] Proposed
-* [ ] Prototype: [Not Started](pr/1)
-* [ ] Implementation: [Not Started](pr/1)
-* [ ] Specification: [Not Started](pr/1)
-
 ## Summary
 
 Named unions have a closed list of "case types":

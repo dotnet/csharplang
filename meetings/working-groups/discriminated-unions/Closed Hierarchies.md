@@ -1,10 +1,5 @@
 # Closed Hierarchies
 
-* [ ] Proposed
-* [ ] Prototype: [Not Started](pr/1)
-* [ ] Implementation: [Not Started](pr/1)
-* [ ] Specification: [Not Started](pr/1)
-
 ## Summary
 
 Allow a class to be declared `closed`. This prevents directly derived classes from being declared in a different assembly:
