@@ -43,12 +43,17 @@ All schedule items must have a public issue or checked-in proposal that can be l
     - [Nominal Type Unions](https://github.com/dotnet/csharplang/blob/0809d6632e3f8d15d3ead205bfc83bd35816aa8f/meetings/working-groups/discriminated-unions/Nominal%20Type%20Unions.md)
     - [Trade-off Matrix](https://github.com/dotnet/csharplang/blob/0809d6632e3f8d15d3ead205bfc83bd35816aa8f/meetings/working-groups/discriminated-unions/Trade%20Off%20Matrix.md)
 
+## C# Language Design Notes for 2025
+
 ### Mon Jun 23, 2025
 
-- [Extension operators in LINQ expression trees](https://github.com/dotnet/csharplang/blob/main/proposals/extension-operators.md#use-of-extension-operators-in-linq-expression-trees) (Aleksey)
-- Extensions _2hrs_ (Julien and Aleksey)
+[C# Language Design Meeting for June 23rd, 2025](https://github.com/dotnet/csharplang/blob/main/meetings/2025/LDM-2025-06-23.md)
 
-## C# Language Design Notes for 2025
+- Extensions
+    - Use of extension operators in LINQ expression trees
+    - `ref` encoding and conflict checks
+    - Extern support
+    - Lookup
 
 ### Wed Jun 18, 2025
 
