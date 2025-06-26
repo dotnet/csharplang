@@ -6,8 +6,6 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ## Schedule when convenient
 
-- Type parameter inference from constraints (333fred) - https://github.com/dotnet/csharplang/blob/9b89d17e372243d99acd32988cc5e823baafe64c/proposals/type-parameter-inference-from-constraints.md
-- Target-typed Static Member Lookup (Joseph) - https://github.com/dotnet/csharplang/issues/9138
 - Triage (working set)
 
 ## Recurring topics
@@ -31,7 +29,13 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ### Wed Jul 2, 2025
 
+*1 hour only*
+- Extension operators (Aleksey)
+
 ### Mon Jun 30, 2025
+
+- Type parameter inference from constraints (333fred) - https://github.com/dotnet/csharplang/blob/9b89d17e372243d99acd32988cc5e823baafe64c/proposals/type-parameter-inference-from-constraints.md
+- Target-typed Static Member Lookup (Joseph) - https://github.com/dotnet/csharplang/issues/9138
 
 ## C# Language Design Notes for 2025
 
