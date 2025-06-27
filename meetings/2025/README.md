@@ -27,11 +27,6 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ### Mon Jul 7, 2025
 
-### Wed Jul 2, 2025
-
-*1 hour only*
-- Extension operators (Aleksey)
-
 ### Mon Jun 30, 2025
 
 - Type parameter inference from constraints (333fred) - https://github.com/dotnet/csharplang/blob/9b89d17e372243d99acd32988cc5e823baafe64c/proposals/type-parameter-inference-from-constraints.md
