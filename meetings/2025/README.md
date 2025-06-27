@@ -40,6 +40,8 @@ All schedule items must have a public issue or checked-in proposal that can be l
     - Stand-alone issues
     - Mutually exclusive issues
 
+- Unions _1.5 hrs_ (Mads and Matt)
+
 ### Mon Jun 23, 2025
 
 [C# Language Design Meeting for June 23rd, 2025](https://github.com/dotnet/csharplang/blob/main/meetings/2025/LDM-2025-06-23.md)
