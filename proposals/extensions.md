@@ -636,7 +636,73 @@ Types and aliases may not be named "extension".
 - ~~Confirm LangVer logic (skip new extensions, vs. consider and report them when picked)~~ (answert: bind unconditionally and report LangVer error except for instance extension methods, LDM 2025-06-11)
 - Should we adjust receiver requirements when accessing an extension member? ([comment](https://github.com/dotnet/roslyn/pull/78685#discussion_r2126534632))
 For instance, `new Struct() { Property = 42 }`.
-- Revisit grouping/conflict rules in light of portability issue: https://github.com/dotnet/roslyn/issues/79043
+
+
+### Revisit grouping/conflict rules in light of portability issue: https://github.com/dotnet/roslyn/issues/79043
+
+The current logic is to group extension blocks that have the same receiver type. This doesn't account for constraints.
+The proposal is to use the same grouping logic that we're planning for the extension grouping type design, namely to account for CLR-level constraints (ie. ignoring notnull, tuple names, nullability annotations).
+
+### Should refness be encoded in the grouping type name?
+
+- Review proposal that `ref` not be included in extension grouping type name (needs further discussion after WG revisits grouping/conflict rules, LDM 2025-06-23)
+```
+public static class E
+{
+  extension(ref int)
+  {
+    public static void M()
+  }
+}
+```
+It is emitted as:
+```
+public static class E
+{
+  public static class <>ExtensionTypeXYZ
+  {
+    .. marker method ...
+    void M()
+  }
+}
+```
+
+And third-party CREF reference for `E.extension(ref int).M` are emitted as `M:E.<>ExtensionGroupingTypeXYZ.M()`
+If `ref` is removed or added to an extension parameter, we probably don't want the CREF to break.
+
+We don't much care for this scenario, as any usage as extension would be an ambiguity:
+```
+public static class E
+{
+  extension(ref int)
+    static void M()
+  extension(int)
+    static void M()
+}
+```
+
+But we care about this scenario (for portability and usefulness), and this should work with proposed metadata design after we adjust conflict rules:
+```
+static class E
+{
+   extension<T>(ref T) where T : struct
+      void M()
+   extension<T>(T) where T : class
+      void M()
+}
+```
+
+Not accounting for refness has a downside, as we loose portability in this scenario:
+```
+static class E
+{
+   extension<T>(ref T)
+      void M()
+   extension<T>(T)
+      void M()
+}
+// portability issue: since we're grouping without accounting for refness, the emitted extension members conflict (not implementation members). Mitigation: keep as classic extensions or split to another static class
+```
 
 ### nameof
 
@@ -763,34 +829,6 @@ public class C<T> { }
 - ~~Should we add `[Extension]` attribute on the static class even when there is no instance extension method inside?~~ (answer: yes, LDM 2025-03-10)
 - ~~Confirm we should add `[Extension]` attribute to implementation getters and setters too.~~ (answer: no, LDM 2025-03-10)
 - ~~Confirm that the extension types should be marked with special name and the compiler will require this flag in metadata (this is a breaking change from preview)~~ (answer: approved, LDM 2025-06-23)
-- Confirm that `ref` should not be included in extension type name (needs further discussion after WG revisits grouping/conflict rules, LDM 2025-06-23)
-```
-public static class E
-{
-  extension(ref int)
-  {
-    public static void M()
-  }
-}
-```
-
-It is emitted as:
-
-```
-public static class E
-{
-  public static class <>ExtensionTypeXYZ
-  {
-    .. marker method ...
-    void M()
-  }
-}
-```
-
-And third-party CREF reference for `E.extension(ref int).M` are emitted as `M:E.<>ExtensionTypeXYZ.M()`
-
-If `ref` is removed or added to an extension parameter, we probably don't want the CREF to break.
-
 
 #### static factory scenario
 
