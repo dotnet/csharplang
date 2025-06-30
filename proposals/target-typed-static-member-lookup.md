@@ -358,7 +358,10 @@ A sigil thus provides essential context. It asserts that the location is target-
 
 Secondly, the feature would become _**less powerful**_ without a sigil. To avoid changes in meaning, this would have to prefer binding to other things in the current scope name, with target-typing as a fallback. This would result in unpleasant interruptions with no recourse other than typing out the full type name. These interruptions are expected to be frequent enough to hamper the success of the feature.
 
-This specific sigil is a good fit with modern language sensibilities and audiences. The Swift language has the same `.xyz` syntax with the same meaning, with its [implicit member expressions](https://docs.swift.org/swift-book/documentation/the-swift-programming-language/expressions#Implicit-Member-Expression).
+This specific sigil is a good fit with modern language sensibilities and audiences. The Swift and Dart languages have both added the `.xyz` syntax with the same meaning as this proposal for C#:
+
+- Swift calls it [implicit member expressions](https://docs.swift.org/swift-book/documentation/the-swift-programming-language/expressions#Implicit-Member-Expression).
+- Dart calls it "dot shorthands" or [static access shorthand](https://github.com/dart-lang/language/blob/c31243942eacadcc1be8cf81016f758fe831b99c/working/3616%20-%20enum%20value%20shorthand/proposal-simple-lrhn.md).
 
 ## Open questions
 
