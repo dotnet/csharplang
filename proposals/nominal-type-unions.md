@@ -8,7 +8,7 @@ Named unions have a closed list of "case types":
 public union IntOrString(int, string);
 ```
 
-Fresh case types can be succinctly declared if we adopt the "Case classes" proposal:
+Fresh case types can be succinctly declared if we adopt the "Case Declarations" proposal:
 
 ``` c#
 public union Pet
