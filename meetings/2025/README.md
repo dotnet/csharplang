@@ -27,20 +27,22 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ### Mon Jul 7, 2025
 
-### Mon Jun 30, 2025
-
-- Type parameter inference from constraints (333fred) - https://github.com/dotnet/csharplang/blob/9b89d17e372243d99acd32988cc5e823baafe64c/proposals/type-parameter-inference-from-constraints.md
-- Target-typed Static Member Lookup (Joseph) - https://github.com/dotnet/csharplang/issues/9138
-
 ## C# Language Design Notes for 2025
 
-[C# Language Design Meeting for June 25rd, 2025](https://github.com/dotnet/csharplang/blob/main/meetings/2025/LDM-2025-06-25.md)
+### Mon Jun 30, 2025
+
+[C# Language Design Meeting for June 30th, 2025](https://github.com/dotnet/csharplang/blob/main/meetings/2025/LDM-2025-06-30.md)
+
+- Type parameter inference from constraints
+- Target-typed static member lookup
+
+### Wed Jun 25, 2025
+
+[C# Language Design Meeting for June 25th, 2025](https://github.com/dotnet/csharplang/blob/main/meetings/2025/LDM-2025-06-25.md)
 
 - Unions
     - Stand-alone issues
     - Mutually exclusive issues
-
-- Unions _1.5 hrs_ (Mads and Matt)
 
 ### Mon Jun 23, 2025
 
