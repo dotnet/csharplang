@@ -636,27 +636,6 @@ Types and aliases may not be named "extension".
 - ~~Confirm LangVer logic (skip new extensions, vs. consider and report them when picked)~~ (answert: bind unconditionally and report LangVer error except for instance extension methods, LDM 2025-06-11)
 - Should we adjust receiver requirements when accessing an extension member? ([comment](https://github.com/dotnet/roslyn/pull/78685#discussion_r2126534632))
 
-### Lookup refinements
-
-- Confirm that we're okay with having an ambiguity when both methods and properties are applicable (answer: we should design a proposal to do better than the status quo, not blocking for .NET 10, LDM 2025-06-23)
-- Confirm that we don't want some betterness across all members before we determine the winning member kind 
-```
-string s = null;
-s.M(); // error
-
-static class E
-{
-    extension(string s)
-    {
-        public System.Action M => throw null;
-    }
-    extension(object o)
-    {
-        public string M() => throw null;
-    }
-}
-```
-
 ### Revisit grouping/conflict rules in light of portability issue: https://github.com/dotnet/roslyn/issues/79043
 
 The current logic is to group extension blocks that have the same receiver type. This doesn't account for constraints.
@@ -937,7 +916,24 @@ static class E2
     }
 }
 ```
+- ~~Confirm that we're okay with having an ambiguity when both methods and properties are applicable~~ (answer: we should design a proposal to do better than the status quo, punting out of .NET 10, LDM 2025-06-23)
+- ~~Confirm that we don't want some betterness across all members before we determine the winning member kind~~ (answer: punting out of .NET 10, WG 2025-07-02)
+```
+string s = null;
+s.M(); // error
 
+static class E
+{
+    extension(string s)
+    {
+        public System.Action M => throw null;
+    }
+    extension(object o)
+    {
+        public string M() => throw null;
+    }
+}
+```
 - ~~Do we have an implicit receiver within extension declarations?~~ (answer: no, was previous discussed in LDM)
 ```csharp
 static class E
