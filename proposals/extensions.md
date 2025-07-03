@@ -423,7 +423,7 @@ type parameters and two sets of parameters.
 Extension blocks are grouped by their CLR-level signature. Each CLR equivalency group is emitted as an **extension grouping type** with a content-based name.
 Extension blocks within a CLR equivalency group are then sub-grouped by C# equivalency. Each C# equivalency group is emitted as an **extension marker type** with a content-based name, nested in its corresponding extension grouping type.
 An extension marker type contains a single **extension marker method** which encodes an extension parameter.
-Each extension member is emitted with a skeleton body in the right extension grouping type, refers back to an extension marker type by its name via an attribute, and is accompanied by a top-level static **implementation method** with a modified signature.    
+Declaration of each extension member is emitted in the right extension grouping type, refers back to an extension marker type by its name via an attribute, and is accompanied by a top-level static **implementation method** with a modified signature.    
 
 Here's a schematized overview of metadata encoding:
 ```
@@ -466,7 +466,7 @@ Note: other constraints are preserved, such as `new()`, `struct`, `class`, `allo
 
 #### Extension grouping types
 
-An extension grouping type is emitted to metadata for each set of extension blocks in source with a the same CLR-level signature (extension grouping types are an evolution of the previous "skeleton type" design).  
+An extension grouping type is emitted to metadata for each set of extension blocks in source with a the same CLR-level signature.  
 - Its name is unspeakable and determined based on the contents of the CLR-level signature. More details below.  
 - Its type parameters have normalized names (`T0`, `T1`, ...) and have no attributes.  
 - It is public and sealed.
@@ -474,7 +474,7 @@ An extension grouping type is emitted to metadata for each set of extension bloc
 
 The content-based name of the extension grouping type is based on the CLR-level signature and includes the following:
 - The fully qualified CLR name of the type of the extension parameter.
-    - Type parameter names will be normalized to `T0`, `T1`, etc ... based on the order they appear in the type declaration. This means an extension block with a type parameter `Dictionary<TKey, TValue>` will result in the fully qualified name being `System.Collections.Generic.Dictionary<T0, T1>`.
+    - Referenced type parameter names will be normalized to `T0`, `T1`, etc ... based on the order they appear in the type declaration.
     - The fully qualified name will not include the containing assembly. It is common for types to be moved between assemblies and that should not break the xml doc references.
 - Constraints of type parameters will be included and sorted such that reordering them in source code does not change the name. Specifically:
     - Type parameter constraints will be listed in declaration order. The constraints for the Nth type parameter will occur before the Nth+1 type parameter.
@@ -495,6 +495,8 @@ An extension marker type is emitted to metadata for each set of extension blocks
 - It is marked with the `specialname` flag.  
 
 The content-based name of the extension marker type is based on the following:
+- The names of type parameters will be included in the order they appear in the extension declaration
+- The attributes of type parameters will be included and sorted such that reordering them in source code does not change the name.
 - Constraints of type parameters will be included and sorted such that reordering them in source code does not change the name.
 - The fully qualified C# name of the extended type
     - This will include items like nullable annotations, tuple names, etc ... 
@@ -588,17 +590,21 @@ is emitted as
 [Extension]
 class E
 {
-    [Extension]
-    public sealed class <>E__ContentName_For_IEnumerable_T<T0> // specialname
+    [Extension, SpecialName]
+    public sealed class <>E__ContentName_For_IEnumerable_T<T0>
     {
-        private static class <>E__ContentName1 // specialname, note: re-declares type parameters
+        [SpecialName]
+        private static class <>E__ContentName1 // note: re-declares type parameter T0 as T
         {
-            private static void <Extension>$(IEnumerable<T> source) { } // specialname
+            [SpecialName]
+            private static void <Extension>$(IEnumerable<T> source) { }
         }
 
-        private static class <>E__ContentName2 // specialname, note: re-declares type parameters
+        [SpecialName]
+        private static class <>E__ContentName2 // note: re-declares type parameter T0 as U
         {
-            private static void <Extension>$(ref IEnumerable<U?> p) { } // specialname
+            [SpecialName]
+            private static void <Extension>$(ref IEnumerable<U?> p) { }
         }
 
         [ExtensionMarkerName("<>E__ContentName1")]
@@ -608,13 +614,15 @@ class E
         ... member in extension<U>(ref IEnumerable<U?> p)
     }
 
-    [Extension]
-    public sealed class <>ContentName_For_IEnumerable_T_With_Constraint<T0> // specialname
+    [Extension, SpecialName]
+    public sealed class <>ContentName_For_IEnumerable_T_With_Constraint<T0>
        where T0 : IEquatable<T0>
     {
-        private static class <>E__ContentName3 // specialname, note: re-declares type parameters
+        [SpecialName]
+        private static class <>E__ContentName3 // note: re-declares type parameter T0 as U
         {
-            private static void <Extension>$(IEnumerable<U> source) { } // specialname
+            [SpecialName]
+            private static void <Extension>$(IEnumerable<U> source) { }
         }
 
         [ExtensionMarkerName("ContentName3")]
@@ -649,16 +657,18 @@ is emitted as
 [Extension]
 static class IEnumerableExtensions
 {
-    [Extension]
-    public sealed class <>E__ContentName_For_IEnumerable_T<T0> // specialname
+    [Extension, SpecialName]
+    public sealed class <>E__ContentName_For_IEnumerable_T<T0>
     {
         // Extension marker type is emitted as a nested type and re-declares its type parameters to include C#-isms
         // In this example, the type parameter `T0` is re-declared as `T` with a `notnull` constraint:
         // .class <>E__IEnumerableOfT<T>.<>E__ContentName_For_IEnumerable_T_Source
         // .typeparam T
         //     .custom instance void NullableAttribute::.ctor(uint8) = (...)
-        private static class <>E__ContentName_For_IEnumerable_T_Source // specialname
+        [SpecialName]
+        private static class <>E__ContentName_For_IEnumerable_T_Source
         {
+            [SpecialName]
             private static <Extension>$(IEnumerable<T> source) => throw null;
         }
 
@@ -684,12 +694,14 @@ static class IEnumerableExtensions
         }
     }
 
-    [Extension]
-    public sealed class <>E__ContentName_For_IAsyncEnumerable_Int // specialname
+    [Extension, SpecialName]
+    public sealed class <>E__ContentName_For_IAsyncEnumerable_Int
     {
-        private static class <>E__ContentName_For_IAsyncEnumerable_Int_Values // specialname
+        [SpecialName]
+        private static class <>E__ContentName_For_IAsyncEnumerable_Int_Values
         {
-            private static <Extension>$(IAsyncEnumerable<int> values) => throw null; // specialname
+            [SpecialName]
+            private static <Extension>$(IAsyncEnumerable<int> values) => throw null;
         }
 
         [ExtensionMarkerName("<>E__ContentName_For_IAsyncEnumerable_Int_Values")]
