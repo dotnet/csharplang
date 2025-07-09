@@ -1,4 +1,4 @@
-# Target-typed static member lookup
+# Target-typed static member access
 
 Champion issue: <https://github.com/dotnet/csharplang/issues/9138>
 
@@ -325,7 +325,7 @@ The `using static` approach has also not found broad adoption over fully qualify
 
 ### Alternative: no sigil
 
-The target-typed static member lookup feature benefits from the precision of the `.` sigil, but it does not require a sigil. Here's how the feature would look without a sigil:
+The target-typed static member access feature benefits from the precision of the `.` sigil, but it does not require a sigil. Here's how the feature would look without a sigil:
 
 ```cs
 type.GetMethod("Name", Public | Instance | DeclaredOnly); // BindingFlags.Public | ...
@@ -354,7 +354,7 @@ Firstly, the feature would be _**harder to understand**_ without a sigil. Withou
 
 The presence of `.` makes reading much more efficient. If no such marker is in place, it will slow down understanding of code. Every identifier will need to be considered as to whether it is in a target-typing location and could be referring to something on that type. The chance of collisions is expected to be high. It can be difficult from context to know if target-typing is in play in a given scenario. Syntaxes such as `null` or `new()` make it clear that a target type is affecting the meaning of the expression, but a plain identifier on its own does not make this clear. It's hard to tell which locations are target-typeable and which are not. It can require a lot of backtracking while reading, and in some cases you need to know whether there are multiple overloads with varying types at this position.
 
-A sigil thus provides essential context. It asserts that the location is target-typeable, and furthermore that the name is coming from the target type. Most importantly of all, the author's intention of target-typed lookup is preserved even if an overload is added which causes target-typing to fail. Without the sigil, it would not be clear whether the original author was trying to look up something in scope, or was trying to access something off the target type. The sigil prevents spooky action at a distance which changes the fundamental meaning of the expression.
+A sigil thus provides essential context. It asserts that the location is target-typeable, and furthermore that the name is coming from the target type. Most importantly of all, the author's intention of target-typed access is preserved even if an overload is added which causes target-typing to fail. Without the sigil, it would not be clear whether the original author was trying to look up something in scope, or was trying to access something off the target type. The sigil prevents spooky action at a distance which changes the fundamental meaning of the expression.
 
 Secondly, the feature would become _**less powerful**_ without a sigil. To avoid changes in meaning, this would have to prefer binding to other things in the current scope name, with target-typing as a fallback. This would result in unpleasant interruptions with no recourse other than typing out the full type name. These interruptions are expected to be frequent enough to hamper the success of the feature.
 
@@ -369,14 +369,14 @@ This specific sigil is a good fit with modern language sensibilities and audienc
 
 This is valid grammar today, which fails in binding if `A` is a type and not a value: `(A).B`.
 
-The new grammar we're adding would allow this to be parsed as a cast followed by a target-typed static member lookup. This new interpretation is consistent with `(A)new()` and `(A)default` working today, but it would not be practically useful. `A.B` is a simpler and clearer way to write the same thing.
+The new grammar we're adding would allow this to be parsed as a cast followed by a target-typed static member access. This new interpretation is consistent with `(A)new()` and `(A)default` working today, but it would not be practically useful. `A.B` is a simpler and clearer way to write the same thing.
 
 Should `(A).B` continue to fail, or be made to work the same as `A.B` when `A` is a type?
 
 ### Ambiguity with conditional expression
 
-There is an ambiguity if target-typed static member lookup is used as the first branch of a conditional expression, where it would parse today as a null-safe dereference: `expr ? .Name : ...`
+There is an ambiguity if target-typed static member access is used as the first branch of a conditional expression, where it would parse today as a null-safe dereference: `expr ? .Name : ...`
 
 We can follow the approach already taken for the similar ambiguity in collection expressions with `expr ? [` possibly being an indexer and possibly being a collection expression.
 
-Alternatively, target-typed static member lookup could be always disallowed within the first branch of a conditional expression unless surrounded by parens: `expr ? (.Name) : ...`. The downside is that this puts a usability burden onto users, since the compiler can work out the ambiguity by looking ahead for the `:` as with collection expressions.
+Alternatively, target-typed static member access could be always disallowed within the first branch of a conditional expression unless surrounded by parens: `expr ? (.Name) : ...`. The downside is that this puts a usability burden onto users, since the compiler can work out the ambiguity by looking ahead for the `:` as with collection expressions.
