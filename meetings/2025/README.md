@@ -15,7 +15,23 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ## Schedule
 
+### Wed Aug 27, 2025
+
+### Mon Aug 25, 2025
+
+### Wed Aug 20, 2025
+
+### Mon Aug 18, 2025
+
+### Wed Aug 13, 2025
+
+### Mon Aug 11, 2025
+
+### Wed Aug 6, 2025
+
 ### Wed Jul 30, 2025
+
+- Unions (Matt and Mads) - *full meeting*
 
 ### Mon Jul 28, 2025
 
