@@ -371,7 +371,9 @@ This is valid grammar today, which fails in binding if `A` is a type and not a v
 
 The new grammar we're adding would allow this to be parsed as a cast followed by a target-typed static member access. This new interpretation is consistent with `(A)new()` and `(A)default` working today, but it would not be practically useful. `A.B` is a simpler and clearer way to write the same thing.
 
-Should `(A).B` continue to fail, or be made to work the same as `A.B` when `A` is a type?
+Should `(A).B` continue to fail when `A` is a type, or be made to work the same as `A.B`?
+
+**Recommendation:** `(A).B` should continue to fail when `A` is a type. Even though blocking this syntax is an additional rule, the syntax is not beneficial.
 
 ### Ambiguity with conditional expression
 
@@ -380,3 +382,5 @@ There is an ambiguity if target-typed static member access is used as the first 
 We can follow the approach already taken for the similar ambiguity in collection expressions with `expr ? [` possibly being an indexer and possibly being a collection expression.
 
 Alternatively, target-typed static member access could be always disallowed within the first branch of a conditional expression unless surrounded by parens: `expr ? (.Name) : ...`. The downside is that this puts a usability burden onto users, since the compiler can work out the ambiguity by looking ahead for the `:` as with collection expressions.
+
+**Recommendation:** Allow `expr ? .Name :` by looking ahead for `:`, just as with collection expressions.
