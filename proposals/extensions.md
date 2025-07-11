@@ -735,7 +735,7 @@ to `IEnumerableExtensions.Method<int>(enumerableOfInt)`.
 
 ## XML docs
 
-The doc comments on the extension block are emitted for the marker type (the DocID for the extension block is `E.<>E__ContentName_For_ExtensionOfT'1` in the example below).  
+The doc comments on the extension block are emitted for the marker type (the DocID for the extension block is `E.<>E__MarkerContentName_For_ExtensionOfT'1` in the example below).  
 They are allowed to reference the extension parameter and type parameters using `<paramref>` and `<typeparamref>` respectively).  
 Note: you may not document the extension parameter or type parameters (with `<param>` and `<typeparam>`) on an extension member.  
 
@@ -782,24 +782,24 @@ yield the following xml:
         <member name="T:E">
             <summary>Summary for E</summary>
         </member>
-        <member name="T:E.&lt;&gt;E__ContentName_For_ExtensionOfT`1">
+        <member name="T:E.&lt;&gt;E__MarkerContentName_For_ExtensionOfT`1">
             <summary>Summary for extension block</summary>
             <typeparam name="T">Description for T</typeparam>
             <param name="t">Description for t</param>
         </member>
-        <member name="M:E.&lt;&gt;E__ContentName_For_ExtensionOfT`1.M``1(``0)">
+        <member name="M:E.&lt;&gt;E__MarkerContentName_For_ExtensionOfT`1.M``1(``0)">
             <summary>Summary for M, which may refer to <paramref name="t"/> and <typeparamref name="T"/></summary>
             <typeparam name="U">Description for U</typeparam>
             <param name="u">Description for u</param>
         </member>
-        <member name="P:E.&lt;&gt;E__ContentName_For_ExtensionOfT`1.P">
+        <member name="P:E.&lt;&gt;E__MarkerContentName_For_ExtensionOfT`1.P">
             <summary>Summary for P</summary>
         </member>
         <member name="M:E.M``2(``0,``1)">
-            <inheritdoc cref="M:E.&lt;&gt;E__ContentName_For_ExtensionOfT`1.M``1(``0)"/>
+            <inheritdoc cref="M:E.&lt;&gt;E__MarkerContentName_For_ExtensionOfT`1.M``1(``0)"/>
         </member>
         <member name="M:E.get_P``1(``0)">
-            <inheritdoc cref="P:E.&lt;&gt;E__ContentName_For_ExtensionOfT`1.P"/>
+            <inheritdoc cref="P:E.&lt;&gt;E__MarkerContentName_For_ExtensionOfT`1.P"/>
         </member>
     </members>
 </doc>
