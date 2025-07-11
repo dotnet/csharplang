@@ -37,8 +37,6 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ### Wed Jul 23, 2025
 
-### Mon Jul 14, 2025
-
 ## C# Language Design Notes for 2025
 
 ### Mon Jun 30, 2025
