@@ -224,6 +224,89 @@ void M(string p) { }
 void M(object p) { }
 ```
 
+### Factory containers
+
+#### Summary (factory containers)
+
+Target-typed static members will be found on separate factory container types, for example:
+
+- `Option<ImmutableArray<int>> result = .Some([42]);` - Calls `Some<T>` on the nongeneric `Option` type
+- `SearchValues<char> separators = .Create(',', ';');` - Calls `Create(ReadOnlySpan<char>)` on the nongeneric `SearchValues` type
+- `Tensor<T> c = .Add(a, b);` - Calls `Add<T>` on the nongeneric `Tensor` type
+
+This will happen automatically when the factory member is on a nongeneric sibling type with the same name. There is also an opt-in model to enable the same lookup in classes where the name does not match. For example:
+
+- `IEnumerable<int> numbers = .Range(1, 10);` - Calls `Range` on the `Enumerable` type
+- `IEqualityComparer<string> comparer = .OrdinalIgnoreCase;` - Calls `OrdinalIgnoreCase` on the `StringComparer` type
+- `IEqualityComparer<T> comparer = .Default;` - Calls `Default` on `EqualityComparer<T>`
+
+For the above examples to work, the `IEnumerable<T>` interface definition would be decorated with an attribute referring to the `Enumerable` class, and the `IEqualityComparer<T>` interface definition would be decorated with an attribute referring to the `StringComparer` and `EqualityComparer<>` classes.
+
+#### Motivation (factory containers)
+
+A common .NET pattern for obtaining a value of some generic type is to call a factory method on a nongeneric type of the same name so that the type argument can be inferred. The core libraries follow this pattern. For example:
+
+- `KeyValuePair.Create<TKey, TValue>` to obtain a `KeyValuePair<TKey, TValue>`
+- `Task.FromResult<T>` to obtain a `Task<T>`
+- `Vector.Add<T>` to obtain a `Vector<T>`, along with many other factory methods for other operations.
+- `Tensor.Add<T>` to obtain a `Tensor<T>`, along with many other factory methods for other operations.
+- `Vector128.Add<T>` to obtain a `Vector128<T>`, along with many other factory methods for other operations.
+- `ImmutableArray.Create<T>` to obtain an `ImmutableArray<T>`
+- `Tuple.Create<T1, T2, ...>` to obtain a `Tuple<T1, T2, ...>`
+- `Channel.CreateBounded<T>` to obtain a `Channel<T>`
+- `SearchValues.Create(ReadOnlySpan<byte>)` to obtain a `SearchValues<byte>`, and overloads for `<char>` and `<string>`
+- `Expression.Lambda<TDelegate>` to obtain an `Expression<TDelegate>`
+
+This pattern has wide uptake in community APIs as well. The SDK steers users in this direction with the [CA1000: Do not declare static members on generic types](https://learn.microsoft.com/en-us/dotnet/fundamentals/code-analysis/quality-rules/ca1000) rule.
+
+Following these patterns and warnings, existing `Option<T>` types should put their `.Some` factory method on a nongeneric class, `Option.Some<T>`. This enables generic type inference, so `Option.Some(42)` can be written.
+
+However, this means that the method `Option.Some<T>` does not exist. This would cause an odd asymmetry: in the core proposal, you'd be able to write `.None`, but not `.Some(val)`. The `None` member is on `Option<T>` because there are no type inference opportunities, in the same manner as `ImmutableArray<T>.Empty`. But the `Some` member is on nongeneric `Option`, not on `Option<T>`.
+
+There is a clear relationship between `Option<T>` and `Option`, `KeyValuePair<TKey, TValue>` and `KeyValuePair`, `Task<T>` and `Task`, `ImmutableArray<T>` and `ImmutableArray`, `Tensor<T>` and `Tensor`. The relationship is clear both from the naming convention and due to the static members on the factory type that return instances of the generic type.
+
+It would be a lost opportunity not to make use of this clear relationship in order to make consumption more consistent.
+
+In addition, if a separate proposal were to make `IEnumerable<T>` the target type of spreads and foreach, the syntax `foreach (var x in .Range(1, 10))` or `[.. .Repeat(1, 10)]` would just fall out.
+
+#### Detailed design (factory containers)
+
+As a guiding principle, the outcome for the call site can be thought of as equivalent to static extension methods being provided on the generic type which directly call the factory member on the generic type. The specifics below are aimed at this equivalence.
+
+Member lookup for a _target-typed member binding expression_ would consider not just static members on the targeted type, but also _applicable factory members_, a subset of the static members of the target type's related _factory container types_.
+
+A type `F` serves as a _factory container type_ for another type `G` if `F` is explicitly referenced by a FactoryContainerAttribute on `G` as defined below, or implicitly if `F` has no type parameters of its own and `G` does have type parameters of its own, and they are both declared in the same module, and they are both declared in either the same containing type if any, or the same namespace if not.
+
+A member of a _factory container type_ is an _applicable factory member_ if it is static and the result of evaluating the member has an identity conversion to the target type. If the _target-typed member binding expression_ is the expression of an invocation expression, then the result of evaluating the invocation is considered instead, and any inferred type arguments in the invocation that appear in the return type will be inferred outside-in to match the target type. For example, `Option<short> opt = .Some(42)` will infer `Option.Some<short>`.
+
+The filter of _applicable factory members_ means that `IEqualityComparer<string> comparer = .OrdinalIgnoreCase;` will work if `IEqualityComparer<T>` declares `[FactoryContainer(typeof(StringComparer))]`, but `IEqualityComparer<int> comparer = .OrdinalIgnoreCase;` will fail with an error that `.OrdinalIgnoreCase` cannot be found, rather than an error that it returns a comparer with an incompatible type.
+
+This is the definition of the attribute that enables a type to use factory members in another type when constructed through target-typed static member access:
+
+```cs
+namespace System.Runtime.CompilerServices;
+
+[AttributeUsage(.Class | .Struct | .Interface | .Enum | .Delegate, AllowMultiple = true, Inherited = false)]
+public sealed class FactoryContainerAttribute(Type containerType) : Attribute
+{
+    public Type ContainerType { get; } = containerType;
+}
+```
+
+Errors will be produced in the following scenarios:
+
+- If the attribute is used in older language versions.
+- If the referenced type contains no members that could be _applicable factory members_ for any generic instantiation of the target type which are at least as accessible as the target type.
+
+#### Alternatives (factory containers)
+
+Static extension methods would be able to achieve the same end goal of writing `.Some(42)` for `Option<T>` or `.Range(1, 10)` for `IEnumerable<int>` or `.OrdinalCompareCase` for `IEqualityComparer<string>`. This would not fall foul of the [CA1000: Do not declare static members on generic types](https://learn.microsoft.com/en-us/dotnet/fundamentals/code-analysis/quality-rules/ca1000) rule, since the extension method itself is not declared on the generic type.
+
+While this shows the power of combining the core proposal with static extension methods, there are scaling problems with using static extension methods to provide the missing consistency in consumption syntax.
+
+1. This would not be automatic out of the box. It would become best practice to declare static extension methods on your own types to enable the nicer consumption pattern. This would not be done consistently, and users would run into the inconsistencies.
+1. The core libraries would likely not be willing to declare such static extension methods for the core types. In general, they prefer not to bloat metadata by declaring simple forwarders to other methods.
+
 ## Specification
 
 `'.' identifier type_argument_list?` is consolidated into a standalone syntax, `member_binding`, and this new syntax is added as a production of the [§12.8.7 Member access](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/expressions.md#1287-member-access) grammar:
@@ -284,12 +367,6 @@ A new operator could solve this, such as `results.SelectNonNull(r => r as .Error
 ### Ambiguities
 
 There are a couple of ambiguities, with [parenthesized expressions](#ambiguity-with-parenthesized-expression) and [conditional expressions](#ambiguity-with-conditional-expression). See each link for details.
-
-### Factory methods public in generic types
-
-The availability of this feature will flip a current framework design guideline on its head, namely [CA1000: Do not declare static members on generic types](https://learn.microsoft.com/en-us/dotnet/fundamentals/code-analysis/quality-rules/ca1000). Currently, the design guideline is to declare a static nongeneric class with a generic helper method so that inference is possible: `ImmutableArray.Create<T>`, not `ImmutableArray<T>.Create`. When people declare Option types, it's similarly `Option.Some<T>`, not `Option<T>.Some`.
-
-When target-typing `Option<int> opt = .Some(42)`, what will be called is a static method on the `Option<T>` type rather than on a static helper `Option` type. This will require library authors to provide public factory methods in both places, if they want to cater to both target-typed construction (`.Some(42)`) and to non-target-typed inference (`var opt = Option.Some(42);`).
 
 ## Anti-drawbacks
 
