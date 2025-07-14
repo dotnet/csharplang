@@ -423,6 +423,7 @@ type parameters and two sets of parameters.
 Extension blocks are grouped by their CLR-level signature. Each CLR equivalency group is emitted as an **extension grouping type** with a content-based name.
 Extension blocks within a CLR equivalency group are then sub-grouped by C# equivalency. Each C# equivalency group is emitted as an **extension marker type** with a content-based name, nested in its corresponding extension grouping type.
 An extension marker type contains a single **extension marker method** which encodes an extension parameter.
+The extension marker method with its containing extension marker type encode the signature of an extension block with full fidelity.
 Declaration of each extension member is emitted in the right extension grouping type, refers back to an extension marker type by its name via an attribute, and is accompanied by a top-level static **implementation method** with a modified signature.    
 
 Here's a schematized overview of metadata encoding:
@@ -734,9 +735,11 @@ to `IEnumerableExtensions.Method<int>(enumerableOfInt)`.
 
 ## XML docs
 
-The doc comments on the extension block are emitted for the unspeakable named type (the DocID for the extension block is `<>E__0'1` in the example below).  
+The doc comments on the extension block are emitted for the marker type (the DocID for the extension block is `E.<>E__MarkerContentName_For_ExtensionOfT'1` in the example below).  
 They are allowed to reference the extension parameter and type parameters using `<paramref>` and `<typeparamref>` respectively).  
 Note: you may not document the extension parameter or type parameters (with `<param>` and `<typeparam>`) on an extension member.  
+
+If two extension blocks are emitted as one marker type, their doc comments are merged as well.
 
 Tools consuming the xml docs are responsible for copying the `<param>` and `<typeparam>` from the extension block onto the extension members as appropriate (ie. the parameter information should only be copied for instance members).  
 
@@ -779,24 +782,24 @@ yield the following xml:
         <member name="T:E">
             <summary>Summary for E</summary>
         </member>
-        <member name="T:E.&lt;&gt;E__0`1">
+        <member name="T:E.&lt;&gt;E__MarkerContentName_For_ExtensionOfT`1">
             <summary>Summary for extension block</summary>
             <typeparam name="T">Description for T</typeparam>
             <param name="t">Description for t</param>
         </member>
-        <member name="M:E.&lt;&gt;E__0`1.M``1(``0)">
+        <member name="M:E.&lt;&gt;E__MarkerContentName_For_ExtensionOfT`1.M``1(``0)">
             <summary>Summary for M, which may refer to <paramref name="t"/> and <typeparamref name="T"/></summary>
             <typeparam name="U">Description for U</typeparam>
             <param name="u">Description for u</param>
         </member>
-        <member name="P:E.&lt;&gt;E__0`1.P">
+        <member name="P:E.&lt;&gt;E__MarkerContentName_For_ExtensionOfT`1.P">
             <summary>Summary for P</summary>
         </member>
         <member name="M:E.M``2(``0,``1)">
-            <inheritdoc cref="M:E.&lt;&gt;E__0`1.M``1(``0)"/>
+            <inheritdoc cref="M:E.&lt;&gt;E__MarkerContentName_For_ExtensionOfT`1.M``1(``0)"/>
         </member>
         <member name="M:E.get_P``1(``0)">
-            <inheritdoc cref="P:E.&lt;&gt;E__0`1.P"/>
+            <inheritdoc cref="P:E.&lt;&gt;E__MarkerContentName_For_ExtensionOfT`1.P"/>
         </member>
     </members>
 </doc>
@@ -863,6 +866,7 @@ Types and aliases may not be named "extension".
 - ~~Confirm that we're okay to discard extension blocks as entry point candidates~~ (answer: yes, discard, LDM 2025-06-11)
 - ~~Confirm LangVer logic (skip new extensions, vs. consider and report them when picked)~~ (answert: bind unconditionally and report LangVer error except for instance extension methods, LDM 2025-06-11)
 - Should we adjust receiver requirements when accessing an extension member? ([comment](https://github.com/dotnet/roslyn/pull/78685#discussion_r2126534632))
+- Should `partial` be required for extension blocks that merge and have their doc comments merged?
 
 ### Revisit grouping/conflict rules in light of portability issue: https://github.com/dotnet/roslyn/issues/79043
 
