@@ -1346,7 +1346,7 @@ public static class Enumerable
 }
 ```
 
-</details>
-
 This ends up looking more like what we've been calling a "member-based" approach, where each extension member contains its own receiver specification. 
+
+</details>
 
