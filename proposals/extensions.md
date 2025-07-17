@@ -859,7 +859,11 @@ Note: this does not allow cref to the extension block, as `E.extension(int)` ref
 
 Types and aliases may not be named "extension".
 
+
 ## Open issues
+
+<details>
+<summary>Temporary section of the document related to open issues, including discussion of unfinalized syntax and alternative designs</summary>
 
 - ~~Confirm `extension` vs. `extensions` as the keyword~~ (answer: `extension`, LDM 2025-03-24)
 - ~~Confirm that we want to disallow `[ModuleInitializer]`~~ (answer: yes, disallow, LDM 2025-06-11)
@@ -1341,6 +1345,8 @@ public static class Enumerable
     extension<TSource>(IEnumerable<TSource> source) public IEnumerable<TSource> Where(Func<TSource, bool> predicate) { ... }
 }
 ```
+
+</details>
 
 This ends up looking more like what we've been calling a "member-based" approach, where each extension member contains its own receiver specification. 
 
