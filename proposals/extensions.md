@@ -172,6 +172,8 @@ It is an error to specify the following modifiers on a member of an extension de
 Properties in extension declarations may not have `init` accessors.  
 The instance members are disallowed if the _receiver parameter_ is unnamed.  
 
+All members shall have names that differ from the name of the static enclosing class and the name of the extended type if it has one.
+
 It is an error to decorate an extension member with the `[ModuleInitializer]` attribute.
 
 ### Refness
