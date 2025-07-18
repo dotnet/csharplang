@@ -873,6 +873,7 @@ Types and aliases may not be named "extension".
 - ~~Confirm LangVer logic (skip new extensions, vs. consider and report them when picked)~~ (answert: bind unconditionally and report LangVer error except for instance extension methods, LDM 2025-06-11)
 - Should we adjust receiver requirements when accessing an extension member? ([comment](https://github.com/dotnet/roslyn/pull/78685#discussion_r2126534632))
 - Should `partial` be required for extension blocks that merge and have their doc comments merged?
+- Confirm that members should not be named after the containing or the extended types.
 
 ### Revisit grouping/conflict rules in light of portability issue: https://github.com/dotnet/roslyn/issues/79043
 
