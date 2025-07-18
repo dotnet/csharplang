@@ -172,6 +172,8 @@ It is an error to specify the following modifiers on a member of an extension de
 Properties in extension declarations may not have `init` accessors.  
 The instance members are disallowed if the _receiver parameter_ is unnamed.  
 
+All members shall have names that differ from the name of the static enclosing class and the name of the extended type if it has one.
+
 It is an error to decorate an extension member with the `[ModuleInitializer]` attribute.
 
 ### Refness
@@ -871,6 +873,7 @@ Types and aliases may not be named "extension".
 - ~~Confirm LangVer logic (skip new extensions, vs. consider and report them when picked)~~ (answert: bind unconditionally and report LangVer error except for instance extension methods, LDM 2025-06-11)
 - Should we adjust receiver requirements when accessing an extension member? ([comment](https://github.com/dotnet/roslyn/pull/78685#discussion_r2126534632))
 - Should `partial` be required for extension blocks that merge and have their doc comments merged?
+- Confirm that members should not be named after the containing or the extended types.
 
 ### Revisit grouping/conflict rules in light of portability issue: https://github.com/dotnet/roslyn/issues/79043
 
