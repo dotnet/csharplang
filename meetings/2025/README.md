@@ -33,8 +33,6 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 - Unions (Matt and Mads) - *full meeting*
 
-### Mon Jul 28, 2025
-
 ## C# Language Design Notes for 2025
 
 ### Mon Jun 30, 2025
