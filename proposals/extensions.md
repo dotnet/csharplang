@@ -436,9 +436,9 @@ static class EnclosingStaticClass
     [Extension]
     public sealed class ExtensionGroupingType1 // has type parameters with minimal constraints sufficient to keep extension member declarations below valid
     {
-        private static class ExtensionMarkerType1 // has re-declared type parameters with full fidelity of C# constraints
+        public static class ExtensionMarkerType1 // has re-declared type parameters with full fidelity of C# constraints
         {
-            private static void <Extension>$(... extension parameter ...) // extension marker method
+            public static void <Extension>$(... extension parameter ...) // extension marker method
         }
         ... ExtensionMarkerType2, etc ...
 
@@ -494,7 +494,7 @@ The marker type re-declares the type parameters of its containing grouping type 
 An extension marker type is emitted to metadata for each set of extension blocks in source with a the same C#-level signature.  
 - Its name is unspeakable and determined based on the contents of the C#-level signature of the extension block. More details below.  
 - It redeclares the type parameters for its containing grouping type to be those declared in source (including name and attributes).
-- It is private and static.
+- It is public and static.
 - It is marked with the `specialname` flag.  
 
 The content-based name of the extension marker type is based on the following:
@@ -517,10 +517,12 @@ The purpose of the marker method is to encode the extension parameter of the ext
 Because it is a member of the extension marker type, it can refer to the re-declared type parameters of the extension marker type.
 
 Each extension marker type contains a single method, the extension marker method.
-- It is private, static, non-generic, void-returning, and is called `<Extension>$`.  
+- It is static, non-generic, void-returning, and is called `<Extension>$`.  
 - Its single parameter has the attributes, refness, type and name from the extension parameter.  
   If the extension parameter doesn't specify a name, then the parameter name is empty.  
-- It is marked with the `specialname` flag.  
+- It is marked with the `specialname` flag.
+
+Accessibility of the marker method will be based on effective accessibility of the extended type. It gets the least restrictive accessibility that ensures that the extended type is at least as visible as the marker method.
 
 #### Extension members
 
@@ -597,17 +599,17 @@ class E
     public sealed class <>E__ContentName_For_IEnumerable_T<T0>
     {
         [SpecialName]
-        private static class <>E__ContentName1 // note: re-declares type parameter T0 as T
+        public static class <>E__ContentName1 // note: re-declares type parameter T0 as T
         {
             [SpecialName]
-            private static void <Extension>$(IEnumerable<T> source) { }
+            public static void <Extension>$(IEnumerable<T> source) { }
         }
 
         [SpecialName]
-        private static class <>E__ContentName2 // note: re-declares type parameter T0 as U
+        public static class <>E__ContentName2 // note: re-declares type parameter T0 as U
         {
             [SpecialName]
-            private static void <Extension>$(ref IEnumerable<U?> p) { }
+            public static void <Extension>$(ref IEnumerable<U?> p) { }
         }
 
         [ExtensionMarkerName("<>E__ContentName1")]
@@ -622,10 +624,10 @@ class E
        where T0 : IEquatable<T0>
     {
         [SpecialName]
-        private static class <>E__ContentName3 // note: re-declares type parameter T0 as U
+        public static class <>E__ContentName3 // note: re-declares type parameter T0 as U
         {
             [SpecialName]
-            private static void <Extension>$(IEnumerable<U> source) { }
+            public static void <Extension>$(IEnumerable<U> source) { }
         }
 
         [ExtensionMarkerName("ContentName3")]
@@ -669,10 +671,10 @@ static class IEnumerableExtensions
         // .typeparam T
         //     .custom instance void NullableAttribute::.ctor(uint8) = (...)
         [SpecialName]
-        private static class <>E__ContentName_For_IEnumerable_T_Source
+        public static class <>E__ContentName_For_IEnumerable_T_Source
         {
             [SpecialName]
-            private static <Extension>$(IEnumerable<T> source) => throw null;
+            public static <Extension>$(IEnumerable<T> source) => throw null;
         }
 
         [ExtensionMarkerName("<>E__ContentName_For_IEnumerable_T_Source")]
@@ -701,10 +703,10 @@ static class IEnumerableExtensions
     public sealed class <>E__ContentName_For_IAsyncEnumerable_Int
     {
         [SpecialName]
-        private static class <>E__ContentName_For_IAsyncEnumerable_Int_Values
+        public static class <>E__ContentName_For_IAsyncEnumerable_Int_Values
         {
             [SpecialName]
-            private static <Extension>$(IAsyncEnumerable<int> values) => throw null;
+            public static <Extension>$(IAsyncEnumerable<int> values) => throw null;
         }
 
         [ExtensionMarkerName("<>E__ContentName_For_IAsyncEnumerable_Int_Values")]
