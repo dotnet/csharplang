@@ -522,7 +522,8 @@ Each extension marker type contains a single method, the extension marker method
   If the extension parameter doesn't specify a name, then the parameter name is empty.  
 - It is marked with the `specialname` flag.
 
-Accessibility of the marker method will be based on effective accessibility of the extended type. It gets the least restrictive accessibility that ensures that the extended type is at least as visible as the marker method.
+Accessibility of the marker method will be the least restrictive accessibility among corresponding declared
+extension members, `private` is used if none are declared.
 
 #### Extension members
 
