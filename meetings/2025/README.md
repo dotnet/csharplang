@@ -31,7 +31,8 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ### Wed Jul 30, 2025
 
-- Unions (Matt and Mads) - *full meeting*
+- `/main` and top-level statements (Jan) - *20 minutes*
+- Unions (Matt and Mads) - *rest of meeting*
 
 ## C# Language Design Notes for 2025
 
