@@ -1,12 +1,12 @@
 # Union proposals overview
 
-- [Closed enums](#closed-enums)
-- [Closed hierarchies](#closed-hierarchies)
 - [Nominal type unions](#nominal-type-unions)
 - [Standard type unions](#standard-type-unions)
 - [Union interfaces](#union-interfaces)
 - [Custom unions](#custom-unions)
 - [Non-boxing access pattern for custom unions](#non-boxing-access-pattern-for-custom-unions)
+- [Closed enums](#closed-enums)
+- [Closed hierarchies](#closed-hierarchies)
 - [Case declarations](#case-declarations)
 - [Target-typed static member access](#target-typed-static-member-access)
 
@@ -15,7 +15,7 @@ flowchart LR
 
 %% Features
 Unions[Nominal type unions]:::approved
-Standard[Standard union types]:::unapproved
+Standard[Standard type unions]:::unapproved
 Interfaces[Union interfaces]:::unapproved
 Custom[Custom unions]:::unapproved
 NonBoxingAccess[Non-boxing access pattern]:::unapproved
