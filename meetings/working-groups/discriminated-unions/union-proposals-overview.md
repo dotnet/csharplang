@@ -14,21 +14,21 @@
 flowchart LR
 
 %% Features
-Enums[Closed enums]:::approved
-Hierarchies[Closed hierarchies]:::approved
 Unions[Nominal type unions]:::approved
 Standard[Standard union types]:::unapproved
 Interfaces[Union interfaces]:::unapproved
 Custom[Custom unions]:::unapproved
 NonBoxingAccess[Non-boxing access pattern]:::unapproved
+Enums[Closed enums]:::approved
+Hierarchies[Closed hierarchies]:::approved
 Cases[Case declarations]:::approved
 Target[Target-typed access]:::approved
 
 %% Dependencies
-Hierarchies <-.-> Enums
-Hierarchies & Unions --> Cases -.-> Target
-Unions --> Standard --> Anonymous & Inferred
+Unions --> Standard
 Unions <--> Interfaces --> Custom --> NonBoxingAccess
+Unions & Hierarchies --> Cases -.-> Target
+Hierarchies <-.-> Enums
 
 %% Colors
 classDef approved fill:#cfc,stroke:#333,stroke-width:1.5px;
