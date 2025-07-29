@@ -19,8 +19,6 @@ var _ = x switch
 }
 ```
 
-In addition, the existence of these standardized unions can be used as the basis of *Anonymous Type Unions* and *Inferred Type Unions* features.
-
 ## Specification
 
 ### Runtime Library
