@@ -6,7 +6,7 @@ A custom union can provide an alternative, non-boxing means to access its value 
 
 ## Motivation
 
-A motivating scenario to manually implement a [custom union type](Custom%20Unions.md) is to customize how the value is stored to hopefully either match an existing interop layout or to avoid allocations.
+A motivating scenario for manually implementing a [custom union type](Custom%20Unions.md) is to customize how the value is stored to hopefully either match an existing interop layout or to avoid allocations.
 
 However, this goal is hampered by the limitation of the compiler only understanding how to access the value via the `Value` property, resulting in struct values being boxed regardless of layout.
 
