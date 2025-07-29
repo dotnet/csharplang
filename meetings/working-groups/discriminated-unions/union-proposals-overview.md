@@ -37,51 +37,6 @@ classDef unapproved fill:#ddd,stroke:#333,stroke-width:1.5px;
 classDef rejected fill:#fdd,stroke:#333,stroke-width:1.5px;
 ```
 
-## Closed enums
-
-- **Proposal**: [Closed Enums](https://github.com/dotnet/csharplang/blob/main/proposals/closed-enums.md)
-- **LDM**: Approved. 
-- **Dependencies**: None. Design together with *Closed hierarchies* to ensure coherence.
-
-Allow enums to be declared `closed`, preventing creation of values other than the explicitly declared enum members. A consuming switch expression can assume only those values can occur, avoiding exhaustiveness warnings.
-
-```csharp
-public closed enum Color { Red, Green, Blue }
-
-var infrared = Color.Red - 1; // Error, not a declared member
-
-_ = color switch
-{
-    Red => "red",
-    Green => "green",
-    Blue => "blue"
-    // No warning about missing cases
-};
-```
-
-## Closed hierarchies
-
-- **Proposal**: [Closed Hierarchies](https://github.com/dotnet/csharplang/blob/main/proposals/closed-hierarchies.md)
-- **LDM**: Approved. 
-- **Dependencies**: None. Design with *Closed enums* to ensure coherence.
-
-Allow classes to be declared `closed`, preventing its use as a base class outside of the assembly. A consuming switch expression can assume only derived types from within that assembly can occur, avoiding exhaustiveness warnings.
-
-```csharp
-// Assembly 1
-public closed class C { ... } 
-public class D : C { ... }     // Ok, same assembly
-
-// Assembly 2
-public class E : C { ... }     // Error, 'C' is closed and in a different assembly
-
-_ = c switch
-{
-    D d => ...,
-    // No warning about missing cases
-}
-```
-
 ## Nominal type unions
 
 - **Proposal**: [Nominal Type Unions](https://github.com/dotnet/csharplang/blob/main/proposals/nominal-type-unions.md)
@@ -156,6 +111,51 @@ This can be used for optimization or to make existing types union-like.
 - **Dependencies**: *Custom unions*.
 
 Allow custom union types to use an alternative access pattern that does not incur boxing.
+
+## Closed enums
+
+- **Proposal**: [Closed Enums](https://github.com/dotnet/csharplang/blob/main/proposals/closed-enums.md)
+- **LDM**: Approved. 
+- **Dependencies**: None. Design together with *Closed hierarchies* to ensure coherence.
+
+Allow enums to be declared `closed`, preventing creation of values other than the explicitly declared enum members. A consuming switch expression can assume only those values can occur, avoiding exhaustiveness warnings.
+
+```csharp
+public closed enum Color { Red, Green, Blue }
+
+var infrared = Color.Red - 1; // Error, not a declared member
+
+_ = color switch
+{
+    Red => "red",
+    Green => "green",
+    Blue => "blue"
+    // No warning about missing cases
+};
+```
+
+## Closed hierarchies
+
+- **Proposal**: [Closed Hierarchies](https://github.com/dotnet/csharplang/blob/main/proposals/closed-hierarchies.md)
+- **LDM**: Approved. 
+- **Dependencies**: None. Design with *Closed enums* to ensure coherence.
+
+Allow classes to be declared `closed`, preventing its use as a base class outside of the assembly. A consuming switch expression can assume only derived types from within that assembly can occur, avoiding exhaustiveness warnings.
+
+```csharp
+// Assembly 1
+public closed class C { ... } 
+public class D : C { ... }     // Ok, same assembly
+
+// Assembly 2
+public class E : C { ... }     // Error, 'C' is closed and in a different assembly
+
+_ = c switch
+{
+    D d => ...,
+    // No warning about missing cases
+}
+```
 
 ## Case declarations
 
