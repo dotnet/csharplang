@@ -4,7 +4,7 @@
 
 ### Summary
 
-Union types implement an interface that makes it easy to identify and interact with at runtime when a value that might be a union is weakly typed or represented as a type parameter.
+Union types implement the interface `IUnion` that makes it easy to identify and interact with unions at runtime when a value that might be a union is weakly typed or represented as a type parameter.
 
 ```csharp
 object value = ...;
@@ -57,7 +57,7 @@ public struct MyUnion : IUnion
 
 ### Summary
 
-Unions may implement the `IUnion<TUnion>` to provides a means to construct union instances at runtime when the union type is a constrained type parameter.
+Unions may also implement the `IUnion<TUnion>` to provides a means to construct union instances at runtime when the union type is a constrained type parameter.
 
 ```csharp
 TUnion ReadUnion<TUnion>() where TUnion : IUnion<TUnion>
