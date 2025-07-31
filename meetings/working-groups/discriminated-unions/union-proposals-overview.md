@@ -61,7 +61,7 @@ _ = pet switch
 
 ## Standard type unions
 
-- **Proposal**: [Standard type unions](https://github.com/dotnet/csharplang/blob/main/meetings/working-groups/discriminated-unions/standard-unions.md)
+- **Proposal**: [Standard type unions](https://github.com/dotnet/csharplang/blob/main/proposals/standard-unions.md)
 - **LDM**: Not approved. 
 - **Dependencies**:  *Nominal type unions*. 
 
@@ -76,7 +76,7 @@ public union Union<T1, T2, T3, T4>(T1, T2, T3, T4);
 
 ## Union interfaces
 
-- **Proposal**: [Union interfaces](https://github.com/dotnet/csharplang/blob/main/meetings/working-groups/discriminated-unions/union-interfaces.md)
+- **Proposal**: [Union interfaces](https://github.com/dotnet/csharplang/blob/main/proposals/union-interfaces.md)
 - **LDM**: Not approved. 
 - **Dependencies**: Design with *Nominal type unions*.
 
@@ -96,7 +96,7 @@ void M<TUnion>() where TUnion : IUnion<TUnion>
 
 ## Custom unions
 
-- **Proposal**: [Custom unions](https://github.com/dotnet/csharplang/blob/main/meetings/working-groups/discriminated-unions/custom-unions.md)
+- **Proposal**: [Custom unions](https://github.com/dotnet/csharplang/blob/main/proposals/custom-unions.md)
 - **LDM**: Not approved. 
 - **Dependencies**: *Nominal type unions*.
 
@@ -106,7 +106,7 @@ This can be used for optimization or to make existing types union-like.
 
 ## Non-boxing access pattern for custom unions
 
-- **Proposal**: [Non-boxing access pattern for custom unions](https://github.com/dotnet/csharplang/blob/main/meetings/working-groups/discriminated-unions/non-boxing-access-pattern.md)
+- **Proposal**: [Non-boxing access pattern for custom unions](https://github.com/dotnet/csharplang/blob/main/proposals/non-boxing-access-pattern.md)
 - **LDM**: Not approved. 
 - **Dependencies**: *Custom unions*.
 

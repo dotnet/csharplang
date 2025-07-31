@@ -15,7 +15,7 @@ The declaration syntax for nominal unions is intended to cover most green-field 
 
 ## Specification
 
-A type is considered a "custom union type" if it implements the [`IUnion` interface](Union%20Interfaces.md). Every constructor on the type that is at least as accessible as the type and takes exactly one parameter contributes the type of that parameter as a case type of the custom union type.
+A type is considered a "custom union type" if it implements the [`IUnion` interface](https://github.com/dotnet/csharplang/blob/main/proposals/union-interfaces.md). Every constructor on the type that is at least as accessible as the type and takes exactly one parameter contributes the type of that parameter as a case type of the custom union type.
 
 The consumption of such a type as a custom union type is enabled in the following ways:
 
