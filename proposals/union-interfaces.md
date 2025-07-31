@@ -26,7 +26,7 @@ To enable library or utility code that is unaware of application specific union 
 
 To provide a means for the compiler to identify union types and access the value of the union with certainty.
 
-### Specification
+### Detailed Design
 
 ```csharp
 public interface IUnion
@@ -76,7 +76,7 @@ TUnion ReadUnion<TUnion>() where TUnion : IUnion<TUnion>
 
 To enable library or utility code that is unaware of application specific union types to become union aware and construct union instances from case values at runtime.
 
-### Specification 
+### Detailed Design
 
 ```csharp
 public interface IUnion<TUnion> : IUnion
