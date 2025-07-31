@@ -1,4 +1,4 @@
-# Standard Type Unions
+# Standard Unions
 
 ## Summary
 
