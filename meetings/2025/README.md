@@ -29,18 +29,20 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ### Wed Aug 6, 2025
 
-### Wed Jul 30, 2025
-
-- `/main` and top-level statements (Jan) - *20 minutes*
-- Unions (Matt and Mads) - *rest of meeting*
-    - [Union proposals overview](https://github.com/dotnet/csharplang/blob/main/meetings/working-groups/discriminated-unions/union-proposals-overview.md)
-    - [Add type parameter restriction to closed hierarchies](https://github.com/dotnet/csharplang/pull/9560)
-    - [Standard unions](https://github.com/dotnet/csharplang/blob/5736dbf3d4008498acb120669a4ede96dd69e104/meetings/working-groups/discriminated-unions/standard-unions.md)
-    - [Union interfaces](https://github.com/dotnet/csharplang/blob/5736dbf3d4008498acb120669a4ede96dd69e104/meetings/working-groups/discriminated-unions/union-interfaces.md)
-    - [Custom unions](https://github.com/dotnet/csharplang/blob/5736dbf3d4008498acb120669a4ede96dd69e104/meetings/working-groups/discriminated-unions/custom-unions.md)
-    - [Non-boxing access pattern](https://github.com/dotnet/csharplang/blob/5736dbf3d4008498acb120669a4ede96dd69e104/meetings/working-groups/discriminated-unions/non-boxing-access-pattern.md)
 
 ## C# Language Design Notes for 2025
+
+### Wed Jul 30, 2025
+
+[C# Language Design Meeting for July 30th, 2025](https://github.com/dotnet/csharplang/blob/main/meetings/2025/LDM-2025-07-30.md)
+
+- '/main' and top-level statements
+- Union proposals overview
+- Add type parameter restriction to closed hierarchies
+- Standard unions
+- Union interfaces
+- Custom unions
+- Non-boxing access pattern
 
 ### Mon Jun 30, 2025
 
