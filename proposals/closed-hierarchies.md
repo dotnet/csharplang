@@ -14,7 +14,7 @@ public record class Open(float Percent) : GateState;
 public record class Locked : GateState; // ERROR - 'GateState' is a closed class
 ```
 
-A consuming `switch` expression that covers all those derived classes can therefore be concluded to "exhaust" the closed class - it does not need to provide a default case to avoid warnings.
+Since all derived classes are declared in the closed class' assembly, a consuming `switch` expression that covers all of them can be concluded to "exhaust" the closed class - it does not need to provide a default case to avoid warnings.
 
 ``` c#
 // Assembly 3
@@ -39,9 +39,9 @@ Closed classes provide a way to indicate that a set of derived classes is comple
 
 Allow `closed` as a modifier on classes. A `closed` class is implicitly abstract whether or not the `abstract` modifier is specified. Thus, it cannot also have a `sealed` or `static` modifier. 
 
-A class deriving from a closed class is *not* itself closed unless explicitly declared so.
+A class deriving from a closed class is *not* itself closed unless explicitly declared to be.
 
-### Enforcement
+### Same-assembly restriction
 
 If a class in one assembly is declared `closed` then it is an error to directly derive from it in another assembly:
 
@@ -54,6 +54,19 @@ public class CO : CC { ... }     // Ok, same assembly
 public class C1 : CC { ... }     // Error, 'CC' is closed and in a different assembly
 public class C2 : CO { ... }     // Ok, 'CO' is not closed
 ```
+
+### Type parameter restriction
+
+If a generic class directly derives from a closed class, then all if its type parameters must be used in the base class specification:
+
+```csharp
+closed class C<T> { ... }
+class D1<T> : C<T> { ... }   // Ok, 'T' is used in closed base class
+class D2<T> : C<T[]> { ... } // Ok, 'T' is used in closed base class
+class D3<T> : C<int> { ... } // Error, 'T' is not used in closed base class
+```
+
+This rule is to ensure that there is a single generic instantiation of the derived type that "exhausts" a given generic instantiation of the closed base type. 
 
 ### Exhaustiveness in switches
 
