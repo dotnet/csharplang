@@ -50,7 +50,7 @@ PP_IgnoredToken
     ;
 ```
 
-These are parsed regardless of language version (the compiler generally dislikes syntax trees to be parsed differently based on LangVersion).
+These are parsed regardless of language version.
 
 ### Restrictions
 
