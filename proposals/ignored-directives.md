@@ -50,6 +50,8 @@ PP_IgnoredToken
     ;
 ```
 
+These are parsed regardless of language version (the compiler generally dislikes syntax trees to be parsed differently based on LangVersion).
+
 ### Restrictions
 
 Ignored directives must occur before the first token ([§6.4][tokens]) in the compilation unit, just like `#define`/`#undef` directives.
