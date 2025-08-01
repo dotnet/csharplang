@@ -23,6 +23,8 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ### Mon Aug 18, 2025
 
+- Triage (Mads)
+
 ### Wed Aug 13, 2025
 
 ### Mon Aug 11, 2025
