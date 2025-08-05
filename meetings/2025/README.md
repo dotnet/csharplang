@@ -15,6 +15,24 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ## Schedule
 
+### Wed Oct 1, 2025
+
+### Mon Sep 29, 2025
+
+### Wed Sep 24, 2025
+
+### Mon Sep 22, 2025
+
+### Wed Sep 17, 2025
+
+### Wed Sep 10, 2025
+
+### Mon Sep 8, 2025
+
+*One hour only*
+
+### Wed Sep 3, 2025
+
 ### Wed Aug 27, 2025
 
 ### Mon Aug 25, 2025
@@ -26,6 +44,8 @@ All schedule items must have a public issue or checked-in proposal that can be l
 - Triage (Mads)
 
 ### Wed Aug 13, 2025
+
+- Unions (Matt and Mads)
 
 ### Mon Aug 11, 2025
 
