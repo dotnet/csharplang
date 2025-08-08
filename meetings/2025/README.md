@@ -45,9 +45,9 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ### Wed Aug 13, 2025
 
-- Unions (Matt and Mads)
+- Unions (Matt and Mads): 
+    - [To nest or not to nest?](https://github.com/dotnet/csharplang/blob/main/meetings/working-groups/discriminated-unions/to-nest-or-not-to-nest.md)
 
-### Mon Aug 11, 2025
 
 ## C# Language Design Notes for 2025
 
