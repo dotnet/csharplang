@@ -1,14 +1,15 @@
 # Union proposals overview
 
-- [Nominal type unions](#nominal-type-unions)
-- [Standard type unions](#standard-type-unions)
-- [Union interfaces](#union-interfaces)
-- [Custom unions](#custom-unions)
-- [Non-boxing access pattern for custom unions](#non-boxing-access-pattern-for-custom-unions)
-- [Closed enums](#closed-enums)
-- [Closed hierarchies](#closed-hierarchies)
-- [Case declarations](#case-declarations)
-- [Target-typed static member access](#target-typed-static-member-access)
+- [Union proposals overview](#union-proposals-overview)
+  - [Nominal type unions](#nominal-type-unions)
+  - [Standard type unions](#standard-type-unions)
+  - [Union interfaces](#union-interfaces)
+  - [Custom unions](#custom-unions)
+  - [Non-boxing access pattern for custom unions](#non-boxing-access-pattern-for-custom-unions)
+  - [Closed enums](#closed-enums)
+  - [Closed hierarchies](#closed-hierarchies)
+  - [Case declarations](#case-declarations)
+  - [Target-typed static member access](#target-typed-static-member-access)
 
 ``` mermaid
 flowchart LR
@@ -62,7 +63,7 @@ _ = pet switch
 ## Standard type unions
 
 - **Proposal**: [Standard type unions](https://github.com/dotnet/csharplang/blob/main/proposals/standard-unions.md)
-- **LDM**: Not approved. 
+- **LDM**: Approved. 
 - **Dependencies**:  *Nominal type unions*. 
 
 A family of nominal type unions in the `System` namespace:
@@ -77,7 +78,7 @@ public union Union<T1, T2, T3, T4>(T1, T2, T3, T4);
 ## Union interfaces
 
 - **Proposal**: [Union interfaces](https://github.com/dotnet/csharplang/blob/main/proposals/union-interfaces.md)
-- **LDM**: Not approved. 
+- **LDM**: Approved. 
 - **Dependencies**: Design with *Nominal type unions*.
 
 Interfaces, at least some of which are implemented by compiler-generated unions, identify types as unions at runtime and facilitate access and construction.
@@ -97,7 +98,7 @@ void M<TUnion>() where TUnion : IUnion<TUnion>
 ## Custom unions
 
 - **Proposal**: [Custom unions](https://github.com/dotnet/csharplang/blob/main/proposals/custom-unions.md)
-- **LDM**: Not approved. 
+- **LDM**: Approved. 
 - **Dependencies**: *Nominal type unions*.
 
 Allow hand-authored types to be consumed as unions (creation, pattern matching, exhaustiveness).
@@ -107,7 +108,7 @@ This can be used for optimization or to make existing types union-like.
 ## Non-boxing access pattern for custom unions
 
 - **Proposal**: [Non-boxing access pattern for custom unions](https://github.com/dotnet/csharplang/blob/main/proposals/non-boxing-access-pattern.md)
-- **LDM**: Not approved. 
+- **LDM**: Approved. 
 - **Dependencies**: *Custom unions*.
 
 Allow custom union types to use an alternative access pattern that does not incur boxing.
