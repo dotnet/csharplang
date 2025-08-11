@@ -1,6 +1,6 @@
 # Simple lambda parameters with modifiers
 
-[!INCLUDE[Specletdisclaimer](./speclet-disclaimer.md)]
+[!INCLUDE[Specletdisclaimer](../speclet-disclaimer.md)]
 
 Champion issue: <https://github.com/dotnet/csharplang/issues/8637>
 
@@ -27,7 +27,7 @@ TryParse<int> parse2 = (string text, out int result) => Int32.TryParse(text, out
 
 ### Grammar
 
-No changes.  The [latest lambda grammar](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-12.0/lambda-method-group-defaults.md#detailed-design) is:
+No changes.  The [latest lambda grammar](../csharp-12.0/lambda-method-group-defaults.md#detailed-design) is:
 
 ```g4
 lambda_expression
@@ -53,8 +53,8 @@ This grammar already considers `modifiers* identifier` to be syntactically legal
 1. This does not apply to a lambda without a parameter list. `ref x => x.ToString()` would not be legal.
 1. A lambda parameter list still cannot mix `implicit_anonymous_function_parameter` and `explicit_anonymous_function_parameter` parameters.
 1. `(ref readonly p) =>`, `(scoped ref p) =>`, and `(scoped ref readonly p) =>` will be allowed, just as they are with explicit parameters, due to:
-   - [Low-level struct improvements](csharp-11.0/low-level-struct-improvements.md#syntax) in C# 11
-   - [`ref readonly` parameters](csharp-12.0/ref-readonly-parameters.md#parameter-declarations) in C# 12
+   - [Low-level struct improvements](../csharp-11.0/low-level-struct-improvements.md#syntax) in C# 11
+   - [`ref readonly` parameters](../csharp-12.0/ref-readonly-parameters.md#parameter-declarations) in C# 12
 1. The presence/absence of a type has no impact on whether a modifier is required or optional.  In other words, if a modifier was required
    with a type present, it is still required with the type absent.  Similarly, if a modifier was optional with a type present, it is 
    optional with the type absent.
@@ -71,7 +71,7 @@ parameter list".
 Parameters in an implicitly typed parameter list cannot have a `default_argument`.  They
 can have an `attribute_list`.
 
-The following change is required to [anonymous function conversions](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-12.0/lambda-method-group-defaults.md#detailed-design):
+The following change is required to [anonymous function conversions](../csharp-12.0/lambda-method-group-defaults.md#detailed-design):
 
 [...]
 > If F has an explicitly **or implicitly typed parameter list**, each parameter in D has the same type and

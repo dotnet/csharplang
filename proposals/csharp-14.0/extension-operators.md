@@ -1,5 +1,7 @@
 # Extension operators
 
+[!INCLUDE[Specletdisclaimer](../speclet-disclaimer.md)]
+
 ***Note:*** *Does not cover user-defined implicit and explicit conversion operators, which are not yet designed or planned.*
 
 ## Declaration
