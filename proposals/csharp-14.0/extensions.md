@@ -1,6 +1,6 @@
 # Extension members
 
-[!INCLUDE[Specletdisclaimer](./speclet-disclaimer.md)]
+[!INCLUDE[Specletdisclaimer](../speclet-disclaimer.md)]
 
 Champion issue: https://github.com/dotnet/csharplang/issues/8697
 
@@ -999,7 +999,7 @@ We'd exclude:
 
 ##### Revisit where `Count`/`Length` extension properties come into play  
 
-#### [Collection expressions](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-12.0/collection-expressions.md)
+#### [Collection expressions](../csharp-12.0/collection-expressions.md)
 
 - Extension `Add` works
 - Extension `GetEnumerator` works for spread
@@ -1007,7 +1007,7 @@ We'd exclude:
 - Static `Create` extension methods should not count as a blessed **create** method
 - Should extension countable properties affect collection expressions?
 
-#### [`params` collections](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-13.0/params-collections.md)
+#### [`params` collections](../csharp-13.0/params-collections.md)
 
 - Extensions `Add` does not affect what types are allowed with `params`
 

@@ -15,6 +15,24 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ## Schedule
 
+### Wed Oct 1, 2025
+
+### Mon Sep 29, 2025
+
+### Wed Sep 24, 2025
+
+### Mon Sep 22, 2025
+
+### Wed Sep 17, 2025
+
+### Wed Sep 10, 2025
+
+### Mon Sep 8, 2025
+
+*One hour only*
+
+### Wed Sep 3, 2025
+
 ### Wed Aug 27, 2025
 
 ### Mon Aug 25, 2025
@@ -23,18 +41,27 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ### Mon Aug 18, 2025
 
+- Triage (Mads)
+
 ### Wed Aug 13, 2025
 
-### Mon Aug 11, 2025
+- Unions (Matt and Mads): 
+    - [To nest or not to nest?](https://github.com/dotnet/csharplang/blob/main/meetings/working-groups/discriminated-unions/to-nest-or-not-to-nest.md)
 
-### Wed Aug 6, 2025
+
+## C# Language Design Notes for 2025
 
 ### Wed Jul 30, 2025
 
-- `/main` and top-level statements (Jan) - *20 minutes*
-- Unions (Matt and Mads) - *rest of meeting*
+[C# Language Design Meeting for July 30th, 2025](https://github.com/dotnet/csharplang/blob/main/meetings/2025/LDM-2025-07-30.md)
 
-## C# Language Design Notes for 2025
+- '/main' and top-level statements
+- Union proposals overview
+- Add type parameter restriction to closed hierarchies
+- Standard unions
+- Union interfaces
+- Custom unions
+- Non-boxing access pattern
 
 ### Mon Jun 30, 2025
 
