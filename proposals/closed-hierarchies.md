@@ -57,20 +57,22 @@ public class C2 : CO { ... }     // Ok, 'CO' is not closed
 
 ### Type parameter restriction
 
-If a generic class directly derives from a closed class, then all if its type parameters must be used in the base class specification:
+If a generic class directly derives from a closed class, then all of its type parameters must be used in the base class specification:
 
 ```csharp
 closed class C<T> { ... }
-class D1<T> : C<T> { ... }   // Ok, 'T' is used in closed base class
-class D2<T> : C<T[]> { ... } // Ok, 'T' is used in closed base class
-class D3<T> : C<int> { ... } // Error, 'T' is not used in closed base class
+class D1<U> : C<U> { ... }   // Ok, 'U' is used in base class
+class D2<V> : C<V[]> { ... } // Ok, 'V' is used in base class
+class D3<W> : C<int> { ... } // Error, 'W' is not used in base class
 ```
 
-This rule is to ensure that there is a single generic instantiation of the derived type that "exhausts" a given generic instantiation of the closed base type. 
+This rule is to ensure that there is a single generic instantiation of the derived type that "exhausts" a given generic instantiation of the closed base type.
+
+*Note:* This rule may not be sufficient if we allow closed interfaces at some point, because a) classes can implement multiple generic instantiations of the same interface, and b) interface type parameters can be co- or contravariant. At such point we'd need to refine the rule to continue to ensure that there's only ever one generic instantiation of a given derived type per generic instantiation of a closed base type.
 
 ### Exhaustiveness in switches
 
-A `switch` expression that handles all of the direct descendents of a closed class will be considered to have exhausted that class. That means that some non-exhaustiveness warnings will no longer be given:
+A `switch` expression that handles all of the direct descendants of a closed class will be considered to have exhausted that class. That means that some non-exhaustiveness warnings will no longer be given:
 
 ``` c#
 CC cc = ...;
@@ -81,7 +83,7 @@ _ = cc switch
 };
 ```
 
-On the other hand this also means that it can be an error for the closed base class to occur as a case after all its direct decendants:
+On the other hand this also means that it can be an error for the closed base class to occur as a case after all its direct descendants:
 
 ``` c#
 _ = cc switch
@@ -89,6 +91,27 @@ _ = cc switch
     CO co => ...,
     CC cc => ..., // Error, case cannot be reached
 };
+```
+
+*Note:* There may not exist valid derived classes for certain generic instantiations of a closed base class. An exhaustive switch only needs to specify cases for derived types that are actually possible. 
+
+For example:
+
+```csharp
+closed class C<T> { ... }
+class D1<U> : C<U> { ... }
+class D2<V> : C<V[]> { ... }
+```
+
+For `C<string>`, for instance, there is no corresponding instantiation of `D2<...>`, and no case for `D2<...>` needs to be given in a switch:
+
+```csharp
+C<string> cs = ...;
+_ = cs switch
+{
+    D1<string> d1 => ...,
+    // No need for a 'D2<...>' case - no instantiation corresponds to 'C<string>'
+}
 ```
 
 ### Lowering
