@@ -1007,7 +1007,7 @@ We'd exclude:
 - Static `Create` extension methods should not count as a blessed **create** method
 - Should extension countable properties affect collection expressions?
 
-#### [`params` collections](../proposals/csharp-13.0/params-collections.md)
+#### [`params` collections](../csharp-13.0/params-collections.md)
 
 - Extensions `Add` does not affect what types are allowed with `params`
 
