@@ -190,7 +190,7 @@ times this cannot happen for whatever reason. But the following rules _must_ be 
 Once a feature has been implemented and has or soon will be shipped, take the following steps (these are usually done in bulk when a release nears):
 
 1. If a folder for the C# release does not exist yet, create it.
-2. Move the specification for the feature into that folder.
+2. Move the specification for the feature into that folder and review relative links it contains.
 3. Update the champion issue as follows:
    1. Update the specification link to point at the new location.
    2. Update the milestone of the issue to be the C# release it has shipped/will ship in, creating it if it doesn't exist.
