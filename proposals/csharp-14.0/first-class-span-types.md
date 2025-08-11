@@ -599,5 +599,5 @@ Keep things as they are.
 [is-type-operator]: https://github.com/dotnet/csharpstandard/blob/8c5e008e2fd6057e1bbe802a99f6ce93e5c29f64/standard/expressions.md#1212121-the-is-type-operator
 
 [ce-or]: ../csharp-12.0/collection-expressions.md#overload-resolution
-[overload-resolution-priority]: ../csharp-13.0/proposals/overload-resolution-priority.md
+[overload-resolution-priority]: ../csharp-13.0/overload-resolution-priority.md
 [better-collection-conversion-from-expression]: ../csharp-13.0/collection-expressions-better-conversion.md#detailed-design
