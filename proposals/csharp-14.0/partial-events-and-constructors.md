@@ -1,6 +1,6 @@
 # Partial Events and Constructors
 
-[!INCLUDE[Specletdisclaimer](./speclet-disclaimer.md)]
+[!INCLUDE[Specletdisclaimer](../speclet-disclaimer.md)]
 
 Champion issue: <https://github.com/dotnet/csharplang/issues/9058>
 
@@ -279,10 +279,10 @@ For more details, see https://github.com/dotnet/roslyn/issues/77254.
 ## Links
 --------->
 
-[partial-methods-ext]: ./csharp-9.0/extending-partial-methods.md
-[partial-props]: ./csharp-13.0/partial-properties.md
-[partial-props-caller-info]: ./csharp-13.0/partial-properties.md#caller-info-attributes
-[partial-props-signatures]: ./csharp-13.0/partial-properties.md#matching-signatures
+[partial-methods-ext]: ../csharp-9.0/extending-partial-methods.md
+[partial-props]: ../csharp-13.0/partial-properties.md
+[partial-props-caller-info]: ../csharp-13.0/partial-properties.md#caller-info-attributes
+[partial-props-signatures]: ../csharp-13.0/partial-properties.md#matching-signatures
 [partial-events-discussion]: https://github.com/dotnet/csharplang/discussions/8064
 [partial-ordering]: https://github.com/dotnet/csharplang/issues/8966
 [xamarin]: https://github.com/xamarin/xamarin-macios/issues/21308#issuecomment-2447535524

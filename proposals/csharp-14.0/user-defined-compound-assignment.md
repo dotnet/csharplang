@@ -1,6 +1,6 @@
 # User Defined Compound Assignment Operators
 
-[!INCLUDE[Specletdisclaimer](./speclet-disclaimer.md)]
+[!INCLUDE[Specletdisclaimer](../speclet-disclaimer.md)]
 
 Champion issue: https://github.com/dotnet/csharplang/issues/9101
 
@@ -206,7 +206,7 @@ has a special name in metadata.
 The signature of an instance increment operator consists of the operator tokens ('checked'? '++' | 'checked'? '--').
 
 A `checked operator` declaration requires a pair-wise declaration of a `regular operator`. A compile-time error occurs otherwise. 
-See also https://github.com/dotnet/csharplang/blob/main/proposals/csharp-11.0/checked-user-defined-operators.md#semantics.
+See also ../csharp-11.0/checked-user-defined-operators.md#semantics.
 
 The purpose of the method is to adjust the value of the instance to result of the requested increment operation,
 whatever that means in context of the declaring type.
@@ -251,7 +251,7 @@ The signature of a compound assignment operator consists of the operator tokens
 the type of the single parameter. The name of the parameter is not part of a compound assignment operator’s signature.
 
 A `checked operator` declaration requires a pair-wise declaration of a `regular operator`. A compile-time error occurs otherwise.
-See also https://github.com/dotnet/csharplang/blob/main/proposals/csharp-11.0/checked-user-defined-operators.md#semantics.
+See also ../csharp-11.0/checked-user-defined-operators.md#semantics.
 
 The purpose of the method is to adjust the value of the instance to result of ```<instance> <binary operator token> parameter```.
 
