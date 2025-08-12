@@ -1,15 +1,17 @@
 # Target-typed inference for type patterns
 
+*This proposal builds on the [Target-typed generic type inference](target-typed-generic-type-inference) proposal.
+
 ## Summary
 
-Allow type patterns to omit a type argument list when it can be inferred from the pattern input value:
+Type patterns may omit a type argument list when it can be inferred from the pattern input value:
 
 ```csharp
 void M(Option<int> option) => option switch
 {
     Some(var i) => ..., // 'Some<int>' inferred
     ...
-}
+};
 ```
 
 ## Motivation

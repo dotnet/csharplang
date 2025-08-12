@@ -2,7 +2,7 @@
 
 ## Summary
 
-Allow generic type inference to take a target type into account. For instance, given:
+Generic type inference may take a target type into account. For instance, given:
 
 ```csharp
 public class MyCollection

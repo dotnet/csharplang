@@ -1,10 +1,10 @@
-# Target-typed type inference for constructor calls
+# Target-typed inference for constructor calls
 
 *This proposal builds on the [Target-typed generic type inference](target-typed-generic-type-inference) proposal.
 
 ## Summary
 
-Allow 'new' expressions to infer type arguments for the newly created class or struct, including [from a target type](target-typed-generic-type-inference) if present. For instance, given:
+'new' expressions may infer type arguments for the newly created class or struct, including [from a target type](target-typed-generic-type-inference) if present. For instance, given:
 
 ```csharp
 public class MyCollection<T> : IEnumerable<T>
