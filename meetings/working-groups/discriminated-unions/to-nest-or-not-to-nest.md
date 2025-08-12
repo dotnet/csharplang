@@ -173,7 +173,13 @@ Option<int> option = new .Some(5);   // 'Option<int>' inferred
 if (option is .Some(var value)) ...; // 'Option<int>' inferred
 ```
 
-Could target typing help eliminate type arguments in the non-nested case as well? It would have to look something like this:
+For the non-nested case, there are now proposals to:
+
+- Allow target types to be taken into account in generic type inference: [Target-typed generic type inference](https://github.com/dotnet/csharplang/blob/main/proposals/target-typed-generic-type-inference).
+- Allow generic type inference in `new` expressions: [Inference for constructor calls](https://github.com/dotnet/csharplang/blob/main/proposals/inference-for-constructor-calls).
+- Allow generic type inference in type patterns, treating the incoming type (`Option<int>` in this case) as the "target type": [Inference for type patterns](https://github.com/dotnet/csharplang/blob/main/proposals/inference-for-type-patterns).
+
+Between them, they would enable:
 
 ```csharp
 // non-nested
@@ -181,11 +187,7 @@ Option<int> option = new Some(5);   // '<int>' inferred
 if (option is Some(var value)) ...; // '<int>' inferred
 ```
 
-This would require us to a) allow target types to be taken into account in generic type inference, b) allow generic type inference in `new` expressions as described above, and c) allow generic type inference in type patterns, treating the incoming type (`Option<int>` in this case) as the "target type".
-
-This does not seem impossible, especially in the light of us planning to generalize generic type inference for other scenarios ([Type Parameter Inference from Constraints](https://github.com/dotnet/csharplang/blob/main/proposals/type-parameter-inference-from-constraints.md)), and it would probably be generally useful way beyond union scenarios, but it is still a fairly extensive language feature in its own right, and might also raise some concerns about breaking changes.
-
-In summary, various auxiliary features have been proposed or can be imagined that would help avoid specifying type arguments when consuming the case types of closed classes or unions.
+In summary, various auxiliary features have been proposed that would help avoid specifying type arguments when consuming the case types of closed classes or unions, both in nested and non-nested scenarios.
 
 ### Too many type parameters
 
