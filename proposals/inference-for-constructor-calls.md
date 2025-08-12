@@ -1,6 +1,6 @@
 # Target-typed inference for constructor calls
 
-*This proposal builds on the [Target-typed generic type inference](target-typed-generic-type-inference) proposal.
+*This proposal builds on the [Target-typed generic type inference](target-typed-generic-type-inference.md) proposal.
 
 ## Summary
 
