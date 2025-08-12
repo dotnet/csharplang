@@ -10,6 +10,9 @@
   - [Closed hierarchies](#closed-hierarchies)
   - [Case declarations](#case-declarations)
   - [Target-typed static member access](#target-typed-static-member-access)
+  - [Target-typed generic type inference](#target-typed-generic-type-inference)
+  - [Inference for constructor calls](#inference-for-constructor-calls)
+  - [Inference for type patterns](#inference-for-type-patterns)
 
 ``` mermaid
 flowchart LR
@@ -23,13 +26,17 @@ NonBoxingAccess[Non-boxing access pattern]:::approved
 Enums[Closed enums]:::approved
 Hierarchies[Closed hierarchies]:::approved
 Cases[Case declarations]:::approved
-Target[Target-typed access]:::approved
+TargetAccess[Target-typed access]:::approved
+TargetInfer[Target-typed inference]:::unapproved
+InferNew[Inference for constructors]:::unapproved
+InferPattern[Inference for type patterns]:::unapproved
 
 %% Dependencies
 Unions --> Standard
 Unions <--> Interfaces --> Custom --> NonBoxingAccess
-Unions & Hierarchies --> Cases -.-> Target
+Unions & Hierarchies --> Cases -.-> TargetAccess
 Hierarchies <-.-> Enums
+TargetInfer --> InferNew & InferPattern
 
 %% Colors
 classDef approved fill:#cfc,stroke:#333,stroke-width:1.5px;
@@ -64,7 +71,7 @@ _ = pet switch
 
 - **Proposal**: [Standard type unions](https://github.com/dotnet/csharplang/blob/main/proposals/standard-unions.md)
 - **LDM**: Approved. 
-- **Dependencies**:  *Nominal type unions*. 
+- **Dependencies**: [Nominal type unions](#nominal-type-unions). 
 
 A family of nominal type unions in the `System` namespace:
 
@@ -79,7 +86,7 @@ public union Union<T1, T2, T3, T4>(T1, T2, T3, T4);
 
 - **Proposal**: [Union interfaces](https://github.com/dotnet/csharplang/blob/main/proposals/union-interfaces.md)
 - **LDM**: Approved. 
-- **Dependencies**: Design with *Nominal type unions*.
+- **Dependencies**: Design with [Nominal type unions](#nominal-type-unions).
 
 Interfaces, at least some of which are implemented by compiler-generated unions, identify types as unions at runtime and facilitate access and construction.
 
@@ -99,7 +106,7 @@ void M<TUnion>() where TUnion : IUnion<TUnion>
 
 - **Proposal**: [Custom unions](https://github.com/dotnet/csharplang/blob/main/proposals/custom-unions.md)
 - **LDM**: Approved. 
-- **Dependencies**: *Nominal type unions*.
+- **Dependencies**: [Nominal type unions](#nominal-type-unions).
 
 Allow hand-authored types to be consumed as unions (creation, pattern matching, exhaustiveness).
 
@@ -109,7 +116,7 @@ This can be used for optimization or to make existing types union-like.
 
 - **Proposal**: [Non-boxing access pattern for custom unions](https://github.com/dotnet/csharplang/blob/main/proposals/non-boxing-access-pattern.md)
 - **LDM**: Approved. 
-- **Dependencies**: *Custom unions*.
+- **Dependencies**: [Custom unions](#custom-unions).
 
 Allow custom union types to use an alternative access pattern that does not incur boxing.
 
@@ -117,7 +124,7 @@ Allow custom union types to use an alternative access pattern that does not incu
 
 - **Proposal**: [Closed enums](https://github.com/dotnet/csharplang/blob/main/proposals/closed-enums.md)
 - **LDM**: Approved. 
-- **Dependencies**: None. Design together with *Closed hierarchies* to ensure coherence.
+- **Dependencies**: None. Design together with [Closed hierarchies](#closed-hierarchies) to ensure coherence.
 
 Allow enums to be declared `closed`, preventing creation of values other than the explicitly declared enum members. A consuming switch expression can assume only those values can occur, avoiding exhaustiveness warnings.
 
@@ -139,7 +146,7 @@ _ = color switch
 
 - **Proposal**: [Closed hierarchies](https://github.com/dotnet/csharplang/blob/main/proposals/closed-hierarchies.md)
 - **LDM**: Approved. 
-- **Dependencies**: None. Design with *Closed enums* to ensure coherence.
+- **Dependencies**: None. Design with [Closed enums](#closed-enums) to ensure coherence.
 
 Allow classes to be declared `closed`, preventing its use as a base class outside of the assembly. A consuming switch expression can assume only derived types from within that assembly can occur, avoiding exhaustiveness warnings.
 
@@ -162,7 +169,7 @@ _ = c switch
 
 - **Proposal**: [Case declarations](https://github.com/dotnet/csharplang/blob/main/proposals/case-declarations.md)
 - **LDM**: Approved. 
-- **Dependencies**:  *Closed hierarchies* and *Nominal type unions*.
+- **Dependencies**:  [Closed hierarchies](#closed-hierarchies) and [Nominal type unions](#nominal-type-unions).
 
 A shorthand for declaring nested case types of a closed type (closed class or union type).
 
@@ -197,3 +204,42 @@ return result switch
 };
 ```
 
+## Target-typed generic type inference
+
+- **Proposal**: [Target-typed generic type inference](https://github.com/dotnet/csharplang/blob/main/proposals/target-typed-generic-type-inference)
+- **LDM**: Not approved. 
+- **Dependencies**: None. Informed by union scenarios.
+
+Generic type inference may take a target type into account.
+
+```csharp
+MyCollection<string> c = MyCollection.Create(); // 'T' = 'string' inferred from target type
+```
+
+## Inference for constructor calls
+
+- **Proposal**: [Inference for constructor calls](https://github.com/dotnet/csharplang/blob/main/proposals/inference-for-constructor-calls)
+- **LDM**: Not pproved. 
+- **Dependencies**: [Target-typed generic type inference](#target-typed-generic-type-inference)
+
+'new' expressions may infer type arguments for the newly created class or struct, including [from a target type](target-typed-generic-type-inference) if present.
+
+```csharp
+Option<int> option = new Some(5); // Infer 'int' from argument and target type
+```
+
+## Inference for type patterns
+
+- **Proposal**: [Inference for type patterns](https://github.com/dotnet/csharplang/blob/main/proposals/inference-for-type-patterns)
+- **LDM**: Not pproved. 
+- **Dependencies**: [Target-typed generic type inference](#target-typed-generic-type-inference)
+
+Type patterns may omit a type argument list when it can be inferred from the pattern input value.
+
+```csharp
+void M(Option<int> option) => option switch
+{
+    Some(var i) => ..., // 'Some<int>' inferred
+    ...
+};
+```
