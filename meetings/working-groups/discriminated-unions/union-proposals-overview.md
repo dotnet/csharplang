@@ -16,10 +16,10 @@ flowchart LR
 
 %% Features
 Unions[Nominal type unions]:::approved
-Standard[Standard type unions]:::unapproved
-Interfaces[Union interfaces]:::unapproved
-Custom[Custom unions]:::unapproved
-NonBoxingAccess[Non-boxing access pattern]:::unapproved
+Standard[Standard type unions]:::approved
+Interfaces[Union interfaces]:::approved
+Custom[Custom unions]:::approved
+NonBoxingAccess[Non-boxing access pattern]:::approved
 Enums[Closed enums]:::approved
 Hierarchies[Closed hierarchies]:::approved
 Cases[Case declarations]:::approved
