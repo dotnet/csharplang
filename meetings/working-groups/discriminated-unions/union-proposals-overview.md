@@ -219,7 +219,7 @@ MyCollection<string> c = MyCollection.Create(); // 'T' = 'string' inferred from 
 ## Inference for constructor calls
 
 - **Proposal**: [Inference for constructor calls](https://github.com/dotnet/csharplang/blob/main/proposals/inference-for-constructor-calls)
-- **LDM**: Not pproved. 
+- **LDM**: Not approved. 
 - **Dependencies**: [Target-typed generic type inference](#target-typed-generic-type-inference)
 
 'new' expressions may infer type arguments for the newly created class or struct, including [from a target type](target-typed-generic-type-inference) if present.
@@ -231,7 +231,7 @@ Option<int> option = new Some(5); // Infer 'int' from argument and target type
 ## Inference for type patterns
 
 - **Proposal**: [Inference for type patterns](https://github.com/dotnet/csharplang/blob/main/proposals/inference-for-type-patterns)
-- **LDM**: Not pproved. 
+- **LDM**: Not approved. 
 - **Dependencies**: [Target-typed generic type inference](#target-typed-generic-type-inference)
 
 Type patterns may omit a type argument list when it can be inferred from the pattern input value.
