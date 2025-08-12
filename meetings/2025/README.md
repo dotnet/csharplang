@@ -47,7 +47,9 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 - Unions (Matt and Mads): 
     - [To nest or not to nest?](https://github.com/dotnet/csharplang/blob/main/meetings/working-groups/discriminated-unions/to-nest-or-not-to-nest.md)
-
+    - [Target-typed generic type inference](https://github.com/dotnet/csharplang/blob/main/proposals/target-typed-generic-type-inference)
+    - [Inference for constructor calls](https://github.com/dotnet/csharplang/blob/main/proposals/inference-for-constructor-calls)
+    - [Inference for type patterns](https://github.com/dotnet/csharplang/blob/main/proposals/inference-for-type-patterns)
 
 ## C# Language Design Notes for 2025
 
