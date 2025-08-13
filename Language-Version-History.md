@@ -1,6 +1,19 @@
 Features Added in C# Language Versions
 ====================
 
+# C# 14.0 - .NET 10 and Visual Studio 2022 version 17.15
+- [Extension methods and properties](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-14.0/extensions.md): allows extending an existing type with instance or static methods and properties.
+- [Extension operators](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-14.0/extension-operators.md): allows extending an existing type with operators.
+- [`field` keyword in properties](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-14.0/field-keyword.md): `field` allows access to the property's backing field without having to declare it.
+- [Partial events and constructors](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-14.0/partial-events-and-constructors.md): allows the partial modifier on events and constructors to separate declaration and implementation parts.
+- [User-defined compound assignment operators](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-14.0/user-defined-compound-assignment.md): allow user types to customize behavior of compound assignment operators in a way that the target of the assignment is modified in-place (`public void operator +=(int x)`).
+- [First-class `Span` types](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-14.0/first-class-span-types.md): streamlines usage of `Span`-based APIs by improving type inference and overload resolution.
+- [Null-conditional assignment](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-14.0/null-conditional-assignment.md): permits assignment to occur conditionally within a `a?.b` or `a?[b]` expression (`a?.b = c`).
+- [Unbound generic types in `nameof`](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-14.0/unbound-generic-types-in-nameof.md): relaxes some restrictions on usage of generic types inside `nameof` (`nameof(List<>)`).
+- [Simple lambda parameters with modifiers](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-14.0/simple-lambda-parameters-with-modifiers.md): allows lambda parameters to be declared with modifiers without requiring their types (`(ref entry) => ...`).
+- [Ignored directives](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-14.0/ignored-directives.md): add `#:` directive prefix to be used by `dotnet run app.cs` tooling but ignored by the language.
+- [Optional and named arguments in `Expression` trees](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-14.0/optional-and-named-parameters-in-expression-trees.md): relaxes some restrictions on `Expression` trees (`Expression<...> e = (a, i) => a.Contains(i, comparer: null);`).
+
 # C# 13.0 - .NET 9 and Visual Studio 2022 version 17.12
 - [ESC escape sequence](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-13.0/esc-escape-sequence.md): introduces the `\e` escape sequence to represent the ESCAPE/ESC character (U+001B).
 - [Method group natural type improvements](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-13.0/method-group-natural-type-improvements.md): look scope-by-scope and prune inapplicable candidates early when determining the natural type of a method group.

@@ -1,5 +1,7 @@
 # Extension operators
 
+[!INCLUDE[Specletdisclaimer](../speclet-disclaimer.md)]
+
 ***Note:*** *Does not cover user-defined implicit and explicit conversion operators, which are not yet designed or planned.*
 
 ## Declaration
@@ -136,7 +138,7 @@ public class Program
 }
 ```
 
-uses [Expression.Add(Expression left, Expression right, MethodInfo? method)](https://learn.microsoft.com/en-us/dotnet/api/system.linq.expressions.expression.add?view=net-9.0#system-linq-expressions-expression-add(system-linq-expressions-expression-system-linq-expressions-expression-system-reflection-methodinfo)) factory.
+uses [Expression.Add(Expression left, Expression right, MethodInfo? method)](https://learn.microsoft.com/dotnet/api/system.linq.expressions.expression.add#system-linq-expressions-expression-add(system-linq-expressions-expression-system-linq-expressions-expression-system-reflection-methodinfo)) factory.
 
 When the operator is an extension operator, a MethodInfo referring to the corresponding implementation method in the enclosing class will be used.
 
@@ -366,7 +368,7 @@ public class Program
 }
 ```
 
-uses [Expression.Add(Expression left, Expression right, MethodInfo? method)](https://learn.microsoft.com/en-us/dotnet/api/system.linq.expressions.expression.add?view=net-9.0#system-linq-expressions-expression-add(system-linq-expressions-expression-system-linq-expressions-expression-system-reflection-methodinfo)) factory.
+uses [Expression.Add(Expression left, Expression right, MethodInfo? method)](https://learn.microsoft.com/dotnet/api/system.linq.expressions.expression.add#system-linq-expressions-expression-add(system-linq-expressions-expression-system-linq-expressions-expression-system-reflection-methodinfo)) factory.
 
 The question is what should we do when the operator is an extension operator.
 We cannot use a MethodInfo referencing the extension operator itself because IL is not allowed

@@ -1,6 +1,6 @@
 # Extension members
 
-[!INCLUDE[Specletdisclaimer](./speclet-disclaimer.md)]
+[!INCLUDE[Specletdisclaimer](../speclet-disclaimer.md)]
 
 Champion issue: https://github.com/dotnet/csharplang/issues/8697
 
@@ -171,6 +171,8 @@ It is an error to specify the following modifiers on a member of an extension de
 `abstract`, `virtual`, `override`, `new`, `sealed`, `partial`, and `protected` (and related accessibility modifiers).  
 Properties in extension declarations may not have `init` accessors.  
 The instance members are disallowed if the _receiver parameter_ is unnamed.  
+
+All members shall have names that differ from the name of the static enclosing class and the name of the extended type if it has one.
 
 It is an error to decorate an extension member with the `[ModuleInitializer]` attribute.
 
@@ -423,6 +425,7 @@ type parameters and two sets of parameters.
 Extension blocks are grouped by their CLR-level signature. Each CLR equivalency group is emitted as an **extension grouping type** with a content-based name.
 Extension blocks within a CLR equivalency group are then sub-grouped by C# equivalency. Each C# equivalency group is emitted as an **extension marker type** with a content-based name, nested in its corresponding extension grouping type.
 An extension marker type contains a single **extension marker method** which encodes an extension parameter.
+The extension marker method with its containing extension marker type encode the signature of an extension block with full fidelity.
 Declaration of each extension member is emitted in the right extension grouping type, refers back to an extension marker type by its name via an attribute, and is accompanied by a top-level static **implementation method** with a modified signature.    
 
 Here's a schematized overview of metadata encoding:
@@ -433,9 +436,9 @@ static class EnclosingStaticClass
     [Extension]
     public sealed class ExtensionGroupingType1 // has type parameters with minimal constraints sufficient to keep extension member declarations below valid
     {
-        private static class ExtensionMarkerType1 // has re-declared type parameters with full fidelity of C# constraints
+        public static class ExtensionMarkerType1 // has re-declared type parameters with full fidelity of C# constraints
         {
-            private static void <Extension>$(... extension parameter ...) // extension marker method
+            public static void <Extension>$(... extension parameter ...) // extension marker method
         }
         ... ExtensionMarkerType2, etc ...
 
@@ -491,7 +494,7 @@ The marker type re-declares the type parameters of its containing grouping type 
 An extension marker type is emitted to metadata for each set of extension blocks in source with a the same C#-level signature.  
 - Its name is unspeakable and determined based on the contents of the C#-level signature of the extension block. More details below.  
 - It redeclares the type parameters for its containing grouping type to be those declared in source (including name and attributes).
-- It is private and static.
+- It is public and static.
 - It is marked with the `specialname` flag.  
 
 The content-based name of the extension marker type is based on the following:
@@ -514,10 +517,13 @@ The purpose of the marker method is to encode the extension parameter of the ext
 Because it is a member of the extension marker type, it can refer to the re-declared type parameters of the extension marker type.
 
 Each extension marker type contains a single method, the extension marker method.
-- It is private, static, non-generic, void-returning, and is called `<Extension>$`.  
+- It is static, non-generic, void-returning, and is called `<Extension>$`.  
 - Its single parameter has the attributes, refness, type and name from the extension parameter.  
   If the extension parameter doesn't specify a name, then the parameter name is empty.  
-- It is marked with the `specialname` flag.  
+- It is marked with the `specialname` flag.
+
+Accessibility of the marker method will be the least restrictive accessibility among corresponding declared
+extension members, `private` is used if none are declared.
 
 #### Extension members
 
@@ -594,17 +600,17 @@ class E
     public sealed class <>E__ContentName_For_IEnumerable_T<T0>
     {
         [SpecialName]
-        private static class <>E__ContentName1 // note: re-declares type parameter T0 as T
+        public static class <>E__ContentName1 // note: re-declares type parameter T0 as T
         {
             [SpecialName]
-            private static void <Extension>$(IEnumerable<T> source) { }
+            public static void <Extension>$(IEnumerable<T> source) { }
         }
 
         [SpecialName]
-        private static class <>E__ContentName2 // note: re-declares type parameter T0 as U
+        public static class <>E__ContentName2 // note: re-declares type parameter T0 as U
         {
             [SpecialName]
-            private static void <Extension>$(ref IEnumerable<U?> p) { }
+            public static void <Extension>$(ref IEnumerable<U?> p) { }
         }
 
         [ExtensionMarkerName("<>E__ContentName1")]
@@ -619,10 +625,10 @@ class E
        where T0 : IEquatable<T0>
     {
         [SpecialName]
-        private static class <>E__ContentName3 // note: re-declares type parameter T0 as U
+        public static class <>E__ContentName3 // note: re-declares type parameter T0 as U
         {
             [SpecialName]
-            private static void <Extension>$(IEnumerable<U> source) { }
+            public static void <Extension>$(IEnumerable<U> source) { }
         }
 
         [ExtensionMarkerName("ContentName3")]
@@ -666,10 +672,10 @@ static class IEnumerableExtensions
         // .typeparam T
         //     .custom instance void NullableAttribute::.ctor(uint8) = (...)
         [SpecialName]
-        private static class <>E__ContentName_For_IEnumerable_T_Source
+        public static class <>E__ContentName_For_IEnumerable_T_Source
         {
             [SpecialName]
-            private static <Extension>$(IEnumerable<T> source) => throw null;
+            public static <Extension>$(IEnumerable<T> source) => throw null;
         }
 
         [ExtensionMarkerName("<>E__ContentName_For_IEnumerable_T_Source")]
@@ -698,10 +704,10 @@ static class IEnumerableExtensions
     public sealed class <>E__ContentName_For_IAsyncEnumerable_Int
     {
         [SpecialName]
-        private static class <>E__ContentName_For_IAsyncEnumerable_Int_Values
+        public static class <>E__ContentName_For_IAsyncEnumerable_Int_Values
         {
             [SpecialName]
-            private static <Extension>$(IAsyncEnumerable<int> values) => throw null;
+            public static <Extension>$(IAsyncEnumerable<int> values) => throw null;
         }
 
         [ExtensionMarkerName("<>E__ContentName_For_IAsyncEnumerable_Int_Values")]
@@ -734,9 +740,11 @@ to `IEnumerableExtensions.Method<int>(enumerableOfInt)`.
 
 ## XML docs
 
-The doc comments on the extension block are emitted for the unspeakable named type (the DocID for the extension block is `<>E__0'1` in the example below).  
+The doc comments on the extension block are emitted for the marker type (the DocID for the extension block is `E.<>E__MarkerContentName_For_ExtensionOfT'1` in the example below).  
 They are allowed to reference the extension parameter and type parameters using `<paramref>` and `<typeparamref>` respectively).  
 Note: you may not document the extension parameter or type parameters (with `<param>` and `<typeparam>`) on an extension member.  
+
+If two extension blocks are emitted as one marker type, their doc comments are merged as well.
 
 Tools consuming the xml docs are responsible for copying the `<param>` and `<typeparam>` from the extension block onto the extension members as appropriate (ie. the parameter information should only be copied for instance members).  
 
@@ -779,24 +787,24 @@ yield the following xml:
         <member name="T:E">
             <summary>Summary for E</summary>
         </member>
-        <member name="T:E.&lt;&gt;E__0`1">
+        <member name="T:E.&lt;&gt;E__MarkerContentName_For_ExtensionOfT`1">
             <summary>Summary for extension block</summary>
             <typeparam name="T">Description for T</typeparam>
             <param name="t">Description for t</param>
         </member>
-        <member name="M:E.&lt;&gt;E__0`1.M``1(``0)">
+        <member name="M:E.&lt;&gt;E__MarkerContentName_For_ExtensionOfT`1.M``1(``0)">
             <summary>Summary for M, which may refer to <paramref name="t"/> and <typeparamref name="T"/></summary>
             <typeparam name="U">Description for U</typeparam>
             <param name="u">Description for u</param>
         </member>
-        <member name="P:E.&lt;&gt;E__0`1.P">
+        <member name="P:E.&lt;&gt;E__MarkerContentName_For_ExtensionOfT`1.P">
             <summary>Summary for P</summary>
         </member>
         <member name="M:E.M``2(``0,``1)">
-            <inheritdoc cref="M:E.&lt;&gt;E__0`1.M``1(``0)"/>
+            <inheritdoc cref="M:E.&lt;&gt;E__MarkerContentName_For_ExtensionOfT`1.M``1(``0)"/>
         </member>
         <member name="M:E.get_P``1(``0)">
-            <inheritdoc cref="P:E.&lt;&gt;E__0`1.P"/>
+            <inheritdoc cref="P:E.&lt;&gt;E__MarkerContentName_For_ExtensionOfT`1.P"/>
         </member>
     </members>
 </doc>
@@ -856,13 +864,19 @@ Note: this does not allow cref to the extension block, as `E.extension(int)` ref
 
 Types and aliases may not be named "extension".
 
+
 ## Open issues
+
+<details>
+<summary>Temporary section of the document related to open issues, including discussion of unfinalized syntax and alternative designs</summary>
 
 - ~~Confirm `extension` vs. `extensions` as the keyword~~ (answer: `extension`, LDM 2025-03-24)
 - ~~Confirm that we want to disallow `[ModuleInitializer]`~~ (answer: yes, disallow, LDM 2025-06-11)
 - ~~Confirm that we're okay to discard extension blocks as entry point candidates~~ (answer: yes, discard, LDM 2025-06-11)
 - ~~Confirm LangVer logic (skip new extensions, vs. consider and report them when picked)~~ (answert: bind unconditionally and report LangVer error except for instance extension methods, LDM 2025-06-11)
 - Should we adjust receiver requirements when accessing an extension member? ([comment](https://github.com/dotnet/roslyn/pull/78685#discussion_r2126534632))
+- Should `partial` be required for extension blocks that merge and have their doc comments merged?
+- Confirm that members should not be named after the containing or the extended types.
 
 ### Revisit grouping/conflict rules in light of portability issue: https://github.com/dotnet/roslyn/issues/79043
 
@@ -985,7 +999,7 @@ We'd exclude:
 
 ##### Revisit where `Count`/`Length` extension properties come into play  
 
-#### [Collection expressions](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-12.0/collection-expressions.md)
+#### [Collection expressions](../csharp-12.0/collection-expressions.md)
 
 - Extension `Add` works
 - Extension `GetEnumerator` works for spread
@@ -993,7 +1007,7 @@ We'd exclude:
 - Static `Create` extension methods should not count as a blessed **create** method
 - Should extension countable properties affect collection expressions?
 
-#### [`params` collections](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-13.0/params-collections.md)
+#### [`params` collections](../csharp-13.0/params-collections.md)
 
 - Extensions `Add` does not affect what types are allowed with `params`
 
@@ -1339,4 +1353,6 @@ public static class Enumerable
 ```
 
 This ends up looking more like what we've been calling a "member-based" approach, where each extension member contains its own receiver specification. 
+
+</details>
 

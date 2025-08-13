@@ -1,6 +1,6 @@
 # Ignored directives
 
-[!INCLUDE[Specletdisclaimer](./speclet-disclaimer.md)]
+[!INCLUDE[Specletdisclaimer](../speclet-disclaimer.md)]
 
 Champion issue: <https://github.com/dotnet/csharplang/issues/8617>
 
@@ -11,9 +11,9 @@ Add `#:` directive prefix to be used by tooling, but ignored by the language.
 ```cs
 #!/usr/bin/dotnet run
 #:sdk      Microsoft.NET.Sdk.Web
-#:property TargetFramework net11.0
-#:property LangVersion preview
-#:package  System.CommandLine 2.0.0-*
+#:property TargetFramework=net11.0
+#:property LangVersion=preview
+#:package  System.CommandLine@2.0.0-*
 
 Console.WriteLine("Hello, World!");
 ```
@@ -50,6 +50,8 @@ PP_IgnoredToken
     ;
 ```
 
+These are parsed regardless of language version.
+
 ### Restrictions
 
 Ignored directives must occur before the first token ([§6.4][tokens]) in the compilation unit, just like `#define`/`#undef` directives.
@@ -84,9 +86,9 @@ We could add each ignored directive to the language instead of introducing one i
 ```cs
 #!/usr/bin/dotnet run
 #sdk      Microsoft.NET.Sdk.Web
-#property TargetFramework net11.0
-#property LangVersion preview
-#package  System.CommandLine 2.0.0-*
+#property TargetFramework=net11.0
+#property LangVersion=preview
+#package  System.CommandLine@2.0.0-*
 #something // unrecognized directives would still be required by the language spec to be an error
 
 Console.WriteLine("Hello, World!");

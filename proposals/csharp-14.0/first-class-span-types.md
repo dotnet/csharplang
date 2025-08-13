@@ -1,6 +1,6 @@
 # First-class Span Types
 
-[!INCLUDE[Specletdisclaimer](./speclet-disclaimer.md)]
+[!INCLUDE[Specletdisclaimer](../speclet-disclaimer.md)]
 
 Champion issue: <https://github.com/dotnet/csharplang/issues/8714>
 
@@ -124,7 +124,7 @@ and instead implement changes so the scenario like the one above would end up su
 #### Variance
 
 The goal of the variance section in _implicit span conversion_ is to replicate some amount of covariance for `System.ReadOnlySpan<T>`. Runtime changes would be required to fully
-implement variance through generics here (see https://github.com/dotnet/csharplang/blob/main/proposals/csharp-13.0/ref-struct-interfaces.md for using `ref struct` types in generics), but we can
+implement variance through generics here (see ../csharp-13.0/ref-struct-interfaces.md for using `ref struct` types in generics), but we can
 allow a limited amount of covariance through use of a proposed .NET 9 API: https://github.com/dotnet/runtime/issues/96952. This will allow the language to treat `System.ReadOnlySpan<T>`
 as if the `T` was declared as `out T` in some scenarios. We do not, however, plumb this variant conversion through _all_ variance scenarios, and do not add it to the definition of
 variance-convertible in [§18.2.3.3](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/interfaces.md#18233-variance-conversion). If in the future, we change the runtime
@@ -598,6 +598,6 @@ Keep things as they are.
 [better-conversion-target]: https://github.com/dotnet/csharpstandard/blob/8c5e008e2fd6057e1bbe802a99f6ce93e5c29f64/standard/expressions.md#12647-better-conversion-target
 [is-type-operator]: https://github.com/dotnet/csharpstandard/blob/8c5e008e2fd6057e1bbe802a99f6ce93e5c29f64/standard/expressions.md#1212121-the-is-type-operator
 
-[ce-or]: https://github.com/dotnet/csharplang/blob/566a4812682ccece4ae4483d640a489287fa9c76/proposals/csharp-12.0/collection-expressions.md#overload-resolution
-[overload-resolution-priority]: https://github.com/dotnet/csharplang/blob/566a4812682ccece4ae4483d640a489287fa9c76/proposals/overload-resolution-priority.md
-[better-collection-conversion-from-expression]: https://github.com/dotnet/csharplang/blob/main/proposals/csharp-13.0/collection-expressions-better-conversion.md#detailed-design
+[ce-or]: ../csharp-12.0/collection-expressions.md#overload-resolution
+[overload-resolution-priority]: ../csharp-13.0/overload-resolution-priority.md
+[better-collection-conversion-from-expression]: ../csharp-13.0/collection-expressions-better-conversion.md#detailed-design

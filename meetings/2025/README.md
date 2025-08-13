@@ -15,15 +15,55 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ## Schedule
 
-### Wed Jul 30, 2025
+### Wed Oct 1, 2025
 
-### Mon Jul 28, 2025
+### Mon Sep 29, 2025
 
-### Wed Jul 23, 2025
+### Wed Sep 24, 2025
 
-### Mon Jul 14, 2025
+### Mon Sep 22, 2025
+
+### Wed Sep 17, 2025
+
+### Wed Sep 10, 2025
+
+### Mon Sep 8, 2025
+
+*One hour only*
+
+### Wed Sep 3, 2025
+
+### Wed Aug 27, 2025
+
+### Mon Aug 25, 2025
+
+### Wed Aug 20, 2025
+
+### Mon Aug 18, 2025
+
+- Triage (Mads)
+
+### Wed Aug 13, 2025
+
+- Unions (Matt and Mads): 
+    - [To nest or not to nest?](https://github.com/dotnet/csharplang/blob/main/meetings/working-groups/discriminated-unions/to-nest-or-not-to-nest.md)
+    - [Target-typed generic type inference](https://github.com/dotnet/csharplang/blob/main/proposals/target-typed-generic-type-inference)
+    - [Inference for constructor calls](https://github.com/dotnet/csharplang/blob/main/proposals/inference-for-constructor-calls)
+    - [Inference for type patterns](https://github.com/dotnet/csharplang/blob/main/proposals/inference-for-type-patterns)
 
 ## C# Language Design Notes for 2025
+
+### Wed Jul 30, 2025
+
+[C# Language Design Meeting for July 30th, 2025](https://github.com/dotnet/csharplang/blob/main/meetings/2025/LDM-2025-07-30.md)
+
+- '/main' and top-level statements
+- Union proposals overview
+- Add type parameter restriction to closed hierarchies
+- Standard unions
+- Union interfaces
+- Custom unions
+- Non-boxing access pattern
 
 ### Mon Jun 30, 2025
 
