@@ -206,7 +206,7 @@ return result switch
 
 ## Target-typed generic type inference
 
-- **Proposal**: [Target-typed generic type inference](https://github.com/dotnet/csharplang/blob/main/proposals/target-typed-generic-type-inference)
+- **Proposal**: [Target-typed generic type inference](https://github.com/dotnet/csharplang/blob/main/proposals/target-typed-generic-type-inference.md)
 - **LDM**: Not approved. 
 - **Dependencies**: None. Informed by union scenarios.
 
@@ -218,7 +218,7 @@ MyCollection<string> c = MyCollection.Create(); // 'T' = 'string' inferred from 
 
 ## Inference for constructor calls
 
-- **Proposal**: [Inference for constructor calls](https://github.com/dotnet/csharplang/blob/main/proposals/inference-for-constructor-calls)
+- **Proposal**: [Inference for constructor calls](https://github.com/dotnet/csharplang/blob/main/proposals/inference-for-constructor-calls.md)
 - **LDM**: Not approved. 
 - **Dependencies**: [Target-typed generic type inference](#target-typed-generic-type-inference)
 
@@ -230,7 +230,7 @@ Option<int> option = new Some(5); // Infer 'int' from argument and target type
 
 ## Inference for type patterns
 
-- **Proposal**: [Inference for type patterns](https://github.com/dotnet/csharplang/blob/main/proposals/inference-for-type-patterns)
+- **Proposal**: [Inference for type patterns](https://github.com/dotnet/csharplang/blob/main/proposals/inference-for-type-patterns.md)
 - **LDM**: Not approved. 
 - **Dependencies**: [Target-typed generic type inference](#target-typed-generic-type-inference)
 

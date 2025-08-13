@@ -175,9 +175,9 @@ if (option is .Some(var value)) ...; // 'Option<int>' inferred
 
 For the non-nested case, there are now proposals to:
 
-- Allow target types to be taken into account in generic type inference: [Target-typed generic type inference](https://github.com/dotnet/csharplang/blob/main/proposals/target-typed-generic-type-inference).
-- Allow generic type inference in `new` expressions: [Inference for constructor calls](https://github.com/dotnet/csharplang/blob/main/proposals/inference-for-constructor-calls).
-- Allow generic type inference in type patterns, treating the incoming type (`Option<int>` in this case) as the "target type": [Inference for type patterns](https://github.com/dotnet/csharplang/blob/main/proposals/inference-for-type-patterns).
+- Allow target types to be taken into account in generic type inference: [Target-typed generic type inference](https://github.com/dotnet/csharplang/blob/main/proposals/target-typed-generic-type-inference.md).
+- Allow generic type inference in `new` expressions: [Inference for constructor calls](https://github.com/dotnet/csharplang/blob/main/proposals/inference-for-constructor-calls.md).
+- Allow generic type inference in type patterns, treating the incoming type (`Option<int>` in this case) as the "target type": [Inference for type patterns](https://github.com/dotnet/csharplang/blob/main/proposals/inference-for-type-patterns.md).
 
 Between them, they would enable:
 
