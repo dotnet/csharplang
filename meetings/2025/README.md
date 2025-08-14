@@ -39,6 +39,8 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ### Wed Aug 20, 2025
 
+- Unions (Matt and Mads)
+  
 ### Mon Aug 18, 2025
 
 - Triage (Mads)
