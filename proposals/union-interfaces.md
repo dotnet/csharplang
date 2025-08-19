@@ -139,3 +139,161 @@ if (MyUnion.TryCreate(value, out MyUnion union))
     ...
 }
 ```
+
+## Additional Interfaces (Not Approved)
+
+### Summary
+
+Additional interfaces expose the remaining methods and properties that the compiler is designed to look for without requiring the union to adopt these specific signatures as its public API.
+
+For example, the following union-like type is not compatible as is. It uses the term `Value` to refer to a case and it does not expose public constructors.
+
+```csharp
+public record Error(int code);
+
+public struct Result<T>
+{
+    public bool IsValue => ...;
+    public bool IsError => ...;
+    public T Value => ...;
+    public Error Error => ...;
+    public static Result<T> FromValue(T value) {...}
+    public static Result<T> FromError(Error error) {...}
+}
+
+...
+Result<int> result = ...;
+if (result is Value(var v)) {...}  // error: not a union
+
+```
+
+Without completely redesigning the type and impacting all the current users, the type can be brought forward by implementing union interfaces explicitly.
+
+```csharp
+public record Error(int code);
+
+public struct Result<T> 
+    : IUnion,
+      IUnionCreate<Result<T>, T>,
+      IUnionCreate<Result<T>, Error>,
+      IUnionGetValue<T>,
+      IUnionGetValue<Error>
+{
+    public bool IsValue => ...;
+    public bool IsError => ...;
+    public T Value => ...;
+    public Error Error => ...;
+    public static Result<T> FromValue(T value) {...}
+    public static Result<T> FromError(Error error) {...}
+
+    // incompatible with existing API
+    object? IUnion.Value => 
+        IsValue ? this.Value 
+        : IsError ? this.Error
+        : null;
+
+    // custom union pattern to avoid boxing 
+    // would be confusing terminology given existing API
+    bool IUnionCreate<Result<T>, Value<T>>.Create(T value) => FromValue(value);
+    bool IUnionCreate<Result<T>, Error>.Create(Error value) => FromError(value);
+    bool IUnionHasValue.HasValue => IsValue || IsError;
+    bool IUnionTryGetValue<Value<T>>.TryGetValue([NotNullWhen(true)] out T value) => ...;
+    bool IUnionTryGetValue<Error>.TryGetValue([NotNullWhen(true)] out Error error) => ...;
+}
+
+...
+Result<int> result = ...;
+if (result is Value(var v)) {...}  // works!
+
+```
+
+### Motivation
+
+Many existing first and third party types already exist that are unions, but do not today conform to the patterns the compiler is looking for to identify and interact with them correctly.  It is already possible to create custom union types that implement the `IUnion` and `IUnion<T>` interfaces without exposing the interface methods on the union itself. The compiler can easily identify these types as union and call through to the interface methods directly (using constrained calls) to guarantee 
+
+### Detailed Design
+
+```csharp
+public interface IUnionCreate<TUnion, TCase> 
+    where TUnion : IUnionCreate<TUnion, TCase>
+{
+    static abstract TUnion Create(TCase value);
+}
+
+public interface IUnionHasValue
+{
+    bool HasValue { get; }
+}
+
+public interface IUnionTryGetValue<TCase> : IUnionHasValue
+{
+    bool TryGetValue([NotNullWhen(true)] out TCase value);
+}
+```
+
+* The compiler will target the IUnionCreate's Create methods if available, when an appropriate accessible constructor is not. The compiler will also use the IUnionCreate implementations to identify the set of case types.
+* The compiler will translate null pattern tests to the IUnionHasValue.HasValue property.
+* The compiler will translate type pattern matches to the IUnionTryGetValue.TryGetValue method if available and applicable, instead of accessing via IUnion.Value property.
+* Note: it is not required to implement these interfaces if the union type's public API contains the equivalent signatures.
+
+
+### Known Issues
+
+* Multiple implementations of generic interfaces with type parameter arguments produce an error today. However, this kind of usage will not become more ambiguous than the type would already be if instantiated with multiple uses of the same type argument.
+
+    ```csharp
+    public struct FatUnion<T1, T2>
+    : IUnion,
+      IUnionTryGetValue<T1>,  // error, may become ambiguous at runtime
+      IUnionTryGetValue<T2>
+    {
+        private readonly int _kind;
+        private readonly T1 _value1;
+        private readonly T2 _value2;
+
+        public FatUnion(T1 value) { _kind = 1; _value1 = value; }
+        public FatUnion(T1 value) { _kind = 2; _value2 = value; }
+
+        bool IUnionHasValue.HasValue => _kind != 0;
+        bool IUnionTryGetValue<T1>.TryGetValue(out T1 value) {...}
+        bool IUnionTryGetValue<T2>.TryGetValue(out T2 value) {...}
+    }
+    ```
+### Alternatives
+
+Instead of requiring union types to implement multiple variations of the same generic interface,
+a family of similar interfaces could exist for each arity of cases.
+
+```csharp
+public interface IUnionCreate<TUnion, T1, T2>
+    where TUnion : IUnionCreate<TUnion, T1, T2>
+{
+    static abstract TUnion Create(T1 value);
+    static abstract TUnion Create(T2 value);
+}
+
+public interface IUnionCreate<TUnion, T1, T2, T3>
+    where TUnion : IUnionCreate<TUnion, T1, T2, T3>
+{
+    static abstract TUnion Create(T1 value);
+    static abstract TUnion Create(T2 value);
+    static abstract TUnion Create(T3 value);
+}
+
+public interface IUnionTryGetValue<T1, T2> : IUnionHasValue
+{
+    bool TryGetValue([NotNullWhen(true)] out T1 value);
+    bool TryGetValue([NotNullWhen(true)] out T2 value);
+}
+
+public interface IUnionTryGetValue<T1, T2, T3> : IUnionHasValue
+{
+    bool TryGetValue([NotNullWhen(true)] out T1 value);
+    bool TryGetValue([NotNullWhen(true)] out T2 value);
+    bool TryGetValue([NotNullWhen(true)] out T3 value);
+}
+```
+
+* How many of these would be defined? What happens to custom unions that have a large number of cases?
+
+
