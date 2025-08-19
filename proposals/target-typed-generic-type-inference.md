@@ -26,7 +26,7 @@ This would also make generic type inference a more helpful addition in non-metho
 
 ## Detailed design
 
-Generic type inference currently has a [first phase](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/expressions.md#12637-input-type-inferences) that consists of collecting "bounds" on type parameters based on comparing each parameter type with its corresponding incoming argument. A second phase then uses the collected bounds for each type parameter to infer the corresponding type argument, if possible.
+Generic type inference currently has a [first phase](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/expressions.md#12632-the-first-phase) that consists of collecting "bounds" on type parameters based on comparing each parameter type with its corresponding incoming argument. A second phase then uses the collected bounds for each type parameter to infer the corresponding type argument, if possible.
 
 This proposal adds to the first phase a facility for also collecting bounds by comparing the generic method's *return type* with the *target type* for the invocation, if one exists (new text in **bold**):
 
