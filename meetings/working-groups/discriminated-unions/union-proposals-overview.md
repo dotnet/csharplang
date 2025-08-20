@@ -27,8 +27,8 @@ Enums[Closed enums]:::approved
 Hierarchies[Closed hierarchies]:::approved
 Cases[Case declarations]:::approved
 TargetAccess[Target-typed access]:::approved
-TargetInfer[Target-typed inference]:::unapproved
-InferNew[Inference for constructors]:::unapproved
+TargetInfer[Target-typed inference]:::approved
+InferNew[Inference for constructors]:::approved
 InferPattern[Inference for type patterns]:::unapproved
 
 %% Dependencies
