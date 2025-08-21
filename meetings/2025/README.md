@@ -35,8 +35,10 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ### Wed Aug 27, 2025
 
-### Mon Aug 25, 2025
-
+- Unions (Matt and Mads)
+    - https://github.com/dotnet/csharplang/blob/main/proposals/inference-for-type-patterns.md
+    - Singleton case types
+ 
 ### Wed Aug 20, 2025
 
 - Unions (Matt and Mads)
