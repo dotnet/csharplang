@@ -42,12 +42,23 @@ All schedule items must have a public issue or checked-in proposal that can be l
 ### Wed Aug 20, 2025
 
 - Unions (Matt and Mads)
-  
-### Mon Aug 18, 2025
-
-- Triage (Mads)
 
 ## C# Language Design Notes for 2025
+
+### Mon Aug 18, 2025
+
+[C# Language Design Meeting for August 18th, 2025](https://github.com/dotnet/csharplang/blob/main/meetings/2025/LDM-2025-08-18.md)
+
+- C# 15 Kickoff and Themes
+    - Unions
+    - Extensions
+    - Dictionary expressions
+    - Type inference
+    - Continuing the null monad
+    - Object initialization
+    - Top-level methods
+    - Caller type name
+    - Switch statement/expression improvements
 
 ### Wed Aug 13, 2025
 
