@@ -1,5 +1,7 @@
 # Unbound generic types in `nameof`
 
+[!INCLUDE[Specletdisclaimer](../speclet-disclaimer.md)]
+
 Champion issue: <https://github.com/dotnet/csharplang/issues/8662>
 
 ## Summary

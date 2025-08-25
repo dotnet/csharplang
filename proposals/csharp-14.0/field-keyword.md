@@ -1,5 +1,7 @@
 # `field` keyword in properties
 
+[!INCLUDE[Specletdisclaimer](../speclet-disclaimer.md)]
+
 Champion issue: <https://github.com/dotnet/csharplang/issues/8635>
 
 ## Summary
@@ -145,7 +147,7 @@ class SomeViewModel
 
     private bool Set<T>(ref T location, T value)
     {
-        if (RuntimeHelpers.Equals(location, value))
+        if (EqualityComparer<T>.Default.Equals(location, value))
             return false;
 
         location = value;
@@ -292,9 +294,9 @@ The nullable annotation of the backing field is determined as follows:
 
 #### Constructor analysis
 
-Currently, an auto property is treated very similarly to an ordinary field in [nullable constructor analysis](nullable-constructor-analysis.md). We extend this treatment to *field-backed properties*, by treating every *field-backed property* as a proxy to its backing field.
+Currently, an auto property is treated very similarly to an ordinary field in [nullable constructor analysis](../csharp-9.0/nullable-constructor-analysis.md). We extend this treatment to *field-backed properties*, by treating every *field-backed property* as a proxy to its backing field.
 
-We update the following spec language from the previous [proposed approach](csharp-9.0/nullable-constructor-analysis.md#proposed-approach) to accomplish this (new language in **bold**):
+We update the following spec language from the previous [proposed approach](../csharp-9.0/nullable-constructor-analysis.md#proposed-approach) to accomplish this (new language in **bold**):
 
 > At each explicit or implicit 'return' in a constructor, we give a warning for each member whose flow state is incompatible with its annotations and nullability attributes. **If the member is a field-backed property, the nullable annotation of the backing field is used for this check. Otherwise, the nullable annotation of the member itself is used.** A reasonable proxy for this is: if assigning the member to itself at the return point would produce a nullability warning, then a nullability warning will be produced at the return point.
 

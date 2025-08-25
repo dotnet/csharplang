@@ -190,7 +190,7 @@ times this cannot happen for whatever reason. But the following rules _must_ be 
 Once a feature has been implemented and has or soon will be shipped, take the following steps (these are usually done in bulk when a release nears):
 
 1. If a folder for the C# release does not exist yet, create it.
-2. Move the specification for the feature into that folder.
+2. Move the specification for the feature into that folder and review relative links it contains.
 3. Update the champion issue as follows:
    1. Update the specification link to point at the new location.
    2. Update the milestone of the issue to be the C# release it has shipped/will ship in, creating it if it doesn't exist.
@@ -199,18 +199,22 @@ Once a feature has been implemented and has or soon will be shipped, take the fo
    4. Add the `Implemented Needs ECMA Spec` label to the issue.
 4. Add the feature to the [language version history](Language-Version-History.md) document.
 
-### Publishing notes
+### Publishing notes (for the LDM notetaker)
 
 When publishing a set of notes, take the following steps:
 
 1. Put the notes in the appropriate `meetings/<year>` folder. Notes should follow the `LDM-<year>-<month>-<date>.md` format.
    1. Any supplemental documents for the meeting are also included here with the same prefix to ensure good sorting.
-   2. Include an agenda at the top with document-relative links to each topic discussed during LDM.
+   2. Include an agenda at the top with document-relative links to each section corresponding to the topics discussed during LDM.
+   3. Include both the champion issue and the reviewed specification for a given topic.
+   4. Ensure there are two spaces at the end of lines that do not have an extra line break (such as between entries for the champion issue and specification).
+   5. All links should be permalinks (rather than branch links). If you press "y" on the page, the URL in the browser will update to the permalink.
 2. Update the `meetings/<year>/README.md` to:
    1. Move the date into the `C# Language Design Notes for <year>` section
-   2. Update the agenda to be the final agenda from the meeting notes. Remove document-relative links.
-   3. Include a link to the notes. This format is usually `[C# Language Design Meeting for <month> <day>, <year>](absolute-note-link)`.
-   4. If a topic was not discussed during LDM, or not fully finished, move the topic line back to `Schedule ASAP`.
+   2. Update the agenda to match what is in the meeting notes, with the document-relative links removed.
+   3. Include a link to the notes. This format is usually `[C# Language Design Meeting for <month> <day>, <year>](absolute-note-link)` (use the branch link here).
+   4. When entering the questions discussed, use the question rather than the outcome.
+   5. If a topic was not discussed during LDM, or not fully finished, move the topic line back to `Schedule ASAP`.
 3. Commit the updates. Prefer using spelled out dates (ie, January 1st, 1970), rather than abbreviations, to avoid confusion.
 4. Update the champion issues of discussed topics with a link to the notes. Prefer using an exact link to the heading for that set of notes.
 5. Create a discussion for the new notes. The title format is `LDM Notes for <month> <day>, <year>`. Set the category to `LDM Notes`.

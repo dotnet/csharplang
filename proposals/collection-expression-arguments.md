@@ -29,30 +29,23 @@ used to determine the appropriate `Create` overload, and are passed along accord
 This syntax was chosen as it:
 
 1. Keeps all information within the `[...]` syntax.  Ensuring that the code still clearly indicates a collection being created.
-2. Does not imply calling a `new` constructor (when that isn't how all collections are created).
-3. Does not imply creating/copying the values of the collection multiple times (like a postfix `with { ... }` might.
-4. Is both not subtle, while also not being excessively verbose.  For example, using `;` instead of `,` to indicate
+1. Does not imply calling a `new` constructor (when that isn't how all collections are created).
+1. Does not imply creating/copying the values of the collection multiple times (like a postfix `with { ... }` might.
+1. Does not contort order of operations, especially with C#'s consistent left-to-right expression evaluation ordering semantics.
+   For example, it does not evaluate the arguments used to construct a collection *after* evaluating the expressions used to
+   populate the collection.
+1. Does not force a user to read to the end of a (potentially large) collection expression to determine core behavioral semantics.
+   For example, having to see to the end of a hundred-line dictionary, only to find that, yes, it was using the right key comparer.
+1. Is both not subtle, while also not being excessively verbose.  For example, using `;` instead of `,` to indicate
    arguments is a very easy piece of syntax to miss.  `with()` only adds 6 characters, and will easily stand out,
    especially with syntax coloring of the `with` keyword.
-6. Reads nicely.  "This is a collection expression 'with' these arguments, consisting of these elements."
-7. Solves the need for comparers for both dictionaries and sets.
-8. Ensures any user need for passing arguments, or any needs we ourselves have beyond comparers in the future are already handled.
-9. Does not conflict with any existing code (using https://grep.app/ to search).
+1. Reads nicely.  "This is a collection expression 'with' these arguments, consisting of these elements."
+1. Solves the need for comparers for both dictionaries and sets.
+1. Ensures any user need for passing arguments, or any needs we ourselves have beyond comparers in the future are already handled.
+1. Does not conflict with any existing code (using https://grep.app/ to search).
 
 A minor question exists if the preferred form would be `args(...)` or `init(...)` instead of `with(...)`.  But the forms are
 otherwise identical.
-
-Open question: Should any support for passing a comparer be provided at all?  Yes/No.
-
-Working group recommendation: Yes.  Comparers are critical for proper behaving of collections, and examination of many packages
-indicates usage of them to customize collection behavior.
-
-Open question: If support for comparers is desired, should it be through a feature specific to *only* comparers?  Or should it
-handle arbitrary arguments?
-
-Working group recommendation: Support arbitrary arguments.  This solves both the 'comparer' issue, while nipping all present and
-future argument concerns in the bud.  For example, users who need to customize performance-oriented arguments (like 'capacity')
-now have a solution beyond waiting for the compiler to support the patterns they are using with the codegen they desire.
 
 ## Design Philosophy
 
@@ -153,7 +146,7 @@ Dictionary<string, int> nameToAge4 = [with(comparer), .. d1, .. d2, .. d3];
 Dictionary<string, int> nameToAge = [with(comparer), kvp1, k1: v2, .. d1];
 ```
 
-These forms seem to "read" reasonable well.  In all those cases, the code is "creating a collection expression,
+These forms seem to "read" reasonably well.  In all those cases, the code is "creating a collection expression,
 'with' the following arguments to pass along to control the final instance, and then the subsequent elements
 used to populate it.  For example, the first line "creates a list of strings 'with' a capacity of two times the
 count of the values about to be spread into it"
@@ -229,7 +222,7 @@ Dictionary<string, int> nameToAge4 = [args(comparer), .. d1, .. d2, .. d3];
 Dictionary<string, int> nameToAge = [args(comparer), kvp1, k1: v2, .. d1];
 ```
 
-These forms seem to "read" reasonable well.  In all those cases, the code is "creating a collection expression,
+These forms seem to "read" reasonably well.  In all those cases, the code is "creating a collection expression,
 with the following 'args' to pass along to control the final instance, and then the subsequent elements used to
 populate it.  For example, the first line "creates a list of strings with a capacity 'arg' of two times the count
 of the values about to be spread into it"
@@ -285,8 +278,11 @@ If *collection_arguments* is included and is not the first element in the collec
 
 If the *argument list* contains any values with *dynamic* type, a compile-time error is reported ([LDM-2025-01-22](https://github.com/dotnet/csharplang/blob/main/meetings/2025/LDM-2025-01-22.md#conclusion-1)).
 
+#### Constructors
+
 If the target type is a *struct* or *class type* that implements `System.Collections.IEnumerable`, and the target type does not have a *create method*, and the target type is not a *generic parameter type* then:
-* [*Overload resolution*](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/expressions.md#1264-overload-resolution) is used to determine the best instance constructor from the *argument list*.
+* [*Overload resolution*](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/expressions.md#1264-overload-resolution) is used to determine the best instance constructor from the candidates.
+* The set of candidate constructors is all accessible instance constructors declared on the target type that are applicable with respect to the *argument list* as defined in [*applicable function member*](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/expressions.md#12642-applicable-function-member).
 * If a best instance constructor is found, the constructor is invoked with the *argument list*.
   * If the constructor has a `params` parameter, the invocation may be in expanded form.
 * Otherwise, a binding error is reported.
@@ -302,18 +298,20 @@ l = [with([1, 2]), 3];         // new List<int>(IEnumerable<int> collection)
 l = [with(default)];           // error: ambiguous constructor
 ```
 
+#### CollectionBuilderAttribute methods
+
 If the target type is a type with a *create method*, then:
-* The *argument list* is the *collection expression* containing the elements only (no arguments), followed by the *argument list*.
-* [*Overload resolution*](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/expressions.md#1264-overload-resolution) is used to determine the best factory method from the *argument list* from the [*create method candidates*](#create-method-candidates):
-* If a best factory method is found, the method is invoked with the *argument list*.
-  * If the factory method has a `params` parameter, the invocation may be in expanded form.
+* [*Overload resolution*](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/expressions.md#1264-overload-resolution) is used to determine the best create method from the candidates.
+* For each [*create method*](#create-methods) for the target type, we define a *projection method* with an identical signature to the create method but *without the last parameter*.
+* The set of *candidate projection methods* is the projection methods that are applicable with respect to the *argument list* as defined in [*applicable function member*](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/expressions.md#12642-applicable-function-member).
+* If a best projection method is found, the corresponding create method is invoked with the *argument list* appended with a `ReadOnlySpan<T>` containing the elements.
 * Otherwise, a binding error is reported.
 
 ```csharp
 MyCollection<string> c = [with(GetComparer()), "1", "2"];
 // IEqualityComparer<string> _tmp1 = GetComparer();
 // ReadOnlySpan<string> _tmp2 = ["1", "2"];
-// c = MyBuilder.Create<string>(_tmp2, _tmp1);
+// c = MyBuilder.Create<string>(_tmp1, _tmp2);
 
 [CollectionBuilder(typeof(MyBuilder), "Create")]
 class MyCollection<T> { ... }
@@ -321,26 +319,24 @@ class MyCollection<T> { ... }
 class MyBuilder
 {
     public static MyCollection<T> Create<T>(ReadOnlySpan<T> elements);
-    public static MyCollection<T> Create<T>(ReadOnlySpan<T> elements, IEqualityComparer<T> comparer);
+    public static MyCollection<T> Create<T>(IEqualityComparer<T> comparer, ReadOnlySpan<T> elements);
 }
 ```
 
+#### Interface target type
+
 If the target type is an *interface type*, then:
-* [*Overload resolution*](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/expressions.md#1264-overload-resolution) is used to determine the best instance constructor from the *argument list* from the following candidate signatures:
-  * If the target type is `IEnumerable<E>`, `IReadOnlyCollection<E>`, or `IReadOnlyList<E>`, the candidates are:
-    * `new()`
-  * If the target type is `ICollection<E>`, or `IList<E>`, the candidates are:
-    * `new()`
-    * `new(int capacity)`
-  * If the target type is `IReadOnlyDictionary<K, V>`, the candidates are:
-    * `new()`
-    * `new(IEqualityComparer<K> comparer)`
-  * If the target type is `IDictionary<K, V>`, the candidates are:
-    * `new()`
-    * `new(int capacity)`
-    * `new(IEqualityComparer<K> comparer)`
-    * `new(int capacity, IEqualityComparer<K> comparer)`
-* If a best factory method is found, the method is invoked with the *argument list*.
+* [*Overload resolution*](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/expressions.md#1264-overload-resolution) is used to determine the best candidate method signature.
+* The set of candidate signatures is the signatures below for the target interface that are applicable with respect to the *argument list* as defined in [*applicable function member*](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/expressions.md#12642-applicable-function-member).
+
+  |Interfaces|Candidate signatures|
+  |:---:|:---:|
+  |`IEnumerable<E>`<br>`IReadOnlyCollection<E>`<br>`IReadOnlyList<E>`|*None*|
+  |`ICollection<E>`<br>`IList<E>`|`(int capacity)`|
+  |`IReadOnlyDictionary<K, V>`|`(IEqualityComparer<K>? comparer)`|
+  |`IDictionary<K, V>`|`(int capacity)`<br>`(IEqualityComparer<K>? comparer)`<br>`(int capacity, IEqualityComparer<K>? comparer)`|
+
+* If a best method signature is found, a method with that signature *or an equivalent initialization* is invoked with the *argument list*.
 * Otherwise, a binding error is reported.
 
 ```csharp
@@ -352,18 +348,21 @@ r = [with(StringComparer.Ordinal)]; // new $PrivateImpl<string, int>(StringCompa
 
 d = [with(capacity: 2)]; // new Dictionary<string, int>(capacity: 2)
 r = [with(capacity: 2)]; // error: 'capacity' parameter not recognized
+d = [with()];            // error: empty arguments not supported
 ```
 
-If the target type is any other type, and the *argument list* is not empty, a binding error is reported.
+#### Other target types
+
+If the target type is any other type, then a binding error is reported for the *argument list*, even if empty.
 
 ```csharp
-Span<int> a = [with(), 1, 2, 3]; // ok
+Span<int> a = [with(), 1, 2, 3]; // error: arguments not supported
 Span<int> b = [with([1, 2]), 3]; // error: arguments not supported
 ```
 
-### Create method candidates
+### Create methods
 
-For a collection expression where the target type *definition* has a `[CollectionBuilder]` attribute, the *create method candidates* for overload resolution are the following, **updated** from [*collection expressions: create methods*](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-12.0/collection-expressions.md#create-methods).
+For a collection expression where the target type *definition* has a `[CollectionBuilder]` attribute, the *create methods* are the following, **updated** from [*collection expressions: create methods*](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-12.0/collection-expressions.md#create-methods).
 
 > A `[CollectionBuilder(...)]` attribute specifies the *builder type* and *method name* of a method to be invoked to construct an instance of the collection type.
 > 
@@ -377,7 +376,7 @@ For a collection expression where the target type *definition* has a `[Collectio
 > * The method must be `static`.
 > * The method must be accessible where the collection expression is used.
 > * The *arity* of the method must match the *arity* of the collection type.
-> * The method must have a **first** parameter of type `System.ReadOnlySpan<E>`, passed by value.
+> * The method must have a **last** parameter of type `System.ReadOnlySpan<E>`, passed by value.
 > * There is an [*identity conversion*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/conversions.md#1022-identity-conversion), [*implicit reference conversion*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/conversions.md#1028-implicit-reference-conversions), or [*boxing conversion*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/conversions.md#1029-boxing-conversions) from the method return type to the *collection type*.
 > 
 > Methods declared on base types or interfaces are ignored and not part of the `CM` set.
@@ -385,8 +384,8 @@ For a collection expression where the target type *definition* has a `[Collectio
 > For a *collection expression* with a target type <code>C&lt;S<sub>0</sub>, S<sub>1</sub>, &mldr;&gt;</code> where the *type declaration* <code>C&lt;T<sub>0</sub>, T<sub>1</sub>, &mldr;&gt;</code> has an associated *builder method* <code>B.M&lt;U<sub>0</sub>, U<sub>1</sub>, &mldr;&gt;()</code>, the *generic type arguments* from the target type are applied in order &mdash; and from outermost containing type to innermost &mdash; to the *builder method*.
 
 The key differences from the earlier algorithm are:
-* Candidate methods may have additional parameters following the `ReadOnlySpan<E>` parameter.
-* Multiple candidate methods are supported.
+* Create methods may have additional parameters *before* the `ReadOnlySpan<E>` parameter.
+* Multiple create methods are supported.
 
 ## Answered questions
 
@@ -396,25 +395,85 @@ Should arguments with `dynamic` type be allowed? That might require using the ru
 
 **Resolution:** Disallowed. [LDM-2025-01-22](https://github.com/dotnet/csharplang/blob/main/meetings/2025/LDM-2025-01-22.md#conclusion-1)
 
-## Open questions
+### `with()` breaking change
+
+The proposed `with()` element is a breaking change.
+```csharp
+object x, y, z = ...;
+object[] items = [with(x, y), z]; // C#13: ok; C#14: error args not supported for object[]
+
+object with(object x, object y) { ... }
+```
+
+Confirm the breaking change is acceptable, and whether breaking change should be tied to language version.
+
+**Resolution:** Keep previous behavior (no breaking change) when compiling with earlier language version. [LDM-2025-03-17](https://github.com/dotnet/csharplang/blob/main/meetings/2025/LDM-2025-03-17.md#conclusion)
+
+### Should arguments affect collection expression conversion?
+
+Should collection arguments and the applicable methods affect convertibility of the collection expression?
+```csharp
+Print([with(comparer: null), 1, 2, 3]); // ambiguous or Print<int>(HashSet<int>)?
+
+static void Print<T>(List<T> list) { ... }
+static void Print<T>(HashSet<T> set) { ... }
+```
+
+If the arguments affect convertibility based on the applicable methods, arguments should probably affect type inference as well.
+```csharp
+Print([with(comparer: StringComparer.Ordinal)]); // Print<string>(HashSet<string>)?
+```
+
+For reference, similar cases with target-typed `new()` result in errors.
+```csharp
+Print<int>(new(comparer: null));              // error: ambiguous
+Print(new(comparer: StringComparer.Ordinal)); // error: type arguments cannot be inferred
+```
+
+**Resolution:** Collection arguments should be ignored in conversions and type inference. [LDM-2025-03-17](https://github.com/dotnet/csharplang/blob/main/meetings/2025/LDM-2025-03-17.md#conclusion-1)
+
+### Collection builder method parameter order
+
+For *collection builder* methods, should the span parameter be before or after any parameters for collection arguments?
+
+Elements first would allow the arguments to be declared as optional.
+```csharp
+class MySetBuilder
+{
+    public static MySet<T> Create<T>(ReadOnlySpan<T> items, IEqualityComparer<T> comparer = null) { ... }
+}
+```
+
+Arguments first would allow the span to be a `params` parameter, to support calling directly in expanded form.
+```csharp
+var s = MySetBuilder.Create(StringComparer.Ordinal, x, y, z);
+
+class MySetBuilder
+{
+    public static MySet<T> Create<T>(IEqualityComparer<T> comparer, params ReadOnlySpan<T> items) { ... }
+}
+```
+
+**Resolution:** The span parameter for elements should be the last parameter. [LDM-2025-03-12](https://github.com/dotnet/csharplang/blob/main/meetings/2025/LDM-2025-03-12.md#conclusion-1)
+
+### Arguments with earlier language version
+
+Is an error reported for `with()` when compiling with an earlier language version, or does `with` bind to another symbol in scope?
+
+**Resolution:** No breaking change for `with` inside a collection expression when compiling with earlier language versions. [LDM-2025-03-17](https://github.com/dotnet/csharplang/blob/main/meetings/2025/LDM-2025-03-17.md#conclusion)
 
 ### Target types where arguments are *required*
 
 Should collection expression conversions be supported to target types where arguments must be supplied because all of the constructors or factory methods require at least one argument?
+
 Such types could be used with collection expressions that include explicit `with()` arguments but the types could not be used for `params` parameters.
 
-A collection type where the constructor is called directly:
+For example, consider the following type constructed from a factory method:
 ```csharp
-class MyCollection<T> : IEnumerable<T>
-{
-    public MyCollection(int capacity) { ... }
-    public void Add(T t) { ... }
-    // ...
-}
-```
+MyCollection<object> c;
+c = [];                  // error: no arguments
+c = [with(capacity: 1)]; // ok
 
-A collection type constructed with a builder method:
-```csharp
 [CollectionBuilder(typeof(MyBuilder), "Create")]
 class MyCollection<T> : IEnumerable<T> { ... }
 
@@ -424,33 +483,23 @@ class MyBuilder
 }
 ```
 
-For either of those cases, arguments are required:
+The same question applies for when the constructor is called directly as in the example below.
+
+However, for the target types where the constructor is called directly, the collection expression *conversion* currently **requires a constructor callable with no arguments**, but the collection *arguments* are ignored when determining convertibility.
+
 ```csharp
-MyCollection<object> x;
-x = [];                  // error: no arguments
-x = [with()];            // error: no 'capacity'
-x = [with(capacity: 1)]; // ok
+c = [];                  // error: no arguments
+c = [with(capacity: 1)]; // error: no constructor callable with no arguments?
+
+class MyCollection<T> : IEnumerable<T>
+{
+    public MyCollection(int capacity) { ... }
+    public void Add(T t) { ... }
+    // ...
+}
 ```
 
-### Construction overloads for *interface types*
-
-Should the constructor candidates for `ICollection<T>` and `IList<T>` be the accessible constructors from `List<T>`, or specific signatures independent from `List<T>`, say `new()` and `new(int capacity)`?
-
-Similarly, should the constructor candidates for `IDictionary<TKey, TValue>` be the accessible constructors from `Dictionary<TKey, TValue>`, or specific signatures, say `new()`, `new(int capacity)`, `new(IEqualityComparer<K> comparer)`, and `new(int capacity, IEqualityComparer<K> comparer)`?
-
-What about `IReadOnlyDictionary<TKey, TValue>` which may be implemented by a synthesized type?
-
-### Construction overloads for *collection builder* types
-
-Should the candidate methods for collection builder types include all overloads on the builder type with the required name, or should the candidates be limited as described [above](#create-method-candidates), for instance by requiring the first parameter is `ReadOnlySpan<T>`?
-
-### Allow empty argument list for any target type
-
-For target types such as *arrays* and *span types* that do not allow arguments, should an explicit empty argument list, `with()`, be allowed?
-
-### Arguments with earlier language version
-
-Is an error reported for `with()` when compiling with an earlier language version, or does `with` bind to another symbol in scope?
+**Resolution:** Support conversions to target types where all constructors or factory methods require arguments, and require `with()` for the conversion. [LDM-2025-03-05](https://github.com/dotnet/csharplang/blob/main/meetings/2025/LDM-2025-04-14.md#conclusion-2)
 
 ### `__arglist`
 
@@ -466,4 +515,72 @@ class MyCollection : IEnumerable
 MyCollection c;
 c = [with(__arglist())];    // ok
 c = [with(__arglist(x, y)]; // ok
+```
+
+**Resolution:** No support for `__arglist` in collection arguments unless free. [LDM-2025-03-05](https://github.com/dotnet/csharplang/blob/main/meetings/2025/LDM-2025-04-14.md#conclusion-3)
+
+### Arguments for *interface types*
+
+Should arguments be supported for interface target types?
+
+```csharp
+ICollection<int> c = [with(capacity: 4)];
+IReadOnlyDictionary<string, int> d = [with(comparer: StringComparer.Ordinal), ..values];
+```
+
+<details>
+If so, which method signatures are used when binding the arguments?
+
+For **mutable** interface types, the options are:
+1. Use the accessible constructors from the well-known type required for instantation: `List<T>` or `Dictionary<K, V>`.
+1. Use signatures independent of specific type, for instance using `new()` and `new(int capacity)` for `ICollection<T>` and `IList<T>` (see [*Construction*](#construction) for potential signatures for each interface).
+
+Using the accessible constructors from a well-known type has the following implications:
+- Parameter names, optional-ness, `params`, are taken from the parameters directly.
+- All accessible constructors are included, even though that may not be useful for collection expressions, such as `List(IEnumerable<T>)` which would allow `IList<int> list = [with(1, 2, 3)];`.
+- The set of constructors may depend on the BCL version.
+
+Recomendation: Use the accessible constructors from the well-known types.  We have guaranteed we would use these types, so this just 'falls out' and is the clearest and simplest path to constructing these values.  
+
+
+For **non-mutable** interface types, the options are similar:
+1. Do nothing.  This 
+1. Use signatures independent of specific type, although the only scenario may be `new(IEqualityComparer<K> comparer)` for `IReadOnlyDictionary<K, V>` for C#14..
+
+
+Using accessible constructors from some well known type (the strategy for mutable-interface-types) is not viable as there is no relation to any particular existing type, and the final type we may use and/or synthesize.  As such, there would have to be odd new requirements that the compiler be able to map any existing constructor of said type (even as it evolves) over to the non-mutable instance it actually generates.
+
+Recomendation: Use signatures independent of a specific type.  And, for C# 14, only support `new(IEqualityComparer<K> comparer)` for `IReadOnlyDictionary<K, V>` as that is the only non-mutable interface where we feel it is critical for usability/semantics to allow users to provide this.  Future C# releases can consider expanding on this set based on solid justifications provided.
+</details>
+
+**Resolution:** https://github.com/dotnet/csharplang/blob/main/meetings/2025/LDM-2025-04-23.md
+
+Arguments are supported for interface target types.  For both mutable and non-mutable interfaces the set of arguments will be curated.  
+
+The expected list (which still needs to be LDM ratified) is [Interface target type](#Interface-target-type)
+
+
+## Open questions
+
+### Empty argument lists
+
+Should we allow empty argument lists for some or all target types?
+
+An empty `with()` would be equivalent to no `with()`. It might provide some consistency with non-empty cases, but it wouldn’t add any new capability.
+
+The meaning of an empty `with()` might be clearer for some target types than others:
+- For types where **constructors** are used, call the applicable constructor with no arguments.
+- For types with **`CollectionBuilderAttribute`**, call the applicable factory method with elements only.
+- For **interface types**, construct the well-known or implementation-defined type with no arguments.
+- However, for **arrays** and **spans**, where collection arguments are not otherwise supported, `with()` may be confusing.
+
+```csharp
+List<int>           l = [with()]; // ok? new List<int>()
+ImmutableArray<int> m = [with()]; // ok? ImmutableArray.Create<int>()
+
+IList<int>       i = [with()]; // ok? new List<int>() or equivalent
+IEnumerable<int> e = [with()]; // ok?
+
+int[]     a = [with()]; // ok?
+Span<int> s = [with()]; // ok?
 ```

@@ -489,7 +489,7 @@ A value of a type can be implicitly coerced to a union type if an implicit coerc
 
 A value of an ad hoc union can be implicitly coerced to a type if all member type's of the union can be implicitly coerced to the type.
 
-    (int, short) value = 10;
+    (int or short) value = 10;
     double value2 = value;
 
 A value of an ad hoc union can be explicitly coerced to a type if one of the member types is coercible to the type.

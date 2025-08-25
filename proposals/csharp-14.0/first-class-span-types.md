@@ -1,5 +1,7 @@
 # First-class Span Types
 
+[!INCLUDE[Specletdisclaimer](../speclet-disclaimer.md)]
+
 Champion issue: <https://github.com/dotnet/csharplang/issues/8714>
 
 ## Summary
@@ -23,9 +25,14 @@ having the language more directly recognize these types and conversions.
 For example, the BCL can add only one overload of any `MemoryExtensions` helper like:
 
 ```cs
+int[] arr = [1, 2, 3];
+Console.WriteLine(
+    arr.StartsWith(1) // CS8773 in C# 13, permitted with this proposal
+    );
+
 public static class MemoryExtensions
 {
-    public static bool StartsWith<T>(this ReadOnlySpan<T> span, T value) where T : IEquatable<T>;
+    public static bool StartsWith<T>(this ReadOnlySpan<T> span, T value) where T : IEquatable<T> => span.Length != 0 && EqualityComparer<T>.Default.Equals(span[0], value);
 }
 ```
 
@@ -117,7 +124,7 @@ and instead implement changes so the scenario like the one above would end up su
 #### Variance
 
 The goal of the variance section in _implicit span conversion_ is to replicate some amount of covariance for `System.ReadOnlySpan<T>`. Runtime changes would be required to fully
-implement variance through generics here (see https://github.com/dotnet/csharplang/blob/main/proposals/csharp-13.0/ref-struct-interfaces.md for using `ref struct` types in generics), but we can
+implement variance through generics here (see ../csharp-13.0/ref-struct-interfaces.md for using `ref struct` types in generics), but we can
 allow a limited amount of covariance through use of a proposed .NET 9 API: https://github.com/dotnet/runtime/issues/96952. This will allow the language to treat `System.ReadOnlySpan<T>`
 as if the `T` was declared as `out T` in some scenarios. We do not, however, plumb this variant conversion through _all_ variance scenarios, and do not add it to the definition of
 variance-convertible in [§18.2.3.3](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/interfaces.md#18233-variance-conversion). If in the future, we change the runtime
@@ -347,7 +354,10 @@ void M(int[] a)
 See also:
 - https://developercommunity.visualstudio.com/t/Extension-method-SystemLinqEnumerable/10790323
 - https://developercommunity.visualstudio.com/t/Compilation-Error-When-Calling-Reverse/10818048
+- https://developercommunity.visualstudio.com/t/Version-17131-has-an-obvious-defect-th/10858254
+- https://developercommunity.visualstudio.com/t/Visual-Studio-2022-update-breaks-build-w/10856758
 - https://github.com/dotnet/runtime/issues/111532
+- https://developercommunity.visualstudio.com/t/Backward-compatibility-issue-:-IEnumerab/10896189#T-ND10896782
 
 Design meeting: https://github.com/dotnet/csharplang/blob/main/meetings/2024/LDM-2024-09-11.md#reverse
 
@@ -484,6 +494,8 @@ class Derived : Base
 }
 ```
 
+See also: https://github.com/dotnet/roslyn/issues/78314
+
 #### Extension method lookup
 
 By allowing _implicit span conversions_ in extension method lookup, we can potentially change what extension method is resolved by overload resolution.
@@ -586,6 +598,6 @@ Keep things as they are.
 [better-conversion-target]: https://github.com/dotnet/csharpstandard/blob/8c5e008e2fd6057e1bbe802a99f6ce93e5c29f64/standard/expressions.md#12647-better-conversion-target
 [is-type-operator]: https://github.com/dotnet/csharpstandard/blob/8c5e008e2fd6057e1bbe802a99f6ce93e5c29f64/standard/expressions.md#1212121-the-is-type-operator
 
-[ce-or]: https://github.com/dotnet/csharplang/blob/566a4812682ccece4ae4483d640a489287fa9c76/proposals/csharp-12.0/collection-expressions.md#overload-resolution
-[overload-resolution-priority]: https://github.com/dotnet/csharplang/blob/566a4812682ccece4ae4483d640a489287fa9c76/proposals/overload-resolution-priority.md
-[better-collection-conversion-from-expression]: https://github.com/dotnet/csharplang/blob/main/proposals/csharp-13.0/collection-expressions-better-conversion.md#detailed-design
+[ce-or]: ../csharp-12.0/collection-expressions.md#overload-resolution
+[overload-resolution-priority]: ../csharp-13.0/overload-resolution-priority.md
+[better-collection-conversion-from-expression]: ../csharp-13.0/collection-expressions-better-conversion.md#detailed-design

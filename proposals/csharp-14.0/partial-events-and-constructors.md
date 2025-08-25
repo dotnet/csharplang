@@ -1,5 +1,7 @@
 # Partial Events and Constructors
 
+[!INCLUDE[Specletdisclaimer](../speclet-disclaimer.md)]
+
 Champion issue: <https://github.com/dotnet/csharplang/issues/9058>
 
 ## Summary
@@ -203,12 +205,12 @@ even though we do not specify the grammar changes explicitly above.
 
 ### Attributes
 
-The attributes of the resulting event or constructor are the combined attributes of the partial declarations.
-The attributes of each of the resulting event accessors
-are the attributes of the corresponding partial implementing declaration accessor.
-The attributes of each of the resulting constructor parameters
-are the combined attributes of the corresponding partial declaration parameters.
+The attributes of the resulting event or constructor are the combined attributes of the partial declarations in the corresponding positions.
 The combined attributes are concatenated in an unspecified order and duplicates are not removed.
+
+The `method` *attribute_target* ([§22.3][attribute-spec]) is ignored on partial event declarations.
+Accessor attributes are used only from accessor declarations (which can be present only under the implementing declaration).
+Note that `param` and `return` *attribute_target*s are already ignored on all event declarations.
 
 Caller-info attributes on the implementing declaration are ignored by the compiler as specified
 by the partial properties proposal in section [Caller-info attributes][partial-props-caller-info]
@@ -262,20 +264,32 @@ We propose the first two member kinds, but any other subset could be considered.
 Partial *primary* constructors could be also considered,
 e.g., permitting the user to have the same parameter list on multiple partial type declarations.
 
+### Attribute locations
+
+Should we recognize the `[method:]` attribute target specifier for partial events (or just the defining declarations)?
+Then the resulting accessor attributes would be the concatenation of `method`-targeting attributes from both (or just the defining) declaration parts
+plus self-targeting and `method`-targeting attributes from the accessors of the implementing declaration.
+Combining attributes from different declaration kinds would be unprecedented and indeed
+the current implementation of attribute matching in Roslyn does not support that.
+
+We can also consider recognizing `[param:]` and `[return:]`, not just on partial events, but all field-like and extern events.
+For more details, see https://github.com/dotnet/roslyn/issues/77254.
+
 <!--------
 ## Links
 --------->
 
-[partial-methods-ext]: ./csharp-9.0/extending-partial-methods.md
-[partial-props]: ./csharp-13.0/partial-properties.md
-[partial-props-caller-info]: ./csharp-13.0/partial-properties.md#caller-info-attributes
-[partial-props-signatures]: ./csharp-13.0/partial-properties.md#matching-signatures
+[partial-methods-ext]: ../csharp-9.0/extending-partial-methods.md
+[partial-props]: ../csharp-13.0/partial-properties.md
+[partial-props-caller-info]: ../csharp-13.0/partial-properties.md#caller-info-attributes
+[partial-props-signatures]: ../csharp-13.0/partial-properties.md#matching-signatures
 [partial-events-discussion]: https://github.com/dotnet/csharplang/discussions/8064
 [partial-ordering]: https://github.com/dotnet/csharplang/issues/8966
 [xamarin]: https://github.com/xamarin/xamarin-macios/issues/21308#issuecomment-2447535524
-[weak-events]: https://learn.microsoft.com/en-us/dotNet/api/system.windows.weakeventmanager
+[weak-events]: https://learn.microsoft.com/dotNet/api/system.windows.weakeventmanager
 [event-syntax]: https://github.com/dotnet/csharpstandard/blob/f3c66477dc2d0a76d5c278e457a63c1695ddae08/standard/classes.md#1581-general
 [event-field-like]: https://github.com/dotnet/csharpstandard/blob/f3c66477dc2d0a76d5c278e457a63c1695ddae08/standard/classes.md#1582-field-like-events
 [ctor-syntax]: https://github.com/dotnet/csharpstandard/blob/f3c66477dc2d0a76d5c278e457a63c1695ddae08/standard/classes.md#1511-instance-constructors
 [ctor-init]: https://github.com/dotnet/csharpstandard/blob/f3c66477dc2d0a76d5c278e457a63c1695ddae08/standard/classes.md#15112-constructor-initializers
 [ctor-var-init]: https://github.com/dotnet/csharpstandard/blob/f3c66477dc2d0a76d5c278e457a63c1695ddae08/standard/classes.md#15113-instance-variable-initializers
+[attribute-spec]: https://github.com/dotnet/csharpstandard/blob/f3c66477dc2d0a76d5c278e457a63c1695ddae08/standard/attributes.md#223-attribute-specification

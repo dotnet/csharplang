@@ -2,6 +2,8 @@
 
 Champion issue: <https://github.com/dotnet/csharplang/issues/9138>
 
+Thanks to those who provided insight and input into this proposal, especially @CyrusNajmabadi!
+
 ## Summary
 
 This feature enables a type name to be omitted from static member access when it is the same as the target type.
@@ -170,7 +172,7 @@ void M(string p) => ...
 
 ### Target-typing with invocations
 
-A core scenario for this proposal is calling factory methods, providing symmetry between production and consumption of values.
+A core scenario for this proposal is calling factory methods. This enables the use of the feature with some of today's class and struct types. This also provides symmetry between production and consumption of values at a future point when there is a facility for `is .Some(42)` to light up without a type hierarchy, which is a future potential with discriminated unions.
 
 ```cs
 SomeResult = .Error("Message");
@@ -182,6 +184,27 @@ To enable target-typing for the invoked expression within an invocation expressi
 For an invocation expression such as `e(...)` where the invoked expression `e` is a _target-typed member binding expression_, we define a new implicit _invocation target-typing conversion_ that permits an implicit conversion from the invocation expression to any type `T` for which there is a _target-typed member binding conversion_ from `e` to `Tₑ`.
 
 Even though the conversion always succeeds when the invoked expression `e` is a  _target-typed member binding expression_, further errors may occur if the invocation expression cannot be bound for any of the same reasons as though the _target-typed member binding expression_ was a non-target-typed expression, qualified as a member of `T`. For instance, the member might not be invocable, or might return a type other than `T`.
+
+### Target-typing after the `new` keyword
+
+A core scenario for this proposal is enable the `new` operator to look up nested derived types. This provides symmetry between production and consumption of values with class DUs and with today's type hierarchies based on nested derived classes or records.
+
+```cs
+new .Case1(arg1, arg2)
+```
+
+This balances the consumption syntax:
+
+```cs
+du switch
+{
+    .Case1(var arg1, var arg2) => ...
+}
+```
+
+This would continue to be target-typed static member access (since nested types are members of their containing type), which is distinct from target-typed `new` since a definite type is provided to the `new` operator.
+
+TODO: spec the conversion
 
 ### Notes
 
@@ -282,27 +305,6 @@ with (expr)
 
 This doesn't seem to be a popular request among the language team members who have commented on it. If we go ahead with the proposed target-typing for `.Name` syntax, this seals the fate of the requested `with` statement syntax shown here.
 
-## Expansions
-
-To match the production and consumption sides even better, it could be very desirable to enable the `new` operator to look up nested derived types in the same way:
-
-```cs
-new .Case1(arg1, arg2)
-```
-
-This would continue to be target-typed static member access (since nested types are members of their containing type), which is distinct from target-typed `new` since a definite type is provided to the `new` operator.
-
-If target-typed static member access is not allowed in this location, the downside is that the production and consumption syntaxes will not have parity.
-
-```cs
-du switch
-{
-    .Case1(var arg1, var arg2) => ...
-}
-```
-
-In cases where the union name is long, perhaps `SomeDiscriminatedUnion<ImmutableArray<int>>`, this will really stand out.
-
 ## Alternatives
 
 ### Alternative: doing nothing
@@ -356,7 +358,10 @@ A sigil thus provides essential context. It asserts that the location is target-
 
 Secondly, the feature would become _**less powerful**_ without a sigil. To avoid changes in meaning, this would have to prefer binding to other things in the current scope name, with target-typing as a fallback. This would result in unpleasant interruptions with no recourse other than typing out the full type name. These interruptions are expected to be frequent enough to hamper the success of the feature.
 
-This specific sigil is a good fit with modern language sensibilities and audiences. The Swift language has the same `.xyz` syntax with the same meaning, with its [implicit member expressions](https://docs.swift.org/swift-book/documentation/the-swift-programming-language/expressions#Implicit-Member-Expression).
+This specific sigil is a good fit with modern language sensibilities and audiences. The Swift and Dart languages have both added the `.xyz` syntax with the same meaning as this proposal for C#:
+
+- Swift calls it [implicit member expressions](https://docs.swift.org/swift-book/documentation/the-swift-programming-language/expressions#Implicit-Member-Expression).
+- Dart calls it "dot shorthands" or [static access shorthand](https://github.com/dart-lang/language/blob/c31243942eacadcc1be8cf81016f758fe831b99c/working/3616%20-%20enum%20value%20shorthand/proposal-simple-lrhn.md).
 
 ## Open questions
 

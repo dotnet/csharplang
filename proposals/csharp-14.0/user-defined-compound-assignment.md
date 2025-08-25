@@ -1,5 +1,7 @@
 # User Defined Compound Assignment Operators
 
+[!INCLUDE[Specletdisclaimer](../speclet-disclaimer.md)]
+
 Champion issue: https://github.com/dotnet/csharplang/issues/9101
 
 ## Summary
@@ -72,6 +74,7 @@ operator_modifier
     | 'sealed'
 +   | 'override'
 +   | 'new'
++   | 'readonly'
     ;
 
 operator_declarator
@@ -203,7 +206,7 @@ has a special name in metadata.
 The signature of an instance increment operator consists of the operator tokens ('checked'? '++' | 'checked'? '--').
 
 A `checked operator` declaration requires a pair-wise declaration of a `regular operator`. A compile-time error occurs otherwise. 
-See also https://github.com/dotnet/csharplang/blob/main/proposals/csharp-11.0/checked-user-defined-operators.md#semantics.
+See also ../csharp-11.0/checked-user-defined-operators.md#semantics.
 
 The purpose of the method is to adjust the value of the instance to result of the requested increment operation,
 whatever that means in context of the declaring type.
@@ -224,21 +227,13 @@ class C1
 An instance increment operator can override an operator with the same signature declared in a base class,
 an `override` modifier can be used for this purpose.
 
-ECMA-335 already "reserved" the following special names for user defined increment operators:
+The following "reserved" special names should be added to ECMA-335 to support instance versions of increment/decrement operators:
 | Name | Operator |
 | -----| -------- |
-|op_Decrement|`--`|
-|op_Increment|`++`|
-
-However, it states that CLS compliance requires the operator methods to be non-void static methods with a single parameter,
-i.e. matches what static increment operators are. We should consider relaxing the CLS compliance requirements
-to allow the operators to be void returning parameter-less instance methods.
-
-The following names should be added to support checked versions of the operators:
-| Name | Operator |
-| -----| -------- |
-|op_CheckedDecrement| checked `--` |
-|op_CheckedIncrement| checked `++` |
+|op_DecrementAssignment| `--` |
+|op_IncrementAssignment| `++` |
+|op_CheckedDecrementAssignment| checked `--` |
+|op_CheckedIncrementAssignment| checked `++` |
 
 ### Compound assignment operators
 [compound-assignment-operators]: #compound-assignment-operators
@@ -256,7 +251,7 @@ The signature of a compound assignment operator consists of the operator tokens
 the type of the single parameter. The name of the parameter is not part of a compound assignment operator’s signature.
 
 A `checked operator` declaration requires a pair-wise declaration of a `regular operator`. A compile-time error occurs otherwise.
-See also https://github.com/dotnet/csharplang/blob/main/proposals/csharp-11.0/checked-user-defined-operators.md#semantics.
+See also ../csharp-11.0/checked-user-defined-operators.md#semantics.
 
 The purpose of the method is to adjust the value of the instance to result of ```<instance> <binary operator token> parameter```.
 
@@ -425,13 +420,13 @@ If type of `x` is not known to be a reference type, the operator method is invok
 
 For example:
 ``` C#
-var a = ++(new S()); // error: not a variable
-var b = ++S.P2; // var temp = S.get_P2(); S.set_P2(S.op_Increment(temp)); b = temp;
-++S.P2; // var temp = S.get_P2(); S.set_P2(S.op_Increment(temp));
-++b; // b.op_Increment(); 
-var d = ++S.P1; // error: set is missing
+var a = (new S())++; // error: not a variable
+var b = S.P2++; // var temp = S.get_P2(); S.set_P2(S.op_Increment(temp)); b = temp;
+S.P2++; // var temp = S.get_P2(); S.set_P2(S.op_Increment(temp));
+b++; // b.op_Increment(); 
+var d = S.P1++; // error: set is missing
 S.P1++; // error: missing setter
-var e = ++b; // var temp = b; b = S.op_Increment(temp); e = temp; 
+var e = b++; // var temp = b; b = S.op_Increment(temp); e = temp; 
 
 struct S
 {
@@ -580,15 +575,30 @@ the set of candidate user-defined operators provided by `T` is determined as fol
 ## Open questions
 [open]: #open-questions
 
-### Should `readonly` modifier be allowed in structures?
+### [Resolved] Should `readonly` modifier be allowed in structures?
 
 It feels like there would be no benefit in allowing to mark a method with `readonly` when the whole
 purpose of the method is to modify the instance.
 
-### Should shadowing be allowed?
+[Conclusion:](https://github.com/dotnet/csharplang/blob/main/meetings/2025/LDM-2025-04-02.md#conclusion)
+We will allow `readonly` modifiers, but we will not relax the target requirements at this time.
+
+### [Resolved] Should shadowing be allowed?
 
 If a derived class declares a 'compound assignment'/'instance increment' operator with the same signature as one in base,
 should we require an `override` modifier?
+
+[Conclusion:](https://github.com/dotnet/csharplang/blob/main/meetings/2025/LDM-2025-04-02.md#conclusion-1)
+Shadowing will be allowed with the same rules as methods.
+
+### [Resolved] Should we have any consistency enforcement between declared `+=` and `+` operators?
+
+During [LDM-2025-02-12](https://github.com/dotnet/csharplang/blob/main/meetings/2025/LDM-2025-02-12.md#user-defined-instance-based-operators)
+a concern was raised about authors accidentally pushing their users into odd scenarios where a `+=` may work, but
+`+` won't (or vice versa) because one form declares extra operators than the other.
+
+[Conclusion:](https://github.com/dotnet/csharplang/blob/main/meetings/2025/LDM-2025-04-02.md#conclusion-2)
+Checks will not be done on consistency between different forms of operators.
 
 ## Alternatives
 [alternatives]: #alternatives
@@ -602,3 +612,8 @@ type, that parameter should not be a `ref` parameter. Because in case of a class
 must be mutated, not the location where the instance is stored. However, when an operator is declared
 in an interface, it is often not known whether the interface will be implemented only by classes,
 or only by structures. Therefore, it is not clear whether the first parameter should be a `ref` parameter.
+
+## Design meetings
+
+- [LDM-2025-02-12](https://github.com/dotnet/csharplang/blob/main/meetings/2025/LDM-2025-02-12.md#user-defined-instance-based-operators)
+- [LDM-2025-04-02](https://github.com/dotnet/csharplang/blob/main/meetings/2025/LDM-2025-04-02.md#user-defined-compound-assignment-operators)

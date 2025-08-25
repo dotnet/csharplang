@@ -1,5 +1,7 @@
 # Null-conditional assignment
 
+[!INCLUDE[Specletdisclaimer](../speclet-disclaimer.md)]
+
 Champion issue: <https://github.com/dotnet/csharplang/issues/8677>
 
 ## Summary
@@ -94,7 +96,7 @@ ref struct RS
 
 void M(RS a, ref int x)
 {
-  a?.b = ref x; // error: Operator '?' can't be applied to operand of type 'C'.
+  a?.b = ref x; // error: Operator '?' can't be applied to operand of type 'RS'.
 }
 ```
 
@@ -108,6 +110,16 @@ void M(RS a, ref int x)
 a?.b++; // error
 --a?.b; // error
 ```
+
+- This feature generally doesn't work when the receiver of the conditional access is a value type. This is because it will fall into one of the following two cases:
+```cs
+void Case1(MyStruct a)
+    => a?.b = c; // a?.b is not allowed when 'a' is of non-nullable value type
+
+void Case2(MyStruct? a)
+    => a?.b = c; // `a.Value` is not a variable, so there's no reasonable meaning to define for the assignment
+```
+[readonly-setter-calls-on-non-variables.md](/proposals/readonly-setter-calls-on-non-variables.md) proposes relaxing this, in which case we could define a reasonable behavior for `a?.b = c`, when `a` is a `System.Nullable<T>` and `b` is a property with a readonly setter.
 
 ### Specification
 The *null conditional assignment* grammar is defined as follows:

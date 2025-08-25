@@ -1,0 +1,1 @@
+This proposal has moved to: https://github.com/dotnet/csharplang/blob/main/proposals/closed-enums.md
