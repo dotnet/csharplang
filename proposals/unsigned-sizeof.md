@@ -76,7 +76,7 @@ No drawbacks are anticipated.
 
 ## Open questions
 
-1. Does the new implicit conversion need to be defined as lower priority than all existing conversions in order to prevent this change from affecting overload resolution? For example:
+1. Is a betterness rule needed in order to prevent this change from affecting overload resolution? For example:
 
    ```cs
    M(sizeof(SomeStruct));
