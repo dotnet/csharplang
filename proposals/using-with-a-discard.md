@@ -156,7 +156,7 @@ Disallowing the use of `_` as an identifier has been previously discussed. Is th
 
 Other alternatives:
 
-- Disallow using declarations in top-level statements
-- Only permit using declarations in top-level statements when nested inside a block statement
-- Only permit using declarations in top-level statements when following some other top-level statement
+- Disallow usings with discards in top-level statements
+- Only permit usings with discards in top-level statements when nested inside a block statement
+- Only permit usings with discards in top-level statements when following some other top-level statement
 - Always allow both forms, and prefer the existing meaning if the expression binds to a namespace, and prefer the new meaning if the expression binds to a value.
