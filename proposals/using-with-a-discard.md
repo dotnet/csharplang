@@ -40,23 +40,7 @@ By using throwaway variable names as seen in community discussions and the Rosly
 
 ## Detailed design
 
-*using_statement* syntax is expanded to include a new *using_discard_statement* syntax:
-
-```diff
- using_statement
-     : 'await'? 'using' '(' resource_acquisition ')' embedded_statement
-+    | using_discard_statement
-     ;
-
- resource_acquisition
-     : local_variable_declaration
-     | expression
-     ;
-
-+using_discard_statement
-+   : 'await'? 'using' '_' '=' expression ';'
-+   ;
-```
+*using_statement* syntax is expanded to include a new *using_discard_statement* syntax, `'await'? 'using' '_' '=' expression ';'` (see [Specification](#specification)).
 
 The lifetime of the resources acquired in a *using_discard_statement*, and the allowed locations for a *using_discard_statement*, are defined in the same way as for C# 8's [`using_declaration` syntax](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-8.0/using.md#using-declaration).
 
@@ -76,7 +60,7 @@ using _ = expr1, expr2;
 
 ```diff
  using_statement
-     : 'using' '(' resource_acquisition ')' embedded_statement
+     : 'await'? 'using' '(' resource_acquisition ')' embedded_statement
 +    | using_discard_statement
      ;
 
@@ -86,7 +70,7 @@ using _ = expr1, expr2;
      ;
 
 +using_discard_statement
-+   : 'using' '_' '=' expression ';'
++   : 'await'? 'using' '_' '=' expression ';'
 +   ;
 ```
 
