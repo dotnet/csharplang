@@ -530,7 +530,7 @@ One reason we shied away from using nullability attributes here is that the ones
 
 #### Infer the initial flow state of the `field`
 
-Instead of defining the behavior in terms of the `field`'s nullable annotation, we could just the initial flow state of the `field` in accessors. This would remove the surprising behavior that the inferred nullable annotation is not exposed in the symbol APIs. Also, it would reflect the reality that it's ok to assign a possible null value to the `field`--the other forms of analysis we have, would succeed in identifying any resulting null safety issues.
+Instead of defining the behavior in terms of the `field`'s nullable annotation, we could just define it in terms of the initial flow state of the `field` in accessors. This would remove the surprising behavior that the inferred nullable annotation is not exposed in the symbol APIs. Also, it would reflect the reality that it's ok to assign a possible null value to the `field`--the other forms of analysis we have, would succeed in identifying any resulting null safety issues.
 
 However, this came about in a phase of implementation where the churn of making this change was not thought to be worthwhile. This is something we could conceivably adjust under the hood in the future, with very few users perceiving any break--this alternative approach being generally more permissive than the one we actually implemented.
 
