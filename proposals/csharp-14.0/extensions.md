@@ -813,7 +813,9 @@ yield the following xml:
 ### CREF references
 
 We can treat extension blocks like nested types, that can be addressed by their signature (as if it were a method with a single extension parameter).
-Example: `E.extension(ref int).M()` or `E.extension(ref int)`.
+Example: `E.extension(ref int).M()`.
+
+But a cref cannot address an extension block itself. `E.extension(int)` could refer to a method named "extension" in type `E`.  
 
 ```csharp
 static class E
@@ -858,7 +860,6 @@ cref
 ```
 
 It's an error to use `extension_member_cref` at top-level (`extension(int).M`) or nested in another extension (`E.extension(int).extension(string).M`).  
-Note: this does not allow cref to the extension block, as `E.extension(int)` refers to a method named "extension" in type `E`.  
 
 ## Breaking changes
 
