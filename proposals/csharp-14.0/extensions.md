@@ -1178,7 +1178,7 @@ static class E
     }
 }
 ```
-- ~~Do we have an implicit receiver within extension declarations?~~ (answer: no, was previous discussed in LDM)
+- ~~Do we have an implicit receiver within extension declarations?~~ (answer: no, was previously discussed in LDM)
 ```csharp
 static class E
 {
