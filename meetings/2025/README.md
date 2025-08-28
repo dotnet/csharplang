@@ -32,14 +32,16 @@ All schedule items must have a public issue or checked-in proposal that can be l
 *One hour only*
 
 ### Wed Sep 3, 2025
+ 
+## C# Language Design Notes for 2025
 
 ### Wed Aug 27, 2025
 
-- Unions (Matt and Mads)
-    - https://github.com/dotnet/csharplang/blob/main/proposals/inference-for-type-patterns.md
-    - Singleton case types
- 
-## C# Language Design Notes for 2025
+[C# Language Design Meeting for August 27th, 2025](https://github.com/dotnet/csharplang/blob/main/meetings/2025/LDM-2025-08-27.md)
+
+- Type inference in patterns
+- Type value conversion
+- Union syntax
 
 ### Wed Aug 20, 2025
 

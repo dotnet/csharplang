@@ -1,5 +1,7 @@
 # Target-typed inference for type patterns
 
+Champion issue: https://github.com/dotnet/csharplang/issues/9630
+
 *This proposal builds on the [target-typed generic type inference](https://github.com/dotnet/csharplang/blob/main/proposals/target-typed-generic-type-inference.md) proposal.
 
 ## Summary
