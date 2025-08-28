@@ -812,19 +812,19 @@ yield the following xml:
 
 ### CREF references
 
-We can treat extension blocks like nested types, that can be address by their signature (as if it were a method with a single extension parameter).
-Example: `E.extension(ref int).M()`.
+We can treat extension blocks like nested types, that can be addressed by their signature (as if it were a method with a single extension parameter).
+Example: `E.extension(ref int).M()` or `E.extension(ref int)`.
 
 ```csharp
 static class E
 {
   extension(ref int i)
   {
-    void M() { } // can be addressed by cref="E.extension(ref int).M()"
+    void M() { } // can be addressed by cref="E.extension(ref int).M()" or cref="extension(ref int).M()" within E, but not cref="M()"
   }
   extension(ref  int i)
   {
-    void M(int i2) { } // can be addressed by cref="E.extension(ref int).M(int)"
+    void M(int i2) { } // can be addressed by cref="E.extension(ref int).M(int)" or cref="extension(ref int).M(int)" within E
   }
 }
 ```
