@@ -1027,7 +1027,7 @@ We'd exclude:
 The current numbering system causes problems with the [validation of public APIs](https://learn.microsoft.com/dotnet/fundamentals/apicompat/package-validation/overview#validator-types)
 which ensures that public APIs match between reference-only assemblies and implementation assemblies.
 
-~~Should we make one of the following changes?~~ (answer: we'll adjust the tool and tweak the implementation of numbering, LDM 2025-05-05)
+~~Should we make one of the following changes?~~ (answer: we're adopting a content-based naming scheme to increase public API stability, and the tools will still need to be updated to account for marker methods)
 1. adjust the tool
 2. use some content-based naming scheme (TBD)
 3. let the name be controlled via some syntax
