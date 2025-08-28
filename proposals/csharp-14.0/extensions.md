@@ -873,12 +873,14 @@ Types and aliases may not be named "extension".
 - ~~Confirm `extension` vs. `extensions` as the keyword~~ (answer: `extension`, LDM 2025-03-24)
 - ~~Confirm that we want to disallow `[ModuleInitializer]`~~ (answer: yes, disallow, LDM 2025-06-11)
 - ~~Confirm that we're okay to discard extension blocks as entry point candidates~~ (answer: yes, discard, LDM 2025-06-11)
-- ~~Confirm LangVer logic (skip new extensions, vs. consider and report them when picked)~~ (answert: bind unconditionally and report LangVer error except for instance extension methods, LDM 2025-06-11)
+- ~~Confirm LangVer logic (skip new extensions, vs. consider and report them when picked)~~ (answer: bind unconditionally and report LangVer error except for instance extension methods, LDM 2025-06-11)
 - Should we adjust receiver requirements when accessing an extension member? ([comment](https://github.com/dotnet/roslyn/pull/78685#discussion_r2126534632))
 - Should `partial` be required for extension blocks that merge and have their doc comments merged?
 - Confirm that members should not be named after the containing or the extended types.
 
-### Revisit grouping/conflict rules in light of portability issue: https://github.com/dotnet/roslyn/issues/79043
+### ~~Revisit grouping/conflict rules in light of portability issue: https://github.com/dotnet/roslyn/issues/79043~~
+
+(answer: this scenario was resolved as part of new metadata design with content-based type names, it is allowed)
 
 The current logic is to group extension blocks that have the same receiver type. This doesn't account for constraints.
 This causes a portability issue with this scenario:
