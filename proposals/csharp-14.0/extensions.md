@@ -812,19 +812,21 @@ yield the following xml:
 
 ### CREF references
 
-We can treat extension blocks like nested types, that can be address by their signature (as if it were a method with a single extension parameter).
+We can treat extension blocks like nested types, that can be addressed by their signature (as if it were a method with a single extension parameter).
 Example: `E.extension(ref int).M()`.
+
+But a cref cannot address an extension block itself. `E.extension(int)` could refer to a method named "extension" in type `E`.  
 
 ```csharp
 static class E
 {
   extension(ref int i)
   {
-    void M() { } // can be addressed by cref="E.extension(ref int).M()"
+    void M() { } // can be addressed by cref="E.extension(ref int).M()" or cref="extension(ref int).M()" within E, but not cref="M()"
   }
   extension(ref  int i)
   {
-    void M(int i2) { } // can be addressed by cref="E.extension(ref int).M(int)"
+    void M(int i2) { } // can be addressed by cref="E.extension(ref int).M(int)" or cref="extension(ref int).M(int)" within E
   }
 }
 ```
@@ -858,7 +860,6 @@ cref
 ```
 
 It's an error to use `extension_member_cref` at top-level (`extension(int).M`) or nested in another extension (`E.extension(int).extension(string).M`).  
-Note: this does not allow cref to the extension block, as `E.extension(int)` refers to a method named "extension" in type `E`.  
 
 ## Breaking changes
 
@@ -873,12 +874,14 @@ Types and aliases may not be named "extension".
 - ~~Confirm `extension` vs. `extensions` as the keyword~~ (answer: `extension`, LDM 2025-03-24)
 - ~~Confirm that we want to disallow `[ModuleInitializer]`~~ (answer: yes, disallow, LDM 2025-06-11)
 - ~~Confirm that we're okay to discard extension blocks as entry point candidates~~ (answer: yes, discard, LDM 2025-06-11)
-- ~~Confirm LangVer logic (skip new extensions, vs. consider and report them when picked)~~ (answert: bind unconditionally and report LangVer error except for instance extension methods, LDM 2025-06-11)
+- ~~Confirm LangVer logic (skip new extensions, vs. consider and report them when picked)~~ (answer: bind unconditionally and report LangVer error except for instance extension methods, LDM 2025-06-11)
 - Should we adjust receiver requirements when accessing an extension member? ([comment](https://github.com/dotnet/roslyn/pull/78685#discussion_r2126534632))
 - Should `partial` be required for extension blocks that merge and have their doc comments merged?
 - Confirm that members should not be named after the containing or the extended types.
 
-### Revisit grouping/conflict rules in light of portability issue: https://github.com/dotnet/roslyn/issues/79043
+### ~~Revisit grouping/conflict rules in light of portability issue: https://github.com/dotnet/roslyn/issues/79043~~
+
+(answer: this scenario was resolved as part of new metadata design with content-based type names, it is allowed)
 
 The current logic is to group extension blocks that have the same receiver type. This doesn't account for constraints.
 This causes a portability issue with this scenario:
@@ -1025,7 +1028,7 @@ We'd exclude:
 The current numbering system causes problems with the [validation of public APIs](https://learn.microsoft.com/dotnet/fundamentals/apicompat/package-validation/overview#validator-types)
 which ensures that public APIs match between reference-only assemblies and implementation assemblies.
 
-~~Should we make one of the following changes?~~ (answer: we'll adjust the tool and tweak the implementation of numbering, LDM 2025-05-05)
+~~Should we make one of the following changes?~~ (answer: we're adopting a content-based naming scheme to increase public API stability, and the tools will still need to be updated to account for marker methods)
 1. adjust the tool
 2. use some content-based naming scheme (TBD)
 3. let the name be controlled via some syntax
@@ -1176,7 +1179,7 @@ static class E
     }
 }
 ```
-- ~~Do we have an implicit receiver within extension declarations?~~ (answer: no, was previous discussed in LDM)
+- ~~Do we have an implicit receiver within extension declarations?~~ (answer: no, was previously discussed in LDM)
 ```csharp
 static class E
 {
