@@ -31,8 +31,6 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 *One hour only*
 
-### Wed Sep 3, 2025
- 
 ## C# Language Design Notes for 2025
 
 ### Wed Aug 27, 2025
