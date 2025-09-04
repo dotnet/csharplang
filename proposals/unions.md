@@ -370,3 +370,7 @@ public record struct Pet : IUnion, IUnion<Pet>
     * Too bad. Use `==` for your null check instead of a pattern match.
     * Let the `null` pattern (and implicit null check in other patterns) apply to both the union value and its `Value` property: `u is null ==> u == null || u.Value == null`.
     * Disallow classes from being union types!
+* The proposed syntax isn't universally loved, particularly when it comes to expressing the case types. Alternatives so far also meet with criticism, but it's possible we will end up making a change. Some top concerns voiced about the current one:
+    * Commas as separators between case types may seem to imply that order matters.
+    * Parenthesized lists look too much like primary constructors (despite not having parameter names).
+    * Too different from enums, which have their "cases" in curly braces.

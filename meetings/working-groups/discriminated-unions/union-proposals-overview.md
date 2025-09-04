@@ -1,11 +1,8 @@
 # Union proposals overview
 
 - [Union proposals overview](#union-proposals-overview)
-  - [Nominal type unions](#nominal-type-unions)
+  - [Unions](#unions)
   - [Standard type unions](#standard-type-unions)
-  - [Union interfaces](#union-interfaces)
-  - [Custom unions](#custom-unions)
-  - [Non-boxing access pattern for custom unions](#non-boxing-access-pattern-for-custom-unions)
   - [Closed enums](#closed-enums)
   - [Closed hierarchies](#closed-hierarchies)
   - [Case declarations](#case-declarations)
@@ -13,27 +10,25 @@
   - [Target-typed generic type inference](#target-typed-generic-type-inference)
   - [Inference for constructor calls](#inference-for-constructor-calls)
   - [Inference for type patterns](#inference-for-type-patterns)
+  - [Type value conversion](#type-value-conversion)
 
 ``` mermaid
 flowchart LR
 
 %% Features
-Unions[Nominal type unions]:::approved
+Unions[Unions]:::approved
 Standard[Standard type unions]:::approved
-Interfaces[Union interfaces]:::approved
-Custom[Custom unions]:::approved
-NonBoxingAccess[Non-boxing access pattern]:::approved
 Enums[Closed enums]:::approved
 Hierarchies[Closed hierarchies]:::approved
 Cases[Case declarations]:::approved
 TargetAccess[Target-typed access]:::approved
 TargetInfer[Target-typed inference]:::approved
 InferNew[Inference for constructors]:::approved
-InferPattern[Inference for type patterns]:::unapproved
+InferPattern[Inference for type patterns]:::consideration
+TypeValue[Type value conversion]:::consideration
 
 %% Dependencies
 Unions --> Standard
-Unions <--> Interfaces --> Custom --> NonBoxingAccess
 Unions & Hierarchies --> Cases -.-> TargetAccess
 Hierarchies <-.-> Enums
 TargetInfer --> InferNew & InferPattern
@@ -45,26 +40,25 @@ classDef unapproved fill:#ddd,stroke:#333,stroke-width:1.5px;
 classDef rejected fill:#fdd,stroke:#333,stroke-width:1.5px;
 ```
 
-## Nominal type unions
+## Unions
 
-- **Proposal**: [Nominal Type Unions](https://github.com/dotnet/csharplang/blob/main/proposals/nominal-type-unions.md)
+- **Proposal**: [Unions](https://github.com/dotnet/csharplang/blob/main/proposals/unions.md)
 - **LDM**: Approved. 
 - **Dependencies**: None.
 
-Introduces declaration of `union` types, which can only contain values from a specified list of types. A consuming switch expression implicitly applies to the contents, and can assume only the listed case types can occur, avoiding exhaustiveness warnings.
+A set of interlinked features that combine to provide C# support for union types, including a declaration syntax and several useful behaviors.
 
 
 ```csharp
-public union Pet(Cat, Dog);
+public union Pet(Cat, Dog); // Declaration syntax
 
-Pet pet = dog;
+Pet pet = dog;              // Implicit conversion
 
 _ = pet switch
 {
-    Cat cat => ...,
+    Cat cat => ...,         // Implicit matching
     Dog dog => ...,
-    // No warning about missing cases
-}
+}                           // Exhaustive switching
 ```
 
 ## Standard type unions
@@ -81,44 +75,6 @@ public union Union<T1, T2, T3>(T1, T2, T3);
 public union Union<T1, T2, T3, T4>(T1, T2, T3, T4);
 ...
 ```
-
-## Union interfaces
-
-- **Proposal**: [Union interfaces](https://github.com/dotnet/csharplang/blob/main/proposals/union-interfaces.md)
-- **LDM**: Approved. 
-- **Dependencies**: Design with [Nominal type unions](#nominal-type-unions).
-
-Interfaces, at least some of which are implemented by compiler-generated unions, identify types as unions at runtime and facilitate access and construction.
-
-```csharp
-object obj = ...;
-
-if (obj is IUnion union && union.Value is string x) {...}
-
-void M<TUnion>() where TUnion : IUnion<TUnion>
-{
-    object val = ...;
-    if (TUnion.TryCreate(val, out var union)) {...}
-}
-```
-
-## Custom unions
-
-- **Proposal**: [Custom unions](https://github.com/dotnet/csharplang/blob/main/proposals/custom-unions.md)
-- **LDM**: Approved. 
-- **Dependencies**: [Nominal type unions](#nominal-type-unions).
-
-Allow hand-authored types to be consumed as unions (creation, pattern matching, exhaustiveness).
-
-This can be used for optimization or to make existing types union-like.
-
-## Non-boxing access pattern for custom unions
-
-- **Proposal**: [Non-boxing access pattern for custom unions](https://github.com/dotnet/csharplang/blob/main/proposals/non-boxing-access-pattern.md)
-- **LDM**: Approved. 
-- **Dependencies**: [Custom unions](#custom-unions).
-
-Allow custom union types to use an alternative access pattern that does not incur boxing.
 
 ## Closed enums
 
@@ -207,7 +163,7 @@ return result switch
 ## Target-typed generic type inference
 
 - **Proposal**: [Target-typed generic type inference](https://github.com/dotnet/csharplang/blob/main/proposals/target-typed-generic-type-inference.md)
-- **LDM**: Not approved. 
+- **LDM**: Approved. 
 - **Dependencies**: None. Informed by union scenarios.
 
 Generic type inference may take a target type into account.
@@ -219,7 +175,7 @@ MyCollection<string> c = MyCollection.Create(); // 'T' = 'string' inferred from 
 ## Inference for constructor calls
 
 - **Proposal**: [Inference for constructor calls](https://github.com/dotnet/csharplang/blob/main/proposals/inference-for-constructor-calls.md)
-- **LDM**: Not approved. 
+- **LDM**: Approved. 
 - **Dependencies**: [Target-typed generic type inference](#target-typed-generic-type-inference)
 
 'new' expressions may infer type arguments for the newly created class or struct, including [from a target type](target-typed-generic-type-inference) if present.
@@ -231,7 +187,7 @@ Option<int> option = new Some(5); // Infer 'int' from argument and target type
 ## Inference for type patterns
 
 - **Proposal**: [Inference for type patterns](https://github.com/dotnet/csharplang/blob/main/proposals/inference-for-type-patterns.md)
-- **LDM**: Not approved. 
+- **LDM**: Needs more work. 
 - **Dependencies**: [Target-typed generic type inference](#target-typed-generic-type-inference)
 
 Type patterns may omit a type argument list when it can be inferred from the pattern input value.
@@ -242,4 +198,16 @@ void M(Option<int> option) => option switch
     Some(var i) => ..., // 'Some<int>' inferred
     ...
 };
+```
+
+## Type value conversion
+
+- **Proposal**:[Type value conversion](https://github.com/dotnet/csharplang/blob/12e6f5b0d512d15d32c8e7ae95674bd070b2758f/meetings/working-groups/discriminated-unions/type-value-conversion.md)
+- **LDM**: Needs more work.
+- **Dependencies**: None.
+
+A type expression specified in a value context can be converted to a value if the type supports a conversion to value.
+
+```csharp
+GateState value = GateState.Locked;
 ```
