@@ -27,6 +27,8 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ### Wed Sep 10, 2025
 
+- Consolidated [Unions](https://github.com/dotnet/csharplang/blob/main/proposals/unions.md) proposal - review and open issues. (Mads)
+
 ### Mon Sep 8, 2025
 
 *One hour only*
