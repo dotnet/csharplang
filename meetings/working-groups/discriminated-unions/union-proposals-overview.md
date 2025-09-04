@@ -1,5 +1,7 @@
 # Union proposals overview
 
+**Umbrella issue**: https://github.com/dotnet/csharplang/issues/9582
+
 - [Union proposals overview](#union-proposals-overview)
   - [Unions](#unions)
   - [Standard type unions](#standard-type-unions)
@@ -47,7 +49,6 @@ classDef rejected fill:#fdd,stroke:#333,stroke-width:1.5px;
 - **Dependencies**: None.
 
 A set of interlinked features that combine to provide C# support for union types, including a declaration syntax and several useful behaviors.
-
 
 ```csharp
 public union Pet(Cat, Dog); // Declaration syntax
