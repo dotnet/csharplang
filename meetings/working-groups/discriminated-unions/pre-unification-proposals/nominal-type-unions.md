@@ -1,5 +1,8 @@
 # Nominal Type Unions
 
+Champion issue: https://github.com/dotnet/csharplang/issues/9411  
+Union overview issue: https://github.com/dotnet/csharplang/issues/8928
+
 ## Summary
 
 Named unions have a closed list of "case types":

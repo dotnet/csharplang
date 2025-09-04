@@ -31,29 +31,43 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 *One hour only*
 
-### Wed Sep 3, 2025
+## C# Language Design Notes for 2025
 
 ### Wed Aug 27, 2025
 
-### Mon Aug 25, 2025
+[C# Language Design Meeting for August 27th, 2025](https://github.com/dotnet/csharplang/blob/main/meetings/2025/LDM-2025-08-27.md)
+
+- Type inference in patterns
+- Type value conversion
+- Union syntax
 
 ### Wed Aug 20, 2025
 
-- Unions (Matt and Mads)
-  
+[C# Language Design Meeting for August 20th, 2025](https://github.com/dotnet/csharplang/blob/main/meetings/2025/LDM-2025-08-20.md)
+
+- Union interfaces
+- Target-type inference improvements
+
 ### Mon Aug 18, 2025
 
-- Triage (Mads)
+[C# Language Design Meeting for August 18th, 2025](https://github.com/dotnet/csharplang/blob/main/meetings/2025/LDM-2025-08-18.md)
+
+- C# 15 Kickoff and Themes
+    - Unions
+    - Extensions
+    - Dictionary expressions
+    - Type inference
+    - Continuing the null monad
+    - Object initialization
+    - Top-level methods
+    - Caller type name
+    - Switch statement/expression improvements
 
 ### Wed Aug 13, 2025
 
-- Unions (Matt and Mads): 
-    - [To nest or not to nest?](https://github.com/dotnet/csharplang/blob/main/meetings/working-groups/discriminated-unions/to-nest-or-not-to-nest.md)
-    - [Target-typed generic type inference](https://github.com/dotnet/csharplang/blob/main/proposals/target-typed-generic-type-inference.md)
-    - [Inference for constructor calls](https://github.com/dotnet/csharplang/blob/main/proposals/inference-for-constructor-calls.md)
-    - [Inference for type patterns](https://github.com/dotnet/csharplang/blob/main/proposals/inference-for-type-patterns.md)
+[C# Language Design Meeting for August 13th, 2025](https://github.com/dotnet/csharplang/blob/main/meetings/2025/LDM-2025-08-13.md)
 
-## C# Language Design Notes for 2025
+- Unions
 
 ### Wed Jul 30, 2025
 
