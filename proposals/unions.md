@@ -287,7 +287,7 @@ Case types can be any type that converts to `object`, e.g., interfaces, type par
 Examples:
 
 ```csharp
-// Union of exiting types
+// Union of existing types
 public union Pet(Cat, Dog, Bird);
 
 // Union with function member
