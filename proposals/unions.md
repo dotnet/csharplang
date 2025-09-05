@@ -291,7 +291,7 @@ Examples:
 public union Pet(Cat, Dog, Bird);
 
 // Union with function member
-public OneOrMore<T>(T, IEnumerable<T>)
+public union OneOrMore<T>(T, IEnumerable<T>)
 {
     public IEnumerable<T> AsEnumerable() => Value switch
     {
