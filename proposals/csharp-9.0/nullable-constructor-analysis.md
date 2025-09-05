@@ -54,7 +54,7 @@ We can address this by instead taking an approach similar to `[MemberNotNull]` a
 **A constructor on a reference type with no initializer** *or*  
 **A constructor on a reference type with a `: base(...)` initializer** has an initial nullable flow state determined by:
 - Initializing base type members to their declared state, since we expect the base constructor to initialize the base members.
-- Then initializing all applicable members in the type to the state given by assigning a `default` literal to the member. A member is applicable if:
+- Then initializing all *applicable members* in the type to the state given by assigning a `default` literal to the member. A member is applicable if:
   - It does not have oblivious nullability, *and*
   - It is instance and the constructor being analyzed is instance, or the member is static and the constructor being analyzed is static.
   - We expect the `default` literal to yield a `NotNull` state for non-nullable value types, a `MaybeNull` state for reference types or nullable value types, and a `MaybeDefault` state for unconstrained generics.
@@ -69,7 +69,7 @@ We can address this by instead taking an approach similar to `[MemberNotNull]` a
 **A constructor on a value type with no initializer** has the same initial nullable flow state as an ordinary method.  
 Members have an initial state based on the declared annotations and nullability attributes. In the case of value types, we expect definite assignment analysis to provide the desired level of safety when there is no `: this(...)` initializer. This is the same as the existing behavior.
 
-**At each explicit or implicit 'return' in a constructor**, we give a warning for each member whose flow state is incompatible with its annotations and nullability attributes. A reasonable proxy for this is: if assigning the member to itself at the return point would produce a nullability warning, then a nullability warning will be produced at the return point.
+**At each explicit or implicit 'return' in a constructor**, we give a warning for each *applicable member* whose flow state is incompatible with its annotations and nullability attributes. A reasonable proxy for this is: if assigning the member to itself at the return point would produce a nullability warning, then a nullability warning will be produced at the return point.
 
 It's possible this could result in a lot of warnings for the same members in some scenarios. As a "stretch goal" I think we should consider the following "optimizations":
 - If a member has an incompatible flow state at all return points in an applicable constructor, we warn on the constructor's name syntax instead of on each return point individually.
