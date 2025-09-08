@@ -871,13 +871,13 @@ Types and aliases may not be named "extension".
 <details>
 <summary>Temporary section of the document related to open issues, including discussion of unfinalized syntax and alternative designs</summary>
 
+- Should we adjust receiver requirements when accessing an extension member? ([comment](https://github.com/dotnet/roslyn/pull/78685#discussion_r2126534632))
 - ~~Confirm `extension` vs. `extensions` as the keyword~~ (answer: `extension`, LDM 2025-03-24)
 - ~~Confirm that we want to disallow `[ModuleInitializer]`~~ (answer: yes, disallow, LDM 2025-06-11)
 - ~~Confirm that we're okay to discard extension blocks as entry point candidates~~ (answer: yes, discard, LDM 2025-06-11)
 - ~~Confirm LangVer logic (skip new extensions, vs. consider and report them when picked)~~ (answer: bind unconditionally and report LangVer error except for instance extension methods, LDM 2025-06-11)
-- Should we adjust receiver requirements when accessing an extension member? ([comment](https://github.com/dotnet/roslyn/pull/78685#discussion_r2126534632))
-- Should `partial` be required for extension blocks that merge and have their doc comments merged?
-- Confirm that members should not be named after the containing or the extended types.
+- ~~Should `partial` be required for extension blocks that merge and have their doc comments merged?~~ (answer: doc comments are merged silently when blocks get merged, no `partial` needed, confirmed by email 2025-09-03)
+- ~~Confirm that members should not be named after the containing or the extended types.~~ (answer: yes, confirmed by email 2025-09-03)
 
 ### ~~Revisit grouping/conflict rules in light of portability issue: https://github.com/dotnet/roslyn/issues/79043~~
 
@@ -899,7 +899,7 @@ The proposal is to use the same grouping logic that we're planning for the exten
 
 ### Should refness be encoded in the grouping type name?
 
-- Review proposal that `ref` not be included in extension grouping type name (needs further discussion after WG revisits grouping/conflict rules, LDM 2025-06-23)
+- ~~Review proposal that `ref` not be included in extension grouping type name (needs further discussion after WG revisits grouping/conflict rules, LDM 2025-06-23)~~ (answer: confirmed by email 2025-09-03)
 ```
 public static class E
 {
@@ -965,15 +965,16 @@ static class E
 ### pattern-based constructs
 
 #### Methods
-- ~~Where should new extension methods come into play?~~ (answer: same places where classic extension methods come into play, LDM 2025-05-05) 
-This includes: 
+- ~~Where should new extension methods come into play?~~ (answer: same places where classic extension methods come into play, LDM 2025-05-05)
+
+This includes:  
 - `GetEnumerator`/`GetAsyncEnumerator` in `foreach`
 - `Deconstruct` in deconstruction, in positional pattern and foreach
 - `Add` in collection initializers
 - `GetPinnableReference` in `fixed`
 - `GetAwaiter` in `await`
 
-This excludes:
+This excludes:  
 - `Dispose`/`DisposeAsync` in `using` and `foreach`
 - `MoveNext`/`MoveNextAsync` in `foreach`
 - `Slice` and `int` indexers in implicit indexers (and possibly list-patterns?)
@@ -982,13 +983,13 @@ This excludes:
 #### Properties and indexers
 - ~~Where should extension properties and indexers come into play?~~  (answer: let's start with the four, LDM 2025-05-05)  
 
-We'd include:
+We'd include:  
 - object initializer: `new C() { ExtensionProperty = ... }`
 - dictionary intializer: `new C() { [0] = ... }`
 - `with`: `x with { ExtensionProperty = ... }`
 - property patterns: `x is { ExtensionProperty: ... }`  
   
-We'd exclude:
+We'd exclude:  
 - `Current` in `foreach`
 - `IsCompleted` in `await`
 - `Count`/`Length` properties and indexers in list-pattern
@@ -998,7 +999,7 @@ We'd exclude:
 - ~~Confirm that extension properties of this shape should only come into play in LINQ queries, to match what instance properties do.~~ (answer: makes sense, LDM 2025-04-06)
 
 ##### List and spread pattern
-- Confirm that extension `Index`/`Range` indexers should play in list-patterns
+- Confirm that extension `Index`/`Range` indexers should play in list-patterns (answer: not relevant for C# 14)
 
 ##### Revisit where `Count`/`Length` extension properties come into play  
 
@@ -1016,7 +1017,7 @@ We'd exclude:
 
 #### [dictionary expressions](https://github.com/dotnet/csharplang/blob/main/proposals/dictionary-expressions.md)
 
-- Confirm that extension indexers don't play in dictionary expressions, as the presence of the indexer is an integral part of what defines a dictionary type.
+- Confirm that extension indexers don't play in dictionary expressions, as the presence of the indexer is an integral part of what defines a dictionary type. (answer: not relevant for C# 14)
 
 ### `extern`
 
