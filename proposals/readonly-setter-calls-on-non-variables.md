@@ -32,6 +32,13 @@ class C
 
     public Span<object> RefReturningIndexerWorkaround => ArraySegmentProp.AsSpan();
 }
+
+// Partial declaration of System.ArraySegment<T> for demonstration
+public readonly struct ArraySegment<T>
+{
+    // Implicitly readonly due to the readonly modifier on the struct
+    public T this[int index] { get; set; }
+}
 ```
 
 Currently, the code above gives the error CS1612 "Cannot modify the return value of 'C.ArraySegmentProp' because it is not a variable." This restriction is unnecessary when the setter is readonly. The restriction is there to remind you to assign the modified struct value back to the property. But there is no supported modification to the struct value when the setter is readonly, so there is no reason to assign back to the property.
