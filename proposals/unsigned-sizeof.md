@@ -52,7 +52,9 @@ The frequent insertion of explicit uint casts is ironic: the compiler is emittin
 
 ## Detailed design
 
-A new implicit conversion is defined, an _unsigned sizeof conversion_, from a `sizeof` expression to `uint`.
+A new implicit conversion is defined, an _unsigned sizeof conversion_, from a `sizeof` expression to `uint`, `nuint`, or `ulong`.
+
+This conversion is added to the list of standard implicit conversions so that a `sizeof` expression may implicitly convert to a user-defined type which has an implicit conversion from an unsigned integer type.
 
 ## Specification
 
@@ -67,6 +69,20 @@ Then, a new conversion is added to the [Implicit conversions](https://github.com
 > ### Unsigned sizeof conversions
 >
 > An implicit conversion exists from a _sizeof_expression_ ([§12.8.19](https://github.com/dotnet/csharpstandard/blob/draft-v9/standard/expressions.md#12819-the-sizeof-operator)) to `uint`.
+
+The new conversion is added to the [Standard implicit conversions](https://github.com/dotnet/csharpstandard/blob/draft-v9/standard/conversions.md#1042-standard-implicit-conversions) section:
+
+> The following implicit conversions are classified as standard implicit conversions:
+>
+> - Identity conversions ([§10.2.2](conversions.md#1022-identity-conversion))
+> - Implicit numeric conversions ([§10.2.3](conversions.md#1023-implicit-numeric-conversions))
+> - Implicit nullable conversions ([§10.2.6](conversions.md#1026-implicit-nullable-conversions))
+> - Null literal conversions ([§10.2.7](conversions.md#1027-null-literal-conversions))
+> - Implicit reference conversions ([§10.2.8](conversions.md#1028-implicit-reference-conversions))
+> - Boxing conversions ([§10.2.9](conversions.md#1029-boxing-conversions))
+> - Implicit constant expression conversions ([§10.2.11](conversions.md#10211-implicit-constant-expression-conversions))
+> - Implicit conversions involving type parameters ([§10.2.12](conversions.md#10212-implicit-conversions-involving-type-parameters))
+> - **Unsigned sizeof conversions**
 
 ## Drawbacks
 
