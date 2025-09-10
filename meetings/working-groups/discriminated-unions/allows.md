@@ -34,10 +34,10 @@ On syntactic feel, some LDM and community members have voiced concerns with comm
 Closed hierarchies are also expected to need to list the allowed subtypes at the base declaration. This is so that exhaustiveness can be evaluated for a given expression involving a closed hierarchy without having to first bind all type declarations in the entire compilation. Java uses the keyword `permits` for the same purpose (<https://openjdk.org/jeps/409>). Thus, closed hierarchies could also benefit from this same syntax. This syntax even works well alongside primary constructors:
 
 ```cs
-closed abstract record Pet(int Feet) allows Cat, Dog;
+closed record Pet(int Feet) allows Cat, Dog;
 
-sealed record Cat(int Feet, ...) : Pet(Feet);
-sealed record Dog(int Feet, ...) : Pet(Feet);
+record Cat(int Feet, ...) : Pet(Feet);
+record Dog(int Feet, ...) : Pet(Feet);
 ```
 
 It would feel coherent to have the exact same syntax meaning the exact same thing between unions and closed non-unions.
@@ -53,7 +53,7 @@ The grammar is updated to the following:
 ```antlr
 union_declaration
     : attributes? struct_modifier* 'partial'? 'union' identifier type_parameter_list?
-      'allows' type (',' type)* type_parameter_constraints_clause*
+      ('allows' type (',' type)*)? type_parameter_constraints_clause*
       (`{` struct_member_declaration* `}` | ';')
     ;
 ```
