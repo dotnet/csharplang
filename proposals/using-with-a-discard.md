@@ -142,7 +142,39 @@ A new subsection is added:
 
 ## Open questions
 
+### Simpler form versus standing out
+
+In most cases, the expression in a using statement will not be of the form `A.B`. It is more common to call a constructor or method. In these common scenarios, there would be very little visual confusion:
+
+```cs
+using someLock.BeginScope();
+using new SomeResource(...);
+```
+
+The compiler could disambiguate by checking whether the expression binds to a namespace or type versus to some other kind of expression. The human reader would only be confused if this feature was used in a misleading way. Even when the underlying syntax is the same, as in the following deliberately-contrived example, it is obvious from context that the first `using` below involves a namespace or type, and that the second `using` does not:
+
+```cs
+using System.ComponentModel;
+
+var result = TryXyz();
+using result.Value;
+```
+
+If this syntax was available, users could *also* write `using _ = expr;` as well in scenarios where they felt it improved clarity. It would work the same way as `using (_ = expr) {` does today. This option optimizes for the user's flexibility in expressiveness. Community feedback is already beginning to show a desire for this flexibility.
+
+Shall we proceed to design the simpler form, allowing `using new SomeResource();` and getting `using _ = new SomeResource();` as a corollary, or shall we design the form that stands out visually with `_ =` as the only form?
+
+### Disallowed top-level expressions
+
+This open question assumes the `using expr;` syntax.
+
+If the top-level expression is a parenthesized expression, this syntax would conflict with `using (expr);` which compiles successfully with a warning about an empty statement. Shall we disallow the expression to be a parenthesized expression?
+
+If the top-level expression is a simple assignment expression, this syntax would conflict in top-level statements with using alias directives: `using existingVariable = expr;`. Shall we disallow the expression to be a simple assignment expression, or disambiguate based on whether expr is a type or namespace?
+
 ### Conflict with using aliases named `_` in top-level statements
+
+This open question assumes the `using _ = expr;` syntax.
 
 A legal program may exist as follows:
 
