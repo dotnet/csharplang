@@ -46,6 +46,33 @@ It would feel coherent to have the exact same syntax meaning the exact same thin
 
 All elements of the syntax retain the meaning they have under the current proposal, and can appear in all the same combinations. The only change is replacing the tokens `(`...`)` with the token `allows`.
 
+### Base types
+
+Thinking to the future, if unions ever supported base types such as implementing interfaces, it might look like this:
+
+```cs
+union Pet<T> allows Cat<T>, Dog<T>
+    : ISomeInterface
+    where T : allows ref struct
+{
+    // members
+}
+```
+
+Putting everything on one line shows a possible downside where the `:` may appear strongly related to the last allowed type:
+
+```cs
+union Pet<T> allows Cat<T>, Dog<T> : ISomeInterface;
+```
+
+Where the original design's parentheses would clearly show that the `:` applies to `Pet<T>` and not to `Dog<T>`:
+
+```cs
+union Pet<T>(Cat<T>, Dog<T>) : ISomeInterface;
+```
+
+If we do not expect base types to be a large percentage of the use cases for the syntax, it may be wise not to optimize heavily around them. Both the `allows` syntax and the parenthesized syntax have aspects which may be initially misleading. Perhaps it could hit a sweet spot to optimize the syntax that will be seen more often.
+
 ## Specification
 
 The grammar is updated to the following:
