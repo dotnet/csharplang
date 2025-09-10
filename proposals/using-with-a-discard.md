@@ -159,4 +159,4 @@ Other alternatives:
 - Disallow usings with discards in top-level statements
 - Only permit usings with discards in top-level statements when nested inside a block statement
 - Only permit usings with discards in top-level statements when following some other top-level statement
-- Always allow both forms, and prefer the existing meaning if the expression binds to a namespace, and prefer the new meaning if the expression binds to a value.
+- Always allow both forms, and prefer the existing meaning if the expression binds to a namespace or type, and prefer the new meaning if the expression binds to a value.
