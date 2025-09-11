@@ -1,7 +1,7 @@
 Features Added in C# Language Versions
 ====================
 
-# C# 14.0 - .NET 10 and Visual Studio 2022 version 17.15
+# C# 14.0 - .NET 10 and Visual Studio 2026 version 18
 - [Extension methods and properties](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-14.0/extensions.md): allows extending an existing type with instance or static methods and properties.
 - [Extension operators](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-14.0/extension-operators.md): allows extending an existing type with operators.
 - [`field` keyword in properties](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-14.0/field-keyword.md): `field` allows access to the property's backing field without having to declare it.
