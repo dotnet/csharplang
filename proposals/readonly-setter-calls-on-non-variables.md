@@ -37,7 +37,7 @@ class C
 public readonly struct ArraySegment<T>
 {
     // Implicitly readonly due to the readonly modifier on the struct
-    public T this[int index] { get; set; }
+    public T this[int index] { get => ...; set => ...; }
 }
 ```
 
