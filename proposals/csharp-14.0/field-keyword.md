@@ -274,34 +274,39 @@ See [Glossary](#glossary) for definitions of new terms.
 
 The *backing field* has the same type as the property. However, its nullable annotation may differ from the property. To determine this nullable annotation, we introduce the concept of *null-resilience*. *Null-resilience* intuitively means that the property's `get` accessor preserves null-safety even when the field contains the `default` value for its type.
 
-A *field-backed property* is determined to be *null-resilient* or not by performing a special nullable analysis of its `get` accessor.
-- For the purposes of this analysis, `field` is temporarily assumed to have *annotated* nullability, e.g. `string?`. This causes `field` to have *maybe-null* or *maybe-default* initial state in the `get` accessor, depending on its type.
-- Then, if nullable analysis of the getter yields no nullable warnings, the property is *null-resilient*. Otherwise, it is not *null-resilient*.
+A *field-backed property* is determined to be *null-resilient* or not by performing a special nullable analysis of its `get` accessor. Note that this analysis is **only** performed when the property may be of reference type and it is *not-annotated*.
+- Two separate nullable analysis passes are performed: one where the `field`'s nullable annotation is *not-annotated*, and one where its nullable annotation is *annotated*. The nullable diagnostics resulting from each analysis are recorded.
+- If there is a nullable diagnostic in the *annotated* pass, which was not present in the *not-annotated* pass, then the property is not null-resilient. Otherwise, it is null-resilient.
+    - The implementation can optimize by first performing the *annotated* pass. If this results in no diagnostics at all, then the property is null-resilient and the *not-annotated* pass can be skipped.
 - If the property does not have a get accessor, it is (vacuously) null-resilient.
 - If the get accessor is auto-implemented, the property is not null-resilient.
 
-The nullability of the backing field is determined as follows:
-- If the field has nullability attributes such as `[field: MaybeNull]`, `AllowNull`, `NotNull`, or `DisallowNull`, then the field's nullable annotation is the same as the property's nullable annotation.
-    - This is because when the user starts applying nullability attributes to the field, we no longer want to infer anything, we just want the nullability to be *what the user said*.
-- If the containing property has ***oblivious*** or ***annotated*** nullability, then the backing field has the same nullability as the property.
-- If the containing property has *not-annotated* nullability (e.g. `string` or `T`) or has the `[NotNull]` attribute, and the property is ***null-resilient***, then the backing field has ***annotated*** nullability.
-- If the containing property has *not-annotated* nullability (e.g. `string` or `T`) or has the `[NotNull]` attribute, and the property is ***not null-resilient***, then the backing field has ***not-annotated*** nullability.
+Null-forgiving (`!`) operators, directives like `#nullable disable` and `#pragma disable warning`, and conventional project-level settings like `<NoWarn>`, are all respected when deciding if a nullable analysis has diagnostics. [DiagnosticSuppressors](https://github.com/dotnet/roslyn/blob/a91d7700db4a8b5da626d272d371477c6975f10e/docs/analyzers/DiagnosticSuppressorDesign.md) are ignored when deciding if a nullable analysis has diagnostics.
+
+The nullable annotation of the backing field is determined as follows:
+- If the associated property's nullable annotation is *annotated* or *oblivious*, then the nullable annotation is the same as the nullable annotation of the associated property.
+- If the associated property's nullable annotation is *not-annotated*, then:
+    - If the property is *null-resilient*, the nullable annotation is *annotated*.
+    - If the property is not *null-resilient*, the nullable annotation is *not-annotated*.
 
 #### Constructor analysis
 
 Currently, an auto property is treated very similarly to an ordinary field in [nullable constructor analysis](../csharp-9.0/nullable-constructor-analysis.md). We extend this treatment to *field-backed properties*, by treating every *field-backed property* as a proxy to its backing field.
 
-We update the following spec language from the previous [proposed approach](../csharp-9.0/nullable-constructor-analysis.md#proposed-approach) to accomplish this:
+We update the following spec language from the previous [proposed approach](../csharp-9.0/nullable-constructor-analysis.md#proposed-approach) to accomplish this (new language in **bold**):
 
 > At each explicit or implicit 'return' in a constructor, we give a warning for each member whose flow state is incompatible with its annotations and nullability attributes. **If the member is a field-backed property, the nullable annotation of the backing field is used for this check. Otherwise, the nullable annotation of the member itself is used.** A reasonable proxy for this is: if assigning the member to itself at the return point would produce a nullability warning, then a nullability warning will be produced at the return point.
 
-Note that this is essentially a constrained interprocedural analysis. We anticipate that in order to analyze a constructor, it will be necessary to do binding and "null-resilience" analysis on all applicable get accessors in the same type, which use the `field` contextual keyword and have *not-annotated* nullability. We speculate that this is not prohibitively expensive because getter bodies are usually not very complex, and that the "null-resilience" analysis only needs to be performed once regardless of how many constructors are in the type.
+> [!NOTE]
+> A key trait of a *null-resilient* property is that it returns a value with "correct" nullability even when the backing field's value is `default`. Given this, we could consider not even tracking a flow state for such properties. However, this seems like a larger change in nullable analysis of properties, which we don't have any motivating scenario for changing at this time.
+
+This is essentially a constrained interprocedural analysis. We anticipate that in order to analyze a constructor, it will be necessary to do binding and "null-resilience" analysis on all potentially applicable get accessors in the same type, which use the `field` contextual keyword and have *not-annotated* nullability. We speculate that this is not prohibitively expensive because getter bodies are usually not very complex, and that the "null-resilience" analysis only needs to be performed once regardless of how many constructors are in the type.
 
 #### Setter analysis
 
 For simplicity, we use the terms "setter" and "set accessor" to refer to either a `set` or `init` accessor.
 
-There is a need to check that setters of *field-backed properties* actually initialize the backing field.
+There is a need to check that setters of non-*null-resilient* field-backed properties actually initialize the backing field.
 
 ```cs
 class C
@@ -322,20 +327,20 @@ class C
 
     public static void Main()
     {
-        new C().Prop.ToString(); // NRE at runtime
+        new C().Prop.ToString(); // no warning, NRE at runtime
     }
 }
 ```
 
 The initial flow state of the *backing field* in the setter of a *field-backed property* is determined as follows:
-- If the property has an initializer, then the initial flow state is the same as the flow state of the property after visiting the initializer.
+- If the property has an initializer, then the initial flow state is the same as the flow state after visiting the initializer.
 - Otherwise, the initial flow state is the same as the flow state given by `field = default;`.
 
 At each explicit or implicit 'return' in the setter, a warning is reported if the flow state of the *backing field* is incompatible with its annotations and nullability attributes.
 
 #### Remarks
 
-This formulation is intentionally very similar to ordinary fields in constructors. Essentially, because only the property accessors can actually refer to the backing field, the setter is treated as a "mini-constructor" for the backing field.
+This formulation is intentionally similar to ordinary fields in constructors. Essentially, because only the property accessors can actually refer to the backing field, the setter is treated as a "mini-constructor" for the backing field.
 
 Much like with ordinary fields, we usually know the property was initialized in the constructor because it was set, but not necessarily. Simply returning within a branch where `Prop != null` was true is also good enough for our constructor analysis, since we understand that untracked mechanisms may have been used to set the property.
 
@@ -519,6 +524,12 @@ One reason we shied away from using nullability attributes here is that the ones
 - In practice, `[field: MaybeNull, AllowNull]` is required to make the field behave "reasonably" as a nullable variable, which gives maybe-null initial flow state, and allows possible null values to be written to it. This feels cumbersome to ask users to do for relatively common "little-l lazy" scenarios.
 - If we pursued this approach, we would consider adding a warning when `[field: AllowNull]` is used, suggesting to also add `MaybeNull`. This is because AllowNull by itself doesn't do what users need out of a nullable variable: it assumes the field is initially not-null when we never saw anything write to it yet.
 - We could also consider adjusting the behavior of `[field: MaybeNull]` on the `field` keyword, or even fields in general, to allow nulls to also be written to the variable, as if `AllowNull` were implicitly also present.
+
+#### Infer the initial flow state of the `field`
+
+Instead of defining the behavior in terms of the `field`'s nullable annotation, we could just define the initial flow state of the `field` in the 'get' accessor. This would reflect the reality that it's ok to assign a possible null value to the `field`. The other forms of analysis we have would succeed in identifying any resulting null safety issues from doing that.
+
+However, this came about in a phase of implementation where the churn of making this change was not thought to be worthwhile. This is something we could conceivably adjust under the hood in the future, with very few users perceiving any break--this alternative approach being generally more permissive than the one we actually implemented.
 
 ## Answered LDM questions
 
