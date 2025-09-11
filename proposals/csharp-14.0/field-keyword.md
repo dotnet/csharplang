@@ -289,9 +289,6 @@ The nullable annotation of the backing field is determined as follows:
     - If the property is *null-resilient*, the nullable annotation is *annotated*.
     - If the property is not *null-resilient*, the nullable annotation is *not-annotated*.
 
-> [!NOTE]
-> The inferred nullable annotation of the backing field is not exposed in the Roslyn symbol APIs due to the dependency on binding and flow analysis of methods. The inferred annotation is instead used only in nullable analysis (and surfaced indirectly through APIs such as GetSymbolInfo/GetTypeInfo for expressions.) The nullable annotation of the property is used instead in the symbol APIs. See also subsection of [Nullability alternatives](#infer-the-initial-flow-state-of-the-field).
-
 #### Constructor analysis
 
 Currently, an auto property is treated very similarly to an ordinary field in [nullable constructor analysis](../csharp-9.0/nullable-constructor-analysis.md). We extend this treatment to *field-backed properties*, by treating every *field-backed property* as a proxy to its backing field.
@@ -530,7 +527,7 @@ One reason we shied away from using nullability attributes here is that the ones
 
 #### Infer the initial flow state of the `field`
 
-Instead of defining the behavior in terms of the `field`'s nullable annotation, we could just define it in terms of the initial flow state of the `field` in accessors. This would remove the surprising behavior that the inferred nullable annotation is not exposed in the symbol APIs. Also, it would reflect the reality that it's ok to assign a possible null value to the `field`--the other forms of analysis we have, would succeed in identifying any resulting null safety issues.
+Instead of defining the behavior in terms of the `field`'s nullable annotation, we could just define the initial flow state of the `field` in the 'get' accessor. This would reflect the reality that it's ok to assign a possible null value to the `field`. The other forms of analysis we have would succeed in identifying any resulting null safety issues from doing that.
 
 However, this came about in a phase of implementation where the churn of making this change was not thought to be worthwhile. This is something we could conceivably adjust under the hood in the future, with very few users perceiving any break--this alternative approach being generally more permissive than the one we actually implemented.
 
