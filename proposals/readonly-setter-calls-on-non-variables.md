@@ -4,7 +4,7 @@ Champion issue: <https://github.com/dotnet/csharplang/issues/9174>
 
 ## Summary
 
-Permits a readonly setter to be called on _all_ non-variable expressions:
+Permits a readonly setter to be called on non-variable expressions, and permits object initializers to be used with value types:
 
 ```cs
 var c = new C();
@@ -17,12 +17,27 @@ c.ArraySegmentMethod()[10] = new object();
 // In limited cases, ref-returning indexers can be used to work around this:
 c.RefReturningIndexerWorkaround[10] = new object();
 
+_ = new C
+{
+    // Remove the current CS1918 error:
+    ArraySegmentProp = { [10] = new object() },
+    // Remove the current CS1918 error:
+    RefReturningIndexerWorkaround = { [10] = new object() },
+};
+
 class C
 {
     public ArraySegment<object> ArraySegmentProp { get; set; }
     public ArraySegment<object> ArraySegmentMethod() => ArraySegmentProp;
 
     public Span<object> RefReturningIndexerWorkaround => ArraySegmentProp.AsSpan();
+}
+
+// Partial declaration of System.ArraySegment<T> for demonstration
+public readonly struct ArraySegment<T>
+{
+    // Implicitly readonly due to the readonly modifier on the struct
+    public T this[int index] { get => ...; set => ...; }
 }
 ```
 
@@ -75,7 +90,9 @@ These use cases would no longer be blocked if CS1612 is fully updated with an un
 
 ## Detailed design
 
-The CS1612 error is not produced for assignments where the setter is readonly. (If the whole struct is readonly, then the setter is also readonly.) The setter call is emitted the same way as any non-accessor readonly instance method call.
+For part 1, the CS1612 error is not produced for assignments where the setter is readonly. (If the whole struct is readonly, then the setter is also readonly.) The setter call is emitted the same way as any non-accessor readonly instance method call.
+
+For part 2, object initializers are now permitted to be used on value types. This means that the CS1918 error will no longer be produced at all. This opens the door to assignments using readonly setters or using refs returned by getters. However, this does not open the door to assignments that would not be permitted in the desugared form. Errors such as CS1612 and CS0313 will be updated to appear within object initializers now that CS1918 is no longer blocking off the entire space.
 
 ### Null-conditional assignment
 
@@ -120,51 +137,23 @@ It's desirable for this error to remain, because the setter _does_ mutate the st
 
 ## Specification
 
-### Waiting for v8 and corrected v7 specification
+Insertions are in **bold**, deletions are in ~~strikethrough~~.
 
-The published v7 spec and the draft specs are all missing the wording that removed the CS1612 error for invocation expressions. This is tracked by <https://github.com/dotnet/csharpstandard/issues/1277> which suggests the following addition to describe the current behavior:
+### Updates permitting readonly setter calls on non-variables
 
-[§12.21.2](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/expressions.md#12212-simple-assignment) _Simple assignment_
-> When a property or indexer declared in a _struct_type_ is the target of an assignment, **unless the _struct_type_ has the `readonly` modifier ([§16.2.2](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/structs.md#1622-struct-modifiers)) and the instance expression is an invocation**, the instance expression associated with the property or indexer access shall be classified as a variable. If the instance expression is classified as a value, a binding-time error occurs.
+The current v8 specification draft does not yet specify readonly members (<https://github.com/dotnet/csharplang/blob/main/proposals/csharp-8.0/readonly-instance-members.md>). The following updates intend to leverage the concept of a _readonly member_. A _readonly member_ is a member which either is directly marked with the `readonly` modifier or which is contained inside a _struct_type_ which is marked with the `readonly` modifier.
 
-Then, the v8 spec is still in draft and the updates for readonly members have not yet merged. When it merges, it will need to redefine the condition as whether the setter itself is readonly, directly or indirectly.
+[§12.21.2](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/expressions.md#12212-simple-assignment) _Simple assignment_ is updated:
 
-### Spec updates
+> When a property or indexer declared in a _struct_type_ is the target of an assignment, **either** the instance expression associated with the property or indexer access shall be classified as a variable, **or the set accessor of the property or indexer shall be a readonly member ([§16.2.2](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/structs.md#1622-struct-modifiers))**. If the instance expression is classified as a value **and the set accessor is not a readonly member**, a binding-time error occurs.
 
-This proposal would remove the text "**and the instance expression is an invocation**" from the paragraph mentioned above in [Waiting for v8 and corrected v7 specification](#waiting-for-v8-and-corrected-v7-specification).
+### Updates permitting object initializers for value types
 
-## Expansions
+The CS1918 error is completely removed. There is no need to block value types. "\[T]he assignments in the nested object initializer are treated as assignments to members of the field or property." Such assignments must already conform to rules such as the one enforced by CS1612, including when inside an object initializer.
 
-There's another location where this kind of assignment is blocked, which is in object initializers:
+[§12.8.16.3](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/expressions.md#128163-object-initializers) _Object initializers_ is updated:
 
-```cs
-// ❌ CS1918 Members of property 'C.ArraySegmentProp' of type 'ArraySegment<object>' cannot be assigned with an object
-// initializer because it is of a value type
-_ = new C { ArraySegmentProp = { [42] = new object() } };
-//          ~~~~~~~~~~~~~~~~
-
-class C
-{
-    public ArraySegment<object> ArraySegmentProp { get; set; }
-}
-```
-
-For the same reasons as above, this error is unnecessary when the properties being initialized have readonly `set`/`init` accessors. The error could be made more granular, placed on each property initializer which calls a _non-readonly_ setter.
-
-Even in the limited cases where a ref-returning indexer is applicable, it does not help with CS1918, where it still unnecessarily broad:
-
-```cs
-// ❌ CS1918 Members of property 'C.StructWithRefReturningIndexer' of type 'Span<object>' cannot be assigned with an object
-// initializer because it is of a value type
-_ = new C { StructWithRefReturningIndexer = { [42] = new object() } };
-//          ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-class C
-{
-    public ArraySegment<object> ArraySegmentProp { get; set; }
-    public Span<object> StructWithRefReturningIndexer => ArraySegmentProp.AsSpan();
-}
-```
+> A member initializer that specifies an object initializer after the equals sign is a ***nested object initializer***, i.e., an initialization of an embedded object. Instead of assigning a new value to the field or property, the assignments in the nested object initializer are treated as assignments to members of the field or property. ~~Nested object initializers cannot be applied to properties with a value type, or to read-only fields with a value type.~~
 
 ## Downsides
 
@@ -195,3 +184,48 @@ public struct S2
     public int Prop { get => 0; readonly set { } }
 }
 ```
+
+## Answered LDM questions
+
+### Should similar assignments be permitted in object initializers?
+
+There's a separate error, CS1918 that blocks assignments through readonly setters when the assignments appear in object initializers. In addition, this error even blocks assignments to ref-returning properties and indexers, and those assignments are not blocked when they appear outside of object initializers.
+
+```cs
+// ❌ CS1918 Members of property 'C.ArraySegmentProp' of type 'ArraySegment<object>' cannot be assigned with an object
+// initializer because it is of a value type
+_ = new C { ArraySegmentProp = { [42] = new object() } };
+//          ~~~~~~~~~~~~~~~~
+
+// ❌ CS1918 Members of property 'C.StructWithRefReturningIndexer' of type 'Span<object>' cannot be assigned with an object
+// initializer because it is of a value type
+_ = new C { StructWithRefReturningIndexer = { [42] = new object() } };
+//          ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+class C
+{
+    public ArraySegment<object> ArraySegmentProp { get; set; }
+    public Span<object> StructWithRefReturningIndexer => ArraySegmentProp.AsSpan();
+}
+```
+
+Such assignments desugar to the following form, the same form in which the CS1612 warning is being removed:
+
+```cs
+var temp = new C();
+// Warning being removed:
+// CS1612 Cannot modify the return value of 'C.ArraySegmentProp' because it is not a variable
+temp.ArraySegmentProp[42] = new object();
+```
+
+```cs
+var temp = new C();
+// Permitted today
+temp.StructWithRefReturningIndexer[42] = new object();
+```
+
+Should this check be made more granular, so that members of struct types may be assigned when they would be allowed to be assigned in the desugared form?
+
+#### Answer
+
+Yes. This expansion will be included. [(LDM 2025-04-02)](https://github.com/dotnet/csharplang/blob/main/meetings/2025/LDM-2025-04-02.md#expansions)
