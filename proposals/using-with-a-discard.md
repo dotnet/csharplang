@@ -56,6 +56,9 @@ using _ = expr1, expr2;
 
 ## Specification
 
+> [!IMPORTANT]
+> This section is based on a draft of the C# 8 Standard specification that does not yet include disposable ref structs. Once the [ongoing specification work](https://github.com/dotnet/csharpstandard/pull/672/files#diff-20796c21eeccfd2c773f2969d23440cbc04e7439f4777729aad5d602477c232fR2057) is complete, this section will be rebased.
+
 [§13.14 The using statement](https://github.com/dotnet/csharpstandard/blob/draft-v9/standard/statements.md#1314-the-using-statement) is updated as follows.
 
 ```diff
