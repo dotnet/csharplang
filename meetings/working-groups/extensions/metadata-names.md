@@ -4,7 +4,7 @@ But there is an issue when it comes to dealing with arity.
 The convention for metadata names is to add an arity suffix to the type name. For `List<T>`, the name is "List" and the name in metadata is "List\`1".  
 This allows for overloading on arity while avoiding name conflicts. You can have "List" (with arity zero) and "List\`1" (with arity one).  
 For extension grouping and marker types, the name is unique enough that we use it directly as the metadata name, without adding an arity suffix.  
-This is causing some issues.
+But this is causing some issues.
 
 The way we produce docIDs for types is to take the name and append the arity suffix.  
 For extensions, we added special handling to use the grouping and marker names. 
@@ -36,14 +36,14 @@ with corresponding metadata:
 }
 ```
 
-**If we do include an arity suffix** in that special handling when producing docIDs, then the docIDs don't match the metadata names.
+**If we do include an arity suffix** when producing docIDs for extensions, then the docIDs don't match the metadata names.
 
 The docIDs for the example would differ from the names in metadata:
 - extension block: "E.<G>$8048A6C8BE30A622530249B904B537EB\`1.<M>$65CB762EDFDF72BBC048551FDEA778ED\`1"
 - extension member: "E.<G>$8048A6C8BE30A622530249B904B537EB\`1.M"
 
 
-**If we don't include an arity suffix** in that special handling, then:
+**If we don't include an arity suffix**, then:
 - docIDs produced from VB symbols on extension metadata will diverge from those produce from C# symbols. VB doesn't have the concept of extension, so will have regular handling for types (which include an arity suffix)
 - if someone makes metadata for an extension type using some other tool, and they do include the arity suffix in the metadata names of grouping and marker types, then docIDs won't match metadata names again.
 
@@ -80,7 +80,7 @@ Then the docIDs would not match the metadata names:
 # Proposal 
 
 We're proposing to update the metadata design to include arity suffix in the metadata names for grouping and marker types.  
-The metadata names for grouping and marker types would be mangled from the `ExtensionGroupingName` and `ExtensionMarkerName`.
+The metadata names for grouping and marker types would be mangled from the `ExtensionGroupingName` and `ExtensionMarkerName`.  
 That would be more conventional.  
 Then we'd produce the docIDs as described above, by taking `ExtensionGroupingName` and `ExtensionMarkerName` and appending an arity suffix as well.
 
@@ -134,7 +134,7 @@ then the docIDs would be:
 - extension block: "E.GroupingType\`1.MarkerType\`1"
 - extension member: "E.GroupingType\`1.M"
 
-Those docIDs are not ideal (they differ from metadata names), but we that's not a new problem.
+Those docIDs are not ideal (they differ from metadata names), but that's not a new problem.
 
 # Practical considerations
 
@@ -143,7 +143,7 @@ But the RC2 SDK/BCL will be compiled using the RC1 compiler, so the change would
 The new compiler will still be able to consume extensions produced by the RC1 compiler: when loading metadata symbols, the unmangling is optional (if there is no arity suffix in the metadata name, we just use the whole metadata name as the name).  
 Given that only the compiler and docIDs make use of grouping and marker types, there would be no binary breaking change. Only implementation methods are referenced in IL, and those are unaffected by the change.  
 
-# Appendix
+# References
 Some pointers to roslyn codebase for reference:
 
 ## Producing docIDs
@@ -161,11 +161,11 @@ Uses Name (see `BuildDottedName`), either appends an arity suffix or type argume
 
 ## Reading docIDs
 1. `DocumentationCommentId.GetSymbolsForDeclarationId(string id, Compilation compilation)`
-DocumentationCommentId.Parser.ParseDeclaredId  
+`DocumentationCommentId.Parser.ParseDeclaredId`  
 Splits identifier into name and arity, then searches symbols with matching Name and Arity (exact).
 
 2. CREF binding
-BindNameMemberCref, ComputeSortedCrefMembers  
+`BindNameMemberCref`, `ComputeSortedCrefMembers`  
 Takes a name followed by type argument list (which provides arity), looks up by name and arity (exact, for types), then constructs with type arguments
 
 
@@ -173,6 +173,7 @@ Takes a name followed by type argument list (which provides arity), looks up by 
 The C# and VB compilers generally appends the arity suffix for generic types, to make the metadata name for a named type. There's some exceptions (notably EE named type symbols).
 For extension grouping and marker types, we use the grouping and marker names as-is, without appending a suffix. The grouping and marker names are the metadata names.
 
-When loading types from metadata, the C# and VB compilers remove the arity suffix when it matches the arity found in metadata (see MetadataHelpers.UnmangleMetadataNameForArity).
+When loading types from metadata, the C# and VB compilers remove the arity suffix when it matches the arity found in metadata (see `MetadataHelpers.UnmangleMetadataNameForArity`).
+
 This means that we can load a type whose name doesn't include a suffix.
 
