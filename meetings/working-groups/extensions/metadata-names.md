@@ -143,6 +143,10 @@ But the RC2 SDK/BCL will be compiled using the RC1 compiler, so the change would
 The new compiler will still be able to consume extensions produced by the RC1 compiler: when loading metadata symbols, the unmangling is optional (if there is no arity suffix in the metadata name, we just use the whole metadata name as the name).  
 Given that only the compiler and docIDs make use of grouping and marker types, there would be no binary breaking change. Only implementation methods are referenced in IL, and those are unaffected by the change.  
 
+# Alternative proposals
+
+We also brainstormed a design where docIDs for extensions would be produced by taking `ExtensionGroupingName` and `ExtensionMarkerName`, would strip any arity suffix (to deal with metadata from another tool), then would proceed as usual (add an arity suffix.
+
 # References
 Some pointers to roslyn codebase for reference:
 
