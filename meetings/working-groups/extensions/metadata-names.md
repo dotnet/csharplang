@@ -23,9 +23,9 @@ with corresponding metadata:
 ```
 .class E
 {
-  .class '<G>$8048A6C8BE30A622530249B904B537EB' // grouping type
+  .class '<G>$8048A6C8BE30A622530249B904B537EB'<T0> // grouping type
   {  
-    .class '<M>$65CB762EDFDF72BBC048551FDEA778ED' // marker type
+    .class '<M>$65CB762EDFDF72BBC048551FDEA778ED'<T> // marker type
     {
       .. marker method ..
     }
@@ -47,7 +47,7 @@ The docIDs for the example would differ from the names in metadata:
 - docIDs produced from VB symbols on extension metadata will diverge from those produce from C# symbols. VB doesn't have the concept of extension, so will have regular handling for types (which include an arity suffix)
 - if someone makes metadata for an extension type using some other tool, and they do include the arity suffix in the metadata names of grouping and marker types, then docIDs won't match metadata names again.
 
-The docIDs from C# source or metadata for the example would be:
+To illustrate the first bullet, the docIDs from C# source or metadata for the example would be:
 - extension block: "E.<G>$8048A6C8BE30A622530249B904B537EB.<M>$65CB762EDFDF72BBC048551FDEA778ED"
 - extension member: "E.<G>$8048A6C8BE30A622530249B904B537EB.M"
 
@@ -56,7 +56,7 @@ But the docIDs from VB metadata would differ from those from C#:
 - extension marker type: "E.<G>$8048A6C8BE30A622530249B904B537EB\`1.<M>$65CB762EDFDF72BBC048551FDEA778ED\`1"
 - extension member: "E.<G>$8048A6C8BE30A622530249B904B537EB\`1.M"
 
-And if some other tool cooks up extension metadata including arity suffixes like this:
+To illustrate the second bullet, if some other tool cooks up extension metadata including arity suffixes like this:
 ```
 .class E
 {
@@ -81,6 +81,7 @@ Then the docIDs would not match the metadata names:
 
 We're proposing to update the metadata design to include arity suffix in the metadata names for grouping and marker types.  
 The metadata names for grouping and marker types would be mangled from the `ExtensionGroupingName` and `ExtensionMarkerName`.  
+`ExtensionGroupingName` and `ExtensionMarkerName` should reflect names of the emitted grouping and marker types from language perspective, not their emitted names. 
 That would be more conventional.  
 Then we'd produce the docIDs as described above, by taking `ExtensionGroupingName` and `ExtensionMarkerName` and appending an arity suffix as well.
 
@@ -88,9 +89,9 @@ For the above example, the compiler would produce:
 ```
 .class E
 {
-  .class '<G>$8048A6C8BE30A622530249B904B537EB`1' // grouping type with arity suffix
+  .class '<G>$8048A6C8BE30A622530249B904B537EB`1'<T0> // grouping type with arity suffix
   {  
-    .class '<M>$65CB762EDFDF72BBC048551FDEA778ED`1' // marker type with arity suffix
+    .class '<M>$65CB762EDFDF72BBC048551FDEA778ED`1'<T> // marker type with arity suffix
     {
       .. marker method ..
     }
@@ -118,9 +119,9 @@ And if some other tool cooks up extension metadata without arity suffix like thi
 ```
 .class E
 {
-  .class 'GroupingName' // grouping type (without arity suffix)
+  .class 'GroupingName'<T0> // grouping type (without arity suffix)
   {  
-    .class 'MarkerName' // marker type (without arity suffix)
+    .class 'MarkerName'<T> // marker type (without arity suffix)
     {
       .. marker method ..
     }
