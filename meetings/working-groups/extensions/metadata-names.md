@@ -1,5 +1,5 @@
 The structure for docID for extension blocks is `E.GroupingName.MarkerName` and that for extension members is `E.GroupingName.Member`.  
-But there is an issue when it comes to dealing with arity.
+But there is an issue when it comes to dealing with arity on the grouping name.
 
 The convention for metadata names is to add an arity suffix to the type name. For `List<T>`, the name is "List" and the name in metadata is "List\`1".  
 This allows for overloading on arity while avoiding name conflicts. You can have "List" (with arity zero) and "List\`1" (with arity one).  
@@ -39,7 +39,7 @@ with corresponding metadata:
 **If we do include an arity suffix** when producing docIDs for extensions, then the docIDs don't match the metadata names.
 
 The docIDs for the example would differ from the names in metadata:
-- extension block: "E.<G>$8048A6C8BE30A622530249B904B537EB\`1.<M>$65CB762EDFDF72BBC048551FDEA778ED\`1"
+- extension block: "E.<G>$8048A6C8BE30A622530249B904B537EB\`1.<M>$65CB762EDFDF72BBC048551FDEA778ED"
 - extension member: "E.<G>$8048A6C8BE30A622530249B904B537EB\`1.M"
 
 
@@ -52,8 +52,8 @@ To illustrate the first bullet, the docIDs from C# source or metadata for the ex
 - extension member: "E.<G>$8048A6C8BE30A622530249B904B537EB.M"
 
 But the docIDs from VB metadata would differ from those from C#:
-- extension grouping type: "E.<G>$8048A6C8BE30A622530249B904B537EB\`1.<M>$65CB762EDFDF72BBC048551FDEA778ED\`1"
-- extension marker type: "E.<G>$8048A6C8BE30A622530249B904B537EB\`1.<M>$65CB762EDFDF72BBC048551FDEA778ED\`1"
+- extension grouping type: "E.<G>$8048A6C8BE30A622530249B904B537EB\`1"
+- extension marker type: "E.<G>$8048A6C8BE30A622530249B904B537EB\`1.<M>$65CB762EDFDF72BBC048551FDEA778ED"
 - extension member: "E.<G>$8048A6C8BE30A622530249B904B537EB\`1.M"
 
 To illustrate the second bullet, if some other tool cooks up extension metadata including arity suffixes like this:
@@ -62,7 +62,7 @@ To illustrate the second bullet, if some other tool cooks up extension metadata 
 {
   .class 'GroupingName`1' // grouping type
   {  
-    .class 'MarkerName`1' // marker type
+    .class 'MarkerName' // marker type
     {
       .. marker method ..
     }
@@ -80,10 +80,11 @@ Then the docIDs would not match the metadata names:
 # Proposal 
 
 We're proposing to update the metadata design to include arity suffix in the metadata names for grouping and marker types.  
-The metadata names for grouping and marker types would be mangled from the `ExtensionGroupingName` and `ExtensionMarkerName`.  
-`ExtensionGroupingName` and `ExtensionMarkerName` should reflect names of the emitted grouping and marker types from language perspective, not their emitted names. 
+The metadata name for grouping type would be mangled from the `ExtensionGroupingName`.  
+`ExtensionGroupingName` should reflect names of the emitted grouping typs from language perspective, not its emitted names. 
 That would be more conventional.  
-Then we'd produce the docIDs as described above, by taking `ExtensionGroupingName` and `ExtensionMarkerName` and appending an arity suffix as well.
+No change to `ExtensionMarkerName` (name and metadata names match).  
+Then we'd produce the docIDs as described above, by appending an arity suffix to `ExtensionGroupingName` as needed.
 
 For the above example, the compiler would produce:
 ```
@@ -91,7 +92,7 @@ For the above example, the compiler would produce:
 {
   .class '<G>$8048A6C8BE30A622530249B904B537EB`1'<T0> // grouping type with arity suffix
   {  
-    .class '<M>$65CB762EDFDF72BBC048551FDEA778ED`1'<T> // marker type with arity suffix
+    .class '<M>$65CB762EDFDF72BBC048551FDEA778ED'<T> // marker type
     {
       .. marker method ..
     }
@@ -105,12 +106,12 @@ The `ExtensionGroupingName` would remain "<G>$8048A6C8BE30A622530249B904B537EB" 
 The `ExtensionMarkerName` would remain "<M>$65CB762EDFDF72BBC048551FDEA778ED" (both for source and metadata symbols).
 
 Then the docIDs for C# symbols would be:
-- extension block: "E.<G>$8048A6C8BE30A622530249B904B537EB\`1.<M>$65CB762EDFDF72BBC048551FDEA778ED\`1"
+- extension block: "E.<G>$8048A6C8BE30A622530249B904B537EB\`1.<M>$65CB762EDFDF72BBC048551FDEA778ED"
 - extension member: "E.<G>$8048A6C8BE30A622530249B904B537EB\`1.M"
 
 And the docIDs for VB metadata symbols would be:
-- extension grouping type: "E.<G>$8048A6C8BE30A622530249B904B537EB\`1.<M>$65CB762EDFDF72BBC048551FDEA778ED\`1"
-- extension marker type: "E.<G>$8048A6C8BE30A622530249B904B537EB\`1.<M>$65CB762EDFDF72BBC048551FDEA778ED\`1"
+- extension grouping type: "E.<G>$8048A6C8BE30A622530249B904B537EB\`1"
+- extension marker type: "E.<G>$8048A6C8BE30A622530249B904B537EB\`1.<M>$65CB762EDFDF72BBC048551FDEA778ED"
 - extension member: "E.<G>$8048A6C8BE30A622530249B904B537EB\`1.M"
 
 Everything aligns.
@@ -121,7 +122,7 @@ And if some other tool cooks up extension metadata without arity suffix like thi
 {
   .class 'GroupingName'<T0> // grouping type (without arity suffix)
   {  
-    .class 'MarkerName'<T> // marker type (without arity suffix)
+    .class 'MarkerName'<T> // marker
     {
       .. marker method ..
     }
@@ -132,7 +133,7 @@ And if some other tool cooks up extension metadata without arity suffix like thi
 }
 ```
 then the docIDs would be:
-- extension block: "E.GroupingType\`1.MarkerType\`1"
+- extension block: "E.GroupingType\`1.MarkerType"
 - extension member: "E.GroupingType\`1.M"
 
 Those docIDs are not ideal (they differ from metadata names), but that's not a new problem.
