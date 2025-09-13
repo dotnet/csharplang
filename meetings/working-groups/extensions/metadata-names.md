@@ -60,9 +60,9 @@ To illustrate the second bullet, if some other tool cooks up extension metadata 
 ```
 .class E
 {
-  .class 'GroupingName`1' // grouping type
+  .class 'GroupingType`1'<T0> // grouping type
   {  
-    .class 'MarkerName' // marker type
+    .class 'MarkerType'<T> // marker type
     {
       .. marker method ..
     }
@@ -120,9 +120,9 @@ And if some other tool cooks up extension metadata without arity suffix like thi
 ```
 .class E
 {
-  .class 'GroupingName'<T0> // grouping type (without arity suffix)
+  .class 'GroupingType'<T0> // grouping type (without arity suffix)
   {  
-    .class 'MarkerName'<T> // marker
+    .class 'MarkerType'<T> // marker
     {
       .. marker method ..
     }
