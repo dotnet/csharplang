@@ -36,24 +36,12 @@ with corresponding metadata:
 }
 ```
 
-**If we do include an arity suffix** when producing docIDs for extensions, then the docIDs don't match the metadata names.
-
-The docIDs for the example would differ from the names in metadata:
-- extension block: "E.<G>$8048A6C8BE30A622530249B904B537EB\`1.<M>$65CB762EDFDF72BBC048551FDEA778ED"
-- extension member: "E.<G>$8048A6C8BE30A622530249B904B537EB\`1.M"
-
-
-**If we don't include an arity suffix**, then:
-- docIDs produced from VB symbols on extension metadata will diverge from those produce from C# symbols. VB doesn't have the concept of extension, so will have regular handling for types (which include an arity suffix)
+**If we do include an arity suffix** when producing docIDs for extensions, then:
+- the docIDs don't match the metadata names.
 - if someone makes metadata for an extension type using some other tool, and they do include the arity suffix in the metadata names of grouping types, then docIDs won't match metadata names again.
 
-To illustrate the first bullet, the docIDs from C# source or metadata for the example would be:
-- extension block: "E.<G>$8048A6C8BE30A622530249B904B537EB.<M>$65CB762EDFDF72BBC048551FDEA778ED"
-- extension member: "E.<G>$8048A6C8BE30A622530249B904B537EB.M"
-
-But the docIDs from VB metadata would differ from those from C#:
-- extension grouping type: "E.<G>$8048A6C8BE30A622530249B904B537EB\`1"
-- extension marker type: "E.<G>$8048A6C8BE30A622530249B904B537EB\`1.<M>$65CB762EDFDF72BBC048551FDEA778ED"
+To illustrate the first bullet, the docIDs for the example would differ from the names in metadata:
+- extension block: "E.<G>$8048A6C8BE30A622530249B904B537EB\`1.<M>$65CB762EDFDF72BBC048551FDEA778ED"
 - extension member: "E.<G>$8048A6C8BE30A622530249B904B537EB\`1.M"
 
 To illustrate the second bullet, if some other tool cooks up extension metadata including arity suffixes like this:
@@ -74,8 +62,22 @@ To illustrate the second bullet, if some other tool cooks up extension metadata 
 ```
 
 Then the docIDs would not match the metadata names:
-- extension block: "E.GroupingName.MarkerName"
-- extension member: "E.GroupingName.M"
+- extension block: "E.GroupingName\`1\`1.MarkerName"
+- extension member: "E.GroupingName\`1\`1.M"
+
+
+**If we don't include an arity suffix**, then:
+- docIDs produced from VB symbols on extension metadata will diverge from those produce from C# symbols. VB doesn't have the concept of extension, so will have regular handling for types (which include an arity suffix)
+
+To illustrate that issue, the docIDs from C# source or metadata for the example would be:
+- extension block: "E.<G>$8048A6C8BE30A622530249B904B537EB.<M>$65CB762EDFDF72BBC048551FDEA778ED"
+- extension member: "E.<G>$8048A6C8BE30A622530249B904B537EB.M"
+
+But the docIDs from VB metadata would differ from those from C#:
+- extension grouping type: "E.<G>$8048A6C8BE30A622530249B904B537EB\`1"
+- extension marker type: "E.<G>$8048A6C8BE30A622530249B904B537EB\`1.<M>$65CB762EDFDF72BBC048551FDEA778ED"
+- extension member: "E.<G>$8048A6C8BE30A622530249B904B537EB\`1.M"
+
 
 # Proposal 
 
@@ -84,7 +86,7 @@ The metadata name for grouping type would be mangled from the `ExtensionGrouping
 `ExtensionGroupingName` should reflect names of the emitted grouping typs from language perspective, not its emitted names. 
 That would be more conventional.  
 No change to `ExtensionMarkerName` (name and metadata names match).  
-Then we'd produce the docIDs as described above, by appending an arity suffix to `ExtensionGroupingName` as needed.
+Then we'd produce the docIDs as described above, by appending an arity suffix to `ExtensionGroupingName` in a way consistent to the current handling of regular generic types.
 
 For the above example, the compiler would produce:
 ```
@@ -177,7 +179,6 @@ Takes a name followed by type argument list (which provides arity), looks up by 
 
 ## Metadata names and metadata loading
 The C# and VB compilers generally appends the arity suffix for generic types, to make the metadata name for a named type. There's some exceptions (notably EE named type symbols).
-For extension grouping types, we use the grouping names as-is, without appending a suffix. The grouping names are the metadata names.
 
 When loading types from metadata, the C# and VB compilers remove the arity suffix when it matches the arity found in metadata (see `MetadataHelpers.UnmangleMetadataNameForArity`).
 
