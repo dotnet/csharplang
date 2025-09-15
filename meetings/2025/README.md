@@ -35,6 +35,8 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ### Wed Sep 10, 2025
 
+[C# Language Design Meeting for September 10th, 2025](https://github.com/dotnet/csharplang/blob/main/meetings/2025/LDM-2025-09-10.md)
+
 - Unions overview
 
 ### Wed Aug 27, 2025
