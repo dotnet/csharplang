@@ -23,9 +23,9 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ### Mon Sep 22, 2025
 
-### Wed Sep 17, 2025
+### Wed Sep 17, 2025 (2nd hour only)
 
-- [Annotating members as `unsafe`](https://github.com/dotnet/designs/pull/330) (Andy) (2nd hour)
+- [Annotating members as `unsafe`](https://github.com/dotnet/designs/pull/330) (Andy)
 
 ### Wed Sep 10, 2025
 
