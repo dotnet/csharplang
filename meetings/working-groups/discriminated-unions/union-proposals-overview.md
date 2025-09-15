@@ -1,6 +1,6 @@
 # Union proposals overview
 
-**Umbrella issue**: https://github.com/dotnet/csharplang/issues/9582
+**Umbrella issue**: https://github.com/dotnet/csharplang/issues/9662
 
 - [Union proposals overview](#union-proposals-overview)
   - [Unions](#unions)

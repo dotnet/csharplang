@@ -31,11 +31,11 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 - [Annotating members as `unsafe`](https://github.com/dotnet/designs/pull/330) (Andy)
 
+## C# Language Design Notes for 2025
+
 ### Wed Sep 10, 2025
 
-- Consolidated [Unions](https://github.com/dotnet/csharplang/blob/main/proposals/unions.md) proposal - review and open issues. (Mads)
-
-## C# Language Design Notes for 2025
+- Unions overview
 
 ### Wed Aug 27, 2025
 

@@ -1,6 +1,6 @@
 # Unions
 
-Champion issue: https://github.com/dotnet/csharplang/issues/8928
+Champion issue: https://github.com/dotnet/csharplang/issues/9662
 
 ## Summary
 [summary]: #summary
