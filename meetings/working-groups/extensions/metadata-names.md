@@ -81,9 +81,9 @@ But the docIDs from VB metadata would differ from those from C#:
 
 # Proposal 
 
-We're proposing to update the metadata design to include arity suffix in the metadata names for grouping types.  
-The metadata name for grouping type would be mangled from the `ExtensionGroupingName`.  
-`ExtensionGroupingName` should reflect names of the emitted grouping typs from language perspective, not its emitted names. 
+We're proposing to update the metadata design to include arity suffix to the `ExtensionGroupingName`
+to compose the metadata name for grouping types.  
+`ExtensionGroupingName` should reflect names of the emitted grouping types from language perspective, not its emitted names. 
 That would be more conventional.  
 No change to `ExtensionMarkerName` (name and metadata names match).  
 Then we'd produce the docIDs as described above, by appending an arity suffix to `ExtensionGroupingName` in a way consistent to the current handling of regular generic types.
@@ -149,7 +149,7 @@ Given that only the compiler and docIDs make use of grouping types, there would 
 
 # Alternative proposals
 
-We also brainstormed a design where docIDs for extensions would be produced by taking `ExtensionGroupingName`, would strip any arity suffix (to deal with metadata from another tool), then would proceed as usual (add an arity suffix.
+We also brainstormed a design where docIDs for extensions would be produced by taking `ExtensionGroupingName`, would strip any arity suffix (to deal with metadata from another tool), then would proceed as usual (add an arity suffix).
 
 # References
 Some pointers to roslyn codebase for reference:
