@@ -57,7 +57,7 @@ To illustrate the second bullet, if some other tool cooks up extension metadata 
     public void M() => throw; // extension member without implementation
   }
 
-  public static void M(this int i) { } // implementation method
+  public static void M<T>(this int i) { } // implementation method
 }
 ```
 
@@ -65,9 +65,13 @@ Then the docIDs would not match the metadata names:
 - extension block: "E.GroupingName\`1\`1.MarkerName"
 - extension member: "E.GroupingName\`1\`1.M"
 
+And when producing docIDs for constructed symbols, we'd end up with both type arguments and arity suffixes:
+- extension block: "E.GroupingName\`1{System.Int32}.MarkerName"
+- extension member: "E.GroupingName\`1{System.Int32}.M"
+
 
 **If we don't include an arity suffix**, then:
-- docIDs produced from VB symbols on extension metadata will diverge from those produce from C# symbols. VB doesn't have the concept of extension, so will have regular handling for types (which include an arity suffix)
+- docIDs produced from VB symbols on extension metadata will diverge from those produced from C# symbols. VB doesn't have the concept of extension, so will have regular handling for types (which include an arity suffix)
 
 To illustrate that issue, the docIDs from C# source or metadata for the example would be:
 - extension block: "E.<G>$8048A6C8BE30A622530249B904B537EB.<M>$65CB762EDFDF72BBC048551FDEA778ED"
@@ -81,8 +85,7 @@ But the docIDs from VB metadata would differ from those from C#:
 
 # Proposal 
 
-We're proposing to update the metadata design to include arity suffix to the `ExtensionGroupingName`
-to compose the metadata name for grouping types.  
+We're proposing to compose the metadata name for grouping types by appending an arity suffix to `ExtensionGroupingName`.  
 `ExtensionGroupingName` should reflect names of the emitted grouping types from language perspective, not its emitted names. 
 That would be more conventional.  
 No change to `ExtensionMarkerName` (name and metadata names match).  
