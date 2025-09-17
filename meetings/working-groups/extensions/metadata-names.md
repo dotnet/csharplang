@@ -32,7 +32,7 @@ with corresponding metadata:
     public void M() => throw; // extension member without implementation
   }
 
-  public static void M(this int i) { } // implementation method
+  public static void M<T>(this int i) { } // implementation method
 }
 ```
 
@@ -104,7 +104,7 @@ For the above example, the compiler would produce:
     public void M() => throw; // extension member without implementation
   }
 
-  public static void M(this int i) { } // implementation method
+  public static void M<T>(this int i) { } // implementation method
 }
 ```
 The `ExtensionGroupingName` would remain "<G>$8048A6C8BE30A622530249B904B537EB" (both for source and metadata symbols).
@@ -134,7 +134,7 @@ And if some other tool cooks up extension metadata without arity suffix like thi
     public void M() => throw; // extension member without implementation
   }
 
-  public static void M(this int i) { } // implementation method
+  public static void M<T>(this int i) { } // implementation method
 }
 ```
 then the docIDs would be:
