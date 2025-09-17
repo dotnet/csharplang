@@ -147,7 +147,7 @@ public union Pet
 
 ## Target-typed static member access
 
-- **Proposal**: [Target-typed static member lookup](https://github.com/dotnet/csharplang/blob/main/proposals/target-typed-static-member-lookup.md)
+- **Proposal**: [Target-typed static member access](https://github.com/dotnet/csharplang/blob/main/proposals/target-typed-static-member-access.md)
 - **LDM**: Approved. 
 - **Dependencies**: None. Informed by union scenarios.
 
