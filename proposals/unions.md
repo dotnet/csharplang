@@ -266,10 +266,10 @@ var value = pet switch
 
 ### Union declarations
 
-Union declarations are a succinct and opinionated way of declaring union types in C#. They declare a struct which uses a single object reference for storage, which means that:
+Union declarations are a succinct and opinionated way of declaring union types in C#. They declare a struct which uses a single object reference for storing its `Value`, which means:
 
-* Any value types among their case types will be boxed on entry.
-* Union values only contain a single pointer, which means they are protected from "tearing".
+* *Boxing*: Any value types among their case types will be boxed on entry.
+* *Compactness*: Union values only contain a single field.
 
 The intent is for union declarations to cover the vast majority of use cases quite nicely. The two main reasons for hand coding specific union types rather than use union declarations are expected to be:
 
@@ -382,7 +382,8 @@ public record struct Pet : IUnion, IUnion<Pet>
     * Too bad. Use `==` for your null check instead of a pattern match.
     * Let the `null` pattern (and implicit null check in other patterns) apply to both the union value and its `Value` property: `u is null ==> u == null || u.Value == null`.
     * Disallow classes from being union types!
-* The proposed syntax isn't universally loved, particularly when it comes to expressing the case types. Alternatives so far also meet with criticism, but it's possible we will end up making a change. Some top concerns voiced about the current one:
+* The proposed union declaration syntax isn't universally loved, particularly when it comes to expressing the case types. Alternatives so far also meet with criticism, but it's possible we will end up making a change. Some top concerns voiced about the current one:
     * Commas as separators between case types may seem to imply that order matters.
     * Parenthesized lists look too much like primary constructors (despite not having parameter names).
     * Too different from enums, which have their "cases" in curly braces.
+* While union declarations generate structs with a single reference field, they are still somewhat susceptible to unexpected behavior when used in a concurrent context. For instance, if a user-defined function member dereferences `this` more than once, the containing variable may have been reassigned as a whole by another thread in between the two accesses. The compiler could generate code to copy `this` to a local when necessary. Should it? In general, what degree of concurrency resiliency is desirable and reasonably attainable?
