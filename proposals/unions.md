@@ -175,7 +175,13 @@ The union behaviors are generally implemented by means of the basic union patter
 
 #### Union conversions
 
-A *union conversion* implicitly converts to a union type from each of its case types. It is sugar for calling the union's constructor for the given case type:
+A *union conversion* implicitly converts to a union type from each of its case types. Specifically, there's a union conversion to a union type `U` from a type or expression `E` if there's a standard implicit conversion from `E` to a type `C` and `C` is a case type of `U`.
+
+A union conversion is not itself a standard implicit conversion. It may therefore not participate in a user-defined implicit conversion or another union conversion.
+
+There are no explicit union conversions beyond the implicit union conversions. Thus, even if there is an explicit conversion from `E` to a union's case type `C`, that doesn't mean there is an explicit conversion from `E` to that union type.
+
+A union conversion is executed by calling the union's constructor for the given case type:
 
 ``` c#
 Pet pet = dog;
@@ -183,7 +189,7 @@ Pet pet = dog;
 Pet pet = new Pet(dog);
 ```
 
-It is not an error if more than one constructor overload applies. Instead, one is chosen in an implementation-defined manner. Note that, per the well-formedness rules, the observable behavior of these constructors is assumed to be the same.
+It is not an ambiguity error if more than one constructor overload applies. Instead, one is chosen in an implementation-defined manner. Note that, per the well-formedness rules, the observable behavior of these constructors is assumed to be the same.
 
 #### Union matching
 
@@ -260,10 +266,10 @@ var value = pet switch
 
 ### Union declarations
 
-Union declarations are a succinct and opinionated way of declaring union types in C#. They declare a struct which uses a single object reference for storage, which means that:
+Union declarations are a succinct and opinionated way of declaring union types in C#. They declare a struct which uses a single object reference for storing its `Value`, which means:
 
-* Any value types among their case types will be boxed on entry.
-* Union values are pointer-length in size, and thus protected from "tearing".
+* *Boxing*: Any value types among their case types will be boxed on entry.
+* *Compactness*: Union values only contain a single field.
 
 The intent is for union declarations to cover the vast majority of use cases quite nicely. The two main reasons for hand coding specific union types rather than use union declarations are expected to be:
 
@@ -329,7 +335,7 @@ A union declaration is lowered to a record struct declaration with
 * a public constructor for each case type,
 * any members in the union declaration's body.
 
-If any user-declared members conflict with generated members, only the user-declared members are kept.
+It is an error for user-declared members to conflict with generated members.
 
 *Note:* The use of a record struct means union declarations have the value-based equality and other behaviors that come with that.
 
@@ -376,7 +382,8 @@ public record struct Pet : IUnion, IUnion<Pet>
     * Too bad. Use `==` for your null check instead of a pattern match.
     * Let the `null` pattern (and implicit null check in other patterns) apply to both the union value and its `Value` property: `u is null ==> u == null || u.Value == null`.
     * Disallow classes from being union types!
-* The proposed syntax isn't universally loved, particularly when it comes to expressing the case types. Alternatives so far also meet with criticism, but it's possible we will end up making a change. Some top concerns voiced about the current one:
+* The proposed union declaration syntax isn't universally loved, particularly when it comes to expressing the case types. Alternatives so far also meet with criticism, but it's possible we will end up making a change. Some top concerns voiced about the current one:
     * Commas as separators between case types may seem to imply that order matters.
     * Parenthesized lists look too much like primary constructors (despite not having parameter names).
     * Too different from enums, which have their "cases" in curly braces.
+* While union declarations generate structs with a single reference field, they are still somewhat susceptible to unexpected behavior when used in a concurrent context. For instance, if a user-defined function member dereferences `this` more than once, the containing variable may have been reassigned as a whole by another thread in between the two accesses. The compiler could generate code to copy `this` to a local when necessary. Should it? In general, what degree of concurrency resiliency is desirable and reasonably attainable?
