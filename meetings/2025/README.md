@@ -25,11 +25,13 @@ All schedule items must have a public issue or checked-in proposal that can be l
     - Syntax
     - Other open issues
 
-### Wed Sep 17, 2025 (2nd hour only)
-
-- [Annotating members as `unsafe`](https://github.com/dotnet/designs/pull/330) (Andy)
-
 ## C# Language Design Notes for 2025
+
+### Wed Sep 17, 2025
+
+[C# Language Design Meeting for September 17th, 2025](https://github.com/dotnet/csharplang/blob/main/meetings/2025/LDM-2025-09-17.md)
+
+- Unsafe evolution
 
 ### Wed Sep 10, 2025
 
