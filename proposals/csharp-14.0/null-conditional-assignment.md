@@ -119,7 +119,7 @@ void Case1(MyStruct a)
 void Case2(MyStruct? a)
     => a?.b = c; // `a.Value` is not a variable, so there's no reasonable meaning to define for the assignment
 ```
-[readonly-setter-calls-on-non-variables.md](/proposals/readonly-setter-calls-on-non-variables.md) proposes relaxing this, in which case we could define a reasonable behavior for `a?.b = c`, when `a` is a `System.Nullable<T>` and `b` is a property with a readonly setter.
+[readonly-setter-calls-on-non-variables.md](https://github.com/dotnet/csharplang/blob/main/proposals/readonly-setter-calls-on-non-variables.md) proposes relaxing this, in which case we could define a reasonable behavior for `a?.b = c`, when `a` is a `System.Nullable<T>` and `b` is a property with a readonly setter.
 
 ### Specification
 The *null conditional assignment* grammar is defined as follows:
