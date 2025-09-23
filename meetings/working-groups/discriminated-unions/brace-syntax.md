@@ -415,7 +415,7 @@ Downsides:
 
 #### Variation: Conditional
 
-A simple names Are declarations if other declarations also exist, otherwise they are type references.
+Simple names are declarations if other declarations also exist in the same union declaration, otherwise they are type references.
 
 This alternative determines the meaning of simple names depending on the meaning of other members.  If any other member has a parameter list then simple names are member declarations too.
 
