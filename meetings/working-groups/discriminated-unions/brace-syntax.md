@@ -382,7 +382,7 @@ Other single character punctuation options:
 ^Cat,       
 `Cat,       // finally the back-tick
 :Cat,
-=Cat,       // maybe
+=Cat,       // maybe..
 >Cat,
 !Cat,
 ?Cat,
@@ -571,19 +571,21 @@ Downsides:
 
 ### Declarations Outside Braces
 
-This alternative moves away from using braces as a means of listing case types, allowing declarations to occur in a type list separate from any body.
+This alternative moves away from using braces as a means of listing case types. It allows both case member declarations and type references to be included in a single list but leave the brace syntax for other kinds of declarations.
 
 ```csharp
 union Pet(Cat, Dog, Bird);  // type references
 
 union Gate(Locked(), Closed(), Open(float Percent));  // declarations
+
+union Result<T>(T, Error(string Message)); // references and declarations.
 ```
 
 It has all the issues as the braces syntax, requiring the same kinds of solutions, but does not try to be enum-like.
 
 #### Variation: Leaving the Nest
 
-A variation of this proposal allows for declarations both inside and outside of the braces. Declarations inside the braces become nested, while declarations outside the braces become types in the same declaration scope as the union.
+A variation of this proposal allows for declarations both inside and outside of the braces. Declarations inside the braces become nested, while declarations outside the braces become types in the same declaration scope as the union. Type references can appear in both, but simple names are considered type references outside the braces and declarations inside the braces. The is no syntax that inverts the meaning of simple names inside the braces.
 
 ```csharp
 namespace NS;
@@ -597,8 +599,19 @@ union Gate
 
 union Gate
 {
-    Locked(),   // declaration of Gate.Locked
-    Closed(),
+    Locked,   // declaration of Gate.Locked
+    Closed,
     Open(float Percent)
+}
+
+union Result<T>
+(
+    T,                        // reference to type T
+    Error(string Message)     // declaration of NS.Error
+}
+
+union Result<T>(T)            // reference to type T
+{
+    Error(string Message)     // declaration of Result<T>.Error
 }
 ```
