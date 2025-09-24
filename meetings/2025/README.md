@@ -21,9 +21,9 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ### Wed Sep 24, 2025
 
-- [Unions](https://github.com/dotnet/csharplang/blob/main/proposals/unions.md) (Mads & Matt)
-    - Syntax
-    - Other open issues
+- Union syntax (Joseph, Matt and Mads)
+    - https://github.com/dotnet/csharplang/blob/main/meetings/working-groups/discriminated-unions/allows.md
+    - https://github.com/dotnet/csharplang/blob/main/meetings/working-groups/discriminated-unions/brace-syntax.md
 
 ## C# Language Design Notes for 2025
 
