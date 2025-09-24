@@ -92,7 +92,7 @@ union SomeUnion
 }
 ```
 
-To disambiguate a simple name to force it to be a declaration instead of a type reference add an empty parameter list.
+To override a simple name to be a declaration instead of a type reference add an empty parameter list.
 
 ```csharp
 using Locked=Int32;
@@ -259,7 +259,7 @@ union Pet
 
 * Simple name declarations can accidentally become references if same named types are introduced in scope.
 
-    > This may not be a big concern, since this kind of change will likely impact use sites and cause build breaks.  And it can be avoided be using parentheses to disambiguate.
+    > This may not be a big concern, since this kind of change will likely impact use sites and cause build breaks. And it can be avoided be using parentheses.
 
     > Possible solution may be to add a warning when a simple name matches a type in scope and the union also has member declarations.
 
@@ -288,7 +288,7 @@ The inability to be certain about the nature of simple names in the primary prop
 
 ### Simple Names are Type References
 
-In this alternative, all simple names are interpreted as type references. The only way to specify a member declaration in the member list is to include a parameter list, if only an empty one.
+In this alternative, all simple names are interpreted as type references. The only way to get one to mean a member declaration is to include an empty parameter list.
 
 ```csharp
 union Pet 
@@ -446,7 +446,7 @@ union Result<T>
 }
 ```
 
-A variant of this variation could introduce an optional syntax to disambiguate, but would have all the same issues as the other alternate syntaxes.
+A variant of this variation could, of course, introduce an optional syntax to specify references, but would have all the same issues as the other alternate syntaxes.
 
 ```csharp
 union Result<T>
@@ -458,7 +458,7 @@ union Result<T>
 
 Downsides:
 * The condition makes it cumbersome to understand the meaning of simple names.
-* It still needs a disambiguation syntax.
+* It still needs additional syntax in some cases.
 
 ### Separate Indicator
 
@@ -485,7 +485,7 @@ union Gate
 }
 ```
 
-To have a mix of both simple named type references and declarations, you must disambiguate by adding empty parameter lists to the declarations.
+To have a mix of both simple named type references and declarations you must use empty parameter lists to get have a simple name declaration.
 
 ```csharp
 record Unknown;
