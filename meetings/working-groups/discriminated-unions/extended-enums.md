@@ -7,7 +7,7 @@ It also aims to consolidate the majority of the design space and feedback over m
 - [#113](https://github.com/dotnet/csharplang/issues/113) - Main champion issue for discriminated unions, 7+ years of discussion and multiple LDM meetings
 
 as well as:
-<summary>
+<details>
 - [#75](https://github.com/dotnet/csharplang/issues/75) - Early comprehensive discussion exploring DU syntax options including enum class
 - [#2962](https://github.com/dotnet/csharplang/discussions/2962) - Major discussion on Andy Gocke's DU proposal, debating enum class vs enum struct
 - [#7016](https://github.com/dotnet/csharplang/issues/7016) - Fast, efficient unions proposal focusing on struct-based implementations
@@ -22,7 +22,7 @@ as well as:
 - [#8926](https://github.com/dotnet/csharplang/discussions/8926) - Extensive discussion on Option<T> as canonical DU use case
 - [#7010](https://github.com/dotnet/csharplang/discussions/7010) - Union types discussion heavily featuring Option<T> and Result<T>
 - [#274](https://github.com/dotnet/csharplang/discussions/274) - Java-style class-level enums with methods and constructors
-</summary>
+</details>
 
 ## 1. Overview
 
