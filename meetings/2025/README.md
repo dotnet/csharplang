@@ -17,7 +17,13 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ### Wed Oct 1, 2025
 
+- Remaining open questions for unions (Matt and Mads)
+
 ### Mon Sep 29, 2025
+
+- Union syntax, continued (Matt and Mads)
+    - Syntax for case type references
+    - Shorthand syntax for unions with case type declarations ("discriminated" unions)
 
 ### Wed Sep 24, 2025
 
