@@ -7,7 +7,7 @@ It also aims to consolidate the majority of the design space and feedback over m
 - [#113](https://github.com/dotnet/csharplang/issues/113) - Main champion issue for discriminated unions, 7+ years of discussion and multiple LDM meetings
 
 <details>
-  <summary>any many more...</summary>
+  <summary>as well as...</summary>
 
   - [#75](https://github.com/dotnet/csharplang/issues/75) - Early comprehensive discussion exploring DU syntax options including enum class
   - [#2962](https://github.com/dotnet/csharplang/discussions/2962) - Major discussion on Andy Gocke's DU proposal, debating enum class vs enum struct
