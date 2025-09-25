@@ -294,10 +294,10 @@ The compiler understands the structure of each case and provides appropriate dec
 
 ### Exhaustiveness
 
-Switch expressions over enhanced shape enums are exhaustive when all cases are handled:
+Enhanced shape enums are similar to classical enums in that they are open by default, but can be potentially 'closed' (see [Closed Enums](https://github.com/dotnet/csharplang/blob/main/proposals/closed-enums.md)).  Open and closed enums with non-integral backing types behave similarly to their integral counterparts.  Closed versus open shape enums treat pattern matching as exhaustive or not depending on if all declared values were explicitly matched.
 
 ```csharp
-enum Status { Active, Pending(DateTime since), Inactive }
+closed enum Status { Active, Pending(DateTime since), Inactive }
 
 // Compiler knows this is exhaustive - no default needed
 var description = status switch
