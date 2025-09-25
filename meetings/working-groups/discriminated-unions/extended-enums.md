@@ -1,6 +1,6 @@
 # Discriminated Unions and Enhanced Enums for C#
 
-This proposal extends C#'s union capabilities by introducing enhanced enums as algebraic sum types. While [type unions](https://raw.githubusercontent.com/dotnet/csharplang/refs/heads/main/proposals/unions.md) solve the problem of values that can be one of several existing types, enhanced enums provide rich, exhaustive case-based types with associated data, building on the familiar enum keyword.
+This proposal extends C#'s union capabilities by introducing enhanced enums as [algebraic sum types](https://en.wikipedia.org/wiki/Sum_type). While [type unions](https://raw.githubusercontent.com/dotnet/csharplang/refs/heads/main/proposals/unions.md) solve the problem of values that can be one of several existing types, enhanced enums provide rich, exhaustive case-based types with associated data, building on the familiar enum keyword.
 
 ## 1. Overview
 
