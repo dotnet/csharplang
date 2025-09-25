@@ -308,8 +308,22 @@ public struct Option<T> : IUnion
     };
     
     // Non-boxing access pattern
-    public bool TryGetValue(out None value) { ... }
-    public bool TryGetValue(out Some value) { ... }
+    public bool TryGetValue(out None value)
+    {
+        value = default;
+        return _discriminant == 1;
+    }
+
+    public bool TryGetValue(out Some value)
+    {
+        if (_discriminant == 2)
+        {
+            value = new Some(_value);
+            return true;
+        }
+        value = default!;
+        return false;
+    }
     
     // Constructors and factories
     public Option(None _) => _discriminant = 1;
