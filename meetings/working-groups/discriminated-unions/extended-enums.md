@@ -386,12 +386,12 @@ public struct Option<T> : IUnion
     }
     
     // Constructors
-    public Option(Option_None _) => _discriminant = 1;
-    public Option(Option_Some<T> some) => (_discriminant, _value) = (2, some.value);
+    public Option(None _) => _discriminant = 1;
+    public Option(Some<T> some) => (_discriminant, _value) = (2, some.value);
     
     // Convenience factories
-    public static Option<T> None => new Option<T>(new Option_None());
-    public static Option<T> Some(T value) => new Option<T>(new Option_Some<T>(value));
+    public static Option<T> None => new Option<T>(new None());
+    public static Option<T> Some(T value) => new Option<T>(new Some<T>(value));
 }
 ```
 
