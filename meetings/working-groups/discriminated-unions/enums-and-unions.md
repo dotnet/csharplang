@@ -90,11 +90,11 @@ The above grammar doesn't provide more than the minimal set of syntax. There are
 
 In both enums and unions, after a semicolon additional members could be provided. Fields. auto-properties, and any other syntax that create additional fields would be prohibited.
 
-## Allow extra members in a partial declaration
+### Allow extra members in a partial declaration
 
 All enums and unions would have a so-called "primary" declaration that lists the union/enum members. Other partial declarations could be allowed, which would allow extra members. Again, no fields would be allowed.
 
-## Allow record bodies in enums
+### Allow record bodies in enums
 
 Enums could be expanded to allow each declaration to have a body, e.g.
 
