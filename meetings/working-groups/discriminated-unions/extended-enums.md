@@ -165,6 +165,8 @@ enum MathConstants : double
 
 These compile to subclasses of `System.Enum` with the appropriate backing field `value__` with the appropriate underlying type. Unlike integral enums, non-integral constant enums require explicit values for each member.
 
+Enhanced constant enums are similar to classical enums in that they are open by default, but can be potentially 'closed' (see [Closed Enums](https://github.com/dotnet/csharplang/blob/main/proposals/closed-enums.md)).  Open and closed enums with non-integral backing types behave similarly to their integral counterparts.  For example, allowing/disallowing conversions from their underlying type, and treating pattern matching as exhaustive or not depending on if all declared values were explicitly matched.
+
 ### Shape Enums
 
 Shape enums are C#'s implementation of algebraic data types, allowing each case to carry different data.
