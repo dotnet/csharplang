@@ -278,7 +278,7 @@ enum class Result<T>
 ```
 
 Members are restricted to:
-- Instance methods, properties and indexers (members that add no additional state)
+- Instance methods, properties, indexers and events.  Note, these must be members that add no additional state. So this does not include auto-properties, or field-backed-events.
 - Static members
 - Nested types
 
