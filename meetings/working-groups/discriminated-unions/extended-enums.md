@@ -155,7 +155,7 @@ enum Priority : string
     High = "high"
 }
 
-enum MathConstants : double
+enum IrrationalConstants : double
 {
     Pi = 3.14159265359,
     E = 2.71828182846,
