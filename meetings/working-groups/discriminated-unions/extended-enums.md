@@ -71,7 +71,7 @@ This proposal leaves type unions unchanged. Enhanced enums are built independent
 Enhanced enums follow these core principles:
 
 - **Progressive enhancement**: Simple enums stay simple; complexity is opt-in
-- **Exhaustiveness**: The compiler knows all possible cases.  See [Closed Enums](https://github.com/dotnet/csharplang/blob/main/proposals/closed-enums.md) for more details.
+- **Exhaustiveness**: The compiler knows all possible cases. Traditional "open" enums allow any value of the underlying type to be cast to the enum, even values not explicitly declared. "Closed" enums (see [Closed Enums proposal](https://github.com/dotnet/csharplang/blob/main/proposals/closed-enums.md)) restrict values to only those declared, enabling true exhaustiveness. **Shape enums are always exhaustive** - there's no way to create values outside the declared cases.
 - **Data carrying**: Each case can carry along its own constituent data in a safe and strongly typed manner.
 - **Familiar syntax**: Builds on existing enum concepts
 
@@ -91,7 +91,7 @@ enum TranscendentalConstants : double { Pi = 3.14159, E = 2.71828 }
 
 #### Shape Declarations
 
-A shape enum (ADT) is created by EITHER:
+A shape enum (C#'s implementation of algebraic sum types) is created by EITHER:
 - Adding `class` or `struct` after `enum`, OR (inclusive)  
 - Having a parameter list on any enum member
 
@@ -109,7 +109,7 @@ enum Result { Ok(int value), Error }    // implicitly 'enum class'
 enum class Result { Ok(int value), Error }
 ```
 
-Shape declaration members have `record`-like semantics around concepts like equality.
+Shape declaration members have `record`-like semantics, meaning equality is value-based - two instances are equal if they have the same case and equal data values (like records).
 
 #### Data-Carrying Cases
 
@@ -187,7 +187,7 @@ enum FileOperation
 }
 ```
 
-Each case defines a constructor (and corresponding destructor) pattern. Cases without parameter lists are singletons, while cases with parameters create new instances.
+Each case defines a constructor (and corresponding deconstructor) pattern. Cases without parameter lists are singletons, while cases with parameters create new instances.
 
 #### Reference vs Value Semantics
 
@@ -419,7 +419,7 @@ enum OrderStatus
     
     public bool IsComplete => this switch
     {
-        Delivered(_) => true,
+        Delivered => true,
         _ => false
     };
 }
@@ -437,7 +437,7 @@ enum class Result<T, E>
     
     public Result<U, E> Map<U>(Func<T, U> mapper) => this switch
     {
-        Ok(var value) => new Ok(mapper(value)),
+        Ok(var value) => new Ok(mapper(value)),  // Note: Constructor syntax TBD, see Open Question #7
         Error(var err) => new Error(err)
     };
 }
@@ -454,6 +454,8 @@ enum struct Option<T>
     };
 }
 ```
+
+*Note: The exact constructor syntax for shape enum cases is still being determined. See [Open Question #7](#10-open-questions) for the options under consideration.*
 
 ### State Machines
 
@@ -489,7 +491,7 @@ Extending the existing `enum` keyword rather than introducing new syntax provide
 
 - **Familiarity**: Developers already understand enums conceptually
 - **Progressive disclosure**: Simple cases remain simple
-- **Cognitive load**: One concept (enums) instead of two (enums + ADTs)
+- **Cognitive load**: One concept (enums) instead of two (enums + algebraic sum types)
 - **Migration path**: Existing enums can be enhanced incrementally
 
 ## 9. Performance Characteristics
@@ -548,7 +550,7 @@ Enhanced enums maintain compatibility with:
 - Debugger visualization
 - Binary serialization (with caveats for shape enums)
 
-### 10. Open Questions
+## 10. Open Questions
 
 Several design decisions remain open:
 
@@ -559,6 +561,7 @@ Several design decisions remain open:
 5. Enums *could* allow for state, outside of the individual shape cases.  There is a clear place to store these in both the `enum class` and `enum struct` layouts.  Should we allow this? Or could it be too confusing?
 6. Enums *could* allow for constructors, though they would likely need to defer to an existing case.  Should we allow this?  Similarly, should individual cases allow for multiple constructors?  Perhaps that is better by allowing cases to have their own record-like bodies.
 7. No syntax has been presented for getting instances of data-carrying enum-members.  `new OrderStatus.Processing(...)` seems heavyweight, esp. compared to `OrderState.Pending`.  Perhaps we keep construction of data-carrying values simple, and just include the argument list, without the need for `new`.
+8. Should enum cases support independent generic parameters? For example: `enum Result { Ok<T>(T value), Error(string message) }`. This would likely only be feasible for `enum class` implementations, not `enum struct` due to layout constraints.
 
 ## Appendix A: Grammar Changes
 
