@@ -555,6 +555,7 @@ Several design decisions remain open:
 3. What should `default(EnumType)` produce for shape enums?
 4. How should enhanced enums interact with System.Text.Json and other serializers?
 5. Enums *could* allow for state, outside of the individual shape cases.  There is a clear place to store these in both the `enum class` and `enum struct` layouts.  Should we allow this? Or could it be too confusing?
+6. Enums *could* allow for constructors, though they would likely need to defer to an existing case.  Should we allow this?  Similarly, should individual cases allow for multiple constructors?  Perhaps that is better by allowing cases to have their own record-like bodies.
 
 ## Appendix A: Grammar Changes
 
