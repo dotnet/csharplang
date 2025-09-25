@@ -346,13 +346,13 @@ enum struct Option<T>
 
 // Conceptually translates to:
 
-// Generated case types
-public readonly struct Option_None { }
-public readonly record struct Option_Some<T>(T value);
-
 // Generated union with optimized storage
 public struct Option<T> : IUnion
 {
+    // Generated case types
+    public readonly struct None { }
+    public readonly record struct Some<T>(T value);
+
     // Optimized layout: discriminator + space for largest case
     private byte _discriminant;
     private T _value;  // Space for Some's data
@@ -360,25 +360,25 @@ public struct Option<T> : IUnion
     // Implements IUnion.Value
     object? IUnion.Value => _discriminant switch
     {
-        1 => new Option_None(),
-        2 => new Option_Some<T>(_value),
+        1 => newNone(),
+        2 => new Some<T>(_value),
         _ => null
     };
     
     // Non-boxing access pattern
     public bool HasValue => _discriminant != 0;
     
-    public bool TryGetValue(out Option_None value)
+    public bool TryGetValue(out None value)
     {
         value = default;
         return _discriminant == 1;
     }
     
-    public bool TryGetValue(out Option_Some<T> value)
+    public bool TryGetValue(out Some<T> value)
     {
         if (_discriminant == 2)
         {
-            value = new Option_Some<T>(_value);
+            value = new Some<T>(_value);
             return true;
         }
         value = default!;
