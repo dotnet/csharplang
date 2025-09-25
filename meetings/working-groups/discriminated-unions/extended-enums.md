@@ -56,7 +56,7 @@ Type unions are the lower-level building block—you use them when the types alr
 
 ### From Type Unions to Discriminated Unions
 
-Type unions solve the fundamental problem of representing a value that can be one of several types. However, the most common use case for unions is the discriminated union pattern, where:
+Type unions solve the fundamental problem of representing a value that can be one of several types. However, a particularly important use case for unions is the discriminated union pattern, where:
 
 - The cases are defined together as a logical unit
 - Each case may carry different data
