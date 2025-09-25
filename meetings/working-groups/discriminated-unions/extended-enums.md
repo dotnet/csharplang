@@ -71,9 +71,9 @@ This proposal leaves type unions unchanged. Enhanced enums are built independent
 Enhanced enums follow these core principles:
 
 - **Progressive enhancement**: Simple enums stay simple; complexity is opt-in
-- **Exhaustiveness**: The compiler tracks all declared cases. Both constant and shape enums can be open or closed (see [Closed Enums proposal](https://github.com/dotnet/csharplang/blob/main/proposals/closed-enums.md)). Open enums signal that the enum author may add new cases in future versions—consumers must handle unknown cases defensively (e.g., with a default branch). Closed enums guarantee their case set is complete and will never change—the compiler ensures exhaustive matching without requiring a default case. For constant enums, "open" means values outside the declared set can be cast to the enum type. For shape enums, "open" means the author reserves the right to add new shape cases in the future, while "closed" promises the current set of shapes is final.
 - **Data carrying**: Each case can carry along its own constituent data in a safe and strongly typed manner.
-- **Familiar syntax**: Builds on existing enum concepts
+- **Familiar syntax**: Builds on existing enum and record/primary-constructor concepts.
+- **Exhaustiveness**: The compiler tracks all declared cases. Both constant and shape enums can be open or closed (see [Closed Enums proposal](https://github.com/dotnet/csharplang/blob/main/proposals/closed-enums.md)). Open enums signal that the enum author may add new cases in future versions—consumers must handle unknown cases defensively (e.g., with a default branch). Closed enums guarantee their case set is complete and will never change—the compiler ensures exhaustive matching without requiring a default case. For constant enums, "open" means values outside the declared set can be cast to the enum type. For shape enums, "open" means the author reserves the right to add new shape cases in the future, while "closed" promises the current set of shapes is final.
 
 ### Syntax Extensions
 
