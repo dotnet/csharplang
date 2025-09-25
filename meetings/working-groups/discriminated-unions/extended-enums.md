@@ -151,6 +151,9 @@ enum Result
 }
 ```
 
+This syntax isn't just similar to records, .each case with a parameter list is shorthand for defining a nested `record` type with that name and those parameters. For `enum class`, the compiler generates nested `sealed record class` types. For `enum struct`, it generates nested `readonly record struct` types. These are real record types with all the expected record behaviors (equality, deconstruction, etc.).
+
+Note that while these record types are what the enum declaration synthesizes, the union implementation *itself* is free to optimize its internal storage. For example, an `enum struct` might store case data inline rather than storing references to record instances, as long as it can reconstruct the record values when needed (such as for pattern matching or the IUnion.Value property).
 #### Combination Rules
 
 - **Constant enums**: Can use extended base types but NOT have parameter lists
