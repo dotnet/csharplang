@@ -6,7 +6,7 @@ This proposal extends C#'s union capabilities by introducing enhanced enums as [
 
 ### Two Complementary Features
 
-C# will gain two separate features for different modeling needs: type unions (already specified) and enhanced enums (this proposal). These features work together but solve distinct problems in the type system.
+C# will gain two separate features for different modeling needs: [type unions](https://raw.githubusercontent.com/dotnet/csharplang/refs/heads/main/proposals/unions.md) and enhanced enums (this proposal). These features work together but solve distinct problems in the type system.
 
 ### At a Glance
 
