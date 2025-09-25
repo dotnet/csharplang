@@ -141,7 +141,7 @@ enum class Result { Ok(int value), Error }
 
 #### Data-Carrying Cases
 
-Shape enum members can have parameter lists, similar to a record's primary constructor, to carry data:
+Shape enum members can have parameter lists, to carry data:
 
 ```csharp
 enum Result
