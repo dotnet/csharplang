@@ -568,12 +568,7 @@ enum_base
     ;
 
 enum_underlying_type
-    : integral_type
-    | 'bool'
-    | 'char' 
-    | 'float'
-    | 'double'
-    | 'decimal'
+    : simple_type // equivalent to all integral types, fp-types, decimal, bool and char
     | 'string'
     | type_name  // Must resolve to one of the above
     ;
