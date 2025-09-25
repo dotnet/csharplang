@@ -8,6 +8,8 @@ It also aims to consolidate the majority of the design space and feedback over m
 
 as well as:
 <details>
+  <summary>any many more...</summary>
+
   - [#75](https://github.com/dotnet/csharplang/issues/75) - Early comprehensive discussion exploring DU syntax options including enum class
   - [#2962](https://github.com/dotnet/csharplang/discussions/2962) - Major discussion on Andy Gocke's DU proposal, debating enum class vs enum struct
   - [#7016](https://github.com/dotnet/csharplang/issues/7016) - Fast, efficient unions proposal focusing on struct-based implementations
