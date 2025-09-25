@@ -550,10 +550,11 @@ Enhanced enums maintain compatibility with:
 
 Several design decisions remain open:
 
-- **Case type accessibility**: Can users reference the generated nested types directly, or should they remain compiler-only?
-- **Partial enums**: Should enhanced enums support `partial` for source generators?
-- **Default values**: What should `default(EnumType)` produce for shape enums?
-- **Serialization**: How should enhanced enums interact with System.Text.Json and other serializers?
+1. Can users reference the generated nested types directly, or should they remain compiler-only?
+2. Should enhanced enums support `partial` for source generators?
+3. What should `default(EnumType)` produce for shape enums?
+4. How should enhanced enums interact with System.Text.Json and other serializers?
+5. Enums *could* allow for state, outside of the individual shape cases.  There is a clear place to store these in both the `enum class` and `enum struct` layouts.  Should we allow this? Or could it be too confusing?
 
 ## Appendix A: Grammar Changes
 
