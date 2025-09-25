@@ -136,7 +136,7 @@ Shape declaration members have `record`-like semantics, meaning equality is valu
 
 #### Data-Carrying Cases
 
-Shape enum members can have parameter lists to carry data:
+Shape enum members can have parameter lists, similar to a record's primary constructor, to carry data:
 
 ```csharp
 enum Result
@@ -245,9 +245,11 @@ Benefits:
 - Better cache locality
 - Reduced GC pressure
 
+Similar to evolution of `records`, these variations can ship at separate times.
+
 #### Members and Methods
 
-Enhanced enums can contain members just like unions:
+Enhanced enums can contain members just like unions.  This applies to both constant and shape enums.
 
 ```csharp
 enum class Result<T>
@@ -270,8 +272,8 @@ enum class Result<T>
 ```
 
 Members are restricted to:
-- Methods and properties (no additional state)
-- Static members
+- Methods, operators, properties and indexers (members that add no additional state).  Though an open question tracks if we might want to allow additional state in a shape enum.
+- Static members. An open question tracks if that could potentially include consructors.
 - Nested types
 
 ## 5. Pattern Matching
