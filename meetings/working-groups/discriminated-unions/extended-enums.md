@@ -560,12 +560,7 @@ Several design decisions remain open:
 
 ```antlr
 enum_declaration
-    : attributes? enum_modifier* 'enum' enum_kind? identifier enum_base? enum_body ';'?
-    ;
-
-enum_kind
-    : 'class'
-    | 'struct'
+    : attributes? enum_modifier* 'enum' ('class' | 'struct')? identifier enum_base? enum_body ';'?
     ;
 
 enum_base
