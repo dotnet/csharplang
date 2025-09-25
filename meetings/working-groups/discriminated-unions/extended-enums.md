@@ -1,6 +1,6 @@
 # Discriminated Unions and Enhanced Enums for C#
 
-This proposal extends C#'s union capabilities by introducing enhanced enums as algebraic data types. While [type unions](https://raw.githubusercontent.com/dotnet/csharplang/refs/heads/main/proposals/unions.md) solve the problem of values that can be one of several existing types, enhanced enums provide rich, exhaustive case-based types with associated data, building on the familiar enum keyword.
+This proposal extends C#'s union capabilities by introducing enhanced enums as algebraic sum types. While [type unions](https://raw.githubusercontent.com/dotnet/csharplang/refs/heads/main/proposals/unions.md) solve the problem of values that can be one of several existing types, enhanced enums provide rich, exhaustive case-based types with associated data, building on the familiar enum keyword.
 
 ## 1. Overview
 
@@ -33,7 +33,7 @@ Type unions and enhanced enums address fundamentally different modeling needs:
 
 **Type unions** bring together disparate existing types. You use them when the types already exist and you need to express "this or that" relationships. The focus is on the types themselves.
 
-**Enhanced enums** define a single type with multiple shapes or cases. You use them for algebraic data types where the focus is on the different forms a value can take, not on combining pre-existing types.
+**Enhanced enums** define a single type with multiple shapes or cases. You use them for algebraic sum types where the focus is on the different forms a value can take, not on combining pre-existing types.
 
 ### Limitations of Current Enums
 
@@ -169,7 +169,7 @@ Enhanced constant enums are similar to classical enums in that they are open by 
 
 ### Shape Enums
 
-Shape enums are C#'s implementation of algebraic data types, allowing each case to carry different data.
+Shape enums are C#'s implementation of algebraic sum types, allowing each case to carry different data.
 
 #### Basic Shape Declarations
 
