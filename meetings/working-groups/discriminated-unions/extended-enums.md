@@ -71,7 +71,7 @@ This proposal leaves type unions unchanged. Enhanced enums are built independent
 Enhanced enums follow these core principles:
 
 - **Progressive enhancement**: Simple enums stay simple; complexity is opt-in
-- **Exhaustiveness**: The compiler knows all possible cases. Traditional "open" enums allow any value of the underlying type to be cast to the enum, even values not explicitly declared. "Closed" enums (see [Closed Enums proposal](https://github.com/dotnet/csharplang/blob/main/proposals/closed-enums.md)) restrict values to only those declared, enabling true exhaustiveness. **Shape enums are always exhaustive** - there's no way to create values outside the declared cases.
+- **Exhaustiveness**: The compiler knows all possible cases. Traditional "open" enums allow any value of the underlying type to be cast to the enum, even values not explicitly declared. "Closed" enums (see [Closed Enums proposal](https://github.com/dotnet/csharplang/blob/main/proposals/closed-enums.md)) restrict values to only those declared, enabling true exhaustiveness. **Shape enums** can be `open` or `closed`, just like constant enums.  An open enum means that consumers should expect more shapes will arise in the future, and thus all processing code must be explicitly resilient to that.  A `closed shape enum` states that all cases are known and unchanging.  Consumption code that handles all declared cases is correct, and will not receive values outside of that set in the future.
 - **Data carrying**: Each case can carry along its own constituent data in a safe and strongly typed manner.
 - **Familiar syntax**: Builds on existing enum concepts
 
