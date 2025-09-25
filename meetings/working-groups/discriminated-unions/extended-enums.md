@@ -302,36 +302,34 @@ enum class Result
 
 // Conceptually translates to:
 
-// Generated case types
-public sealed record class Result_Success(string value);
-public sealed record class Result_Failure(int code);
 
 // Generated union
-public union Result(Result_Success, Result_Failure)
+public union Result
 {
-    // Convenience constructors/factories
-    public static Result Success(string value) => new Result(new Result_Success(value));
-    public static Result Failure(int code) => new Result(new Result_Failure(code));
+    Success,
+    Failure;
+    
+    // Generated case types
+    public sealed record class Success(string value);
+    public sealed record class Failure(int code);
 }
-```
 
 Singleton cases (those without parameters) generate types with shared instances:
 
 ```csharp
 enum class State { Ready, Processing, Complete }
 
-// Conceptually translates to:
-public sealed class State_Ready 
+public union State
 {
-    public static readonly State_Ready Instance = new();
-    private State_Ready() { }
-}
-// Similar for Processing and Complete
-
-public union State(State_Ready, State_Processing, State_Complete)
-{
-    public static State Ready => new State(State_Ready.Instance);
-    // etc.
+    Ready, Processing, Complete;
+    
+    // Conceptually translates to:
+    public sealed class Ready 
+    {
+        public static readonly Ready Instance = new();
+        private Ready() { }
+    }
+    // Similar for Processing and Complete
 }
 ```
 
