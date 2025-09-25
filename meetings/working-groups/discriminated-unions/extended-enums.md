@@ -196,7 +196,7 @@ enum IrrationalConstants : double
 }
 ```
 
-These compile to subclasses of `System.Enum` with the appropriate backing field `value__` with the appropriate underlying type. Unlike integral enums, non-integral constant enums require explicit values for each member.
+These compile to subclasses of `System.Enum` with the appropriate backing field `value__` with the appropriate underlying type. Unlike integral enums, which auto-increment from zero, non-integral constant enums require explicit values for each member.
 
 ### Shape Enums: Discriminated Unions Made Elegant
 
