@@ -118,8 +118,8 @@ enum TranscendentalConstants : double { Pi = 3.14159, E = 2.71828 }
 
 #### Shape Declarations
 
-A shape enum (C#'s implementation of algebraic sum types) is created by EITHER:
-- Adding `class` or `struct` after `enum`, OR (inclusive)  
+Any of the following creates a shape enum (C#'s implementation of algebraic sum types):
+- Adding `class` or `struct` after `enum`
 - Having a parameter list on any enum member
 
 ```csharp
