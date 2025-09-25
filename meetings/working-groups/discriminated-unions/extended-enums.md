@@ -109,6 +109,8 @@ enum Result { Ok(int value), Error }    // implicitly 'enum class'
 enum class Result { Ok(int value), Error }
 ```
 
+Shape declaration members have `record`-like semantics around concepts like equality.
+
 #### Data-Carrying Cases
 
 Shape enum members can have parameter lists to carry data:
@@ -556,6 +558,7 @@ Several design decisions remain open:
 4. How should enhanced enums interact with System.Text.Json and other serializers?
 5. Enums *could* allow for state, outside of the individual shape cases.  There is a clear place to store these in both the `enum class` and `enum struct` layouts.  Should we allow this? Or could it be too confusing?
 6. Enums *could* allow for constructors, though they would likely need to defer to an existing case.  Should we allow this?  Similarly, should individual cases allow for multiple constructors?  Perhaps that is better by allowing cases to have their own record-like bodies.
+7. No syntax has been presented for getting instances of data-carrying enum-members.  `new OrderStatus.Processing(...)` seems heavyweight, esp. compared to `OrderState.Pending`.  Perhaps we keep construction of data-carrying values simple, and just include the argument list, without the need for `new`.
 
 ## Appendix A: Grammar Changes
 
