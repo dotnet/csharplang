@@ -85,8 +85,8 @@ Traditional enums only support integral types. Enhanced enums support any consta
 
 ```csharp
 enum Traditional : int { A = 1, B = 2 }
-enum Extended : string { Active = "active", Inactive = "inactive" }
-enum Extended : double { Pi = 3.14159, E = 2.71828 }
+enum Priority : string { Low = "low", Medium = "medium", High = "high" }
+enum TranscendentalConstants : double { Pi = 3.14159, E = 2.71828 }
 ```
 
 #### Shape Declarations
