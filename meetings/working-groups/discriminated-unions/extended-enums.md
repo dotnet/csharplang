@@ -194,7 +194,7 @@ enum IrrationalConstants : double
 
 These compile to subclasses of `System.Enum` with the appropriate backing field `value__` with the appropriate underlying type. Unlike integral enums, non-integral constant enums require explicit values for each member.
 
-Enhanced constant enums are similar to classical enums in that they are open by default, but can be potentially 'closed' (see [Closed Enums](https://github.com/dotnet/csharplang/blob/main/proposals/closed-enums.md)).  Open and closed enums with non-integral backing types behave similarly to their integral counterparts.  For example, allowing/disallowing conversions from their underlying type, and treating pattern matching as exhaustive or not depending on if all declared values were explicitly matched.
+Enhanced constant enums are similar to classic enums in that they are open by default, but can be potentially 'closed' (see [Closed Enums](https://github.com/dotnet/csharplang/blob/main/proposals/closed-enums.md)).  Open and closed enums with non-integral backing types behave similarly to their integral counterparts.  For example, allowing/disallowing conversions from their underlying type, and treating pattern matching as exhaustive or not depending on if all declared values were explicitly matched.
 
 ### Shape Enums
 
@@ -216,9 +216,9 @@ enum FileOperation
 
 Each case defines a constructor (and corresponding deconstructor) pattern. Cases without parameter lists are singletons, while cases with parameters create new instances.
 
-#### Reference vs Value Semantics
+#### Reference Type and Value Type
 
-**`enum class`** creates reference-type enums, stored on the heap:
+**`enum class`** creates reference-type enums, stored according to underlying runtime choices (normally the heap):
 
 ```csharp
 enum class WebResponse
@@ -234,7 +234,7 @@ Benefits:
 - No risk of struct tearing
 - Natural null representation
 
-**`enum struct`** creates value-type enums, optimized for stack storage:
+**`enum struct`** creates value-type enums, optimized for inline storage:
 
 ```csharp
 enum struct Option<T>
@@ -253,7 +253,7 @@ Similar to evolution of `records`, these variations can ship at separate times.
 
 #### Members and Methods
 
-Enhanced enums can contain members just like unions.  This applies to both constant and shape enums.
+Enums can contain members just like unions.  This applies to both constant and shape enums.
 
 ```csharp
 enum class Result<T>
@@ -300,7 +300,7 @@ The compiler understands the structure of each case and provides appropriate dec
 
 ### Exhaustiveness
 
-Enhanced shape enums are similar to classical enums in that they are open by default, but can be potentially 'closed' (see [Closed Enums](https://github.com/dotnet/csharplang/blob/main/proposals/closed-enums.md)).  Open and closed enums with non-integral backing types behave similarly to their integral counterparts.  Closed versus open shape enums treat pattern matching as exhaustive or not depending on if all declared values were explicitly matched.
+Enhanced shape enums are similar to classic enums in that they are open by default, but can be potentially 'closed' (see [Closed Enums](https://github.com/dotnet/csharplang/blob/main/proposals/closed-enums.md)).  Open and closed enums with non-integral backing types behave similarly to their integral counterparts.  Closed versus open shape enums treat pattern matching as exhaustive or not depending on if all declared values were explicitly matched.
 
 ```csharp
 closed enum Status { Active, Pending(DateTime since), Inactive }
@@ -587,12 +587,13 @@ Several design decisions remain open:
 
 1. Can users reference the generated nested types directly, or should they remain compiler-only?
 2. Should enhanced enums support `partial` for source generators?
-3. What should `default(EnumType)` produce for shape enums?
+3. What should `default(EnumType)` produce for struct-based shape enums?
 4. How should enhanced enums interact with System.Text.Json and other serializers?
 5. Enums *could* allow for state, outside of the individual shape cases.  There is a clear place to store these in both the `enum class` and `enum struct` layouts.  Should we allow this? Or could it be too confusing?
 6. Enums *could* allow for constructors, though they would likely need to defer to an existing case.  Should we allow this?  Similarly, should individual cases allow for multiple constructors?  Perhaps that is better by allowing cases to have their own record-like bodies.
 7. No syntax has been presented for getting instances of data-carrying enum-members.  `new OrderStatus.Processing(...)` seems heavyweight, esp. compared to `OrderState.Pending`.  Perhaps we keep construction of data-carrying values simple, and just include the argument list, without the need for `new`.  This also likely ties into the investigations into [target-typed-static-member-lookup](https://github.com/dotnet/csharplang/blob/main/proposals/target-typed-static-member-lookup.md).
 8. Should enum cases support independent generic parameters? For example: `enum Result { Ok<T>(T value), Error(string message) }`. This would likely only be feasible for `enum class` implementations, not `enum struct` due to layout constraints.
+9. This could open the door for enums (all enums, or non-classic enums) to automatically implement IEquatable, ISpanFormattable, and other interfaces when appropriate such as IBinaryInteger. This has been requested at <https://github.com/dotnet/csharplang/discussions/8789>, <https://github.com/dotnet/csharplang/discussions/6761>, and <https://github.com/dotnet/runtime/issues/112819> for example.
 
 ## Appendix A: Grammar Changes
 
