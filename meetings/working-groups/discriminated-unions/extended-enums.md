@@ -71,7 +71,7 @@ This proposal leaves type unions unchanged. Enhanced enums are built independent
 Enhanced enums follow these core principles:
 
 - **Progressive enhancement**: Simple enums stay simple; complexity is opt-in
-- **Exhaustiveness**: The compiler knows all possible cases
+- **Exhaustiveness**: The compiler knows all possible cases.  See [Closed Enums](https://github.com/dotnet/csharplang/blob/main/proposals/closed-enums.md) for more details.
 - **Type safety**: Each case's data is strongly typed
 - **Familiar syntax**: Builds on existing enum concepts
 
