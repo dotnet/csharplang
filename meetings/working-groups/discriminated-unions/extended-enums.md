@@ -447,6 +447,8 @@ enum OrderStatus
         Delivered => true,
         _ => false
     };
+    
+    // Alternatively: public bool IsComplete => this is Delivered;
 }
 ```
 
@@ -517,7 +519,7 @@ Extending the existing `enum` keyword rather than introducing new syntax provide
 - **Familiarity**: Developers already understand enums conceptually
 - **Progressive disclosure**: Simple cases remain simple
 - **Cognitive load**: One concept (enums) instead of two (enums + algebraic sum types)
-- **Migration path**: Existing enums can be enhanced incrementally
+- **Migration path**: Existing enums can be enhanced incrementally. Changing from a constant to shape based enum would be a breaking binary change, though ideally not a source break.
 
 ## 9. Performance Characteristics
 
