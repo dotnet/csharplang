@@ -1,13 +1,11 @@
 # Discriminated Unions and Enhanced Enums for C#
 
-This proposal introduces enhanced enums as an elegant way to build discriminated unions in C#. Building on the foundational [type unions](https://raw.githubusercontent.com/dotnet/csharplang/refs/heads/main/proposals/unions.md) feature, enhanced enums provide familiar, concise syntax for the common pattern of defining algebraic sum types where the cases are known at declaration time.
+This proposal introduces enhanced enums as an elegant way to build discriminated unions in C#. Building on [type unions](https://raw.githubusercontent.com/dotnet/csharplang/refs/heads/main/proposals/unions.md), enhanced enums provide familiar, concise syntax for algebraic sum types where cases are known at declaration time.
 
-It also aims to consolidate the majority of the design space and feedback over many years in this repository, especially from:
-
-- [#113](https://github.com/dotnet/csharplang/issues/113) - Main champion issue for discriminated unions, 7+ years of discussion and multiple LDM meetings
+It consolidates design feedback from many years of repository discussions, especially [#113](https://github.com/dotnet/csharplang/issues/113) and related issues.
 
 <details>
-  <summary>as well as...</summary>
+  <summary>Key discussion threads...</summary>
 
   - [#75](https://github.com/dotnet/csharplang/issues/75) - Early comprehensive discussion exploring DU syntax options including enum class
   - [#2962](https://github.com/dotnet/csharplang/discussions/2962) - Major discussion on Andy Gocke's DU proposal, debating enum class vs enum struct
@@ -31,17 +29,13 @@ It also aims to consolidate the majority of the design space and feedback over m
 
 ## 1. Overview
 
-### Building on Type Unions
-
-C# gains a layered approach to union types: [type unions](https://raw.githubusercontent.com/dotnet/csharplang/refs/heads/main/proposals/unions.md) provide the foundational building block for combining types, while enhanced enums (this proposal) offer elegant syntax for the discriminated union pattern where you define the cases and their union together.
-
-### At a Glance
+C# gains a layered approach to union types: type unions provide the foundation for combining types, while enhanced enums offer elegant syntax for discriminated unions where you define cases and their union together.
 
 ```csharp
-// Type unions - the foundation for combining existing types
+// Type unions - combine existing types
 union Result { string, ValidationError, NetworkException }
 
-// Shape enums - elegant discriminated unions with integrated case definitions
+// Shape enums - discriminated unions with integrated case definitions
 enum PaymentResult
 {
     Success(string transactionId),
@@ -50,39 +44,35 @@ enum PaymentResult
 }
 ```
 
-Type unions are the lower-level building block—you use them when the types already exist and you need to express "one of these" relationships. Shape enums build on this foundation to provide the natural way to express discriminated unions, where you want to define the cases and their union as a cohesive unit.
-
 ## 2. Motivation and Design Philosophy
 
 ### From Type Unions to Discriminated Unions
 
-Type unions solve the fundamental problem of representing a value that can be one of several types. However, a particularly important use case for unions is the discriminated union pattern, where:
+Type unions solve the fundamental problem of representing "one of several types". A particularly important pattern is discriminated unions, where:
 
-- The cases are defined together as a logical unit
+- Cases are defined together as a logical unit
 - Each case may carry different data
 - The set of cases is typically closed and known at design time
 
-Shape enums provide elegant syntax for this discriminated union pattern. Rather than manually defining types and then combining them with a union declaration, shape enums let you express the entire discriminated union naturally in a single declaration.
+Shape enums provide natural syntax for this pattern—expressing the entire discriminated union in a single declaration rather than manually defining and combining types.
 
 ### Limitations of Current Enums
 
-Today's C# enums have served us well but have significant limitations:
+Today's C# enums have significant limitations:
 
-1. **No associated data**: Cases are merely integral values, unable to carry additional information
-2. **Not truly exhaustive**: Any integer can be cast to an enum type, breaking exhaustiveness guarantees
-3. **Limited to integers**: Cannot use other primitive types like strings or doubles
+1. **No associated data**: Cases are merely integral values
+2. **Not truly exhaustive**: Any integer can be cast to an enum type
+3. **Limited to integers**: Cannot use strings or doubles
 
-Enhanced enums address all these limitations while preserving the conceptual simplicity developers expect.
+Enhanced enums address all these limitations while preserving conceptual simplicity.
 
 ### Building on Familiar Concepts
 
-By extending the existing `enum` keyword rather than introducing entirely new syntax, enhanced enums provide a grow-up story. Simple enums remain simple, while advanced scenarios become possible without abandoning familiar patterns. Most importantly, shape enums are not a separate feature from unions—they are the idiomatic way to express discriminated unions in C#.
+By extending the existing `enum` keyword, enhanced enums provide a grow-up story. Simple enums remain simple, while advanced scenarios become possible without abandoning familiar patterns.
 
 ## 3. Type Unions (Foundation)
 
-### Core Concepts
-
-Type unions are fully specified in the [unions proposal](https://raw.githubusercontent.com/dotnet/csharplang/refs/heads/main/proposals/unions.md#summary). They provide the foundational machinery:
+Type unions are fully specified in the [unions proposal](https://raw.githubusercontent.com/dotnet/csharplang/refs/heads/main/proposals/unions.md#summary). They provide:
 
 - Implicit conversions from case types to the union type
 - Pattern matching that unwraps union contents
@@ -90,28 +80,22 @@ Type unions are fully specified in the [unions proposal](https://raw.githubuserc
 - Enhanced nullability tracking
 - Flexible storage strategies (boxing or non-boxing)
 
-### The Building Block
-
-Type unions are the essential building block that makes discriminated unions possible. They handle all the complex mechanics of storing values of different types, pattern matching, and ensuring type safety. Shape enums leverage all this machinery while providing a more convenient and integrated syntax for the common discriminated union pattern.
-
 ## 4. Enhanced Enums
 
 ### Design Principles
 
-Enhanced enums follow these core principles:
-
 - **Progressive enhancement**: Simple enums stay simple; complexity is opt-in
-- **Data carrying**: Each case can carry along its own constituent data in a safe and strongly typed manner
-- **Familiar syntax**: Builds on existing enum and record/primary-constructor concepts
-- **Union foundation**: Shape enums are discriminated unions built on the type union machinery
+- **Data carrying**: Each case can carry its own constituent data
+- **Familiar syntax**: Builds on existing enum and record concepts
+- **Union foundation**: Shape enums are discriminated unions
 
 ### Syntax Extensions
 
-Enhanced enums extend the traditional enum syntax in three orthogonal ways:
+Enhanced enums extend traditional enum syntax in three orthogonal ways:
 
 #### Extended Base Types
 
-Traditional enums only support integral types. Enhanced enums support any constant-bearing type:
+Support any constant-bearing type:
 
 ```csharp
 enum Traditional : int { A = 1, B = 2 }
@@ -121,7 +105,7 @@ enum TranscendentalConstants : double { Pi = 3.14159, E = 2.71828 }
 
 #### Shape Declarations
 
-Any of the following creates a shape enum (a discriminated union with integrated case definitions):
+Create a shape enum (discriminated union) by:
 - Adding `class` or `struct` after `enum`
 - Having a parameter list on any enum member
 
@@ -131,17 +115,13 @@ enum struct Result { Success, Failure } // shape enum via 'struct' keyword
 enum Result { Success(), Failure() }    // shape enum via parameter lists
 ```
 
-When created via parameter lists alone, it defaults to `enum class` (reference type):
+When created via parameter lists alone, defaults to `enum class`:
 
 ```csharp
 enum Result { Ok(int value), Error }    // implicitly 'enum class'
-// equivalent to:
-enum class Result { Ok(int value), Error }
 ```
 
 #### Data-Carrying Cases
-
-Shape enum members can have parameter lists, to carry data:
 
 ```csharp
 enum Result
@@ -151,14 +131,13 @@ enum Result
 }
 ```
 
-This syntax isn't just similar to records, .each case with a parameter list is shorthand for defining a nested `record` type with that name and those parameters. For `enum class`, the compiler generates nested `sealed record class` types. For `enum struct`, it generates nested `readonly record struct` types. These are real record types with all the expected record behaviors (equality, deconstruction, etc.).
+Each case with a parameter list generates a nested record type. `enum class` generates `sealed record class` types; `enum struct` generates `readonly record struct` types. While these are the generated types, the union implementation may optimize internal storage.
 
-Note that while these record types are what the enum declaration synthesizes, the union implementation *itself* is free to optimize its internal storage. For example, an `enum struct` might store case data inline rather than storing references to record instances, as long as it can reconstruct the record values when needed (such as for pattern matching or the IUnion.Value property).
 #### Combination Rules
 
 - **Constant enums**: Can use extended base types but NOT have parameter lists
 - **Shape enums**: Can have parameter lists but NOT specify a base type
-- **Mixing cases**: Cannot mix constant values and parameterized cases in the same enum
+- **Mixing cases**: Cannot mix constant values and parameterized cases
 
 ```csharp
 // ✓ Valid - constant enum with string base
@@ -174,11 +153,11 @@ enum Bad { A = 1, B(string x) }
 enum struct Bad : int { A, B }
 ```
 
-For the complete formal grammar specification, see [Appendix A: Grammar Changes](#appendix-a-grammar-changes).
+For the complete formal grammar, see [Appendix A: Grammar Changes](#appendix-a-grammar-changes).
 
 ### Constant Value Enums
 
-Enhanced constant enums extend traditional enums to support any primitive type that can have compile-time constants:
+Enhanced constant enums support any primitive type with compile-time constants:
 
 ```csharp
 enum Priority : string 
@@ -187,24 +166,13 @@ enum Priority : string
     Medium = "medium", 
     High = "high"
 }
-
-enum IrrationalConstants : double
-{
-    Pi = 3.14159265359,
-    E = 2.71828182846,
-    GoldenRatio = 1.61803398875
-}
 ```
 
-These compile to subclasses of `System.Enum` with the appropriate backing field `value__` with the appropriate underlying type. Unlike integral enums, which auto-increment from zero, non-integral constant enums require explicit values for each member.
+These compile to `System.Enum` subclasses with the appropriate `value__` backing field. Non-integral constant enums require explicit values for each member.
 
 ### Shape Enums: Discriminated Unions Made Elegant
 
-Shape enums are discriminated unions expressed through familiar enum syntax. They combine the power of type unions with the convenience of defining cases and their union together. When you write a shape enum, you're creating a complete discriminated union—the compiler generates the case types, creates the union that combines them, and provides convenient access patterns.
-
-#### Basic Shape Declarations
-
-Shape enums can mix cases with and without data:
+Shape enums combine type unions with convenient integrated syntax:
 
 ```csharp
 enum FileOperation
@@ -216,46 +184,21 @@ enum FileOperation
 }
 ```
 
-This single declaration creates a complete discriminated union: the case types, the union that combines them, and all the machinery for pattern matching and exhaustiveness checking.
-
 #### Reference Type and Value Type
 
-**`enum class`** creates a discriminated union where the case types are reference types:
-
-```csharp
-enum class WebResponse
-{
-    Success(string content),
-    Error(int statusCode, string message),
-    Timeout
-}
-```
-
-Benefits:
-- Cheap to pass around (pointer-sized union)
-- No risk of struct tearing
+**`enum class`** creates discriminated unions with reference type cases:
+- Cheap to pass around (pointer-sized)
+- No struct tearing risk
 - Natural null representation
 
-**`enum struct`** creates a discriminated union with optimized value-type storage:
-
-```csharp
-enum struct Option<T>
-{
-    None,
-    Some(T value)
-}
-```
-
-Benefits:
+**`enum struct`** creates discriminated unions with optimized value-type storage:
 - No heap allocation
 - Better cache locality
 - Reduced GC pressure
 
-Similar to evolution of `records`, these variations can ship at separate times.
-
 #### Members and Methods
 
-Enums can contain members just like unions. This applies to both constant and shape enums:
+Enums can contain members just like unions:
 
 ```csharp
 enum class Result<T>
@@ -278,19 +221,15 @@ enum class Result<T>
 ```
 
 Members are restricted to:
-- Instance methods, properties, indexers and events.  Note, these must be members that add no additional state. So this does not include auto-properties, or field-backed-events.
+- Instance methods, properties, indexers and events (no additional state)
 - Static members
 - Nested types
 
 ## 5. Translation Strategy
 
-### Shape Enums as Discriminated Unions
-
-Shape enums translate directly to the union pattern—they generate the case types as nested types and create a union that combines them. This isn't just an implementation detail; it's the fundamental design: shape enums ARE discriminated unions with convenient integrated syntax.
+Shape enums translate directly to unions—generating case types as nested types and creating a union that combines them.
 
 ### `enum class` Translation
-
-An `enum class` generates a union with nested record classes:
 
 ```csharp
 enum class Result
@@ -305,13 +244,12 @@ public union Result
     Success,
     Failure;
     
-    // Generated case types
     public sealed record class Success(string value);
     public sealed record class Failure(int code);
 }
 ```
 
-Singleton cases (those without parameters) generate types with shared instances:
+Singleton cases generate types with shared instances:
 
 ```csharp
 enum class State { Ready, Processing, Complete }
@@ -332,8 +270,6 @@ public union State
 
 ### `enum struct` Translation
 
-An `enum struct` also generates a union with nested types, but uses the union's non-boxing access pattern for optimized storage:
-
 ```csharp
 enum struct Option<T>
 {
@@ -342,19 +278,15 @@ enum struct Option<T>
 }
 
 // Conceptually translates to:
-
-// Generated union with optimized storage
 public struct Option<T> : IUnion
 {
-    // Generated case types
     public readonly struct None { }
     public readonly record struct Some(T value);
 
     // Optimized layout: discriminator + space for largest case
     private byte _discriminant;
-    private T _value;  // Space for Some's data
+    private T _value;
     
-    // Implements IUnion.Value
     object? IUnion.Value => _discriminant switch
     {
         1 => new None(),
@@ -363,42 +295,23 @@ public struct Option<T> : IUnion
     };
     
     // Non-boxing access pattern
-    public bool HasValue => _discriminant != 0;
+    public bool TryGetValue(out None value) { ... }
+    public bool TryGetValue(out Some value) { ... }
     
-    public bool TryGetValue(out None value)
-    {
-        value = default;
-        return _discriminant == 1;
-    }
-    
-    public bool TryGetValue(out Some value)
-    {
-        if (_discriminant == 2)
-        {
-            value = new Some(_value);
-            return true;
-        }
-        value = default!;
-        return false;
-    }
-    
-    // Constructors
+    // Constructors and factories
     public Option(None _) => _discriminant = 1;
     public Option(Some some) => (_discriminant, _value) = (2, some.value);
     
-    // Convenience factories
     public static Option<T> None => new Option<T>(new None());
     public static Option<T> Some(T value) => new Option<T>(new Some(value));
 }
 ```
 
-This optimized layout leverages the flexibility of the union pattern while providing the performance characteristics developers expect from value types.
-
 ## 6. Pattern Matching and Behaviors
 
 ### Unified Pattern Matching
 
-Shape enums ARE unions, so they inherit all union pattern matching behavior directly. There's no separate implementation or semantics—the patterns you write against shape enums are handled by the exact same union machinery:
+Shape enums inherit all union pattern matching behavior:
 
 ```csharp
 var message = operation switch
@@ -411,8 +324,6 @@ var message = operation switch
 ```
 
 ### Exhaustiveness
-
-Because shape enums are unions, they get union exhaustiveness checking for free:
 
 ```csharp
 closed enum Status { Active, Pending(DateTime since), Inactive }
@@ -428,33 +339,20 @@ var description = status switch
 
 ### All Union Behaviors
 
-Shape enums automatically get all union behaviors:
-- **Implicit conversions** from case values to the enum type
-- **Nullability tracking** for the union's contents
-- **Well-formedness** guarantees about values
-
-There's no duplication or risk of divergence—shape enums are unions with convenient syntax.
+Shape enums automatically get:
+- Implicit conversions from case values
+- Nullability tracking
+- Well-formedness guarantees
 
 ## 7. Examples and Use Cases
 
 ### Migrating Traditional Enums
 
-Traditional enums can be progressively enhanced to become discriminated unions:
-
 ```csharp
-// Step 1: Traditional enum
+// Traditional enum
 enum OrderStatus { Pending = 1, Processing = 2, Shipped = 3, Delivered = 4 }
 
-// Step 2: Transform into discriminated union with data
-enum OrderStatus
-{
-    Pending,
-    Processing(DateTime startedAt),
-    Shipped(string trackingNumber),
-    Delivered(DateTime deliveredAt)
-}
-
-// Step 3: Add methods for common operations
+// Enhanced with data
 enum OrderStatus
 {
     Pending,
@@ -462,17 +360,11 @@ enum OrderStatus
     Shipped(string trackingNumber),
     Delivered(DateTime deliveredAt);
     
-    public bool IsComplete => this switch
-    {
-        Delivered => true,
-        _ => false
-    };
+    public bool IsComplete => this is Delivered;
 }
 ```
 
 ### Result and Option Types
-
-Shape enums provide the natural way to express these fundamental discriminated union patterns:
 
 ```csharp
 enum class Result<T, E>
@@ -502,8 +394,6 @@ enum struct Option<T>
 
 ### State Machines
 
-Enhanced enums excel at modeling state machines—a classic discriminated union use case:
-
 ```csharp
 enum class ConnectionState
 {
@@ -530,25 +420,22 @@ enum class ConnectionState
 
 ### Why Extend `enum`
 
-Extending the existing `enum` keyword rather than introducing new syntax provides several benefits:
-
 - **Familiarity**: Developers already understand enums conceptually
 - **Progressive disclosure**: Simple cases remain simple
-- **Cognitive load**: One concept (enums) instead of two (enums + algebraic sum types)
+- **Cognitive load**: One concept instead of two
 - **Migration path**: Existing enums can be enhanced incrementally
 
-### Shape Enums ARE Discriminated Unions
+### Union Foundation
 
-This is not just an implementation detail—it's the core design principle. Shape enums are the idiomatic way to express discriminated unions in C#. By building directly on the union machinery:
-
+Shape enums are discriminated unions expressed through enum syntax. By building on union machinery:
 - All union optimizations automatically benefit shape enums
-- There's no risk of semantic divergence between features
-- The mental model is simple: shape enums generate types and combine them with a union
-- Future union enhancements immediately apply to shape enums
+- No risk of semantic divergence between features
+- Simple mental model: shape enums generate types and combine them with a union
+- Future union enhancements immediately apply
 
 ### Storage Strategy Trade-offs
 
-The distinction between `enum class` (reference types) and `enum struct` (optimized value types) allows developers to choose the right trade-off for their scenario, similar to the choice between `record class` and `record struct`.
+The distinction between `enum class` and `enum struct` allows developers to choose the right trade-off, similar to choosing between `record class` and `record struct`.
 
 ## 9. Performance Characteristics
 
@@ -569,44 +456,33 @@ The distinction between `enum class` (reference types) and `enum struct` (optimi
 ```csharp
 // Allocation per construction
 enum class Result { Ok(int value), Error(string message) }
-var r1 = Result.Ok(42);  // Heap allocation for Ok instance
+var r1 = Result.Ok(42);  // Heap allocation
 
 // No allocation
 enum struct Result { Ok(int value), Error(string message) }  
-var r2 = Result.Ok(42);  // Stack only, value stored inline
+var r2 = Result.Ok(42);  // Stack only
 ```
 
 ### Optimization Opportunities
 
-Because shape enums are unions, they benefit from all union optimizations:
+Shape enums benefit from all union optimizations:
 - Singleton cases to shared instances
 - Small structs fitting in registers
-- Pattern matching via union's optimized paths
+- Pattern matching via optimized paths
 - Exhaustive switches avoiding default branches
 
 ## 10. Open Questions
 
-Several design decisions remain open:
-
-1. **Nested type accessibility**: Should users be able to reference the generated case types directly (e.g., `Result.Success`), or should they remain compiler-only?
-
+1. **Nested type accessibility**: Should users reference generated case types directly?
 2. **Partial support**: Should enhanced enums support `partial` for source generators?
-
-3. **Default values**: What should `default(EnumType)` produce for shape enums? The union default (null `Value`)?
-
-4. **Serialization**: How should enhanced enums interact with System.Text.Json and other serializers?
-
-5. **Additional state**: Should shape enums allow instance fields outside of case data? The union structure could accommodate this.
-
-6. **Custom constructors**: Should enums allow custom constructors that delegate to cases? Should cases support multiple constructors?
-
-7. **Construction syntax**: Should we use `Result.Ok(42)` or `new Result.Ok(42)` or support both? This ties into [target-typed static member lookup](https://github.com/dotnet/csharplang/blob/main/proposals/target-typed-static-member-lookup.md).
-
-8. **Generic cases**: Should cases support independent generic parameters? For example: `enum Result { Ok<T>(T value), Error(string message) }`. This would likely only work for `enum class`.
-
-9. **Interface implementation**: Should enhanced enums automatically implement interfaces like `IEquatable<T>` when appropriate?
-
-10. **Exact lowering**: Should the spec define the exact names and shapes of generated types, or leave these as implementation details?
+3. **Default values**: What should `default(EnumType)` produce for shape enums?
+4. **Serialization**: How should enhanced enums interact with System.Text.Json?
+5. **Additional state**: Should shape enums allow instance fields outside case data?
+6. **Custom constructors**: Should enums allow custom constructors that delegate to cases?
+7. **Construction syntax**: `Result.Ok(42)` or `new Result.Ok(42)` or both?
+8. **Generic cases**: Should cases support independent generic parameters?
+9. **Interface implementation**: Should enhanced enums automatically implement `IEquatable<T>`?
+10. **Exact lowering**: Should the spec define exact names and shapes of generated types?
 
 ## Appendix A: Grammar Changes
 
@@ -620,7 +496,7 @@ enum_base
     ;
 
 enum_underlying_type
-    : simple_type // equivalent to all integral types, fp-types, decimal, bool and char
+    : simple_type // all integral types, fp-types, decimal, bool and char
     | 'string'
     | type_name  // Must resolve to one of the above
     ;
