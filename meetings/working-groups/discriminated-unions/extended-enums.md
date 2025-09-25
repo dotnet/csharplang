@@ -272,8 +272,8 @@ enum class Result<T>
 ```
 
 Members are restricted to:
-- Methods, operators, properties and indexers (members that add no additional state).  Though an open question tracks if we might want to allow additional state in a shape enum.
-- Static members. An open question tracks if that could potentially include consructors.
+- Instance methods, properties and indexers (members that add no additional state).  Though an open question tracks if we might want to allow additional state in a shape enum.
+- Static members. An open question tracks if that could potentially include constructors.
 - Nested types
 
 ## 5. Pattern Matching
