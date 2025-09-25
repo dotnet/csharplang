@@ -1,4 +1,4 @@
-# Target-typed static member lookup
+# Target-typed static member access
 
 Champion issue: <https://github.com/dotnet/csharplang/issues/9138>
 
@@ -224,6 +224,89 @@ void M(string p) { }
 void M(object p) { }
 ```
 
+### Factory containers
+
+#### Summary (factory containers)
+
+Target-typed static members will be found on separate factory container types, for example:
+
+- `Option<ImmutableArray<int>> result = .Some([42]);` - Calls `Some<T>` on the nongeneric `Option` type
+- `SearchValues<char> separators = .Create(',', ';');` - Calls `Create(ReadOnlySpan<char>)` on the nongeneric `SearchValues` type
+- `Tensor<T> c = .Add(a, b);` - Calls `Add<T>` on the nongeneric `Tensor` type
+
+This will happen automatically when the factory member is on a nongeneric sibling type with the same name. There is also an opt-in model to enable the same lookup in classes where the name does not match. For example:
+
+- `IEnumerable<int> numbers = .Range(1, 10);` - Calls `Range` on the `Enumerable` type
+- `IEqualityComparer<string> comparer = .OrdinalIgnoreCase;` - Calls `OrdinalIgnoreCase` on the `StringComparer` type
+- `IEqualityComparer<T> comparer = .Default;` - Calls `Default` on `EqualityComparer<T>`
+
+For the above examples to work, the `IEnumerable<T>` interface definition would be decorated with an attribute referring to the `Enumerable` class, and the `IEqualityComparer<T>` interface definition would be decorated with an attribute referring to the `StringComparer` and `EqualityComparer<>` classes.
+
+#### Motivation (factory containers)
+
+A common .NET pattern for obtaining a value of some generic type is to call a factory method on a nongeneric type of the same name so that the type argument can be inferred. The core libraries follow this pattern. For example:
+
+- `KeyValuePair.Create<TKey, TValue>` to obtain a `KeyValuePair<TKey, TValue>`
+- `Task.FromResult<T>` to obtain a `Task<T>`
+- `Vector.Add<T>` to obtain a `Vector<T>`, along with many other factory methods for other operations.
+- `Tensor.Add<T>` to obtain a `Tensor<T>`, along with many other factory methods for other operations.
+- `Vector128.Add<T>` to obtain a `Vector128<T>`, along with many other factory methods for other operations.
+- `ImmutableArray.Create<T>` to obtain an `ImmutableArray<T>`
+- `Tuple.Create<T1, T2, ...>` to obtain a `Tuple<T1, T2, ...>`
+- `Channel.CreateBounded<T>` to obtain a `Channel<T>`
+- `SearchValues.Create(ReadOnlySpan<byte>)` to obtain a `SearchValues<byte>`, and overloads for `<char>` and `<string>`
+- `Expression.Lambda<TDelegate>` to obtain an `Expression<TDelegate>`
+
+This pattern has wide uptake in community APIs as well. The SDK steers users in this direction with the [CA1000: Do not declare static members on generic types](https://learn.microsoft.com/en-us/dotnet/fundamentals/code-analysis/quality-rules/ca1000) rule.
+
+Following these patterns and warnings, existing `Option<T>` types should put their `.Some` factory method on a nongeneric class, `Option.Some<T>`. This enables generic type inference, so `Option.Some(42)` can be written.
+
+However, this means that the method `Option.Some<T>` does not exist. This would cause an odd asymmetry: in the core proposal, you'd be able to write `.None`, but not `.Some(val)`. The `None` member is on `Option<T>` because there are no type inference opportunities, in the same manner as `ImmutableArray<T>.Empty`. But the `Some` member is on nongeneric `Option`, not on `Option<T>`.
+
+There is a clear relationship between `Option<T>` and `Option`, `KeyValuePair<TKey, TValue>` and `KeyValuePair`, `Task<T>` and `Task`, `ImmutableArray<T>` and `ImmutableArray`, `Tensor<T>` and `Tensor`. The relationship is clear both from the naming convention and due to the static members on the factory type that return instances of the generic type.
+
+It would be a lost opportunity not to make use of this clear relationship in order to make consumption more consistent.
+
+In addition, if a separate proposal were to make `IEnumerable<T>` the target type of spreads and foreach, the syntax `foreach (var x in .Range(1, 10))` or `[.. .Repeat(1, 10)]` would just fall out.
+
+#### Detailed design (factory containers)
+
+As a guiding principle, the outcome for the call site can be thought of as equivalent to static extension methods being provided on the generic type which directly call the factory member on the generic type. The specifics below are aimed at this equivalence.
+
+Member lookup for a _target-typed member binding expression_ would consider not just static members on the targeted type, but also _applicable factory members_, a subset of the static members of the target type's related _factory container types_.
+
+A type `F` serves as a _factory container type_ for another type `G` if `F` is explicitly referenced by a FactoryContainerAttribute on `G` as defined below, or implicitly if `F` has no type parameters of its own and `G` does have type parameters of its own, and they are both declared in the same module, and they are both declared in either the same containing type if any, or the same namespace if not.
+
+A member of a _factory container type_ is an _applicable factory member_ if it is static and the result of evaluating the member has an identity conversion to the target type. If the _target-typed member binding expression_ is the expression of an invocation expression, then the result of evaluating the invocation is considered instead, and any inferred type arguments in the invocation that appear in the return type will be inferred outside-in to match the target type. For example, `Option<short> opt = .Some(42)` will infer `Option.Some<short>`.
+
+The filter of _applicable factory members_ means that `IEqualityComparer<string> comparer = .OrdinalIgnoreCase;` will work if `IEqualityComparer<T>` declares `[FactoryContainer(typeof(StringComparer))]`, but `IEqualityComparer<int> comparer = .OrdinalIgnoreCase;` will fail with an error that `.OrdinalIgnoreCase` cannot be found, rather than an error that it returns a comparer with an incompatible type.
+
+This is the definition of the attribute that enables a type to use factory members in another type when constructed through target-typed static member access:
+
+```cs
+namespace System.Runtime.CompilerServices;
+
+[AttributeUsage(.Class | .Struct | .Interface | .Enum | .Delegate, AllowMultiple = true, Inherited = false)]
+public sealed class FactoryContainerAttribute(Type containerType) : Attribute
+{
+    public Type ContainerType { get; } = containerType;
+}
+```
+
+Errors will be produced in the following scenarios:
+
+- If the attribute is used in older language versions.
+- If the referenced type contains no members that could be _applicable factory members_ for any generic instantiation of the target type which are at least as accessible as the target type.
+
+#### Alternatives (factory containers)
+
+Static extension methods would be able to achieve the same end goal of writing `.Some(42)` for `Option<T>` or `.Range(1, 10)` for `IEnumerable<int>` or `.OrdinalCompareCase` for `IEqualityComparer<string>`. This would not fall foul of the [CA1000: Do not declare static members on generic types](https://learn.microsoft.com/en-us/dotnet/fundamentals/code-analysis/quality-rules/ca1000) rule, since the extension method itself is not declared on the generic type.
+
+While this shows the power of combining the core proposal with static extension methods, there are scaling problems with using static extension methods to provide the missing consistency in consumption syntax.
+
+1. This would not be automatic out of the box. It would become best practice to declare static extension methods on your own types to enable the nicer consumption pattern. This would not be done consistently, and users would run into the inconsistencies.
+1. The core libraries would likely not be willing to declare such static extension methods for the core types. In general, they prefer not to bloat metadata by declaring simple forwarders to other methods.
+
 ## Specification
 
 `'.' identifier type_argument_list?` is consolidated into a standalone syntax, `member_binding`, and this new syntax is added as a production of the [§12.8.7 Member access](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/expressions.md#1287-member-access) grammar:
@@ -285,12 +368,6 @@ A new operator could solve this, such as `results.SelectNonNull(r => r as .Error
 
 There are a couple of ambiguities, with [parenthesized expressions](#ambiguity-with-parenthesized-expression) and [conditional expressions](#ambiguity-with-conditional-expression). See each link for details.
 
-### Factory methods public in generic types
-
-The availability of this feature will flip a current framework design guideline on its head, namely [CA1000: Do not declare static members on generic types](https://learn.microsoft.com/en-us/dotnet/fundamentals/code-analysis/quality-rules/ca1000). Currently, the design guideline is to declare a static nongeneric class with a generic helper method so that inference is possible: `ImmutableArray.Create<T>`, not `ImmutableArray<T>.Create`. When people declare Option types, it's similarly `Option.Some<T>`, not `Option<T>.Some`.
-
-When target-typing `Option<int> opt = .Some(42)`, what will be called is a static method on the `Option<T>` type rather than on a static helper `Option` type. This will require library authors to provide public factory methods in both places, if they want to cater to both target-typed construction (`.Some(42)`) and to non-target-typed inference (`var opt = Option.Some(42);`).
-
 ## Anti-drawbacks
 
 There's been a separate request to mimic VB's `With` construct, allowing dotted access to the expression anywhere within the block:
@@ -325,7 +402,7 @@ The `using static` approach has also not found broad adoption over fully qualify
 
 ### Alternative: no sigil
 
-The target-typed static member lookup feature benefits from the precision of the `.` sigil, but it does not require a sigil. Here's how the feature would look without a sigil:
+The target-typed static member access feature benefits from the precision of the `.` sigil, but it does not require a sigil. Here's how the feature would look without a sigil:
 
 ```cs
 type.GetMethod("Name", Public | Instance | DeclaredOnly); // BindingFlags.Public | ...
@@ -354,7 +431,7 @@ Firstly, the feature would be _**harder to understand**_ without a sigil. Withou
 
 The presence of `.` makes reading much more efficient. If no such marker is in place, it will slow down understanding of code. Every identifier will need to be considered as to whether it is in a target-typing location and could be referring to something on that type. The chance of collisions is expected to be high. It can be difficult from context to know if target-typing is in play in a given scenario. Syntaxes such as `null` or `new()` make it clear that a target type is affecting the meaning of the expression, but a plain identifier on its own does not make this clear. It's hard to tell which locations are target-typeable and which are not. It can require a lot of backtracking while reading, and in some cases you need to know whether there are multiple overloads with varying types at this position.
 
-A sigil thus provides essential context. It asserts that the location is target-typeable, and furthermore that the name is coming from the target type. Most importantly of all, the author's intention of target-typed lookup is preserved even if an overload is added which causes target-typing to fail. Without the sigil, it would not be clear whether the original author was trying to look up something in scope, or was trying to access something off the target type. The sigil prevents spooky action at a distance which changes the fundamental meaning of the expression.
+A sigil thus provides essential context. It asserts that the location is target-typeable, and furthermore that the name is coming from the target type. Most importantly of all, the author's intention of target-typed access is preserved even if an overload is added which causes target-typing to fail. Without the sigil, it would not be clear whether the original author was trying to look up something in scope, or was trying to access something off the target type. The sigil prevents spooky action at a distance which changes the fundamental meaning of the expression.
 
 Secondly, the feature would become _**less powerful**_ without a sigil. To avoid changes in meaning, this would have to prefer binding to other things in the current scope name, with target-typing as a fallback. This would result in unpleasant interruptions with no recourse other than typing out the full type name. These interruptions are expected to be frequent enough to hamper the success of the feature.
 
@@ -369,14 +446,18 @@ This specific sigil is a good fit with modern language sensibilities and audienc
 
 This is valid grammar today, which fails in binding if `A` is a type and not a value: `(A).B`.
 
-The new grammar we're adding would allow this to be parsed as a cast followed by a target-typed static member lookup. This new interpretation is consistent with `(A)new()` and `(A)default` working today, but it would not be practically useful. `A.B` is a simpler and clearer way to write the same thing.
+The new grammar we're adding would allow this to be parsed as a cast followed by a target-typed static member access. This new interpretation is consistent with `(A)new()` and `(A)default` working today, but it would not be practically useful. `A.B` is a simpler and clearer way to write the same thing.
 
-Should `(A).B` continue to fail, or be made to work the same as `A.B` when `A` is a type?
+Should `(A).B` continue to fail when `A` is a type, or be made to work the same as `A.B`?
+
+**Recommendation:** `(A).B` should continue to fail when `A` is a type. Even though blocking this syntax is an additional rule, the syntax is not beneficial.
 
 ### Ambiguity with conditional expression
 
-There is an ambiguity if target-typed static member lookup is used as the first branch of a conditional expression, where it would parse today as a null-safe dereference: `expr ? .Name : ...`
+There is an ambiguity if target-typed static member access is used as the first branch of a conditional expression, where it would parse today as a null-safe dereference: `expr ? .Name : ...`
 
 We can follow the approach already taken for the similar ambiguity in collection expressions with `expr ? [` possibly being an indexer and possibly being a collection expression.
 
-Alternatively, target-typed static member lookup could be always disallowed within the first branch of a conditional expression unless surrounded by parens: `expr ? (.Name) : ...`. The downside is that this puts a usability burden onto users, since the compiler can work out the ambiguity by looking ahead for the `:` as with collection expressions.
+Alternatively, target-typed static member access could be always disallowed within the first branch of a conditional expression unless surrounded by parens: `expr ? (.Name) : ...`. The downside is that this puts a usability burden onto users, since the compiler can work out the ambiguity by looking ahead for the `:` as with collection expressions.
+
+**Recommendation:** Allow `expr ? .Name :` by looking ahead for `:`, just as with collection expressions.
