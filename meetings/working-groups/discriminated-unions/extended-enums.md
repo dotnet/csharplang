@@ -199,6 +199,8 @@ enum struct Option<T>
     None,
     Some(T value)
 }
+```
+
 **`enum class`** creates discriminated unions with reference type cases:
 - Cheap to pass around (pointer-sized)
 - No struct tearing risk
