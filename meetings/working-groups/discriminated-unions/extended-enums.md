@@ -234,7 +234,7 @@ enum class Result<T>
     
     public bool IsSuccess => this switch 
     {
-        Success(_) => true,
+        Success(_) => true, // or just: Success => true,
         _ => false
     };
     
@@ -271,7 +271,7 @@ The compiler understands the structure of each case and provides appropriate dec
 
 ### Exhaustiveness
 
-Switch expressions over enhanced enums are exhaustive when all cases are handled:
+Switch expressions over enhanced shape enums are exhaustive when all cases are handled:
 
 ```csharp
 enum Status { Active, Pending(DateTime since), Inactive }
@@ -513,11 +513,11 @@ Extending the existing `enum` keyword rather than introducing new syntax provide
 ```csharp
 // Allocation per call
 enum class Result { Ok(int value), Error(string message) }
-var r1 = new Ok(42);  // Heap allocation
+var r1 = new Result.Ok(42);  // Heap allocation
 
 // No allocation
 enum struct Result { Ok(int value), Error(string message) }  
-var r2 = new Ok(42);  // Stack only
+var r2 = new Result.Ok(42);  // Stack only
 ```
 
 ### Optimization Opportunities
@@ -560,7 +560,7 @@ Several design decisions remain open:
 4. How should enhanced enums interact with System.Text.Json and other serializers?
 5. Enums *could* allow for state, outside of the individual shape cases.  There is a clear place to store these in both the `enum class` and `enum struct` layouts.  Should we allow this? Or could it be too confusing?
 6. Enums *could* allow for constructors, though they would likely need to defer to an existing case.  Should we allow this?  Similarly, should individual cases allow for multiple constructors?  Perhaps that is better by allowing cases to have their own record-like bodies.
-7. No syntax has been presented for getting instances of data-carrying enum-members.  `new OrderStatus.Processing(...)` seems heavyweight, esp. compared to `OrderState.Pending`.  Perhaps we keep construction of data-carrying values simple, and just include the argument list, without the need for `new`.
+7. No syntax has been presented for getting instances of data-carrying enum-members.  `new OrderStatus.Processing(...)` seems heavyweight, esp. compared to `OrderState.Pending`.  Perhaps we keep construction of data-carrying values simple, and just include the argument list, without the need for `new`.  This also likely ties into the investigations into [target-typed-static-member-lookup](https://github.com/dotnet/csharplang/blob/main/proposals/target-typed-static-member-lookup.md).
 8. Should enum cases support independent generic parameters? For example: `enum Result { Ok<T>(T value), Error(string message) }`. This would likely only be feasible for `enum class` implementations, not `enum struct` due to layout constraints.
 
 ## Appendix A: Grammar Changes
