@@ -460,7 +460,7 @@ enum class Result<T, E>
     
     public Result<U, E> Map<U>(Func<T, U> mapper) => this switch
     {
-        Ok(var value) => new Ok(mapper(value)),  // Note: Constructor syntax TBD, see Open Question #7
+        Ok(var value) => new Ok(mapper(value)),  // Note: Construction syntax TBD, see Open Question #7
         Error(var err) => new Error(err)
     };
 }
@@ -478,7 +478,7 @@ enum struct Option<T>
 }
 ```
 
-*Note: The exact constructor syntax for shape enum cases is still being determined. See [Open Question #7](#10-open-questions) for the options under consideration.*
+*Note: The exact construction syntax for shape enum cases is still being determined. See [Open Question #7](#10-open-questions) for the options under consideration.*
 
 ### State Machines
 
