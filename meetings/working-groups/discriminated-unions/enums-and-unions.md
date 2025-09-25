@@ -88,7 +88,7 @@ The above grammar doesn't provide more than the minimal set of syntax. There are
 
 ### Allow extra members after a semicolon
 
-In both enums and unions, after a semicolon additional members could be provided. Fields. auto-properties, and any other syntax that create additional fields would be prohibited.
+In both enums and unions, after a semicolon additional members could be provided. Fields, auto-properties, and any other syntax that create additional fields would be prohibited.
 
 ### Allow extra members in a partial declaration
 
