@@ -72,7 +72,7 @@ Enhanced enums follow these core principles:
 
 - **Progressive enhancement**: Simple enums stay simple; complexity is opt-in
 - **Exhaustiveness**: The compiler knows all possible cases.  See [Closed Enums](https://github.com/dotnet/csharplang/blob/main/proposals/closed-enums.md) for more details.
-- **Type safety**: Each case's data is strongly typed
+- **Data carrying**: Each case can carry along its own constituent data in a safe and strongly typed manner.
 - **Familiar syntax**: Builds on existing enum concepts
 
 ### Syntax Extensions
