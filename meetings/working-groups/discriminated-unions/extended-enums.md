@@ -6,7 +6,6 @@ It also aims to consolidate the majority of the design space and feedback over m
 
 - [#113](https://github.com/dotnet/csharplang/issues/113) - Main champion issue for discriminated unions, 7+ years of discussion and multiple LDM meetings
 
-as well as:
 <details>
   <summary>any many more...</summary>
 
