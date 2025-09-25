@@ -354,6 +354,8 @@ var message = operation switch
 
 ### Exhaustiveness
 
+The compiler tracks all declared cases. Both constant and shape enums can be open or closed (see [Closed Enums proposal](https://github.com/dotnet/csharplang/blob/main/proposals/closed-enums.md)). Open enums can be used to signal that the enum author may add new cases in future versions—consumers must handle unknown cases defensively (e.g., with a default branch). Closed enums signal that there is no need to handle unknown cases, such as when the case set is complete and will never change—the compiler ensures exhaustive matching without requiring a default case. For constant enums, "open" means values outside the declared set can be cast to the enum type.
+
 ```csharp
 closed enum Status { Active, Pending(DateTime since), Inactive }
 
