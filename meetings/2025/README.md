@@ -25,13 +25,13 @@ All schedule items must have a public issue or checked-in proposal that can be l
     - Syntax for case type references
     - Shorthand syntax for unions with case type declarations ("discriminated" unions)
 
+## C# Language Design Notes for 2025
+
 ### Wed Sep 24, 2025
 
-- Union syntax (Joseph, Matt and Mads)
-    - https://github.com/dotnet/csharplang/blob/main/meetings/working-groups/discriminated-unions/allows.md
-    - https://github.com/dotnet/csharplang/blob/main/meetings/working-groups/discriminated-unions/brace-syntax.md
+[C# Language Design Meeting for September 17th, 2025](https://github.com/dotnet/csharplang/blob/main/meetings/2025/LDM-2025-09-24.md)
 
-## C# Language Design Notes for 2025
+- Union Syntax Thunderdome Part 1
 
 ### Wed Sep 17, 2025
 
