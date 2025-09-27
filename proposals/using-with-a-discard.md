@@ -56,10 +56,7 @@ using _ = expr1, expr2;
 
 ## Specification
 
-> [!IMPORTANT]
-> This section is based on a draft of the C# 8 Standard specification that does not yet include disposable ref structs. Once the [ongoing specification work](https://github.com/dotnet/csharpstandard/pull/672/files#diff-20796c21eeccfd2c773f2969d23440cbc04e7439f4777729aad5d602477c232fR2057) is complete, this section will be rebased.
-
-[§13.14 The using statement](https://github.com/dotnet/csharpstandard/blob/draft-v9/standard/statements.md#1314-the-using-statement) is updated as follows.
+[§13.14 The using statement](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/statements.md#1314-the-using-statement) is updated as follows.
 
 ```diff
  using_statement
@@ -68,20 +65,23 @@ using _ = expr1, expr2;
      ;
 
  resource_acquisition
-     : local_variable_declaration
+     : non_ref_local_variable_declaration
      | expression
      ;
 
+ non_ref_local_variable_declaration
+     : implicitly_typed_local_variable_declaration
+     | explicitly_typed_local_variable_declaration
+     ;
+
 +using_discard_statement
-+   : 'await'? 'using' '_' '=' expression ';'
-+   ;
++    : 'await'? 'using' '_' '=' expression ';'
++    ;
 ```
 
-Removals in ~~strikeout~~, additions in **bold**:
+Additions in **bold**:
 
-> If the form of *resource_acquisition* is *local_variable_declaration* then the type of the *local_variable_declaration* shall be ~~either `dynamic` or~~ a type that can be implicitly converted to `System.IDisposable`. If the form of *resource_acquisition* is *expression* then this expression shall be implicitly convertible to `System.IDisposable`. **If the form of *using_statement* is *using_discard_statement* then its contained *expression* shall be implicitly convertible to `System.IDisposable`.**
-
-(Removal of "either `dynamic` or" is a spec refactoring which makes the first sentence more obviously parallel to the second sentence. `dynamic` is already included in "a type that can be implicitly converted to `System.IDisposable`.")
+> If the form of *resource_acquisition* is *local_variable_declaration* then the type of the *local_variable_declaration* shall be either `dynamic` or a resource type. If the form of *resource_acquisition* is *expression*, **or the form of *using_statement* is *using_discard_statement* with its constituent *expression*,** then this expression shall have a resource type. If `await` is present, the resource type shall implement `System.IAsyncDisposable`.  A `ref struct` type cannot be the resource type for a `using` statement with the `await` modifier.
 
 Removals in ~~strikeout~~, additions in **bold**:
 
@@ -97,7 +97,7 @@ Removals in ~~strikeout~~, additions in **bold**:
 > using _ = «expression»;
 > ```
 >
-> ~~has~~ **have** the same three possible expansions. In this case `ResourceType` is implicitly the compile-time type of the *expression*, if it has one. Otherwise the interface `IDisposable` itself is used as the `ResourceType`. The `resource` variable is inaccessible in, and invisible to, the embedded *statement* **(in the case of a *using_statement* which has an embedded statement) or the remainder of the current scope (in the case of a *using_discard_statement*)**.
+> ~~has~~ **have** the same possible formulations.
 
 A new subsection is added:
 
