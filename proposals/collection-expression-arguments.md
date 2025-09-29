@@ -337,7 +337,7 @@ If the target type is an *interface type*, then:
 
   |Interfaces|Candidate signatures|
   |:---:|:---:|
-  |`IEnumerable<E>`<br>`IReadOnlyCollection<E>`<br>`IReadOnlyList<E>` `()` (no parameters)|
+  |`IEnumerable<E>`<br>`IReadOnlyCollection<E>`<br>`IReadOnlyList<E>`|`()` (no parameters)|
   |`ICollection<E>`<br>`IList<E>`|`()` (no parameters)<br>`(int capacity)`|
   |`IReadOnlyDictionary<K, V>`|`()` (no parameters)<br>`(IEqualityComparer<K>? comparer)`|
   |`IDictionary<K, V>`|`()` (no parameters)<br>`(int capacity)`<br>`(IEqualityComparer<K>? comparer)`<br>`(int capacity, IEqualityComparer<K>? comparer)`|
