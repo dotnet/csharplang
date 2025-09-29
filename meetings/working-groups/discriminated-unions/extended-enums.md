@@ -391,7 +391,7 @@ Shape enums automatically get:
 enum OrderStatus { Pending = 1, Processing = 2, Shipped = 3, Delivered = 4 }
 
 // Enhanced with data
-enum structOrderStatus
+enum struct OrderStatus
 {
     Pending,
     Processing(DateTime startedAt),
