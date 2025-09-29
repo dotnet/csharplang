@@ -33,7 +33,7 @@ C# gains a layered approach to union types: type unions provide the foundation f
 
 ```csharp
 // Type unions - combine existing types
-union Result { string, ValidationError, NetworkException }
+union Result(string, ValidationError, NetworkException);
 
 // Shape enums - discriminated unions with integrated case definitions
 enum PaymentResult
@@ -254,11 +254,8 @@ enum class Result
 }
 
 // Translates to:
-public union Result
-{
-    Success,
-    Failure;
-    
+public union Result(Sucess, Failure)
+{    
     public sealed record class Success(string value);
     public sealed record class Failure(int code);
 }
@@ -270,10 +267,8 @@ Singleton cases generate types with shared instances:
 enum class State { Ready, Processing, Complete }
 
 // Translates to:
-public union State
-{
-    Ready, Processing, Complete;
-    
+public union State(Ready, Processing, Complete)
+{    
     public sealed class Ready 
     {
         public static readonly Ready Instance = new();
