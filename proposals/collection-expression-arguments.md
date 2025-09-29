@@ -356,7 +356,7 @@ r = [with(StringComparer.Ordinal)]; // new $PrivateImpl<string, int>(StringCompa
 
 d = [with(capacity: 2)]; // new Dictionary<string, int>(capacity: 2)
 r = [with(capacity: 2)]; // error: 'capacity' parameter not recognized
-d = [with()];            // Legal: empty arguments supported fro interfaces
+d = [with()];            // Legal: empty arguments supported for interfaces
 ```
 
 #### Other target types
