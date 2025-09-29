@@ -368,7 +368,7 @@ Span<int> a = [with(), 1, 2, 3]; // error: arguments not supported
 Span<int> b = [with([1, 2]), 3]; // error: arguments not supported
 
 int[] a = [with(), 1, 2, 3]; // error: arguments not supported
-int[] b = [with(length: 1]), 3]; // error: arguments not supported
+int[] b = [with(length: 1), 3]; // error: arguments not supported
 ```
 
 ### Create methods
