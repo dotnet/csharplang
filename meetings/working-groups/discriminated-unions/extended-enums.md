@@ -36,7 +36,7 @@ C# gains a layered approach to union types: type unions provide the foundation f
 union Result(string, ValidationError, NetworkException);
 
 // Shape enums - discriminated unions with integrated case definitions
-enum PaymentResult
+enum struct PaymentResult // or `enum class`
 {
     Success(string transactionId),
     Declined(string reason),
@@ -107,24 +107,16 @@ enum TranscendentalConstants : double { Pi = 3.14159, E = 2.71828 }
 
 Create a shape enum (discriminated union) by:
 - Adding `class` or `struct` after `enum`
-- Having a parameter list on any enum member
 
 ```csharp
 enum class Result { Success, Failure }  // shape enum via 'class' keyword
 enum struct Result { Success, Failure } // shape enum via 'struct' keyword
-enum Result { Success(), Failure() }    // shape enum via parameter lists
-```
-
-When created via parameter lists alone, defaults to `enum class`:
-
-```csharp
-enum Result { Ok(int value), Error }    // implicitly 'enum class'
 ```
 
 #### Data-Carrying Cases
 
 ```csharp
-enum Result
+enum class Result // or enum struct
 {
     Success(string id),
     Failure(int code, string message)
@@ -132,6 +124,8 @@ enum Result
 ```
 
 Each case with a parameter list generates a nested record type. `enum class` generates `sealed record class` types; `enum struct` generates `readonly record struct` types. While these are the generated types, the union implementation may optimize internal storage.
+
+TODO: Should the structs be readonly?  Seems like that goes against normal structs (including `record struct`).  Seems like that could be opt in with `readonly enum struct X`.
 
 #### Combination Rules
 
@@ -144,13 +138,16 @@ Each case with a parameter list generates a nested record type. `enum class` gen
 enum Status : string { Active = "A", Inactive = "I" }
 
 // ✓ Valid - shape enum with data
-enum class Result { Ok(int value), Error(string msg) }
+enum class class Result { Ok(int value), Error(string msg) }
 
 // ✗ Invalid - cannot mix constants and shapes
-enum Bad { A = 1, B(string x) }
+enum class Bad { A = 1, B(string x) }
 
 // ✗ Invalid - shape enums cannot have base types
 enum struct Bad : int { A, B }
+
+// ✗ Invalid - Constant enums cannot have parameter lists
+enum Bad { A(), B() }
 ```
 
 For the complete formal grammar, see [Appendix A: Grammar Changes](#appendix-a-grammar-changes).
@@ -175,7 +172,7 @@ These compile to `System.Enum` subclasses with the appropriate `value__` backing
 Shape enums combine type unions with convenient integrated syntax:
 
 ```csharp
-enum FileOperation
+enum class FileOperation // or enum struct
 {
     Open(string path),
     Close,
@@ -394,7 +391,7 @@ Shape enums automatically get:
 enum OrderStatus { Pending = 1, Processing = 2, Shipped = 3, Delivered = 4 }
 
 // Enhanced with data
-enum OrderStatus
+enum structOrderStatus
 {
     Pending,
     Processing(DateTime startedAt),
