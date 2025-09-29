@@ -308,11 +308,6 @@ If the target type is a type with a *create method*, then:
 * Otherwise, a binding error is reported.
 
 ```csharp
-MyCollection<string> c = [with(GetComparer()), "1", "2"];
-// IEqualityComparer<string> _tmp1 = GetComparer();
-// ReadOnlySpan<string> _tmp2 = ["1", "2"];
-// c = MyBuilder.Create<string>(_tmp1, _tmp2);
-
 [CollectionBuilder(typeof(MyBuilder), "Create")]
 class MyCollection<T> { ... }
 
@@ -323,6 +318,17 @@ class MyBuilder
 }
 ```
 
+```c#
+MyCollection<string> c1 = [with(GetComparer()), "1", "2"];
+// IEqualityComparer<string> _tmp1 = GetComparer();
+// ReadOnlySpan<string> _tmp2 = ["1", "2"];
+// c1 = MyBuilder.Create<string>(_tmp1, _tmp2);
+
+MyCollection<string> c2 = [with(), "1", "2"];
+// ReadOnlySpan<string> _tmp3 = ["1", "2"];
+// c2 = MyBuilder.Create<string>(_tmp3);
+```
+
 #### Interface target type
 
 If the target type is an *interface type*, then:
@@ -331,13 +337,15 @@ If the target type is an *interface type*, then:
 
   |Interfaces|Candidate signatures|
   |:---:|:---:|
-  |`IEnumerable<E>`<br>`IReadOnlyCollection<E>`<br>`IReadOnlyList<E>`|*None*|
-  |`ICollection<E>`<br>`IList<E>`|`(int capacity)`|
-  |`IReadOnlyDictionary<K, V>`|`(IEqualityComparer<K>? comparer)`|
-  |`IDictionary<K, V>`|`(int capacity)`<br>`(IEqualityComparer<K>? comparer)`<br>`(int capacity, IEqualityComparer<K>? comparer)`|
+  |`IEnumerable<E>`<br>`IReadOnlyCollection<E>`<br>`IReadOnlyList<E>` `()` (no parameters)|
+  |`ICollection<E>`<br>`IList<E>`|`()` (no parameters)<br>`(int capacity)`|
+  |`IReadOnlyDictionary<K, V>`|`()` (no parameters)<br>`(IEqualityComparer<K>? comparer)`|
+  |`IDictionary<K, V>`|`()` (no parameters)<br>`(int capacity)`<br>`(IEqualityComparer<K>? comparer)`<br>`(int capacity, IEqualityComparer<K>? comparer)`|
 
 * If a best method signature is found, a method with that signature *or an equivalent initialization* is invoked with the *argument list*.
 * Otherwise, a binding error is reported.
+
+Note: `with()` is always legal for all interface targets, and has the same meaning as not having the `with()` element at all.
 
 ```csharp
 IDictionary<string, int> d;
@@ -348,7 +356,7 @@ r = [with(StringComparer.Ordinal)]; // new $PrivateImpl<string, int>(StringCompa
 
 d = [with(capacity: 2)]; // new Dictionary<string, int>(capacity: 2)
 r = [with(capacity: 2)]; // error: 'capacity' parameter not recognized
-d = [with()];            // error: empty arguments not supported
+d = [with()];            // Legal: empty arguments supported fro interfaces
 ```
 
 #### Other target types
@@ -358,6 +366,9 @@ If the target type is any other type, then a binding error is reported for the *
 ```csharp
 Span<int> a = [with(), 1, 2, 3]; // error: arguments not supported
 Span<int> b = [with([1, 2]), 3]; // error: arguments not supported
+
+int[] a = [with(), 1, 2, 3]; // error: arguments not supported
+int[] b = [with(length: 1]), 3]; // error: arguments not supported
 ```
 
 ### Create methods
@@ -559,15 +570,13 @@ Arguments are supported for interface target types.  For both mutable and non-mu
 
 The expected list (which still needs to be LDM ratified) is [Interface target type](#Interface-target-type)
 
-
-## Open questions
-
 ### Empty argument lists
 
 Should we allow empty argument lists for some or all target types?
 
 An empty `with()` would be equivalent to no `with()`. It might provide some consistency with non-empty cases, but it wouldn’t add any new capability.
 
+<details>
 The meaning of an empty `with()` might be clearer for some target types than others:
 - For types where **constructors** are used, call the applicable constructor with no arguments.
 - For types with **`CollectionBuilderAttribute`**, call the applicable factory method with elements only.
@@ -584,3 +593,12 @@ IEnumerable<int> e = [with()]; // ok?
 int[]     a = [with()]; // ok?
 Span<int> s = [with()]; // ok?
 ```
+</details>
+
+**Resolution:** https://github.com/dotnet/csharplang/blob/main/meetings/2025/LDM-2025-05-12.md#empty-argument-lists
+
+> We will allow with() for constructor types and builder types that can be called without arguments at all, and we will add empty constructor signatures for the interface (mutable and readonly) types. Arrays and spans will not allow with(), as there are no signatures that would fit them.
+
+## Open questions
+
+None currently.
