@@ -30,7 +30,7 @@ Print($"Hello, {args[0].Capitalize()}!");
 // Fields are useful:
 namespace MyUtils;
 
-static string? cache;
+string? cache;
 
 string GetValue() => cache ??= Compute();
 ```
@@ -115,3 +115,4 @@ TODO: What parts of the design are still undecided?
 - Allow `file` or `private` or both? What should `private` really mean? Visible to file, namespace, or something else?
 - Name for the speakable static class (currently `TopLevel`)? Should it be speakable at all?
 - Should we simplify the TLS entry point logic? Should it be a breaking change?
+- Should we require the `static` modifier (and keep our doors open if we want to introduce some non-`static` top-level members in the future)?
