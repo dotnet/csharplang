@@ -251,7 +251,7 @@ enum class Result
 }
 
 // Translates to:
-public union Result(Sucess, Failure)
+public union Result(Success, Failure)
 {    
     public sealed record class Success(string value);
     public sealed record class Failure(int code);
