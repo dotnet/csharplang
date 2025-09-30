@@ -74,9 +74,10 @@ TODO: This is the bulk of the proposal. Explain the design in enough detail for 
   - A type synthesized per namespace and file. That means `private` members are only visible in the file.
   - Cannot be addressed from C#, but has speakable name `TopLevel` so it is callable from other languages.
     This means that custom types named `TopLevel` become disallowed in a namespace where top-level members are used.
-- Usage:
+  - It needs to have an attribute `[TopLevel]` otherwise it is considered a plain old type. This prevents a breaking change.
+- Usage (if there is an appropriately-shaped `NS.TopLevel` type):
   - `using NS;` implies `using static NS.TopLevel;`.
-  - Lookup for `NS.Method()` can find `NS.TopLevel.Method()`.
+  - Lookup for `NS.Member` can find `NS.TopLevel.Member`.
   - Nothing really changes for extensions.
 - Entry points:
   - Top-level `Main` methods can be entry points.
@@ -113,6 +114,29 @@ TODO: What parts of the design are still undecided?
 
 - Which member kinds? Methods, fields, properties, indexers, events, constructors, operators.
 - Allow `file` or `private` or both? What should `private` really mean? Visible to file, namespace, or something else?
-- Name for the speakable static class (currently `TopLevel`)? Should it be speakable at all?
+- Shape of the synthesized static class (currently `[TopLevel] TopLevel`)? Should it be speakable?
 - Should we simplify the TLS entry point logic? Should it be a breaking change?
 - Should we require the `static` modifier (and keep our doors open if we want to introduce some non-`static` top-level members in the future)?
+- Should we disallow mixing top-level members and existing declarations in one file?
+  - Or we could limit their relative ordering, like top-level statements vs. other declarations are limited today.
+  - Allowing such mixing might be surprising, for example:
+    ```cs
+    namespace N;
+    int s_field;
+    int M() => s_field; // ok
+    static class C
+    {
+      static int M() => s_field; // error, `s_field` is not visible here
+    }
+    ```
+  - Disallowing such mixing might be surprising too, for example, consider there is an existing code:
+    ```cs
+    namespace N;
+    class C;
+    ```
+    and I just want to add a new declaration to it which fails and forces me to create a new file or namespace block:
+    ```cs
+    namespace N;
+    extension(object) {} // error
+    class C;
+    ```
