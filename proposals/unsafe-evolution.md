@@ -4,7 +4,7 @@ Champion issue: https://github.com/dotnet/csharplang/issues/9704
 
 ## Summary
 
-We update the definition of `unsafe` in C# from refering to locations where pointer types are used, to be locations where memory unmanaged by the runtime is dereferenced. These locations
+We update the definition of `unsafe` in C# from referring to locations where pointer types are used, to be locations where memory unmanaged by the runtime is dereferenced. These locations
 are where memory unsafety occurs, and are responsible for the bulk of CVEs categorized as memory safety issues.
 
 ```cs
@@ -23,23 +23,23 @@ void M()
 ## Motivation
 
 Background for this feature can also be found in https://github.com/dotnet/designs/pull/330, which tracks the broader ecosystem changes that will be needed as part of this proposal. For C#
-specifically, we want to make sure that memory unsafety is properly tracked by the language; today, it can be difficult to look at a program hollistically and understand all locations where
+specifically, we want to make sure that memory unsafety is properly tracked by the language; today, it can be difficult to look at a program holistically and understand all locations where
 memory unsafety occurs. This is because various helpers such as the `System.Runtime.CompilerServices.Unsafe`, `System.Runtime.InteropServices.Marshal`, and others do not express that they
 violate memory safety and need special consideration. Methods that then use these helpers aren't immediately obvious, and when auditing code for memory safety issues (either ahead of time
 when doing review, or when trying to determine the cause of a vulnerability that is being reported) it can be difficult to pinpoint the locations that could be contributing to issues.
 
 Historically, `unsafe` in C# has referred to a specific memory-safety hole: the existence of pointer types. The moment that a pointer type is no longer involved, C# is perfectly happy to let
 memory unsafety lie latent in code. It is this issue that we are looking to address with this evolution of `unsafe` in C# and the .NET ecosystem, labeling areas where memory unsafety could
-potentially being occuring, making it easier for reviewers and auditors to understand the boundaries of potential memory unsafety in a program. Importantly, this means that we will be _changing_
+potentially occur, making it easier for reviewers and auditors to understand the boundaries of potential memory unsafety in a program. Importantly, this means that we will be _changing_
 the meaning of `unsafe`, not just augmenting it. The existence of a pointer is not itself unsafe; the unsafe action is dereferencing the pointer. This extends further to types themselves;
 types cannot be inherently unsafe. It is only the action of using a type that could be unsafe, not the existence of that type.
 
 In order for this information to flow through the system, we therefore need to have a way to mark methods themselves as `unsafe`. Today, `unsafe` as a method modifier has no external impact,
-it only allows pointers to be used in the body of the member. Going forward, `unsafe` as a modifier will actually publicly change the meaning of the member; it will indicate that the member
-has memory safety concerns and any usages must be manually validated by the programmer using the member.
+it only allows pointers to be used in the signature and body of the member. Going forward, `unsafe` as a modifier will actually publicly change the meaning of the member; it will indicate that
+the member has memory safety concerns and any usages must be manually validated by the programmer using the member.
 
 This is a potentially large breaking change for particular segments of the C# user base. Our hope is that, for many of our users, this is effectively transparent, and updating to the new rules
-will be seemless. However, given that some large API surfaces like large parts of reflection may need to be marked `unsafe`, we do think it likely that there will need to be a decent on-ramp to
+will be seamless. However, given that some large API surfaces like large parts of reflection may need to be marked `unsafe`, we do think it likely that there will need to be a decent on-ramp to
 the new rules to avoid entirely bifurcating the ecosystem.
 
 ## Detailed Design
@@ -56,26 +56,27 @@ an initialized [`stackalloc`][stack-allocation-spec] are also perfectly legal in
 Given the extensive rewrite of both the `unsafe` code section and other parts C# specification inherent in this change, it would be unwieldy and likely not useful to provide a line-by-line diff
 of the existing rules of the specification. Instead, we will provide an overview of the change to make in a given section, as well as specific new rules for what is allowed in `unsafe` contexts.
 
-#### Expression safety state
+#### Expression memory safety state
 
 > [!NOTE]
 > Now accepting naming suggestions
 
-We introduce a new state that is tracked for all expressions in C#: the safety state. There are two possible safety states for any expression: safe, or unsafe. Expressions with a safety state of
-safe may be used anywhere they are normally legal in C#. Expressions with a safety state of unsafe can only be used in an [unsafe context][unsafe-context-spec], and any use outside of an unsafe context
-is an error.
+We introduce a new state that is tracked for all expressions in C#: the memory safety state. There are two possible safety states for any expression: safe, or unsafe. Expressions with a memory safety
+state of safe may be used anywhere they are normally legal in C#. Expressions with a memory safety state of unsafe can only be used in an [unsafe context][unsafe-context-spec], and any use outside of
+an unsafe context is an error.
 
-For every expression production in [§12](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/expressions.md), if all of its nested expressions have a safety state of safe, then that
-expression has a safety state of safe. If that expression has no nested expressions, it has a safety state of safe. The following expressions always have a safety state of unsafe:
+For every expression production in [§12](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/expressions.md), if all of its nested expressions have a memory safety state of safe, then that
+expression has a memory safety state of safe. If that expression has no nested expressions, it has a memory safety state of safe. The following expressions always have a memory safety state of unsafe:
 
 * [Pointer indirections][pointer-indirection]
 * [Pointer member access][pointer-member-access]
 * [Pointer element access][pointer-element-access]
+* Function pointer invocation
 * Element access on a fixed-size buffer
 * `stackalloc` under the conditions defined [below](#stack-allocation)
 
-In addition to these expressions, expressions can also conditionally introduce a safety state of unsafe if they depend on any symbol that is marked as `unsafe`. For example, calling a method that is
-marked as `unsafe` will cause the _invocation_expression_ to have a safety state of unsafe, even if the receiver and all arguments have a safety state of safe.
+In addition to these expressions, expressions can also conditionally introduce a memory safety state of unsafe if they depend on any symbol that is marked as `unsafe`. For example, calling a method
+that is marked as `unsafe` will cause the _invocation_expression_ to have a memory safety state of unsafe, even if the receiver and all arguments have a memory safety state of safe.
 
 > [!NOTE]
 > This section probably needs expansion to formally declare the various expression types and symbols that can change the safety state of an expression.
@@ -95,9 +96,12 @@ removed. No semantics change about the meaning of these expressions; the only ch
 
 For [pointer indirection][pointer-indirection], [pointer member access][pointer-member-access], and [pointer element access][pointer-element-access], these operators remain unsafe, as these
 access memory that is not managed the runtime. They remain in [§24][unsafe-code.md], and continue to require an `unsafe` context to be used. Any use outside of an `unsafe` context is an error.
-No semantics about these operators change; they still continue to mean exactly the same thing that they do today.
+No semantics about these operators change; they still continue to mean exactly the same thing that they do today. These expressions always have a memory safety state of unsafe.
 
 The [fixed statement][fixed-statement] moves to [§13](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/statements.md), with references to `unsafe` contexts removed.
+
+Function pointers are not yet incorporated into the main C# specification, but they are similarly affected; everything but function pointer invocation is moved into the standard specification.
+A function pointer invocation expression always has a memory safety state of unsafe.
 
 #### Fixed-size buffers
 
@@ -122,6 +126,21 @@ contract of `Span<T>` and `ReadOnlySpan<T>`, and so must be subject to extra scr
 > [!NOTE]
 > This means that assigning a `stackalloc` to a pointer is _always_ safe, regardless of context. Arguably, this is a bit of failure of the proposal, as the creation of the pointer could be far from
 > the actual dereference of the pointer.
+
+### Overriding, inheritance, and implementation
+
+It is invalid to add `unsafe` at the member level in any override or implementation of a member that does not have `unsafe` on it originally, because callers may be using the base definition and not
+see any addition of `unsafe` by a derived implementation. This rule may add friction as we adopt `unsafe` across the ecosystem, and may need to be revisited to be moved down to a warning if it proves
+to be a significant adoption blocker.
+
+### Delegates and lambdas
+
+It is invalid to convert an `unsafe` member to a delegate type that is not marked `unsafe`. The [_function type_](csharp-10.0/lambda-improvements.md#natural-function-type) definition is updated to
+include whether the _anonymous function_ has the `unsafe` keyword, or the _method group_ is to a member with the `unsafe` modifier.
+
+## Open questions
+
+
 
 [unsafe-code.md]: https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/expressions.md#128-primary-expressions
 [unsafe-context-spec]: https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/unsafe-code.md#242-unsafe-contexts
