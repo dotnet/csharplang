@@ -119,7 +119,6 @@ Syntax:
 collection_element
    : expression_element
    | spread_element
-   | key_value_pair_element
 +  | with_element
    ;
 
@@ -136,14 +135,6 @@ Examples of how this would look are:
 // Initialize to twice the capacity since we'll have to add
 // more values later.
 List<string> names = [with(capacity: values.Count * 2), .. values];
-
-// With the dictionary types.
-Dictionary<string, int> nameToAge1 = [with(comparer)];
-Dictionary<string, int> nameToAge2 = [with(comparer), kvp1, kvp2, kvp3];
-Dictionary<string, int> nameToAge3 = [with(comparer), k1:v1, k2:v2, k3:v4];
-Dictionary<string, int> nameToAge4 = [with(comparer), .. d1, .. d2, .. d3];
-
-Dictionary<string, int> nameToAge = [with(comparer), kvp1, k1: v2, .. d1];
 ```
 
 These forms seem to "read" reasonably well.  In all those cases, the code is "creating a collection expression,
