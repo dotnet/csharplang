@@ -197,6 +197,8 @@ Note: the [conversions](https://github.com/dotnet/csharplang/blob/main/proposals
 
 Note the actual contents of the `with_element` do not affect if the conversion exists or not.  Just the presence or absence of it.  The intuition here is simply that if the collection expression is written without one (like `[x, y, z]`) it would have to be to be able to call the constructor without args.  While if it is has `[with(...), x, y, z]` it could then call the appropriate constructor.  This also means that types that can *not* invoked with a no-argument constructor *can* be used with a collection expression.  However, they can only be constructed with a collection expression that contains a `with_element`.
 
+The actual determination of how a `with_element` will affect construction is given [below](#Construction).
+
 ## Construction
 
 Construction is updated as follows.
