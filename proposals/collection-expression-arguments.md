@@ -154,26 +154,17 @@ existing method by using `@with(...)`.
 We would translate this `with(...)` element like so:
 
 ```c#
-Dictionary<string, int> nameToAge1 = [with(StringComparer.OrdinalIgnoreCase), ...]; // translates to:
+List<string> names = [with(/*capacity*/10), ...]; // translates to:
 
 // argument_list *becomes* the argument list for the
 // constructor call. 
-__result = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase); // followed by normal initialization
-
-// or:
-
-ImmutableDictionary<string, int> nameToAge2 = [with(StringComparer.OrdinalIgnoreCase), ...]; // translates to:
-
-// argument_list arguments are passed initially to the
-// 'create method'.
-__result = ImmutableDictionary.CreateRange(StringComparer.OrdinalIgnoreCase, /* key/values to initialize dictionary with */);
+__result = new List<string>(10); // followed by normal initialization
 
 // or
 
-IReadOnlyDictionary<string, int> nameToAge2 = [with(StringComparer.OrdinalIgnoreCase), ...]; // translates to:
+IList<string> names2 = [with(capacity: 20), ...]; // translates to:
 
-// create synthesized dictionary with hashing/equality
-// behavior determined by StringComparer.OrdinalIgnoreCase.
+__result = new List<string>(20);
 ```
 
 In other words, the argument_list arguments would be passed to the appropriate constructor if we are calling
