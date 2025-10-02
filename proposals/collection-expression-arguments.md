@@ -185,6 +185,18 @@ dictionary interface types to control its behavior.
 
 Collection arguments are *not* considered when determining *collection expression* conversions.
 
+Note: the [conversions](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-12.0/collection-expressions.md#conversions) section for collection-expressions is updated in the following manner:
+
+```diff
+> A struct or class type that implements System.Collections.IEnumerable where:
+
+-  * The type has an applicable constructor that can be invoked with no arguments, and the constructor is accessible at the location of the collection expression.
++  a. the collection expression has no `with_element` and the type has an applicable constructor that can be invoked with no arguments, accessible at the location of the collection expression. or
++  b. the collection expression has a `with_element` and the type has at least one constructor accessible at the location of the collection expression. 
+```
+
+Note the actual contents of the `with_element` do not affect if the conversion exists or not.  Just the presence or absence of it.  The intuition here is simply that if the collection expression is written without one (like `[x, y, z]`) it would have to be to be able to call the constructor without args.  While if it is has `[with(...), x, y, z]` it could then call the appropriate constructor.  This also means that types that can *not* invoked with a no-argument constructor *can* be used with a collection expression.  However, they can only be constructed with a collection expression that contains a `with_element`.
+
 ## Construction
 
 Construction is updated as follows.
