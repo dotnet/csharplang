@@ -111,9 +111,9 @@ passed to that constructor, which is definitely is not.
 Based on all of the above, a small handful of options have come up that are felt to solve the needs of passing
 arguments, without stepping out of bounds of the goals of collection expressions.
 
-## Option 1: `[with(...arguments...)]`
+## `[with(...arguments...)]` Design
 
-The design of this form would be as follows:
+Syntax:
 
 ```diff
 collection_element
@@ -189,78 +189,6 @@ In other words, the argument_list arguments would be passed to the appropriate c
 a constructor, or to the appropriate 'create method' if we are calling such a method.  We would also allow a
 single argument inheriting from the BCL *comparer* types to be provided when instantiating one of the destination
 dictionary interface types to control its behavior.
-
-## Option 2: `[args(...arguments...)]`
-
-This form is effectively identical to the `with(...)` form, just using a slightly different identifier.  The
-benefit here would primarily be around clearer identification of what is in the `(...)` section.  They are
-clearly 'arguments' as 'args' states.
-
-Of note: 'args' is *already* a contextual keyword in C#.  It was added as part of "top-level statements" to
-allow top-level code to refer to the `string[]` arguments passed into the program.  So this form is effectively
-identical to the `with(...)` just with a subjective preference on a different keyword.
-
-This form seems to be even *less* likely to have any breaks versus `with(...)`.  A method called `with(...)`
-and used in a collection expression is at least conceivable.  A method called `args(...)` feels like an even
-lower realm of chance, making it even more acceptable to take the break.
-
-Examples of this form are:
-
-```c#
-// With an existing type:
-
-// Initialize to twice the capacity since we'll have to add
-// more values later.
-List<string> names = [args(capacity: values.Count * 2), .. values];
-
-// With the dictionary types.
-Dictionary<string, int> nameToAge1 = [args(comparer)];
-Dictionary<string, int> nameToAge2 = [args(comparer), kvp1, kvp2, kvp3];
-Dictionary<string, int> nameToAge3 = [args(comparer), k1:v1, k2:v2, k3:v4];
-Dictionary<string, int> nameToAge4 = [args(comparer), .. d1, .. d2, .. d3];
-
-Dictionary<string, int> nameToAge = [args(comparer), kvp1, k1: v2, .. d1];
-```
-
-These forms seem to "read" reasonably well.  In all those cases, the code is "creating a collection expression,
-with the following 'args' to pass along to control the final instance, and then the subsequent elements used to
-populate it.  For example, the first line "creates a list of strings with a capacity 'arg' of two times the count
-of the values about to be spread into it"
-
-## Option3: `[init(...arguments...)]`
-
-Same as option 2, just with 'init' as the keyword chosen:
-
-```c#
-// With an existing type:
-
-// Initialize to twice the capacity since we'll have to add
-// more values later.
-List<string> names = [init(capacity: values.Count * 2), .. values];
-
-// With the dictionary types.
-Dictionary<string, int> nameToAge1 = [init(comparer)];
-Dictionary<string, int> nameToAge2 = [init(comparer), kvp1, kvp2, kvp3];
-Dictionary<string, int> nameToAge3 = [init(comparer), k1:v1, k2:v2, k3:v4];
-Dictionary<string, int> nameToAge4 = [init(comparer), .. d1, .. d2, .. d3];
-
-Dictionary<string, int> nameToAge = [init(comparer), kvp1, k1: v2, .. d1];
-```
-
-## Option 4: `new(...arguments...) [...elements...]`
-
-The design here would play off of how `new(...) { v1, v2, ... }` can already instantiate a target collection type
-and supply initial collection values.  The arguments in the `new(...)` clause would be passed to the constructor if
-creating a new instance, or as the initial arguments if calling a *create method*.  We would allow a single *comparer*
-argument if creating a new `IDictionary<,>` or `IReadOnlyDictionary<,>`.
-
-There are several downsides to this idea, as enumerated in the initial *weaknesses* section.  First, there is a
-general concern around syntax appearing outside of the `[...]` section.  We want the `[...]` to be instantly 
-recognizable, which is not the case if there is a `new(...)` appearing first.  Second, seeing the `new(...)` 
-strongly triggers the view that this is simply an implicit-object-creation.  And, while somewhat true for the
-case where a constructor *is* actually called (like for `Dictionary<,>`) it is misleading when calling a *create
-method*, or creating an interface.  Finally, there is general apprehension around using `new` at all as there
-is a feeling of redundancy around both the `new` indicating a new instance, *and* `[...]` indicating a new instance.
 
 ## Conversions
 
