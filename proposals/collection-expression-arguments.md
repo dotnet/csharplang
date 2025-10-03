@@ -180,8 +180,10 @@ The [conversions](https://github.com/dotnet/csharplang/blob/main/proposals/cshar
 > A struct or class type that implements System.Collections.IEnumerable where:
 
 -  * The type has an applicable constructor that can be invoked with no arguments, and the constructor is accessible at the location of the collection expression.
-+  a. the collection expression has no `with_element` and the type has an applicable constructor that can be invoked with no arguments, accessible at the location of the collection expression. or
-+  b. the collection expression has a `with_element` and the type has at least one constructor accessible at the location of the collection expression. 
++  a. the collection expression has no `with_element` and the type has an applicable constructor
++     that can be invoked with no arguments, accessible at the location of the collection expression. or
++  b. the collection expression has a `with_element` and the type has at least one constructor
++     accessible at the location of the collection expression. 
 ```
 
 Note the actual arguments within the `argument_list` of the `with_element` do not affect if the conversion exists or not.  Just the presence or absence of the `with_element` itself.  The intuition here is simply that if the collection expression is written without one (like `[x, y, z]`) it would have to be to be able to call the constructor without args.  While if it is has `[with(...), x, y, z]` it could then call the appropriate constructor.  This also means that types that can *not* invoked with a no-argument constructor *can* be used with a collection expression, but *only*  if that collection expression that contains a `with_element`.
