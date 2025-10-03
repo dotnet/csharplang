@@ -174,9 +174,7 @@ dictionary interface types to control its behavior.
 
 ## Conversions
 
-Collection arguments are *not* considered when determining *collection expression* conversions.
-
-Note: the [conversions](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-12.0/collection-expressions.md#conversions) section for collection-expressions is updated in the following manner:
+The [conversions](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-12.0/collection-expressions.md#conversions) section for collection-expressions is updated in the following manner:
 
 ```diff
 > A struct or class type that implements System.Collections.IEnumerable where:
@@ -186,7 +184,7 @@ Note: the [conversions](https://github.com/dotnet/csharplang/blob/main/proposals
 +  b. the collection expression has a `with_element` and the type has at least one constructor accessible at the location of the collection expression. 
 ```
 
-Note the actual contents of the `with_element` do not affect if the conversion exists or not.  Just the presence or absence of it.  The intuition here is simply that if the collection expression is written without one (like `[x, y, z]`) it would have to be to be able to call the constructor without args.  While if it is has `[with(...), x, y, z]` it could then call the appropriate constructor.  This also means that types that can *not* invoked with a no-argument constructor *can* be used with a collection expression.  However, they can only be constructed with a collection expression that contains a `with_element`.
+Note the actual arguments within the `argument_list` of the `with_element` do not affect if the conversion exists or not.  Just the presence or absence of the `with_element` itself.  The intuition here is simply that if the collection expression is written without one (like `[x, y, z]`) it would have to be to be able to call the constructor without args.  While if it is has `[with(...), x, y, z]` it could then call the appropriate constructor.  This also means that types that can *not* invoked with a no-argument constructor *can* be used with a collection expression, but *only*  if that collection expression that contains a `with_element`.
 
 The actual determination of how a `with_element` will affect construction is given [below](#Construction).
 
@@ -202,7 +200,7 @@ If *collection_arguments* is included and is not the first element in the collec
 
 If the *argument list* contains any values with *dynamic* type, a compile-time error is reported ([LDM-2025-01-22](https://github.com/dotnet/csharplang/blob/main/meetings/2025/LDM-2025-01-22.md#conclusion-1)).
 
-#### Constructors
+### Constructors
 
 If the target type is a *struct* or *class type* that implements `System.Collections.IEnumerable`, and the target type does not have a *create method*, and the target type is not a *generic parameter type* then:
 * [*Overload resolution*](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/expressions.md#1264-overload-resolution) is used to determine the best instance constructor from the candidates.
@@ -222,7 +220,7 @@ l = [with([1, 2]), 3];         // new List<int>(IEnumerable<int> collection)
 l = [with(default)];           // error: ambiguous constructor
 ```
 
-#### CollectionBuilderAttribute methods
+### CollectionBuilderAttribute methods
 
 If the target type is a type with a *create method*, then:
 * [*Overload resolution*](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/expressions.md#1264-overload-resolution) is used to determine the best create method from the candidates.
@@ -253,7 +251,35 @@ MyCollection<string> c2 = [with(), "1", "2"];
 // c2 = MyBuilder.Create<string>(_tmp3);
 ```
 
-#### Interface target type
+<a id="create-methods"></a>
+#### CollectionBuilderAttribute: Create methods
+
+For a collection expression where the target type *definition* has a `[CollectionBuilder]` attribute, the *create methods* are the following, **updated** from [*collection expressions: create methods*](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-12.0/collection-expressions.md#create-methods).
+
+> A `[CollectionBuilder(...)]` attribute specifies the *builder type* and *method name* of a method to be invoked to construct an instance of the collection type.
+> 
+> The *builder type* must be a non-generic `class` or `struct`.
+> 
+> First, the set of applicable *create methods* `CM` is determined.
+> It consists of methods that meet the following requirements:
+> 
+> * The method must have the name specified in the `[CollectionBuilder(...)]` attribute.
+> * The method must be defined on the *builder type* directly.
+> * The method must be `static`.
+> * The method must be accessible where the collection expression is used.
+> * The *arity* of the method must match the *arity* of the collection type.
+> * The method must have a **last** parameter of type `System.ReadOnlySpan<E>`, passed by value.
+> * There is an [*identity conversion*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/conversions.md#1022-identity-conversion), [*implicit reference conversion*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/conversions.md#1028-implicit-reference-conversions), or [*boxing conversion*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/conversions.md#1029-boxing-conversions) from the method return type to the *collection type*.
+> 
+> Methods declared on base types or interfaces are ignored and not part of the `CM` set.
+
+> For a *collection expression* with a target type <code>C&lt;S<sub>0</sub>, S<sub>1</sub>, &mldr;&gt;</code> where the *type declaration* <code>C&lt;T<sub>0</sub>, T<sub>1</sub>, &mldr;&gt;</code> has an associated *builder method* <code>B.M&lt;U<sub>0</sub>, U<sub>1</sub>, &mldr;&gt;()</code>, the *generic type arguments* from the target type are applied in order &mdash; and from outermost containing type to innermost &mdash; to the *builder method*.
+
+The key differences from the earlier algorithm are:
+* Create methods may have additional parameters *before* the `ReadOnlySpan<E>` parameter.
+* Multiple create methods are supported.
+
+### Interface target type
 
 If the target type is an *interface type*, then:
 * [*Overload resolution*](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/expressions.md#1264-overload-resolution) is used to determine the best candidate method signature.
@@ -283,7 +309,7 @@ r = [with(capacity: 2)]; // error: 'capacity' parameter not recognized
 d = [with()];            // Legal: empty arguments supported for interfaces
 ```
 
-#### Other target types
+### Other target types
 
 If the target type is any other type, then a binding error is reported for the *argument list*, even if empty.
 
@@ -294,33 +320,6 @@ Span<int> b = [with([1, 2]), 3]; // error: arguments not supported
 int[] a = [with(), 1, 2, 3]; // error: arguments not supported
 int[] b = [with(length: 1), 3]; // error: arguments not supported
 ```
-
-### Create methods
-
-For a collection expression where the target type *definition* has a `[CollectionBuilder]` attribute, the *create methods* are the following, **updated** from [*collection expressions: create methods*](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-12.0/collection-expressions.md#create-methods).
-
-> A `[CollectionBuilder(...)]` attribute specifies the *builder type* and *method name* of a method to be invoked to construct an instance of the collection type.
-> 
-> The *builder type* must be a non-generic `class` or `struct`.
-> 
-> First, the set of applicable *create methods* `CM` is determined.
-> It consists of methods that meet the following requirements:
-> 
-> * The method must have the name specified in the `[CollectionBuilder(...)]` attribute.
-> * The method must be defined on the *builder type* directly.
-> * The method must be `static`.
-> * The method must be accessible where the collection expression is used.
-> * The *arity* of the method must match the *arity* of the collection type.
-> * The method must have a **last** parameter of type `System.ReadOnlySpan<E>`, passed by value.
-> * There is an [*identity conversion*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/conversions.md#1022-identity-conversion), [*implicit reference conversion*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/conversions.md#1028-implicit-reference-conversions), or [*boxing conversion*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/conversions.md#1029-boxing-conversions) from the method return type to the *collection type*.
-> 
-> Methods declared on base types or interfaces are ignored and not part of the `CM` set.
-
-> For a *collection expression* with a target type <code>C&lt;S<sub>0</sub>, S<sub>1</sub>, &mldr;&gt;</code> where the *type declaration* <code>C&lt;T<sub>0</sub>, T<sub>1</sub>, &mldr;&gt;</code> has an associated *builder method* <code>B.M&lt;U<sub>0</sub>, U<sub>1</sub>, &mldr;&gt;()</code>, the *generic type arguments* from the target type are applied in order &mdash; and from outermost containing type to innermost &mdash; to the *builder method*.
-
-The key differences from the earlier algorithm are:
-* Create methods may have additional parameters *before* the `ReadOnlySpan<E>` parameter.
-* Multiple create methods are supported.
 
 ## Answered questions
 
