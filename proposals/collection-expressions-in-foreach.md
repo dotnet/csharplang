@@ -1,6 +1,8 @@
 # Collection Expressions in `foreach`
 
-Championed issue: https://github.com/dotnet/csharplang/issues/9739
+[!INCLUDE[Specletdisclaimer](../speclet-disclaimer.md)]
+
+Champion issue: https://github.com/dotnet/csharplang/issues/9739
 
 ## Summary
 
