@@ -115,11 +115,11 @@ enum JsonValue
   },
   Object(ImmutableDictionary<string, JsonValue> Members)
   {
-    public override string ToString() => Value.ToString();
+    public override string ToString() => Members.ToString();
   },
   Array(ImmutableArray<JsonValue> Elements)
   {
-    public override string ToString() => Value.ToString();
+    public override string ToString() => Elements.ToString();
   },
   Null
   {
