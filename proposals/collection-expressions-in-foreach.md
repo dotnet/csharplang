@@ -1,5 +1,7 @@
 # Collection Expressions in `foreach`
 
+Championed issue: https://github.com/dotnet/csharplang/issues/9739
+
 ## Summary
 
 [Collection Expressions](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-12.0/collection-expressions.md)
