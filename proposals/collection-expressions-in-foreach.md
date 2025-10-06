@@ -2,7 +2,7 @@
 
 ## Summary
 
-[Collection Expressions(https://github.com/dotnet/csharplang/blob/main/proposals/csharp-12.0/collection-expressions.md)
+[Collection Expressions](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-12.0/collection-expressions.md)
 introduced a terse syntax `[e1, e2, e3, etc]` to create common collection values.
 This proposal extends their usage to `foreach` statements, where they can be used directly as the iteration
 source without requiring an explicit target type.
