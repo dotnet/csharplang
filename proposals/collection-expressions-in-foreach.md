@@ -121,10 +121,9 @@ If no best common type can be determined, a compile-time error occurs.
 While the semantics are defined in terms of array creation, a compliant implementation is free to optimize
 the collection expression however it deems appropriate, provided the observable behavior remains the same. For example:
 
-- When the element count is known and there are no intervening `await` expressions or `yield` statements, the implementation may use:
-  - A stack-allocated `ReadOnlySpan<T>` for the elements
-  - Data stored in the program's constant data segment
-  - Complete elision of the collection when possible
+- Stored in the program's constant data segment when it contains only constant values.
+- Using a stack-allocated `ReadOnlySpan<T>` for the elements when the element count is known and there are no intervening `await` expressions or `yield` statements.
+- Complete elision of the collection entirely.
 
 For example, `foreach (var i in [0, 1, 2, 3])` could be translated to:
 ```csharp
