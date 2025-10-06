@@ -30,7 +30,7 @@ Another common scenario is iterating through a fixed set of stages or phases:
 
 ```csharp
 // Today:
-foreach (var phase in new[] { Phase.Parsing, Phase..Binding, Phase..Lowering", Phase..Emit })
+foreach (var phase in new[] { Phase.Parsing, Phase.Binding, Phase.Lowering, Phase.Emit })
 {
     ExecuteCompilerPhase(phase);
 }
@@ -50,15 +50,15 @@ a "natural type," which proved to be too large and complex a design space to tac
 However, for `foreach` statements specifically, the problem space is much simpler. The collection is
 created and immediately consumed—user code cannot introspect the collection itself—giving the language
 and compiler broad flexibility in implementation without the complexities of determining a universal
-natural type.  This flexibility follows the design principles of collection-expresions themselves, 
+natural type.  This flexibility follows the design principles of collection-expressions themselves, 
 allowing optimal performance, with minimal syntax.
 
 ## Detailed design
 
 ### Syntax
 
-No grammar changes are required. Collection expressions are already valid expressions syntactically; thi
-s proposal only extends where they can be used semantically.
+No grammar changes are required. Collection expressions are already valid expressions syntactically; this
+proposal only extends where they can be used semantically.
 
 ### Semantics
 
