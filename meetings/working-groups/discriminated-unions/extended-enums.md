@@ -138,7 +138,7 @@ TODO: Should the structs be readonly?  Seems like that goes against normal struc
 enum Status : string { Active = "A", Inactive = "I" }
 
 // ✓ Valid - shape enum with data
-enum class class Result { Ok(int value), Error(string msg) }
+enum class Result { Ok(int value), Error(string msg) }
 
 // ✗ Invalid - cannot mix constants and shapes
 enum class Bad { A = 1, B(string x) }
