@@ -19,17 +19,18 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 - Remaining open questions for unions (Matt and Mads)
 
+## C# Language Design Notes for 2025
+
 ### Mon Sep 29, 2025
 
-- Union syntax, continued (Matt and Mads)
-    - Syntax for case type references
-    - Shorthand syntax for unions with case type declarations ("discriminated" unions)
+[C# Language Design Meeting for September 29th, 2025](https://github.com/dotnet/csharplang/blob/main/meetings/2025/LDM-2025-09-29.md)
 
-## C# Language Design Notes for 2025
+- Union Syntax Thunderdome Part 2
+- Enums vs Unions
 
 ### Wed Sep 24, 2025
 
-[C# Language Design Meeting for September 17th, 2025](https://github.com/dotnet/csharplang/blob/main/meetings/2025/LDM-2025-09-24.md)
+[C# Language Design Meeting for September 24th, 2025](https://github.com/dotnet/csharplang/blob/main/meetings/2025/LDM-2025-09-24.md)
 
 - Union Syntax Thunderdome Part 1
 
