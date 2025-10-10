@@ -25,6 +25,8 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ### Wed Oct 1, 2025
 
+[C# Language Design Meeting for October 1st, 2025](https://github.com/dotnet/csharplang/blob/main/meetings/2025/LDM-2025-10-01.md)
+
 - Closed enums
 - Closed Hierarchies
 
