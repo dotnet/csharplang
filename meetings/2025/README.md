@@ -15,17 +15,18 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ## Schedule
 
-## Wed Oct 15, 2025
+## Mon Oct 13, 2025
 
 - [Breaking change: use declaration-block safe-context for Span-valued collection expressions (Rikki)](https://github.com/dotnet/csharplang/issues/9750)
 - [Collection expressions in `foreach` (Cyrus)](https://github.com/dotnet/csharplang/blob/fd6c1c1fbabe77ac8ddd36154d8872b33e4dab89/proposals/collection-expressions-in-foreach.md)
 - [Immediately enumerated collection expressions (Rikki)](https://github.com/dotnet/csharplang/pull/9749/commits/dfb92021164c63f24742c01d3330bbc218b6cdf6#diff-19da35cb95d64e7d09307f216b1c0140557f356b4c81f3c85080c10a3f24bc66)
 
+## C# Language Design Notes for 2025
+
 ### Wed Oct 1, 2025
 
-- Remaining open questions for unions (Matt and Mads)
-
-## C# Language Design Notes for 2025
+- Closed enums
+- Closed Hierarchies
 
 ### Mon Sep 29, 2025
 

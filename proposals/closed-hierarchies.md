@@ -1,5 +1,7 @@
 # Closed Hierarchies
 
+Champion issue: https://github.com/dotnet/csharplang/issues/9499  
+
 ## Summary
 
 Allow a class to be declared `closed`. This prevents directly derived classes from being declared in a different assembly:
