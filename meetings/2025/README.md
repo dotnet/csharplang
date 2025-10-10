@@ -7,6 +7,9 @@ All schedule items must have a public issue or checked-in proposal that can be l
 ## Schedule when convenient
 
 - Triage (working set)
+- [Breaking change: use declaration-block safe-context for Span-valued collection expressions (Rikki)](https://github.com/dotnet/csharplang/issues/9750)
+- [Collection expressions in `foreach` (Cyrus)](https://github.com/dotnet/csharplang/blob/main/proposals/collection-expressions-in-foreach.md)
+- [Immediately enumrated collection expressions (Rikki)](https://github.com/dotnet/csharplang/pull/9749)
 
 ## Recurring topics
 
