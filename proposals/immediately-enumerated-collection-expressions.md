@@ -22,8 +22,6 @@ See also https://github.com/dotnet/csharplang/blob/main/meetings/working-groups/
 ## Motivation
 [motivation]: #motivation
 
-<!-- Why are we doing this? What use cases does it support? What is the expected outcome? -->
-
 Choosing a single "natural type" for collection expressions in the general case, e.g. `var coll = [1, 2, 3];`, has proven to be a difficult question and represents a major commitment. Should `coll` be a `List<int>`, `ReadOnlySpan<int>`, or something else? It's not obvious, and some of the possible answers represent a major engineering cost, and in any case a major statement about the defaults/preferences of the ecosystem.
 
 However, we do see a significant amount of demand for the ability to use collection expressions in contexts where the collection is immediately enumerated, and the collection value itself is not directly observable in user code. In this case, we should be able to define a solution which is convenient, optimal, and relatively low risk.
@@ -32,8 +30,6 @@ Today, we believe that users are using `new[] { ... }` or `(T[])[...]` instead o
 
 ## Detailed design
 [design]: #detailed-design
-
-<!-- This is the bulk of the proposal. Explain the design in enough detail for somebody familiar with the language to understand, and for somebody familiar with the compiler to implement,  and include examples of how the feature is used. This section can start out light before the prototyping phase but should get into specifics and corner-cases as the feature is iteratively designed and implemented. -->
 
 ### Method type argument inference
 
@@ -171,7 +167,7 @@ void M<T>(T[] items) { }
 
 ### Implementation flexibility
 
-Similar to [collection-expressions-in-foreach.md](https://github.com/dotnet/csharplang/blob/9d618b5eacaca9721550fb9a153a291087c10dae/proposals/collection-expressions-in-foreach.md), the implementation is encouraged to optimize based on the fact that user code can't observe the array which is created for a foreach-collection or spread-value under these new rules. So, it is free to use different strategies to allocate space for the collection elements such as an InlineArray on the stack.
+Similar to [collection-expressions-in-foreach.md](https://github.com/dotnet/csharplang/blob/9d618b5eacaca9721550fb9a153a291087c10dae/proposals/collection-expressions-in-foreach.md), the implementation is encouraged to optimize based on the fact that user code can't observe the array which is created for a foreach-collection or spread-value under these new rules. So, it is free to use different strategies to allocate space for the collection elements such as an InlineArray on the stack, or not creating a collection instance at all and instead "inlining" the enumeration of elements.
 
 Below is an example of an emit strategy for "conditional element inclusion":
 
@@ -192,20 +188,15 @@ if (includeMoreItems)
 ## Drawbacks
 [drawbacks]: #drawbacks
 
-<!-- Why should we *not* do this? -->
-
 Ensuring high-quality code generation in a wide variety of usage scenarios may be a significant amount of work.
 
 ## Alternatives
 [alternatives]: #alternatives
 
-<!-- What other designs have been considered? What is the impact of not doing this? -->
 Take the [collection-expressions-in-foreach.md](https://github.com/dotnet/csharplang/blob/98d6837c32e8d0ab25a29001267be5be206a0f19/proposals/collection-expressions-in-foreach.md) proposal instead, which provides support for the "base case" `foreach (var item in [1, 2, 3])` only, and doesn't provide support in spreads.
 
 ## Open questions
 [open]: #open-questions
-
-<!-- What parts of the design are still undecided? -->
 
 ### Output type inference for spreads
 
