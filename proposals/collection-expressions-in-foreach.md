@@ -116,6 +116,10 @@ foreach (T_e v in (T_e[])[e1, e2, ..s1, etc.])
 
 If no best common type can be determined, a compile-time error occurs.
 
+Note: this is also akin to having a method `void M<T>(T[] values);` and running type inference on `M([e1, e2, ..s1, etc.])` to see
+what type argument `T` is inferred to be.  That type for `T` is then the element type for the `foreach` and the rules for an 
+explicitly typed `foreach` statement (above) apply.
+
 ### Implementation flexibility
 
 While the semantics are defined in terms of array creation, a compliant implementation is free to optimize
