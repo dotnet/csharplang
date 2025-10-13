@@ -49,21 +49,32 @@ Given a *spread element* of the form:
 .. collection
 ```
 - When `collection` lacks a natural type, we determine if a *collection expression iteration conversion* exists, from `collection` to type `IEnumerable<TElem>`, and apply the conversion if it exists.
-- `TElem` is the *best common element type* of `collection`.
+- `TElem` is determined in the following way:
+    - If the collection-expression containing the spread element `.. collection` is subject to a *collection expression conversion* to a type with an *element type*, then `TElem` is that *element type*.
+    - Otherwise, `TElem` is the *best common element type* of `collection`.
 - If the type of `TElem` can be determined, then the *collection expression iteration conversion* exists. Otherwise, the conversion does not exist.
+
+#### Remarks
+
+We intend for the following cases, which push element type information down from a target type to just work:
+- `foreach (string? x in [null]) { }`
+- `string?[] items = [.. [null]];`
+- `List<string?> items = [.. [null]];`
+
+When no target element type is available, such as when `foreach (var x ...` form is being used, or when the element type of the containing collection-expression of a spread is not known, then, the *best common element type* mechanism is used to propagate the nested element type information outward.
 
 ### Best common element type
 
-The *best common element type* of an expression is determined similarly to the *best common type of a set of expressions* ([§12.6.3.16](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/expressions.md#126316-finding-the-best-common-type-of-a-set-of-expressions)):
+See also [collection-expressions.md#type-inference](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-12.0/collection-expressions.md#type-inference).
+
+The *best common element type* of an expression `E` is determined similarly to the *best common type of a set of expressions* ([§12.6.3.16](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/expressions.md#126316-finding-the-best-common-type-of-a-set-of-expressions)):
 
 - A new *unfixed* type variable `X` is introduced.
-- For each expression `Ei` an *output type inference* ([§12.6.3.8](expressions.md#12638-output-type-inferences)) is performed from it to `IEnumerable<X>`.
+- An *output type inference* ([§12.6.3.8](expressions.md#12638-output-type-inferences)) is performed from `E` to `IEnumerable<X>`.
 - `X` is *fixed* ([§12.6.3.13](expressions.md#126313-fixing)), if possible, and the resulting type is the best common element type.
 - Otherwise inference fails.
 
-When combined to the above changes to type inference rules, it effectively means that certain subexpressions are searched recursively in order to come up with an element type for the containing expression, which is then "pushed back down" into the elements via target-typed conversion.
-
-For example, in the following statement, the element type of the collection being iterated, is the *best common type* of expressions `a, b, c`:
+For example, in the following statement, the element type of the collection being iterated, is same as the *best common type* of expressions `a, b, c`:
 
 ```cs
 foreach (var item in [a, b, c])
@@ -71,11 +82,11 @@ foreach (var item in [a, b, c])
 }
 ```
 
-Note that this feature is intentionally specified in such a way, that an element type is determined similarly for the `foreach` collection above, as it is for a generic method call with a `T[]` parameter:
+Note that this feature is intentionally specified in such a way that an element type is determined similarly for the `foreach` collection above, as it is for a generic method call with an `IEnumerable<T>` parameter:
 
 ```cs
 M([a, b, c]);
-void M<T>(T[] items)
+void M<T>(IEnumerable<T> items)
 {
 }
 ```
