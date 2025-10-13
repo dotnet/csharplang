@@ -1,6 +1,6 @@
 # Immediately Enumerated Collection Expressions
 
-Champion issue: `<link to the champion issue>`
+Champion issue: https://github.com/dotnet/csharplang/issues/9754
 
 ## Summary
 [summary]: #summary
