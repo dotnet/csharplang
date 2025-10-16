@@ -104,7 +104,7 @@ This proposal doesn't get us 100% of the way there to "conditional element inclu
 string[] items2 = ["a", "b", .. includeRest ? ["c", "d"] : []];
 ```
 
-We are interested in pursuing type inference improvements which we expect to improve things across the board--for calls, foreach, and spreads--all in a similar way.
+We are interested in pursuing type inference improvements which we expect to improve things across the board—for calls, foreach, and spreads—all in a similar way.
 ```cs
 // Make all of the following work using a future type inference improvement:
 M1(cond ? [1] : [2]);
