@@ -101,7 +101,7 @@ var y = obj?.Member;        // Null-conditional member access
 ```csharp
 var x = condition ? [1, 2, 3] : [4, 5, 6];    // Conditional with collection expressions
 var y = flag ? .StaticMember : expr;          // Conditional with static member access
-var z = test ?  /* comment */ [x] : [y];      // Comment between tokens
+var z = test ?/*comment*/[x] : [y];      // Comment between tokens
 ```
 
 **Invalid (violates adjacency requirement):**
