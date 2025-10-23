@@ -86,7 +86,7 @@ productions.
 
 The [Conditional Operator](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/expressions.md#1115-conditional-operator) section is updated to include the following rule:
 
-> A conditional expression of the form `b ? x : y` is not allowed to have `?` and `x` touch if `x` starts with a `.` or `[` token.  If `x` starts with either of those tokens, the collection expression will instead be interpreted as a  `null_conditional_member_access` or `null_conditional_element_access` respectively.
+> A conditional expression of the form `b ? x : y` is not allowed to have `?` and `x` touch if `x` starts with a `.` or `[` token.  If `x` starts with either of those tokens, the expression will instead be interpreted as a  `null_conditional_member_access` or `null_conditional_element_access` respectively.
 
 
 ### Examples
