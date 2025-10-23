@@ -75,11 +75,6 @@ null_conditional_member_access
     : primary_expression '?' '.' identifier type_argument_list?
       (null_forgiving_operator? dependent_access)*
     ;
-
-null_conditional_projection_initializer
-    : primary_expression '?' '.' identifier type_argument_list?
-    ;
-    
 null_conditional_element_access
     : primary_expression '?' '[' argument_list ']'
       (null_forgiving_operator? dependent_access)*
