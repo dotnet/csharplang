@@ -24,8 +24,8 @@ While the parser can disambiguate by looking ahead for a `:` token, this creates
 A true syntactic ambiguity exists with: `A ? [ B ] ? [ C ] : D`
 
 This could be parsed as:
-- `(A ? [ B ]) ? [ C ] : D` - conditional expression producing a collection, then null-conditional indexing
-- `A ? ([B] ? [C]) : D` - conditional expression with nested conditional in the true branch
+- `(A?[B]) ? [C] : D` - conditional expression producing a collection, then null-conditional indexing
+- `A ? ([B]?[C]) : D` - conditional expression with nested conditional in the true branch
 
 The language currently interprets this as the former, which is reasonable since the latter would involve
 creating a collection expression solely to perform null-conditional indexing on it—a pattern with no practical use.
