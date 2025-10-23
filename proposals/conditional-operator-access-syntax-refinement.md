@@ -78,6 +78,12 @@ null_conditional_element_access
     : primary_expression '?[' argument_list ']' dependent_access*
 ```
 
+With explicit text stating:
+
+> `?.` and `?[` are made up of the two tokens `?` followed by either `.` or `[`. Unlike other productions in the syntactic grammar, no
+characters of any kind (not even whitespace) are allowed between the two tokens in each of these
+productions.
+
 ### Examples
 
 **Valid null-conditional access (no space):**
