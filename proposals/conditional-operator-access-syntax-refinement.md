@@ -130,6 +130,8 @@ These patterns would need to be updated to remove the whitespace: `ctx?["auxData
 Similarly,  if `a?[b]:` was encountered, it would need to be updated to have explicit spaces to
 preserve parsing behavior.
 
+Note: Users using standard .Net tooling (like Visual Studio and `dotnet format`) would not be likely to run into this issue as the standard formatting engine already formats code such that it follows the syntax pattern codified here.  
+
 ### Migration burden
 
 Developers will need to update their code when upgrading to the language version that includes this feature.
