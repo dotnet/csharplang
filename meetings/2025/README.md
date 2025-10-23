@@ -15,7 +15,11 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ## Schedule
 
-## Mon Oct 13, 2025
+### Wed Oct 29, 2025
+
+- [Unsafe evolution (333fred)](https://github.com/dotnet/csharplang/pull/9781)
+
+### Mon Oct 13, 2025
 
 - [Breaking change: use declaration-block safe-context for Span-valued collection expressions (Rikki)](https://github.com/dotnet/csharplang/issues/9750)
 - [Collection expressions in `foreach` (Cyrus)](https://github.com/dotnet/csharplang/blob/fd6c1c1fbabe77ac8ddd36154d8872b33e4dab89/proposals/collection-expressions-in-foreach.md)
