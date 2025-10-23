@@ -147,15 +147,15 @@ conditional_expression
     ;
 ```
 
-- If a `?` is seen after an null_coalescing_expression.  Then
-    - If the following token is not a `[` then normal conditional_expression parsing occurs.
-    - If the following token is a `[` then the first `expression` part of the conditional_expression is parsed out.
-        - If what follows is not a `:` and `[` was next to the `?` (e.g. `a?[b]`), then a null_conditional_element_access is parsed instead.
-        - If what follows is not a `:` and `[` was not next to the `?` (e.g. `a ? [b]`), then this is an error.  The parser should attempt to reparse this as a null_conditional_element_access expression.  If that succeeds, it should report that the `?` and `[` must be directly next to each other.  Otherwise, it should report a normal error that `:` was missing.
+- If a `?` is seen after an `null_coalescing_expression`.  Then
+    - If the following token is not a `[` then normal `conditional_expression` parsing occurs.
+    - If the following token is a `[` then the first `expression` part of the `conditional_expression` is parsed out.
+        - If what follows is not a `:` and `[` was next to the `?` (e.g. `a?[b]`), then a `null_conditional_element_access` is parsed instead.
+        - If what follows is not a `:` and `[` was not next to the `?` (e.g. `a ? [b]`), then this is an error.  The parser should attempt to reparse this as a `null_conditional_element_access` expression.  If that succeeds, it should report that the `?` and `[` must be directly next to each other.  Otherwise, it should report a normal error that `:` was missing.
         - Otherwise, what followed was a `:`
-            - If `?` was not touching the `[`, this is a conditional_expression (e.g. `a ? [b] :`), which should then consume the colon and finish parsing the second `expression` portion of the operation.
-            - Otherwise, this is `a?[b]:` The parser should reparse after the `?` as a null_conditional_element_access. And return that expression upwards.  The `:` can then be consumed by a higher parse operation (like a higher conditional_expression parse).
-               - If no such higher parse operation exists to consume the `:`, the parser should see if it had a null_conditional_element_access followed by the colon (e.g. `a?[b] : c`).  It should then report that a space should be placed after the `?`
+            - If `?` was not touching the `[`, this is a `conditional_expression` (e.g. `a ? [b] :`), which should then consume the `:` and finish parsing the second `expression` portion of the `conditional_expression`.
+            - Otherwise, this is `a?[b]:` The parser should reparse after the `?` as a `null_conditional_element_access`. And return that expression upwards.  The `:` can then be consumed by a higher parse operation (like a higher `conditional_expression` parse).
+               - If no such higher parse operation exists to consume the `:`, the parser should see if it had a `null_conditional_element_access` followed by the colon (e.g. `a?[b] : c`).  It should then report that a space should be placed after the `?`.
 
 This approach provides clear guidance for migration, also ensuring that the breaking change is manageable.
 
