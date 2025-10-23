@@ -72,12 +72,10 @@ The grammar productions for null-conditional operators now explicitly require to
 
 ```
 null_conditional_member_access
-    : primary_expression '?' '.' identifier type_argument_list?
-    // where '?' and '.' must be adjacent
-    
+    : primary_expression '?.' identifier type_argument_list? dependent_access*
+
 null_conditional_element_access
-    : primary_expression '?' '[' argument_list ']'
-    // where '?' and '[' must be adjacent
+    : primary_expression '?[' argument_list ']' dependent_access*
 ```
 
 ### Examples
