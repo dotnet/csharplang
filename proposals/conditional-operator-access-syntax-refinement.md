@@ -70,12 +70,14 @@ token.
 
 The grammar productions for null-conditional operators now explicitly require token adjacency:
 
-```
+```diff
 null_conditional_member_access
-    : primary_expression '?.' identifier type_argument_list? dependent_access*
+-    : primary_expression '?' '.' identifier type_argument_list? dependent_access*
++    : primary_expression '?.' identifier type_argument_list? dependent_access*
 
 null_conditional_element_access
-    : primary_expression '?[' argument_list ']' dependent_access*
+-    : primary_expression '?' '[' argument_list ']' dependent_access*
++    : primary_expression '?[' argument_list ']' dependent_access*
 ```
 
 With explicit text stating:
