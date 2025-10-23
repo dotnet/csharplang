@@ -105,13 +105,15 @@ var y = obj? .Member;       // Error: space between ? and .
 
 ### Breaking change
 
-This is a breaking change. Code that currently uses whitespace between `?` and `[` for null-conditional indexing will no longer compile.
+This is a breaking change. Code that currently uses whitespace between `?` and `[` for null-conditional indexing will no longer compile.  Similarly, code like `a?[b]:[c]` would break as well.  
 
 Real-world examples from existing codebases include:
 - `var aux_data = ctx? ["auxData"] as JObject;`
 - `var baseScheme = SchemeManager.GetHardCodedSchemes ()? ["Base"];`
 
 These patterns would need to be updated to remove the whitespace: `ctx?["auxData"]` and `SchemeManager.GetHardCodedSchemes()?["Base"]`.
+Similarly,  if `a?[b]:` was encountered, it would need to be updated to have explicit spaces to
+preserve parsing behavior.
 
 ### Migration burden
 
