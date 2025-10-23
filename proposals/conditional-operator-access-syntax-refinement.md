@@ -100,7 +100,7 @@ var y = obj?.Member;        // Null-conditional member access
 **Valid conditional expressions (with space/comment):**
 ```csharp
 var x = condition ? [1, 2, 3] : [4, 5, 6];    // Conditional with collection expressions
-var y = flag ? .StaticMember : expr;          // Conditional with static member access
+var y = flag ? .StaticMember : expr;          // Conditional with static member access (possible future feature)
 var z = test ?/*comment*/[x] : [y];      // Comment between tokens
 ```
 
