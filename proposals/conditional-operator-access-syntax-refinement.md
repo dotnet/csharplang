@@ -131,7 +131,7 @@ Note: Users using standard .Net tooling (like Visual Studio and `dotnet format`)
 
 Developers will need to update their code when upgrading to the language version that includes this feature.
 
-The compiler will be augmented to parse in the following fashion:
+The compiler will be augmented to parse in the following fashion.  Note: the augmentations only affect what errors are reported in code that cannot be legally parsed.  Specifically, to help users potentially affected by this breaking change to update their code accordingly. 
 
 Given:
 
