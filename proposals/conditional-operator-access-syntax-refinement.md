@@ -157,6 +157,8 @@ conditional_expression
             - Otherwise, this is `a?[b]:` The parser should reparse after the `?` as a `null_conditional_element_access`. And return that expression upwards.  The `:` can then be consumed by a higher parse operation (like a higher `conditional_expression` parse).
                - If no such higher parse operation exists to consume the `:`, the parser should see if it had a `null_conditional_element_access` followed by the colon (e.g. `a?[b] : c`).  It should then report that a space should be placed after the `?`.
 
+Similar rules would be present for `?` followed by `.`, with `[` replaced with `.` in the above and `null_conditional_element_access` replaced with `null_conditional_member_access`.
+
 This approach provides clear guidance for migration, also ensuring that the breaking change is manageable.
 
 ## Design meetings
