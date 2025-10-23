@@ -138,6 +138,16 @@ Developers will need to update their code when upgrading to the language version
 
 The compiler will be augmented to parse in the following fashion:
 
+Given:
+
+```
+conditional_expression
+    : null_coalescing_expression
+    | null_coalescing_expression '?' expression ':' expression
+    ;
+```
+
+
 - If a `?` is seen after an expression.  Then
     - If the following token is not a `[` then normal conditional-operator parsing occurs.
     - If the following token is a `[` then the `when_true` part of the conditional operator is parsed out.
