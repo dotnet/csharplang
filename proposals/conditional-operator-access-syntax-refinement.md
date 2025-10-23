@@ -136,13 +136,17 @@ Note: Users using standard .Net tooling (like Visual Studio and `dotnet format`)
 
 Developers will need to update their code when upgrading to the language version that includes this feature.
 
-When the compiler encounters code that would have been valid under the old rules but is now invalid (e.g., `ctx? ["auxData"]`), it should:
+The compiler will be augmented to parse in the following fashion:
 
-1. Attempt to parse using the new rules (requiring adjacency for null-conditional access)
-2. If this fails, attempt to parse using the old interpretation
-3. If the old interpretation succeeds as a null-conditional access, provide a diagnostic suggesting removal of the whitespace:
-   - **Error**: "Whitespace is not allowed between '?' and '[' in null-conditional indexing. Remove the whitespace to fix this error."
-   - **Suggested fix**: `ctx?["auxData"]`
+- If a `?` is seen after an expression.  Then
+    - If the following token is not a `[` then normal conditional-operator parsing occurs.
+    - If the following token is a `[` then the `when_true` part of the conditional operator is parsed out.
+        - If what follows is not a `:` and `[` was next to the `?` (e.g. `a?[b]`), then a nullable-access expression is parsed instead.
+        - If what follows is not a `:` and `[` was not next to the `?` (e.g. `a ? [b]`), then this is an error.  The parser should attempt to reparse this as a conditional-access expression.  If that succeeds, it should report that the `?` and `[` must be directly next to each other.  Otherwise, it should report a normal error that `:` was missing.
+        - Otherwise, what followed was a `:`
+            - If `?` was not touching the `[`, this is a conditional operation (e.g. `a ? [b] :`), which should then consume the colon and finish parsing the when_false portion of the operation.
+            - Otherwise, this is `a?[b]:` The parser should reparse after the `?` as a nullable-access operation. And return that expression upwards.  The `:` can then be consumed by a higher parse operation (like a higher conditional operation parse).
+               - If no such higher parse operation exists to consume the `:`, the parser should see if it had a conditional-access operation followed by the colon (e.g. `a?[b] : c`).  It should then report that a space should be placed after the `?`
 
 This approach provides clear guidance for migration, also ensuring that the breaking change is manageable.
 
