@@ -150,5 +150,4 @@ Link to design notes that affect this proposal, and describe in one sentence for
 This feature will be enabled only for the C# language version in which it ships, allowing existing code to
 continue compiling under previous language versions.
 
-## Error recovery and diagnostics
 
