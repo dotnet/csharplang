@@ -80,7 +80,7 @@ null_conditional_element_access
 
 With explicit text stating:
 
-> `?.` and `?[` are made up of the two tokens `?` followed by either `.` or `[`. Unlike other productions in the syntactic grammar, no
+> `?` `.` and `?` `[` are made up of the two tokens `?` followed by either `.` or `[`. Unlike other productions in the syntactic grammar, no
 characters of any kind (not even whitespace) are allowed between the two tokens in each of these
 productions.
 
