@@ -114,7 +114,7 @@ as the _primary_expression_ of an `element_access`; these are evaluated as a _po
 Again, the story for [stack allocation][stack-allocation-spec] is very similar to [pointers](#pointer-types). Converting a `stackalloc` to a pointer is no longer unsafe; it is the deference of that
 pointer that is unsafe. We do add one new rule, however:
 
-A _stackalloc_expression_ has a [safety state](#expression-safety-state) of unsafe if all of the following statements are true:
+A _stackalloc_expression_ has a [safety state](#expression-memory-safety-state) of unsafe if all of the following statements are true:
 
 * The _stackalloc_expression_ is being converted to a `Span<T>` or a `ReadOnlySpan<T>`.
 * The _stackalloc_expression_ does not have a _stackalloc_initializer_.
@@ -124,8 +124,71 @@ In these contexts, the resulting stack space could have unknown memory contents,
 contract of `Span<T>` and `ReadOnlySpan<T>`, and so must be subject to extra scrutiny by the author and reviewers of such code.
 
 > [!NOTE]
-> This means that assigning a `stackalloc` to a pointer is _always_ safe, regardless of context. Arguably, this is a bit of failure of the proposal, as the creation of the pointer could be far from
-> the actual dereference of the pointer.
+> This means that assigning a `stackalloc` to a pointer is _always_ safe, regardless of context.
+
+### Overriding, inheritance, and implementation
+
+It is invalid to add `unsafe` at the member level in any override or implementation of a member that does not have `unsafe` on it originally, because callers may be using the base definition and not
+see any addition of `unsafe` by a derived implementation. This rule may add friction as we adopt `unsafe` across the ecosystem, and may need to be revisited to be moved down to a warning if it proves
+to be a significant adoption blocker.
+
+### Delegates and lambdas
+
+It is invalid to convert an `unsafe` member to a delegate type that is not marked `unsafe`. The [_function type_](csharp-10.0/lambda-improvements.md#natural-function-type) definition is updated to
+include whether the _anonymous function_ has the `unsafe` keyword, or the _method group_ is to a member that is marked `unsafe`. If it is, an anonymous function type is created, just as it would be
+if any parameter were a by-`ref`, optional, or `params`.
+
+A delegate type that is marked `unsafe` can only be invoked in an `unsafe` context, and the invocation of an `unsafe` delegate has a memory safety state of `unsafe`. If a delegate type is `unsafe`,
+then its `Invoke`, `BeginInvoke`, and `EndInvoke` methods are also marked as `unsafe`.
+
+## Open questions
+
+### How breaking do we want to skew
+
+The initial proposal is a maximally-breaking approach, mainly as a litmus test for how aggressive we want to be. It proposes no ability to opt in/out sections of the code, changes the meaning of `unsafe`
+on methods, prohibits the usage of `unsafe` on types, uses errors instead of warnings, and generally forces migration to occur all at once, at the time the compiler is upgraded (and then potentially
+repeatedly as dependencies update and add `unsafe` to members that were already in use). However, we have a wealth of experience in making changes like this that we can draw on to scope the size of
+the breaks down and allow incremental adoption. These options are covered below.
+
+#### Opt in/out for code regions
+
+This is not the first time that C# has redefined the "base" case of unannotated code. C# 8.0 introduced the nullable reference type feature, which in many ways can be seen as a blueprint for how the
+`unsafe` feature is shaping up. It had similar goals (prevent bugs that cost billions of dollars by redefining the way default C# is interpreted) and a similar general featureset (add new info to types
+to propagate states and avoid bugs). It was also heavily breaking, and needed a strong set of opt in and opt out functionality to allow the feature to be adopted over time by codebases. That
+functionality is the "nullable reference type context". This is a lexical scope that informs the compiler, for a given region in code, both how to interpret unannotated type references and what types
+of warnings to give to the user. We could use this as a model for `unsafe` as well, adding an "safety rules context" or similar to allow controlling whether these new rules are being applied or not.
+
+One advantage that we have with the new `unsafe` features is that they are much less prevalent. While there are a decent number of `unsafe` calls in top libraries, our guesstimates on the percentage
+of top libraries that use `unsafe` is much lower than "every single line of C# code ever written". Hopefully this means that, while some ability to opt in/out is possibly needed, we don't need as
+complicated a mechanism as nullable has, with dedicated preprocessor switches and the like.
+
+#### Warnings instead of errors
+
+We can also reduce the severity of the breaks by giving warnings instead of errors, perhaps with a `<WarningsAsErrors>safety</WarningsAsErrors>` flag supported by the compiler for ease of opting in to
+maximum enforcement. This would allow file-by-file opt in/out by enabling the new warnings at the project level, then turning off the warnings in a file or location where the user isn't ready to upgrade
+yet.
+
+#### Method signature breaks
+
+Right now, we propose that `unsafe` as a keyword on the method move from something that is lexically scoped without a semantic impact to something that has semantic impact, and isn't lexically scoped.
+We could limit this break by introducing a new keyword for when the caller of a method or member must be in an `unsafe` context; for example, `callerunsafe` as a modifier.
+
+#### Defaults for source generators
+
+For nullable, we force generator authors to explicitly opt-in to nullable regardless of whether the entire project has opted into the feature by default, so that generator output isn't broken by the user
+turning on nullable and warn as error. Should we do the same for source generators?
+
+### Local functions/lambda safe contexts
+
+Right now `unsafe` on a method body is lexically scoped. Any nested local functions or lambdas inherit this, and their bodies are in a memory unsafe context. Is this behavior that we want to keep in
+the language? Note that if we do keep `unsafe` as the modifier used to expose that the caller must be unsafe, this could then have impacts on the signature of the method.
+
+### Lambda/method group conversion to safe delegate types
+
+Is conversion of a lambda or method group marked `unsafe` to a non-unsafe delegate type permitted without warning or error in an `unsafe` context? If we don't do this, then it could be fairly painful
+for various parts of the ecosystem, particularly any enumerables that are passed through LINQ queries.
+
+
 
 ### Overriding, inheritance, and implementation
 
