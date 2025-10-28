@@ -189,22 +189,6 @@ Is conversion of a lambda or method group marked `unsafe` to a non-unsafe delega
 for various parts of the ecosystem, particularly any enumerables that are passed through LINQ queries.
 
 
-
-### Overriding, inheritance, and implementation
-
-It is invalid to add `unsafe` at the member level in any override or implementation of a member that does not have `unsafe` on it originally, because callers may be using the base definition and not
-see any addition of `unsafe` by a derived implementation. This rule may add friction as we adopt `unsafe` across the ecosystem, and may need to be revisited to be moved down to a warning if it proves
-to be a significant adoption blocker.
-
-### Delegates and lambdas
-
-It is invalid to convert an `unsafe` member to a delegate type that is not marked `unsafe`. The [_function type_](csharp-10.0/lambda-improvements.md#natural-function-type) definition is updated to
-include whether the _anonymous function_ has the `unsafe` keyword, or the _method group_ is to a member with the `unsafe` modifier.
-
-## Open questions
-
-
-
 [unsafe-code.md]: https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/expressions.md#128-primary-expressions
 [unsafe-context-spec]: https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/unsafe-code.md#242-unsafe-contexts
 [pointer-types-spec]: https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/unsafe-code.md#243-pointer-types
