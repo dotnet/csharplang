@@ -440,7 +440,7 @@ static class E
 }
 ```
 
-A **using_static_directive** still does not import extension methods directly as static methods, so the implementation method for non-static extension methods cannot be invoked as a static method.  
+A **using_static_directive** still does not import extension methods directly as static methods, so the implementation method for non-static extension methods cannot be invoked directly as a static method.  
 ```cs
 using static E;
 
