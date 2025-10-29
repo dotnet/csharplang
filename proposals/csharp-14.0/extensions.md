@@ -433,9 +433,9 @@ static class E
 {
     extension(object)
     {
-        public static void M() { System.Console.Write("M "); }
-        public static int P { get => 42; set { System.Console.Write($" {value}"); } }
-        public static object operator +(object o1, object o2) { System.Console.Write(" +"); return o1; }
+        public static void M() { }
+        public static int P { get => 42; set { } }
+        public static object operator +(object o1, object o2) { return o1; }
     }
 }
 ```
