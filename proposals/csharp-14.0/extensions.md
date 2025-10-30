@@ -377,6 +377,84 @@ static class E2
 Static extension methods will be resolved like instance extension methods (we will consider an extra argument of the receiver type).  
 Extension properties will be resolved like extension methods, with a single parameter (the receiver parameter) and a single argument (the actual receiver value).  
 
+### `using static` directives
+
+A **using_static_directive** makes members of extension blocks in the type declaration available for extension access.  
+
+```cs
+using static N.E;
+
+new object().M();
+object.M2();
+
+_ = new object().Property;
+_ = object.Property2;
+
+C c = null;
+_ = c + c;
+c += 1;
+
+namespace N
+{
+    static class E
+    {
+        extension(object o)
+        {
+            public void M() { }
+            public static void M2() { }
+            public int Property => 0;
+            public static int Property2 => 0;
+        }
+
+        extension(C c)
+        {
+            public static C operator +(C c1, C c2) => throw null;
+            public void operator +=(int i) => throw null;
+        }
+    }
+}
+
+class C { } 
+```
+
+As before, the accessible static members (except extension methods) contained directly in the declaration of the given type can be referenced directly.  
+This means that implementation methods (except those that are extension methods) can be used directly as static methods:
+
+```cs
+using static E;
+
+M();
+System.Console.Write(get_P());
+set_P(43);
+_ = op_Addition(0, 0);
+_ = new object() + new object();
+
+static class E
+{
+    extension(object)
+    {
+        public static void M() { }
+        public static int P { get => 42; set { } }
+        public static object operator +(object o1, object o2) { return o1; }
+    }
+}
+```
+
+A **using_static_directive** still does not import extension methods directly as static methods, so the implementation method for non-static extension methods cannot be invoked directly as a static method.  
+```cs
+using static E;
+
+M(1); // error: The name 'M' does not exist in the current context
+
+static class E
+{
+    extension(int i)
+    {
+        public void M() { }
+    }
+}
+```
+
 ### OverloadResolutionPriorityAttribute
 
 Extension members within an enclosing static class are subject to prioritization according to ORPA values. The enclosing static
