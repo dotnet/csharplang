@@ -169,6 +169,7 @@ public static class Enumerable
 
 It is an error to specify the following modifiers on a member of an extension declaration:
 `abstract`, `virtual`, `override`, `new`, `sealed`, `partial`, and `protected` (and related accessibility modifiers).  
+It is an error to specify the `readonly` modifier on a member of an extension declaration.  
 Properties in extension declarations may not have `init` accessors.  
 The instance members are disallowed if the _receiver parameter_ is unnamed.  
 
@@ -181,23 +182,6 @@ It is an error to decorate an extension member with the `[ModuleInitializer]` at
 By default the receiver is passed to instance extension members by value, just like other parameters. 
 However, an extension declaration receiver in parameter form can specify `ref`, `ref readonly` and `in`, 
 as long as the receiver type is known to be a value type. 
-
-If `ref` is specified, an instance member or one of its accessors can be declared `readonly`, which prevents it from mutating the receiver:
-
-``` c#
-public static class Bits
-{
-    extension(ref ulong bits) // receiver is passed by ref
-    {
-        public bool this[int index]
-        {
-            set => bits = value ? bits | Mask(index) : bits & ~Mask(index); // mutates receiver
-            readonly get => (bits & Mask(index)) != 0;                // cannot mutate receiver
-        }
-    }
-    static ulong Mask(int index) => 1ul << index;
-}
-```
 
 ### Nullability and attributes
 
