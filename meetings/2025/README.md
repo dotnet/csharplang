@@ -15,6 +15,10 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ## Schedule
 
+### Wed Nov 5, 2025
+
+- [Unsafe evolution (333fred)](https://github.com/dotnet/csharplang/pull/9781)
+
 ### Wed Oct 29, 2025
 
 - [Unsafe evolution (333fred)](https://github.com/dotnet/csharplang/pull/9781)
