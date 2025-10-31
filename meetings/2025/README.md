@@ -6,6 +6,9 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ## Schedule when convenient
 
+- [Target-typed static member access (jnm2, Cyrus)](https://github.com/dotnet/csharplang/blob/afad49721a7b9923efbbc36ae6c455d85b994543/proposals/target-typed-static-member-access.md)
+- [`using` with a discard (333fred or jnm2)](https://github.com/dotnet/csharplang/blob/afad49721a7b9923efbbc36ae6c455d85b994543/proposals/using-with-a-discard.md)
+- [Unsigned sizeof (jnm2)](https://github.com/dotnet/csharplang/blob/afad49721a7b9923efbbc36ae6c455d85b994543/proposals/unsigned-sizeof.md)
 - Triage (working set)
 
 ## Recurring topics
