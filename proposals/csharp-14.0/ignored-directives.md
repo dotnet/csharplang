@@ -1,4 +1,4 @@
-# Ignored directives
+# Ignored directives for single-file programs
 
 [!INCLUDE[Specletdisclaimer](../speclet-disclaimer.md)]
 
@@ -17,6 +17,8 @@ Add `#:` directive prefix to be used by tooling, but ignored by the language.
 
 Console.WriteLine("Hello, World!");
 ```
+
+See the [SDK documentation for `dotnet run file.cs`](https://github.com/dotnet/sdk/blob/main/documentation/general/dotnet-run-file.md) for more details on directives supported in single-file programs.
 
 ## Motivation
 
