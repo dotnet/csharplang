@@ -10,12 +10,13 @@ You can find:
 
 - Active C# language feature proposals in the [proposals folder](proposals)
 - Notes from C# language design meetings in the [meetings folder](meetings)
-- Full C# 6 language specification (draft) in the [spec folder](spec)
 - Summary of the [language version history here](Language-Version-History.md).
 
 If you discover bugs or deficiencies in the above, please leave an issue to raise them, or even better: a pull request to fix them.
 
-For *new feature proposals*, however, please raise them for [discussion](https://github.com/dotnet/csharplang/labels/Discussion), and *only* submit a proposal as a pull request if invited to do so by a member of the Language Design Team (a "champion").
+For *new feature proposals*, however, please raise them for [discussion](https://github.com/dotnet/csharplang/labels/Discussion), and *only* submit a proposal as an issue or pull request if invited to do so by a member of the Language Design Team (a "champion").
+
+The complete design process is described [here](Design-Process.md). A shorter overview is below.
 
 ## Discussions
 
@@ -33,9 +34,8 @@ Discussions that are short and stay on topic are much more likely to be read. If
 Language proposals which prevent specific syntax from occurring can be achieved with a [Roslyn analyzer](https://docs.microsoft.com/visualstudio/extensibility/getting-started-with-roslyn-analyzers). Proposals that only make existing syntax optionally illegal will be rejected by the language design committee to prevent increased language complexity.
 
 ## Proposals
-Once you have a fully fleshed out proposal describing a new language feature in syntactic and semantic detail, please [open an issue for it](https://github.com/dotnet/csharplang/issues/new/choose), and it will be labeled as a [Proposal](https://github.com/dotnet/csharplang/issues?q=is%3Aopen+is%3Aissue+label%3AProposal). The comment thread on the issue can be used to hash out or briefly discuss details of the proposal, as well as pros and cons of adopting it into C#. If an issue does not meet the bar of being a full proposal, we may move it to a discussion, so that it can be "baked" further. Specific open issues or more expansive discussion with a proposal will often warrant opening a side discussion rather than cluttering the comment section on the issue.
 
-When a member of the C# LDM finds that a proposal merits discussion, they can [Champion](https://github.com/dotnet/csharplang/issues?q=is%3Aopen+is%3Aissue+label%3A%22Proposal+champion%22) it, which means that they will bring it to the C# Language Design Meeting. If the LDM decides to work on adopting the feature, the proposer, the champion and others can collaborate on adding it as a document to the [Proposals](proposals) folder, where its evolution can be tracked over time.
+When a member of the C# LDM finds that a proposal merits consideration by the broader team, they can [Champion](https://github.com/dotnet/csharplang/issues?q=is%3Aopen+is%3Aissue+label%3A%22Proposal+champion%22) it, which means that they will bring it to the C# Language Design Meeting. Proposals are always discussed in linked discussions, not in the champion issue. We didn't always follow this policy, so many champion issues will have discussion on them; we now lock issues to prevent new discussion from occurring on them. Each champion issue will have a discussion link on it.
 
 ## Design Process
 
@@ -66,7 +66,7 @@ Language Design Meetings (LDMs) are held by the LDT and occasional invited guest
 
 ## Language Specification
 
-It is our plan to move the C# Language Specification into Markdown, and draft it in the [spec](spec) folder. The spec drafts will eventually be standardized and published by ECMA. The folder currently contains an unofficial Markdown version of the C# 6.0 specification for convenience.
+The current ECMA-334 specification can be found in markdown form on the [C# Language Standard](https://github.com/dotnet/csharpstandard/) repository.
 
 ## Implementation
 

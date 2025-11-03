@@ -2,6 +2,8 @@
 
 [!INCLUDE[Specletdisclaimer](../speclet-disclaimer.md)]
 
+Champion issue: <https://github.com/dotnet/csharplang/issues/34>
+
 ## Summary
 [summary]: #summary
 
@@ -36,7 +38,7 @@ assignment_operator
     ;
 ```
 
-Which follows the existing semantic rules for compound assignment operators ([§11.18.3](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/expressions.md#11183-compound-assignment)), except that we elide the assignment if the left-hand side is non-null. The rules for this feature are as follows.
+Which follows the existing semantic rules for compound assignment operators ([§12.21.4](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/expressions.md#12214-compound-assignment)), except that we elide the assignment if the left-hand side is non-null. The rules for this feature are as follows.
 
 Given `a ??= b`, where `A` is the type of `a`, `B` is the type of `b`, and `A0` is the underlying type of `A` if `A` is a nullable value type:
 
@@ -60,7 +62,7 @@ We relax this requirement to:
 
 1. If A exists and is a non-nullable value type, a compile-time error occurs.
 
-This allows the null coalescing operator to work on unconstrained type parameters, as the unconstrained type parameter T exists, is not a nullable type, and is not a reference type.
+This allows the null coalescing operator to work on unconstrained type parameters, as the unconstrained type parameter `T` exists, is not a nullable type, and is not a reference type.
 
 ## Drawbacks
 [drawbacks]: #drawbacks
@@ -75,7 +77,6 @@ The programmer can write `(x = x ?? y)`, `if (x == null) x = y;`, or `x ?? (x = 
 ## Unresolved questions
 [unresolved]: #unresolved-questions
 
-- [ ] Requires LDM review
 - [ ] Should we also support `&&=` and `||=` operators?
 
 ## Design meetings

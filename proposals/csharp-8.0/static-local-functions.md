@@ -2,6 +2,8 @@
 
 [!INCLUDE[Specletdisclaimer](../speclet-disclaimer.md)]
 
+Champion issue: <https://github.com/dotnet/csharplang/issues/1565>
+
 ## Summary
 
 Support local functions that disallow capturing state from the enclosing scope.

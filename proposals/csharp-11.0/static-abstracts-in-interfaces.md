@@ -2,6 +2,8 @@
 
 [!INCLUDE[Specletdisclaimer](../speclet-disclaimer.md)]
 
+Champion issue: <https://github.com/dotnet/csharplang/issues/4436>
+
 ## Summary
 [summary]: #summary
 
@@ -25,7 +27,7 @@ interface IAddable<T> where T : IAddable<T>
 // Classes and structs (including built-ins) can implement interface
 struct Int32 : …, IAddable<Int32>
 {
-    static Int32 I.operator +(Int32 x, Int32 y) => x + y; // Explicit
+    static Int32 IAddable.operator +(Int32 x, Int32 y) => x + y; // Explicit
     public static int Zero => 0;                          // Implicit
 }
 
@@ -47,8 +49,8 @@ int sixtyThree = AddAll(new [] { 1, 2, 4, 8, 16, 32 });
 
 The feature would allow static interface members to be declared virtual. 
 
-#### Today's rules
-Today, instance members in interfaces are implicitly abstract (or virtual if they have a default implementation), but can optionally have an `abstract` (or `virtual`) modifier. Non-virtual instance members must be explicitly marked as `sealed`. 
+#### Rules before C# 11
+Before C# 11, instance members in interfaces are implicitly abstract (or virtual if they have a default implementation), but can optionally have an `abstract` (or `virtual`) modifier. Non-virtual instance members must be explicitly marked as `sealed`. 
 
 Static interface members today are implicitly non-virtual, and do not allow `abstract`, `virtual` or `sealed` modifiers.
 
@@ -85,7 +87,7 @@ interface I<T> where T : I<T>
 ```
 
 ##### Explicitly non-virtual static members
-For symmetry with non-virtual instance members, static members should be allowed an optional `sealed` modifier, even though they are non-virtual by default:
+For symmetry with non-virtual instance members, static members (except fields) should be allowed an optional `sealed` modifier, even though they are non-virtual by default:
 
 ``` c#
 interface I0
@@ -125,7 +127,11 @@ class C : I<C>
     public C(string s) => _s = s;
     static void I<C>.M() => Console.WriteLine("Implementation");
     static C I<C>.P { get; set; }
-    static event Action I<C>.E;
+    static event Action I<C>.E // event declaration must use field accessor syntax
+    {
+        add { ... }
+        remove { ... }
+    }
     static C I<C>.operator +(C l, C r) => new C($"{l._s} {r._s}");
     static bool I<C>.operator ==(C l, C r) => l._s == r._s;
     static bool I<C>.operator !=(C l, C r) => l._s != r._s;
@@ -142,7 +148,7 @@ Today all unary and binary operator declarations have some requirement involving
 
 These requirements need to be relaxed so that a restricted operand is allowed to be of a type parameter that counts as "the instance type of the enclosing type".
 
-In order for a type parameter `T` to count as " the instance type of the enclosing type", it must meet the following requirements:
+In order for a type parameter `T` to count as "the instance type of the enclosing type", it must meet the following requirements:
 - `T` is a direct type parameter on the interface in which the operator declaration occurs, and
 - `T` is *directly* constrained by what the spec calls the "instance type" - i.e. the surrounding interface with its own type parameters used as type arguments.
 
@@ -187,10 +193,10 @@ C c = M<C>(); // The static members of C get called
 Since query expressions are spec'ed as a syntactic rewrite, C# actually lets you use a *type* as the query source, as long as it has static members for the query operators you use! In other words, if the *syntax* fits, we allow it!
 We think this behavior was not intentional or important in the original LINQ, and we don't want to do the work to support it on type parameters. If there are scenarios out there we will hear about them, and can choose to embrace this later.
 
-### Variance safety [§17.2.3.2](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/interfaces.md#17232-variance-safety)
+### Variance safety [§18.2.3.2](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/interfaces.md#18232-variance-safety)
 
 Variance safety rules should apply to signatures of static abstract members. The addition proposed in
-https://github.com/dotnet/csharplang/blob/main/proposals/variance-safety-for-static-interface-members.md#variance-safety
+https://github.com/dotnet/csharplang/blob/main/proposals/csharp-9.0/variance-safety-for-static-interface-members.md#variance-safety
 should be adjusted from
 
 *These restrictions do not apply to occurrences of types within declarations of static members.* 
@@ -199,7 +205,7 @@ to
 
 *These restrictions do not apply to occurrences of types within declarations of **non-virtual, non-abstract** static members.*
 
-### [§10.5.4](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/conversions.md#1054-user-defined-implicit-conversions) User defined implicit conversions
+### [§10.5.4](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/conversions.md#1054-user-defined-implicit-conversions) User defined implicit conversions
 
 The following bullet points
 
@@ -225,7 +231,7 @@ are adjusted as follows:
     - If `U2` is not empty, then `U` is `U2`
 - If `U` is empty, the conversion is undefined and a compile-time error occurs.
 
-### [§10.5.5](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/conversions.md#1055-user-defined-explicit-conversions)  User-defined explicit conversions
+### [§10.3.9](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/conversions.md#1039-user-defined-explicit-conversions)  User-defined explicit conversions
 
 The following bullet points
 
@@ -263,18 +269,19 @@ At https://github.com/dotnet/csharplang/blob/main/meetings/2022/LDM-2022-01-24.m
 
 ### Pattern matching
 
-Given the following code, a user might reasonably expect it to print True (as it would if the constant pattern was written inline):
+Given the following code, a user might reasonably expect it to print "True" (as it would if the constant pattern was written inline):
 
 ```cs
 M(1.0);
 
 static void M<T>(T t) where T : INumberBase<T>
 {
-    Console.WriteLine(t is 1);
+    Console.WriteLine(t is 1); // Error. Cannot use a numeric constant
+    Console.WriteLine((t is int i) && (i is 1)); 
 }
 ```
 
-However, because the input type of the pattern is not `double`, the constant `1` pattern will first type check the incoming `T` against `int`. This is unintuitive, so we will block it until a future C# version adds better handling for numeric matching against types derived from `INumberBase<T>`. To do so, we will say that, we will explicitly recognize `INumberBase<T>` as the type that all "numbers" will derive from, and block the pattern if we're trying to match a numeric constant pattern against a number type that we can't represent the pattern in (ie, a type parameter constrained to `INumberBase<T>`, or a user-defined number type that inherits from `INumberBase<T>`).
+However, because the input type of the pattern is not `double`, the constant `1` pattern will first type check the incoming `T` against `int`. This is unintuitive, so it is blocked until a future C# version adds better handling for numeric matching against types derived from `INumberBase<T>`. To do so, we will say that, we will explicitly recognize `INumberBase<T>` as the type that all "numbers" will derive from, and block the pattern if we're trying to match a numeric constant pattern against a number type that we can't represent the pattern in (ie, a type parameter constrained to `INumberBase<T>`, or a user-defined number type that inherits from `INumberBase<T>`).
 
 Formally, we add an exception to the definition of *pattern-compatible* for constant patterns:
 

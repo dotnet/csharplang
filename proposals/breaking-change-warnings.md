@@ -1,5 +1,7 @@
 # Breaking change warnings
 
+Champion issue: <https://github.com/dotnet/csharplang/issues/8865>
+
 ## Summary
 [summary]: #summary
 
@@ -25,7 +27,7 @@ It is customary that newer compilers are used to compile older versions of C#. T
 
 ### Example: field access in auto-properties
 
-As an example, let's say we introduce [field access in auto-properties](https://github.com/dotnet/csharplang/blob/main/proposals/semi-auto-properties.md) in C# 13, with a design that introduces a new `field` parameter in scope within property accessors. This new `field` parameter would shadow access to any field etc. called `field` in existing property accessors, potentially altering its meaning. We would accompany that feature with a warning in C# 11 and lower for any code that uses the identifier `field` within a property accessor:
+As an example, let's say we introduce [field access in auto-properties](https://github.com/dotnet/csharplang/blob/e222e8b490b5c231430260c3fd3f8df8bcab9a3c/proposals/semi-auto-properties.md) in C# 13, with a design that introduces a new `field` parameter in scope within property accessors. This new `field` parameter would shadow access to any field etc. called `field` in existing property accessors, potentially altering its meaning. We would accompany that feature with a warning in C# 12 and lower for any code that uses the identifier `field` within a property accessor:
 
 ``` c#
 public class Entity
@@ -33,8 +35,8 @@ public class Entity
     string field;
     public string Field
     {
-        get { return field; }         // Warning in C# 11 and below
-        set { field = value.Trim(); } // Warning in C# 11 and below
+        get { return field; }         // Warning in C# 12 and below
+        set { field = value.Trim(); } // Warning in C# 12 and below
     }
     ...
 }

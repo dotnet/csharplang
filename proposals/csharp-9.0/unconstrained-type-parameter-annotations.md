@@ -2,6 +2,8 @@
 
 [!INCLUDE[Specletdisclaimer](../speclet-disclaimer.md)]
 
+Champion issue: <https://github.com/dotnet/csharplang/issues/3297>
+
 ## Summary
 
 Allow nullable annotations for type parameters that are not constrained to value types or reference types: `T?`.

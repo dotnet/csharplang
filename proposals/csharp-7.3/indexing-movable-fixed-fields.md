@@ -1,5 +1,7 @@
 # Indexing `fixed` fields should not require pinning regardless of the movable/unmovable context. #
 
+Champion issue: <https://github.com/dotnet/csharplang/issues/1351>
+
 The change has the size of a bug fix. It can be in 7.3 and does not conflict with whatever direction we take further.
 This change is only about allowing the following scenario to work even though `s` is moveable. It is already valid when `s` is not moveable. 
 

@@ -2,7 +2,7 @@
 
 [!INCLUDE[Specletdisclaimer](../speclet-disclaimer.md)]
 
-https://github.com/dotnet/csharplang/issues/5737
+Champion issue: <https://github.com/dotnet/csharplang/issues/5737>
 
 ## Summary
 
@@ -180,14 +180,14 @@ For example, if a struct has 100 fields, and just one of them is explicitly init
 
 We adjust the following section of the standard:
 
-https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/expressions.md#11712-this-access
+https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/expressions.md#12814-this-access
 > If the constructor declaration has no constructor initializer, the `this` variable behaves exactly the same as an `out` parameter of the struct type. In particular, this means that the variable shall be definitely assigned in every execution path of the instance constructor.
 
 We adjust this language to read:
 
-If the constructor declaration has no constructor initializer, the `this` variable behaves similarly to an `out` parameter of the struct type, except that it is not an error when the definite assignment requirements ([§9.4.1](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/variables.md#941-general)) are not met. Instead, we introduce the following behaviors:
+If the constructor declaration has no constructor initializer, the `this` variable behaves similarly to an `out` parameter of the struct type, except that it is not an error when the definite assignment requirements ([§9.4.1](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/variables.md#941-general)) are not met. Instead, we introduce the following behaviors:
 
-  1. When the `this` variable itself does not meet the requirements, then all unassigned instance variables within `this` at all points where requirements are violated are implicitly initialized to the default value ([§9.3](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/variables.md#93-default-values)) in an *initialization* phase before any other code in the constructor runs.
+  1. When the `this` variable itself does not meet the requirements, then all unassigned instance variables within `this` at all points where requirements are violated are implicitly initialized to the default value ([§9.3](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/variables.md#93-default-values)) in an *initialization* phase before any other code in the constructor runs.
 2. When an instance variable *v* within `this` does not meet the requirements, or any instance variable at any level of nesting within *v* does not meet the requirements, then *v* is implicitly initialized to the default value in an *initialization* phase before any other code in the constructor runs.
 
 ## Design meetings

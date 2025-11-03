@@ -1,5 +1,6 @@
-
 # Records v2
+
+Champion issue: <https://github.com/dotnet/csharplang/issues/39>
 
 In the past we've thought about records as a feature to enable working with data.
 

@@ -147,7 +147,7 @@ The precise rules for computing the *safe-to-return* status of an expression, an
 
 The *ref-safe-to-escape* is a scope, enclosing an lvalue expression, to which it is safe for a ref to the lvalue to escape to. If that scope is the entire method, we say that a ref to the lvalue is *safe to return* from the method.
 
-The *ref-safe-to-escape* scope for an lvalue expression can never be to a greater scope than the *safe-to-escape* for the same value. That means when the spec limits the *safe-to-escape* of a value it is implicitly also limiting the *ref-safe-to-escape* as well. However *ref-safe-to-escape* scope can be to a smaller scope than *safe-to-escape*. Consider that non-ref locals have *safe-to-escape* scope outside method but *ref-safe-to-escape* inside the method.
+The *ref-safe-to-escape* scope for an lvalue expression can never be to a greater scope than the *safe-to-escape* for the same value. That means when the spec limits the *safe-to-escape* of a value it is implicitly also limiting the *ref-safe-to-escape*. However *ref-safe-to-escape* scope can be to a smaller scope than *safe-to-escape*. Consider that non-ref locals have *safe-to-escape* scope outside method but *ref-safe-to-escape* inside the method.
 
 ### safe-to-escape
 

@@ -2,6 +2,8 @@
 
 [!INCLUDE[Specletdisclaimer](../speclet-disclaimer.md)]
 
+Champion issue: <https://github.com/dotnet/csharplang/issues/185>
+
 ## Summary
 
 This feature is about delivering two new operators that allow constructing `System.Index` and `System.Range` objects, and using them to index/slice collections at runtime.
@@ -299,7 +301,7 @@ The inspiration for this behavior was collection initializers. Using the structu
 This proposal initially required that types implement `ICollection` in order to qualify as Indexable. That required a number of special cases though:
 
 - `ref struct`: these cannot implement interfaces yet types like `Span<T>` are ideal for index / range support.
-- `string`: does not implement `ICollection` and adding that `interface` has a large cost.
+- `string`: does not implement `ICollection` and adding that interface has a large cost.
 
 This means to support key types special casing is already needed. The special casing of `string` is less interesting as the language does this in other areas (`foreach` lowering, constants, etc ...). The special casing of `ref struct` is more concerning as it's special casing an entire class of types. They get labeled as Indexable if they simply have a property named `Count` with a return type of `int`.
 
@@ -373,7 +375,7 @@ Restrictions:
 - All members in the pattern must be instance members
 - If a Length method is found but it has the wrong return type, continue looking for Count
 - The indexer used for the Index pattern must have exactly one int parameter
-- The Slice method used for the Range pattern must have exactly two int parameters
+- The `Slice` method used for the Range pattern must have exactly two int parameters
 - When looking for the pattern members, we look for original definitions, not constructed members
 
 ## Design meetings

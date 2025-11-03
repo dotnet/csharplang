@@ -2,6 +2,8 @@
 
 [!INCLUDE[Specletdisclaimer](../speclet-disclaimer.md)]
 
+Champion issue: <https://github.com/dotnet/csharplang/issues/8652>
+
 ## Summary
 [summary]: #summary
 
@@ -81,14 +83,14 @@ Collection literals are [target-typed](https://github.com/dotnet/csharplang/blob
   * Literals with no `spread_element` in them.
   * Literals with arbitrary ordering of any element type.
 
-* The *iteration type* of `..s_n` is the type of the *iteration variable* determined as if `s_n` were used as the expression being iterated over in a [`foreach_statement`](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/statements.md#1295-the-foreach-statement).
+* The *iteration type* of `..s_n` is the type of the *iteration variable* determined as if `s_n` were used as the expression being iterated over in a [`foreach_statement`](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/statements.md#1395-the-foreach-statement).
 * Variables starting with `__name` are used to represent the results of the evaluation of `name`, stored in a location so that it is only evaluated once.  For example `__e1` is the evaluation of `e1`.
 * `List<T>`, `IEnumerable<T>`, etc. refer to the respective types in the `System.Collections.Generic` namespace.
-* The specification defines a [translation](#collection-literal-translation) of the literal to existing C# constructs.  Similar to the [*query expression translation*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/expressions.md#11173-query-expression-translation), the literal is itself only legal if the translation would result in legal code.  The purpose of this rule is to avoid having to repeat other rules of the language that are implied (for example, about convertibility of expressions when assigned to storage locations).
+* The specification defines a [translation](#collection-literal-translation) of the literal to existing C# constructs.  Similar to the [*query expression translation*](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/expressions.md#12203-query-expression-translation), the literal is itself only legal if the translation would result in legal code.  The purpose of this rule is to avoid having to repeat other rules of the language that are implied (for example, about convertibility of expressions when assigned to storage locations).
 * An implementation is not required to translate literals exactly as specified below.  Any translation is legal if the same result is produced and there are no observable differences in the production of the result.
   * For example, an implementation could translate literals like `[1, 2, 3]` directly to a `new int[] { 1, 2, 3 }` expression that itself bakes the raw data into the assembly, eliding the need for `__index` or a sequence of instructions to assign each value. Importantly, this does mean if any step of the translation might cause an exception at runtime that the program state is still left in the state indicated by the translation.
 
-* References to 'stack allocation' refer to any strategy to allocate on the stack and not the heap.  Importantly, it does not imply or require that that strategy be through the actual `stackalloc` mechanism.  For example, the use of [inline arrays](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-12.0/inline-arrays.md) is also an allowed and desirable approach to accomplish stack allocation where available. 
+* References to 'stack allocation' refer to any strategy to allocate on the stack and not the heap.  Importantly, it does not imply or require that that strategy be through the actual `stackalloc` mechanism.  For example, the use of [inline arrays](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-12.0/inline-arrays.md) is also an allowed and desirable approach to accomplish stack allocation where available. Note that in C# 12, inline arrays can't be initialized with a collection expression. That remains an open proposal.
 
 * Collections are assumed to be well-behaved.  For example:
 
@@ -107,7 +109,7 @@ An implicit *collection expression conversion* exists from a collection expressi
 * A *span type*:
   * `System.Span<T>`
   * `System.ReadOnlySpan<T>`  
-  in which cases the *element type* is `T`
+  In which case the *element type* is `T`
 * A *type* with an appropriate *[create method](#create-methods)*, in which case the *element type* is the [*iteration type*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/statements.md#1295-the-foreach-statement) determined from a `GetEnumerator` instance method or enumerable interface, not from an extension method
 * A *struct* or *class type* that implements `System.Collections.IEnumerable` where:
   * The *type* has an *[applicable](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/expressions.md#11642-applicable-function-member)* constructor that can be invoked with no arguments, and the constructor is accessible at the location of the collection expression.
@@ -116,18 +118,18 @@ An implicit *collection expression conversion* exists from a collection expressi
     * If the method is generic, the type arguments can be inferred from the collection and argument.
     * The method is accessible at the location of the collection expression.
 
-    In which case the *element type* is the [*iteration type*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/statements.md#1295-the-foreach-statement) of the *type*.
+    In which case the *element type* is the [*iteration type*](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/statements.md#1395-the-foreach-statement) of the *type*.
 * An *interface type*:
   * `System.Collections.Generic.IEnumerable<T>`
   * `System.Collections.Generic.IReadOnlyCollection<T>`
   * `System.Collections.Generic.IReadOnlyList<T>`
   * `System.Collections.Generic.ICollection<T>`
   * `System.Collections.Generic.IList<T>`  
-  in which cases the *element type* is `T`
+  In which case the *element type* is `T`
 
-The implicit conversion exists if the type has an *element type* `U` where for each *element* `Eᵢ` in the collection expression:
-* If `Eᵢ` is an *expression element*, there is an implicit conversion from `Eᵢ` to `U`.
-* If `Eᵢ` is a *spread element* `..Sᵢ`, there is an implicit conversion from the *iteration type* of `Sᵢ` to `U`.
+The implicit conversion exists if the type has an *element type* `T` where for each *element* `Eᵢ` in the collection expression:
+* If `Eᵢ` is an *expression element*, there is an implicit conversion from `Eᵢ` to `T`.
+* If `Eᵢ` is a *spread element* `..Sᵢ`, there is an implicit conversion from the *iteration type* of `Sᵢ` to `T`.
 
 There is no *collection expression conversion* from a collection expression to a multi dimensional *array type*.
 
@@ -182,7 +184,7 @@ Methods declared on base types or interfaces are ignored and not part of the `CM
 
 If the `CM` set is empty, then the *collection type* doesn't have an *element type* and doesn't have a *create method*. None of the following steps apply.
 
-If only one method among those in the `CM` set has an [*identity conversion*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/conversions.md#1022-identity-conversion) from `E` to the *element type* of the *collection type*, that is the *create method* for the *collection type*. Otherwise, the *collection type* doesn't have a *create method*.
+If only one method among those in the `CM` set has an [*identity conversion*](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/conversions.md#1022-identity-conversion) from `E` to the *element type* of the *collection type*, that is the *create method* for the *collection type*. Otherwise, the *collection type* doesn't have a *create method*.
 
 An error is reported if the `[CollectionBuilder]` attribute does not refer to an invokable method with the expected signature.
 
@@ -377,9 +379,9 @@ static T[] AsArray<T>(T[] arg) => arg;
 static List<T[]> AsListOfArray<T>(List<T[]> arg) => arg;
 ```
 
-The [*type inference*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/expressions.md#1163-type-inference) rules are updated as follows.
+The [*type inference*](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/expressions.md#1263-type-inference) rules are updated as follows.
 
-The existing rules for the [*first phase*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/expressions.md#11632-the-first-phase) are extracted to a new *input type inference* section, and a  rule is added to *input type inference* and *output type inference* for collection expression expressions.
+The existing rules for the [*first phase*](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/expressions.md#12632-the-first-phase) are extracted to a new *input type inference* section, and a  rule is added to *input type inference* and *output type inference* for collection expression expressions.
 
 > 11.6.3.2 The first phase
 >
@@ -391,7 +393,7 @@ The existing rules for the [*first phase*](https://github.com/dotnet/csharpstand
 >
 > * If `E` is a *collection expression* with elements `Eᵢ`, and `T` is a type with an *element type* `Tₑ` or `T` is a *nullable value type* `T0?` and `T0` has an *element type* `Tₑ`, then for each `Eᵢ`:
 >   * If `Eᵢ` is an *expression element*, then an *input type inference* is made *from* `Eᵢ` *to* `Tₑ`.
->   * If `Eᵢ` is a *spread element* with an [*iteration type*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/statements.md#1295-the-foreach-statement) `Sᵢ`, then a [*lower-bound inference*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/expressions.md#116310-lower-bound-inferences) is made *from* `Sᵢ` *to* `Tₑ`.
+>   * If `Eᵢ` is a *spread element* with an [*iteration type*](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/statements.md#1395-the-foreach-statement) `Sᵢ`, then a [*lower-bound inference*](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/expressions.md#126310-lower-bound-inferences) is made *from* `Sᵢ` *to* `Tₑ`.
 > * *[existing rules from first phase]* ...
 
 > 11.6.3.7 Output type inferences
@@ -405,9 +407,9 @@ The existing rules for the [*first phase*](https://github.com/dotnet/csharpstand
 
 ## Extension methods
 
-No changes to [*extension method invocation*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/expressions.md#11783-extension-method-invocations) rules. 
+No changes to [*extension method invocation*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/expressions.md#128103-extension-method-invocations) rules. 
 
-> 11.7.8.3 Extension method invocations
+> 12.8.10.3 Extension method invocations
 >
 > An extension method `Cᵢ.Mₑ` is *eligible* if:
 >
@@ -430,7 +432,7 @@ var z = Extensions.AsImmutableArray([3]); // ok
 ## Overload resolution
 [overload-resolution]: #overload-resolution
 
-[*Better conversion from expression*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/expressions.md#11644-better-conversion-from-expression) is updated to prefer certain target types in collection expression conversions.
+[*Better conversion from expression*](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/expressions.md#12645-better-conversion-from-expression) is updated to prefer certain target types in collection expression conversions.
 
 In the updated rules:
 * A *span_type* is one of:
@@ -481,7 +483,7 @@ ArrayDerived([""]);         // ambiguous
 ## Span types
 [span-types]: #span-types
 
-The span types `ReadOnlySpan<T>` and `Span<T>` are both [*constructible collection types*](#conversions).  Support for them follows the design for [`params Span<T>`](https://github.com/dotnet/csharplang/blob/main/proposals/params-span.md). Specifically, constructing either of those spans will result in an array T[] created on the [stack](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/unsafe-code.md#229-stack-allocation) if the params array is within limits (if any) set by the compiler. Otherwise the array will be allocated on the heap.
+The span types `ReadOnlySpan<T>` and `Span<T>` are both [*constructible collection types*](#conversions).  Support for them follows the design for [`params Span<T>`](https://github.com/dotnet/csharplang/blob/main/proposals/rejected/params-span.md). Specifically, constructing either of those spans will result in an array T[] created on the [stack](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/unsafe-code.md#229-stack-allocation) if the params array is within limits (if any) set by the compiler. Otherwise the array will be allocated on the heap.
 
 If the compiler chooses to allocate on the stack, it is not required to translate a literal directly to a `stackalloc` at that specific point.  For example, given:
 
@@ -507,7 +509,7 @@ foreach (var x in y)
 }
 ```
 
-The compiler can also [inline arrays](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-12.0/inline-arrays.md), if available, when choosing to allocate on the stack.
+The compiler can also use [inline arrays](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-12.0/inline-arrays.md), if available, when choosing to allocate on the stack. Note that in C# 12, inline arrays can't be initialized with a collection expression. That feature is an open proposal.
 
 If the compiler decides to allocate on the heap, the translation for `Span<T>` is simply:
 
@@ -524,35 +526,31 @@ A collection expression has a *known length* if the compile-time type of each *s
 ### Interface translation
 [interface-translation]: #interface-translation
 
-Given a target type `IEnumerable<T>`, `IReadOnlyCollection<T>`, `IReadOnlyList<T>`, `ICollection<T>`, or `IList<T>`a compliant implementation is only required to produce a value that implements that interface.  A compliant implementation is free to: 
-
-1. Use an existing type that implements that interface.
-1. Synthesize a type that implements the interface.
-
-In either case, the type used is allowed to implement a larger set of interfaces than those strictly required.
-
-Synthesized types are free to employ any strategy they want to implement the required interfaces properly.  For example, a synthesized type might inline the elements directly within itself, avoiding the need for additional internal collection allocations.  A synthesized type could also not use any storage whatsoever, opting to compute the values directly.  For example, using `Enumerable.Range(1, 10)` for `[1, 2, 3, 4, 5, 6, 7, 8, 9, 10]`.
-
 #### Non-mutable interface translation
 [non-mutable-interface-translation]: #non-mutable-interface-translation
 
-Given a target type or `IEnumerable<T>`, `IReadOnlyCollection<T>`, `IReadOnlyList<T>`, the value generated is allowed to implement more interfaces than required.  For example, implementing the mutable interfaces as well (specifically, implementing `ICollection<T>` or `IList<T>`).  However, in that case:
+Given a target type which does not contain mutating members, namely `IEnumerable<T>`, `IReadOnlyCollection<T>`, and `IReadOnlyList<T>`, a compliant implementation is required to produce a value that implements that interface. If a type is synthesized, it is recommended the synthesized type implements all these interfaces, as well as `ICollection<T>` and `IList<T>`, regardless of which interface type was targeted. This ensures maximal compatibility with existing libraries, including those that introspect the interfaces implemented by a value in order to light up performance optimizations.
 
-1. The value must return `true` when queried for `ICollection<T>.IsReadOnly`.   This ensures consumers can appropriately tell that the collection is non-mutable, despite implementing the mutable views.
+In addition, the value must implement the nongeneric `ICollection` and `IList` interfaces. This enables collection expressions to support dynamic introspection in scenarios such as data binding.
+
+A compliant implementation is free to:
+
+1. Use an existing type that implements the required interfaces.
+1. Synthesize a type that implements the required interfaces.
+
+In either case, the type used is allowed to implement a larger set of interfaces than those strictly required.
+
+Synthesized types are free to employ any strategy they want to implement the required interfaces properly.  For example, a synthesized type might inline the elements directly within itself, avoiding the need for additional internal collection allocations.  A synthesized type could also not use any storage whatsoever, opting to compute the values directly.  For example, returning `index + 1` for `[1, 2, 3, 4, 5, 6, 7, 8, 9, 10]`.
+
+1. The value must return `true` when queried for `ICollection<T>.IsReadOnly` (if implemented) and nongeneric `IList.IsReadOnly` and `IList.IsFixedSize`.  This ensures consumers can appropriately tell that the collection is non-mutable, despite implementing the mutable views.
 1. The value must throw on any call to a mutation method (like `IList<T>.Add`).  This ensures safety, preventing a non-mutable collection from being accidentally mutated.
 
-It is recommended that any type that is synthesized implement all these interfaces. This ensures that maximal compatibility with existing libraries, including those that introspect the interfaces implemented by a value in order to light up performance optimizations.
-
 #### Mutable interface translation
-[non-mutable-interface-translation]: #non-mutable-interface-translation
+[mutable-interface-translation]: #mutable-interface-translation
 
-Given a target type or `ICollection<T>` or `IList<T>`:
+Given target type that contains mutating members, namely `ICollection<T>` or `IList<T>`:
 
-1. The value must return `false` when queried for `ICollection<T>.IsReadOnly`. 
-
-The value generated is allowed to implement more interfaces than required.  Specifically, implementing `IList<T>` even when only targeting `ICollection<T>`.  However, in that case:
-
-1. The value must support all mutation methods (like `IList<T>.RemoveAt`).
+1. The value must be an instance of `List<T>`.
 
 ### Known length translation
 [known-length-translation]: #known-length-translation
@@ -900,10 +898,10 @@ class Collection : IEnumerable<int>, IEnumerable<string>
 
 ### Specification of a [*constructible*](#conversions) collection type utilizing a [*create method*](#create-methods) is sensitive to the context at which conversion is classified
 
-An existence of the conversion in this case depends on the notion of an [*iteration type*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/statements.md#1295-the-foreach-statement)
+An existence of the conversion in this case depends on the notion of an [*iteration type*](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/statements.md#1395-the-foreach-statement)
 of the *collection type*. If there is a *create method* that takes a `ReadOnlySpan<T>` where `T` is the *iteration type*, the conversion exists. Otherwise, it doesn't.
 
-However, an [*iteration type*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/statements.md#1295-the-foreach-statement)
+However, an [*iteration type*](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/statements.md#1395-the-foreach-statement)
 is sensitive to the context at which `foreach` is performed. For the same *collection type* it can be different based on what extension methods
 are in scope, and it can also be undefined.
 
@@ -996,7 +994,7 @@ an application of a `CollectionBuilder` attribute. If we don't know the *iterati
 signature of the *create method* should be. If the *iteration type* comes from context, there is no guarantee that
 the type is always going to be used in a similar context.
 
-[Params Collections](https://github.com/dotnet/csharplang/blob/main/proposals/params-collections.md#method-parameters) feature
+[Params Collections](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-13.0/params-collections.md#method-parameters) feature
 is also affected by this. It feels strange to be unable to reliably predict element type of a `params` parameter at the
 declaration point. The current proposal also requires to ensure that the *create method* is at least as accessible as the
 `params` *collection type*. It is impossible to perform this check in a reliable fashion, unless the *collection type*
@@ -1279,81 +1277,3 @@ such types are valid `params` types when these APIs are declared public and are 
 #### Conclusion
 
 Approved with modifications [LDM-2024-01-10](https://github.com/dotnet/csharplang/blob/main/meetings/2024/LDM-2024-01-10.md)
-
-## Design meetings
-[design-meetings]: #design-meetings
-
-https://github.com/dotnet/csharplang/blob/main/meetings/2021/LDM-2021-11-01.md#collection-literals
-https://github.com/dotnet/csharplang/blob/main/meetings/2022/LDM-2022-03-09.md#ambiguity-of--in-collection-expressions
-https://github.com/dotnet/csharplang/blob/main/meetings/2022/LDM-2022-09-28.md#collection-literals
-https://github.com/dotnet/csharplang/blob/main/meetings/2024/LDM-2024-01-08.md
-https://github.com/dotnet/csharplang/blob/main/meetings/2024/LDM-2024-01-10.md
-
-## Working group meetings
-[working-group-meetings]: #working-group-meetings
-
-https://github.com/dotnet/csharplang/blob/main/meetings/working-groups/collection-literals/CL-2022-10-06.md
-https://github.com/dotnet/csharplang/blob/main/meetings/working-groups/collection-literals/CL-2022-10-14.md
-https://github.com/dotnet/csharplang/blob/main/meetings/working-groups/collection-literals/CL-2022-10-21.md
-https://github.com/dotnet/csharplang/blob/main/meetings/working-groups/collection-literals/CL-2023-04-05.md
-https://github.com/dotnet/csharplang/blob/main/meetings/working-groups/collection-literals/CL-2023-04-28.md
-https://github.com/dotnet/csharplang/blob/main/meetings/working-groups/collection-literals/CL-2023-05-26.md
-https://github.com/dotnet/csharplang/blob/main/meetings/working-groups/collection-literals/CL-2023-06-12.md
-https://github.com/dotnet/csharplang/blob/main/meetings/working-groups/collection-literals/CL-2023-06-26.md
-https://github.com/dotnet/csharplang/blob/main/meetings/working-groups/collection-literals/CL-2023-08-03.md
-https://github.com/dotnet/csharplang/blob/main/meetings/working-groups/collection-literals/CL-2023-08-10.md
-
-## Upcoming agenda items
-
-* Stack allocations for huge collections might blow the stack.  Should the compiler have a heuristic for placing this data on the heap?  Should the language be unspecified to allow for this flexibility?  We should follow what the spec/impl does for [`params Span<T>`](https://github.com/dotnet/csharplang/issues/1757). Options are:
-
-  * Always stackalloc.  Teach people to be careful with Span.  This allows things like `Span<T> span = [1, 2, ..s]` to work, and be fine as long as `s` is small.  If this could blow the stack, users could always create an array instead, and then get a span around this.  This seems like the most in line with what people might want, but with extreme danger.
-  * Only stackalloc when the literal has a *fixed* number of elements (i.e. no spread elements).  This then likely makes things always safe, with fixed stack usage, and the compiler (hopefully) able to reuse that fixed buffer.  However, it means things like `[1, 2, ..s]` would never be possible, even if the user knows it is completely safe at runtime.
-
-* How does overload resolution work?  If an API has:
-
-  ```C#
-  public void M(T[] values);
-  public void M(List<T> values);
-  ```
-
-  What happens with `M([1, 2, 3])`?  We likely need to define 'betterness' for these conversions.
-
-* Should we expand on collection initializers to look for the very common `AddRange` method? It could be used by the underlying constructed type to perform adding of spread elements potentially more efficiently.  We might also want to look for things like `.CopyTo` as well.  There may be drawbacks here as those methods might end up causing excess allocations/dispatches versus directly enumerating in the translated code.
-* Generic type inference should be updated to flow type information to/from collection literals.  For example:
-
-  ```C#
-  void M<T>(T[] values);
-  M([1, 2, 3]);
-  ```
-
-  It seems natural that this should be something the inference algorithm can be made aware of.  Once this is supported for the 'base' constructible collection type cases (`T[]`, `I<T>`, `Span<T>` `new T()`), then it should also fall out of the `Collect(constructible_type)` case.  For example:
-
-  ```C#
-  void M<T>(ImmutableArray<T> values);
-  M([1, 2, 3]);
-  ```
-
-  Here, `Immutable<T>` is constructible through an `init void Construct(T[] values)` method.  So the `T[] values` type would be used with inference against `[1, 2, 3]` leading to an inference of `int` for `T`.
-
-* Cast/Index ambiguity.
-
-  Today the following is an expression that is indexed into
-
-  ```c#
-  var v = (Expr)[1, 2, 3];
-  ```
-
-  But it would be nice to be able to do things like:
-
-  ```c#
-  var v = (ImmutableArray<int>)[1, 2, 3];
-  ```
-
-  Can/should we take a break here?
-
-* Syntactic ambiguities with `?[`.  
-
-  It might be worthwhile to change the rules for `nullable index access` to state that no space can occur between `?` and `[`.  That would be a breaking change (but likely minor as VS already forces those together if you type them with a space).  If we do this, then we can have `x?[y]` be parsed differently than `x ? [y]`.
-
-  A similar thing occurs if we want to go with https://github.com/dotnet/csharplang/issues/2926.  In that world `x?.y` is ambiguous with `x ? .y`.  If we require the `?.` to abut, we can syntactically distinguish the two cases trivially.  

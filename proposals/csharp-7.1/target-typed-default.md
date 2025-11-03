@@ -1,5 +1,7 @@
 # Target-typed "default" literal
 
+Champion issue: <https://github.com/dotnet/csharplang/issues/102>
+
 ## Summary
 [summary]: #summary
 

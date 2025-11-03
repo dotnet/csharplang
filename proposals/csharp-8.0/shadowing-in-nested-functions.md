@@ -1,5 +1,7 @@
 ﻿# Name shadowing in nested functions
 
+Champion issue: <https://github.com/dotnet/csharplang/issues/2777>
+
 ## Summary
 
 Permit variable names in lambdas and local functions to reuse (and shadow) names from the enclosing method or function.

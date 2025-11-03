@@ -2,6 +2,8 @@
 
 [!INCLUDE[Specletdisclaimer](../speclet-disclaimer.md)]
 
+Champion issue: <https://github.com/dotnet/csharplang/issues/8645>
+
 ## Summary
 Relax the using_alias_directive ([§13.5.2](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/namespaces.md#1352-using-alias-directives)) to allow it to point at any sort of type, not just named types.  This would support types not allowed today, like: tuple types, pointer types, array types, etc.  For example, this would now be allowed:
 

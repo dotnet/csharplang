@@ -2,6 +2,8 @@
 
 [!INCLUDE[Specletdisclaimer](../speclet-disclaimer.md)]
 
+Champion issue: <https://github.com/dotnet/csharplang/issues/4747>
+
 ## Summary
 [summary]: #summary 
 The compiler applies the mapping defined by `#line` directives to diagnostic locations and sequence points emitted to the PDB.

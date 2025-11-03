@@ -2,6 +2,8 @@
 
 [!INCLUDE[Specletdisclaimer](../speclet-disclaimer.md)]
 
+Champion issue: <https://github.com/dotnet/csharplang/issues/8647>
+
 ## Summary
 Allow a new form of string literal that starts with a minimum of three `"""` characters (but no maximum), optionally followed by a `new_line`, the content of the string, and then ends with the same number of quotes that the literal started with.  For example:
 
@@ -66,14 +68,14 @@ var json = $$"""
                 "summary": "text",
                 "length" : {{value.Length}},
              };
-             """
+             """;
 ```
 
 ## Motivation
 
 C# lacks a general way to create simple string literals that can contain effectively any arbitrary text.  All C# string literal forms today need some form of escaping in case the contents use some special character (always if a delimiter is used).  This prevents easily having literals containing other languages in them (for example, an XML, HTML or JSON literal).  
 
-All current approaches to form these literals in C# today always force the user to manually escape the contents.  Editing at that point can be highly annoying as the escaping cannot be avoided and must be dealt with whenever it arises in the contents.  This is particularly painful for regexes, especially when they contain quotes or backslashes.  Even with a `@""` string, quotes themselves must be escaped leading to a mix of C# and regex interspersed. `{` and `}` are similarly frustrating in `$""` strings.
+All current approaches to form these literals in C# today always force the user to manually escape the contents.  Editing at that point can be highly annoying as the escaping cannot be avoided and must be dealt with whenever it arises in the contents.  This is particularly painful for regexes, especially when they contain quotes or backslashes.  Even with a verbatim (`@""`) string, quotes themselves must be escaped leading to a mix of C# and regex interspersed. `{` and `}` are similarly frustrating in interpolated (`$""`) strings.
 
 The crux of the problem is that all our strings have a fixed start/end delimiter.   As long as that is the case, we will always have to have an escaping mechanism as the string contents may need to specify that end delimiter in their contents.  This is particularly problematic as that delimiter `"` is exceedingly common in many languages.
 
@@ -82,7 +84,7 @@ To address this, this proposal allows for flexible start and end delimiters so t
 ## Goals
 
 1. Provide a mechanism that will allow *all* string values to be provided by the user without the need for *any* escape-sequences whatsoever.  Because all strings must be representable without escape-sequences, it must always be possible for the user to specify delimiters that will be guaranteed to not collide with any text contents.
-2. Support interpolations in the same fashion.  As above, because *all* strings must be representable without escapes, it must always be possible for the user to specify an `interpolation` delimiter that will be guaranteed to not collide with any text contents.  Importantly, languages that use our `interpolation` delimiter characters (`{` and `}`) should feel first-class and not painful to use.
+2. Support interpolations in the same fashion.  As above, because *all* strings must be representable without escapes, it must always be possible for the user to specify an `interpolation` delimiter that will be guaranteed to not collide with any text contents.  Importantly, languages that use our *interpolation* delimiter characters (`{` and `}`) should feel first-class and not painful to use.
 3. Multiline string literals should look pleasant in code and should not make indentation within the compilation unit look strange.  Importantly, literal values that themselves have no indentation should not be forced to occupy the first column of the file as that can break up the flow of code and will look unaligned with the rest of the code that surrounds it.
     * This behavior should be easy to override while keeping literals clear and easy to read.
 4. For all strings that do not themselves contain a `new_line` or start or end with a quote (`"`) character, it should be possible to represent the string literal itself on a single line.
@@ -163,7 +165,7 @@ The portions between the starting and ending `raw_string_literal_delimiter` are 
 ```
 var v1 = """
          This is the entire content of the string.
-         """
+         """;
 ```
 
 This maintains symmetry with how the starting `new_line` is ignored, and it also provides a uniform way to ensure the 'indentation whitespace' can always be adjusted. To represent a string with a terminal `new_line` an extra line must be provided like so:
@@ -172,7 +174,7 @@ This maintains symmetry with how the starting `new_line` is ignored, and it also
 var v1 = """
          This string ends with a new line.
 
-         """
+         """;
 ```
 
 3. A `single_line_raw_string_literal` cannot represent a string value that starts or ends with a quote (`"`) though an augmentation to this proposal is provided in the `Drawbacks` section that shows how that could be supported.
@@ -182,7 +184,7 @@ var v1 = """
 ```
 var v1 = """
          "The content of this string starts with a quote
-         """
+         """;
 ```
 
 5. A `raw_string_literal` can also represent content that end with a quote (`"`).  This is supported as the terminating delimiter must be on its own line. For example:
@@ -190,13 +192,13 @@ var v1 = """
 ```
 var v1 = """
          "The content of this string starts and ends with a quote"
-         """
+         """;
 ```
 
 ```
 var v1 = """
          ""The content of this string starts and ends with two quotes""
-         """
+         """;
 ```
 
 5. The requirement that a 'blank' `raw_content` be either a prefix of the 'indentation whitespace' or the 'indentation whitespace' must be a prefix of it helps ensure confusing scenarios with mixed whitespace do not occur, especially as it would be unclear what should happen with that line.  For example, the following case is illegal:
@@ -206,7 +208,7 @@ var v1 = """
          Start
 <tab>
          End
-         """
+         """;
 ```
 
 6. Here the 'indentation whitespace' is nine space characters, but the 'blank' `raw_content` does not start with a prefix of that.  There is no clear answer as to how that `<tab>` line should be treated at all.  Should it be ignored?  Should it be the same as `.........<tab>`?  As such, making it illegal seems the clearest for avoiding confusion.
@@ -218,7 +220,7 @@ var v1 = """
          Start
 <four spaces>
          End
-         """
+         """;
 ```
 
 ```
@@ -226,7 +228,7 @@ var v1 = """
          Start
 <nine spaces>
          End
-         """
+         """;
 ```
 
 In both these cases, the 'indentation whitespace' will be nine spaces.  And in both cases, we will remove as much of that prefix as possible, leading the 'blank' `raw_content` in each case to be empty (not counting every `new_line`).  This allows users to not have to see and potentially fret about whitespace on these lines when they copy/paste or edit these lines.
@@ -238,7 +240,7 @@ var v1 = """
          Start
 <ten spaces>
          End
-         """
+         """;
 ```
 
 The 'indentation whitespace' will still be nine spaces.  Here though, we will remove as much of the 'indentation whitespace' as possible, and the 'blank' `raw_content` will contribute a single space to the final content.  This allows for cases where the content does need whitespace on these lines that should be preserved.
@@ -247,7 +249,7 @@ The 'indentation whitespace' will still be nine spaces.  Here though, we will re
 
 ```
 var v1 = """
-         """
+         """;
 ```
 
 This is because the start of the raw string must have a `new_line` (which it does) but the end must have a `new_line` as well (which it does not).  The minimal legal `raw_string_literal` is:
@@ -255,14 +257,14 @@ This is because the start of the raw string must have a `new_line` (which it doe
 ```
 var v1 = """
 
-         """
+         """;
 ```
 
 However, this string is decidedly uninteresting as it is equivalent to `""`.
 
 ## Indentation examples
 
-The 'indentation whitespace' algorithm can be visualized on several inputs like so:
+The 'indentation whitespace' algorithm can be visualized on several inputs like so. The following examples use the vertical bar character `|` to illustrate the first column in the resultant raw string:
 
 ### Example 1 - Standard case
 ```
@@ -357,7 +359,7 @@ var xml = """
 ```
 
 
-### Example 5 - Blank line with less whitespace than prefix (dots represent spaces)
+### Example 6 - Blank line with less whitespace than prefix (dots represent spaces)
 ```
 var xml = """
           <element attr="content">
@@ -382,7 +384,7 @@ var xml = """
 
 
 
-### Example 5 - Blank line with more whitespace than prefix (dots represent spaces)
+### Example 7 - Blank line with more whitespace than prefix (dots represent spaces)
 ```
 var xml = """
           <element attr="content">
@@ -490,11 +492,11 @@ The above is similar to the definition of `raw_string_literal` but with some imp
     - A content line is any text except a `new_line`.
     - A content line can contain multiple `raw_interpolation` occurrences at any position.  The `raw_interpolation` must start with an equal number of open braces (`{`) as the number of dollar signs at the start of the literal.
     - If 'indentation whitespace' is not-empty, a `raw_interpolation` cannot immediately follow a `new_line`.
-    - The `raw_interpolation` will following the normal rules specified at [§11.7.3](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/expressions.md#1173-interpolated-string-expressions).  Any `raw_interpolation` must end with the same number of close braces (`}`) as dollar signs and open braces.
+    - The `raw_interpolation` will following the normal rules specified at [§12.8.3](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/expressions.md#1283-interpolated-string-expressions).  Any `raw_interpolation` must end with the same number of close braces (`}`) as dollar signs and open braces.
     - Any `interpolation` can itself contain new-lines within in the same manner as an `interpolation` in a normal `verbatim_string_literal` (`@""`).
     - It then ends with a `new_line` some number (possibly zero) of `whitespace` and the same number of quotes that the literal started with.
 
-Computation of the interpolated string value follows the same rules as a normal `raw_string_literal` except updated to handle lines containing `raw_interpolation`s.  Building the string value happens in the same fashion, just with the interpolation holes replaced with whatever values those expressions produce at runtime.  If the `interpolated_raw_string_literal` is converted to a `FormattableString` then the values of the interpolations are passed in their respective order to the `arguments` array to `FormattableString.Create`.  The rest of the content of the `interpolated_raw_string_literal` *after* the 'indentation whitespace' has been stripped from all lines will be used to generate `format` string passed to `FormattableString.Create`, except with appropriately numbered `{N}` contents in each location where a `raw_interpolation` occurred (or `{N,constant}` in the case if its `interpolation` is of the form `expression ',' constant_expression`).
+Computation of the interpolated string value follows the same rules as a normal `raw_string_literal` except updated to handle lines containing `raw_interpolation`s.  Building the string value happens in the same fashion, just with the interpolation holes replaced with whatever values those expressions produce at runtime.  If the `interpolated_raw_string_literal` is converted to a `FormattableString` then the values of the interpolations are passed in their respective order to the `arguments` array to `FormattableString.Create`.  The rest of the content of the `interpolated_raw_string_literal` *after* the 'indentation whitespace' has been stripped from all lines will be used to generate the `format` string passed to `FormattableString.Create`, except with appropriately numbered `{N}` contents in each location where a `raw_interpolation` occurred (or `{N,constant}` in the case if its `interpolation` is of the form `expression ',' constant_expression`).
 
 There is an ambiguity in the above specification.  Specifically when a section of `{` in text and `{` of an interpolation abut. For example:
 
@@ -506,13 +508,11 @@ var v1 = $$"""
 
 This could be interpreted as: `{{ {order_number } }}` or `{ {{order_number}} }`.  However, as the former is illegal (no C# expression could start with `{`) it would be pointless to interpret that way.  So we interpret in the latter fashion, where the innermost `{` and `}` braces form the interpolation, and any outermost ones form the text.  In the future this might be an issue if the language ever supports any expressions that are surrounded by braces.  However, in that case, the recommendation would be to write such a case like so: `{{({some_new_expression_form})}}`.  Here, parentheses would help designate the expression portion from the rest of the literal/interpolation.  This has precedence already with how ternary conditional expressions need to be wrapped to not conflict with the formatting/alignment specifier of an interpolation (e.g. `{(x ? y : z)}`).
 
-Examples: (upcoming)
-
 ## Drawbacks
 
 Raw string literals add more complexity to the language.  We already have many string literal forms already for numerous purposes.  `""` strings, `@""` strings, and `$""` strings already have a lot of power and flexibility.  But they all lack a way to provide raw contents that never need escaping.
 
-The above rules do not support the case of 4.a:
+The above rules do not support the case of [4.a](#goals):
 
 4. ...
     - Optionally, with extra complexity, we could refine this to state that: For all strings that do not themselves contain a `new_line` (but can start or end with a quote `"` character), it should be possible to represent the string literal itself on a single line.

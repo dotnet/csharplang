@@ -2,6 +2,8 @@
 
 [!INCLUDE[Specletdisclaimer](../speclet-disclaimer.md)]
 
+Champion issue: <https://github.com/dotnet/csharplang/issues/99>
+
 ## Summary
 Support parameterless constructors and instance field initializers for struct types.
 
@@ -32,7 +34,7 @@ record struct Person()
 ### Instance field initializers
 Instance field declarations for a struct may include initializers.
 
-As with class field initializers [§14.5.6.3](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/classes.md#14563-instance-field-initialization):
+As with class field initializers [§15.5.6.3](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/classes.md#15563-instance-field-initialization):
 > A variable initializer for an instance field cannot reference the instance being created. 
 
 An error is reported if a struct has field initializers and no declared instance constructors since the field initializers will not be run.
@@ -45,7 +47,7 @@ A struct may declare a parameterless instance constructor.
 
 A parameterless instance constructor is valid for all struct kinds including `struct`, `readonly struct`, `ref struct`, and `record struct`.
 
-If no parameterless instance constructor is declared, the struct (see [§15.4.9](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/structs.md#1549-constructors)) ...
+If no parameterless instance constructor is declared, the struct (see [§16.4.9](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/structs.md#1649-constructors)) ...
 > implicitly has a parameterless instance constructor which always returns the value that results from setting all value type fields to their default value and all reference type fields to null.
 
 ### Modifiers
@@ -62,7 +64,7 @@ Constructors can be declared `extern` or `unsafe`.
 Constructors cannot be `partial`.
 
 ### Executing field initializers
-_Instance variable initializers_ ([§14.11.3](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/classes.md#14113-instance-variable-initializers)) is **modified** as follows:
+_Instance variable initializers_ ([§15.11.3](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/classes.md#15113-instance-variable-initializers)) is **modified** as follows:
 
 > When **a class** instance constructor has no constructor initializer, or it has a constructor initializer of the form `base(...)`, that constructor implicitly performs the initializations specified by the *variable_initializer*s of the instance fields declared in its class. This corresponds to a sequence of assignments that are executed immediately upon entry to the constructor and before the implicit invocation of the direct base class constructor.
 > 
@@ -71,7 +73,7 @@ _Instance variable initializers_ ([§14.11.3](https://github.com/dotnet/csharpst
 > **When a struct instance constructor has a `this()` constructor initializer that represents the _default parameterless constructor_, the declared constructor implicitly clears all instance fields and performs the initializations specified by the *variable_initializer*s of the instance fields declared in its struct. Immediately upon entry to the constructor, all value type fields are set to their default value and all reference type fields are set to `null`. Immediately after that, a sequence of assignments corresponding to the *variable_initializer*s are executed.**
 
 ### Definite assignment
-Instance fields (other than `fixed` fields) must be definitely assigned in struct instance constructors that do not have a `this()` initializer (see [§15.4.9](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/structs.md#1549-constructors)).
+Instance fields (other than `fixed` fields) must be definitely assigned in struct instance constructors that do not have a `this()` initializer (see [§16.4.9](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/structs.md#1649-constructors)).
 
 ```csharp
 struct S0 // ok
@@ -90,7 +92,7 @@ struct S2
 {
     int x = 1;
     object y;
-    public S2() { } // error: field 'y' must be assigned
+    public S2() { } // error in C# 10 (valid starting in C# 11): field 'y' must be assigned
 }
 
 struct S3 // ok
@@ -178,7 +180,7 @@ No warning will be reported when using substituting such a struct type for a typ
 struct S { public S(int i) { } }
 static T CreateNew<T>() where T : new() => new T();
 
-_ = new S();        // warning: no constructor called
+_ = new S();        // no warning called
 _ = CreateNew<S>(); // ok
 ```
 
