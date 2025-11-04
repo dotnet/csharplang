@@ -193,6 +193,11 @@ the language? Note that if we do keep `unsafe` as the modifier used to expose th
 Is conversion of a lambda or method group marked `unsafe` to a non-unsafe delegate type permitted without warning or error in an `unsafe` context? If we don't do this, then it could be fairly painful
 for various parts of the ecosystem, particularly any enumerables that are passed through LINQ queries.
 
+### `stackalloc` as initialized
+
+Today, [the spec](https://github.com/dotnet/csharpstandard/blob/draft-v9/standard/expressions.md#12822-stack-allocation) always considers `stackalloc` memory as uninitialized, and says that the contents
+are undefined unless manually cleared or assigned. Do we consider this a spec bug, or do we need to change what we consider `unsafe` for `stackalloc` purposes?
+
 
 [unsafe-code.md]: https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/expressions.md#128-primary-expressions
 [unsafe-context-spec]: https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/unsafe-code.md#242-unsafe-contexts
