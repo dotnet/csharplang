@@ -1,4 +1,4 @@
-# Ignored directives for single-file programs
+# Ignored directives for file-based apps
 
 [!INCLUDE[Specletdisclaimer](../speclet-disclaimer.md)]
 
