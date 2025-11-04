@@ -7,6 +7,7 @@ All schedule items must have a public issue or checked-in proposal that can be l
 ## Schedule when convenient
 
 - Triage (working set)
+- [Relaxed ordering for `partial` and `ref` modifiers](https://github.com/dotnet/csharplang/blob/591a2b18cd261d7128e7fc5075c9788f1830abd5/proposals/relaxed-partial-ref-ordering.md) (Rikki)
 
 ## Recurring topics
 
