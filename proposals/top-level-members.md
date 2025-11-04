@@ -1,6 +1,6 @@
 # Top-Level Members
 
-Champion issue: (TODO)
+Champion issue: https://github.com/dotnet/csharplang/issues/9803
 
 ## Summary
 
@@ -47,14 +47,10 @@ extension<T>(IEnumerable<T> e)
 
 ## Motivation
 
-TODO: Why are we doing this? What use cases does it support? What is the expected outcome?
-
 - Avoid boilerplate utility static classes.
 - Evolve top-level statements from C# 9.
 
 ## Detailed design
-
-TODO: This is the bulk of the proposal. Explain the design in enough detail for somebody familiar with the language to understand, and for somebody familiar with the compiler to implement,  and include examples of how the feature is used. This section can start out light before the prototyping phase but should get into specifics and corner-cases as the feature is iteratively designed and implemented.
 
 - Some members can be declared directly in a namespace (file-scoped or block-scoped).
   - Allowed kinds currently are: methods, operators, extension blocks, and fields.
@@ -88,15 +84,11 @@ TODO: This is the bulk of the proposal. Explain the design in enough detail for 
 
 ## Drawbacks
 
-TODO: Why should we *not* do this?
-
 - Polluting namespaces with loosely organized helpers.
 - Requires tooling updates to properly surface and organize top-level methods in IntelliSense, refactorings, etc.
 - Entry point resolution breaking changes.
 
 ## Alternatives
-
-TODO: What other designs have been considered? What is the impact of not doing this?
 
 - Support `args` keyword in top-level members (just like it can be accessed in top-level statements). But we have `System.Environment.GetCommandLineArgs()`.
 - Allow capturing variables from top-level statements inside non-`static` top-level members.
@@ -107,10 +99,10 @@ TODO: What other designs have been considered? What is the impact of not doing t
   - Could be brought to scope via `extern alias`.
     - To avoid needing to specify those in project files (e.g., so file-based apps also work),
       there could be a syntax for that like `extern alias Util = Util.dll`.
+- Allow declaring top-level statements inside namespaces as well.
+  - Top-level local functions would introduce ambiguities with top-level methods. Wouldn't be a breaking change though, just need to decide which one wins.
 
 ## Open questions
-
-TODO: What parts of the design are still undecided?
 
 - Which member kinds? Methods, fields, properties, indexers, events, constructors, operators.
 - Allow `file` or `private` or both? What should `private` really mean? Visible to file, namespace, or something else?
@@ -140,3 +132,10 @@ TODO: What parts of the design are still undecided?
     extension(object) {} // error
     class C;
     ```
+- Do we need new name conflict rules for declarations and/or usages?
+  For example, should the following be an error when declared (and/or when used)?
+  ```cs
+  namespace NS;
+  int Foo;
+  class Foo { }
+  ```
