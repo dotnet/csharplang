@@ -49,7 +49,7 @@ In order to avoid getting in the user's way needlessly, we should allow `partial
 ## Detailed design
 [design]: #detailed-design
 
-Note that some of the below grammars are from C# 7 and are missing more recent modifiers such as `required` and `file.`  
+Note that some of the below grammars are from C# 7 and are missing more recent modifiers such as `required` and `file`.  
 Since we have a precedent for contextual keywords `required` and `file` being modifiers, we believe we know how to parse `partial` as a modifier in any valid position it could appear in.
 
 The method grammar [(§15.6.1)](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/classes.md#1561-general) is updated as follows:
