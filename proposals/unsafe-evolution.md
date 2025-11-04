@@ -141,6 +141,11 @@ if any parameter were a by-`ref`, optional, or `params`.
 A delegate type that is marked `unsafe` can only be invoked in an `unsafe` context, and the invocation of an `unsafe` delegate has a memory safety state of `unsafe`. If a delegate type is `unsafe`,
 then its `Invoke`, `BeginInvoke`, and `EndInvoke` methods are also marked as `unsafe`.
 
+### `extern`
+
+Because `extern` methods are to native locations that cannot be guaranteed by the runtime, any `extern` method is automatically considered `unsafe`. Even methods that only take `unmanaged` parameters by
+value cannot be safely called by C#, as the calling convention used for the method could be incorrectly specified by the user and must be manually verified by review.
+
 ## Open questions
 
 ### How breaking do we want to skew
