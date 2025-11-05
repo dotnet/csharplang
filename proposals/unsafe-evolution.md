@@ -292,6 +292,31 @@ void M(SafeWrapper w)
 }
 ```
 
+### Taking the address of an uninitialized variable
+
+Today, taking the address of a not definitely assigned variable can consider that variable definitely assigned, exposing uninitialized member. We have a couple of options to solving that:
+
+1. Require that variables be definitely assigned before allowing an address-of operator to be used on them.
+2. Make taking the address of an uninitialized variable unsafe.
+
+Examples:
+
+```cs
+static void SkipInit<T>(out T value)  
+{
+    // value is considered definitely assigned after the address-of
+    fixed (void* ptr = &value);
+}
+```
+
+```cs
+int i;
+// i is considered definitely assigned after the address-of
+_ = &i;
+// Incrementing whatever was on the stack
+i++;
+```
+
 
 [unsafe-code.md]: https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/expressions.md#128-primary-expressions
 [unsafe-context-spec]: https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/unsafe-code.md#242-unsafe-contexts
