@@ -58,17 +58,9 @@ an initialized [`stackalloc`][stack-allocation-spec] are also perfectly legal in
 Given the extensive rewrite of both the `unsafe` code section and other parts C# specification inherent in this change, it would be unwieldy and likely not useful to provide a line-by-line diff
 of the existing rules of the specification. Instead, we will provide an overview of the change to make in a given section, as well as specific new rules for what is allowed in `unsafe` contexts.
 
-#### Expression memory safety state
+#### Redefining expressions that require unsafe contexts
 
-> [!NOTE]
-> Now accepting naming suggestions
-
-We introduce a new state that is tracked for all expressions in C#: the memory safety state. There are two possible safety states for any expression: safe, or unsafe. Expressions with a memory safety
-state of safe may be used anywhere they are normally legal in C#. Expressions with a memory safety state of unsafe can only be used in an [unsafe context][unsafe-context-spec], and any use outside of
-an unsafe context is a warning.
-
-For every expression production in [§12](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/expressions.md), if all of its nested expressions have a memory safety state of safe, then that
-expression has a memory safety state of safe. If that expression has no nested expressions, it has a memory safety state of safe. The following expressions always have a memory safety state of unsafe:
+The following expression require an `unsafe` context when used:
 
 * [Pointer indirections][pointer-indirection]
 * [Pointer member access][pointer-member-access]
@@ -77,11 +69,15 @@ expression has a memory safety state of safe. If that expression has no nested e
 * Element access on a fixed-size buffer
 * `stackalloc` under the conditions defined [below](#stack-allocation)
 
-In addition to these expressions, expressions can also conditionally introduce a memory safety state of unsafe if they depend on any symbol that is marked as `unsafe`. For example, calling a method
-that is marked as `unsafe` will cause the _invocation_expression_ to have a memory safety state of unsafe, even if the receiver and all arguments have a memory safety state of safe.
+In addition to these expressions, expressions and statements can also conditionally require an `unsafe` context if they depend on any symbol that is marked as `unsafe`. For example, calling a method
+that is marked as `unsafe` will cause the _invocation_expression_ to require an `unsafe` context. Statements with invocations embedded (such as `using`s, `foreach`, and similar) can also require an
+`unsafe` context when they use a member that is marked as `unsafe`.
+
+When we say "requires an unsafe context" or similar in this document, it means emitting a warning that the construct requires an `unsafe` context to be used. [Warnings vs errors](#warnings-vs-errors)
+discusses whether this should be an error.
 
 > [!NOTE]
-> This section probably needs expansion to formally declare the various expression types and symbols that can change the safety state of an expression.
+> This section probably needs expansion to formally declare what each expression and statement must consider to require an `unsafe` context.
 
 #### Pointer types
 
@@ -98,12 +94,12 @@ removed. No semantics change about the meaning of these expressions; the only ch
 
 For [pointer indirection][pointer-indirection], [pointer member access][pointer-member-access], and [pointer element access][pointer-element-access], these operators remain unsafe, as these
 access memory that is not managed the runtime. They remain in [§24][unsafe-code.md], and continue to require an `unsafe` context to be used. Any use outside of an `unsafe` context is a warning.
-No semantics about these operators change; they still continue to mean exactly the same thing that they do today. These expressions always have a memory safety state of unsafe.
+No semantics about these operators change; they still continue to mean exactly the same thing that they do today. These expressions must always occur in an `unsafe` context.
 
 The [fixed statement][fixed-statement] moves to [§13](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/statements.md), with references to `unsafe` contexts removed.
 
 Function pointers are not yet incorporated into the main C# specification, but they are similarly affected; everything but function pointer invocation is moved into the standard specification.
-A function pointer invocation expression always has a memory safety state of unsafe.
+A function pointer invocation expression must always occur in an `unsafe` context.
 
 #### Fixed-size buffers
 
@@ -141,8 +137,7 @@ it would be if any parameter were a by-`ref`, optional, or `params`.
 
 It is a memory safety warning convert a delegate type that is marked as `unsafe` to `System.Delegate`/`System.Linq.Expressions.Expression`/`System.Linq.Expressions.Expression<T>`.
 
-A delegate type that is marked `unsafe` can only be invoked in an `unsafe` context, and the invocation of an `unsafe` delegate has a memory safety state of `unsafe`. If a delegate type is `unsafe`,
-then its `Invoke`, `BeginInvoke`, and `EndInvoke` methods are also marked as `unsafe`.
+A delegate type that is marked `unsafe` can only be invoked in an `unsafe` context. If a delegate type is `unsafe`, then its `Invoke`, `BeginInvoke`, and `EndInvoke` methods are also marked as `unsafe`.
 
 ### `extern`
 
@@ -210,6 +205,14 @@ of warnings to give to the user. We could use this as a model for `unsafe` as we
 One advantage that we have with the new `unsafe` features is that they are much less prevalent. While there are a decent number of `unsafe` calls in top libraries, our guesstimates on the percentage
 of top libraries that use `unsafe` is much lower than "every single line of C# code ever written". Hopefully this means that, while some ability to opt in/out is possibly needed, we don't need as
 complicated a mechanism as nullable has, with dedicated preprocessor switches and the like.
+
+#### Warnings vs errors
+
+The proposal currently states that memory safety requirements are currently enforced via a warning, rather than error. This is drawing from our experience working with the nullable feature, where warnings
+allowed code bases to incrementally adopt the new feature and not need to convert large swathes of code all at once. We expect a similar process will be needed for unsafe warnings: many codebases will
+simply be able to turn on the new rules globally and move on with their lives. But we expect the codebases we most care about adopting the new rules will have large amounts of code to annotate, and we
+want them to be able to move forward with the feature, rather than seeing a wall of errors and giving up immediately. By making the requirements warnings, we allow these codebases to fix warnings file-by-file
+or method-by-method as required, disabling the warnings everywhere else.
 
 #### Method signature breaks
 
