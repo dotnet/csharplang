@@ -5,7 +5,7 @@ Champion issue: https://github.com/dotnet/csharplang/issues/9704
 ## Summary
 
 We update the definition of `unsafe` in C# from referring to locations where pointer types are used, to be locations where memory unmanaged by the runtime is dereferenced. These locations
-are where memory unsafety occurs, and are responsible for the bulk of CVEs categorized as memory safety issues.
+are where memory unsafety occurs, and are responsible for the bulk of CVEs (Common Vulnerabilities and Exposures) categorized as memory safety issues.
 
 ```cs
 void M()
@@ -73,8 +73,7 @@ In addition to these expressions, expressions and statements can also conditiona
 that is marked as `unsafe` will cause the _invocation_expression_ to require an `unsafe` context. Statements with invocations embedded (such as `using`s, `foreach`, and similar) can also require an
 `unsafe` context when they use a member that is marked as `unsafe`.
 
-When we say "requires an unsafe context" or similar in this document, it means emitting a warning that the construct requires an `unsafe` context to be used. [Warnings vs errors](#warnings-vs-errors)
-discusses whether this should be an error.
+When we say "requires an unsafe context" or similar in this document, it means emitting an error that the construct requires an `unsafe` context to be used.
 
 > [!NOTE]
 > This section probably needs expansion to formally declare what each expression and statement must consider to require an `unsafe` context.
@@ -93,7 +92,7 @@ Similarly, [pointer expressions][pointer-expressions], except for [pointer indir
 removed. No semantics change about the meaning of these expressions; the only change is that they no longer require an `unsafe` context to use.
 
 For [pointer indirection][pointer-indirection], [pointer member access][pointer-member-access], and [pointer element access][pointer-element-access], these operators remain unsafe, as these
-access memory that is not managed the runtime. They remain in [§24][unsafe-code.md], and continue to require an `unsafe` context to be used. Any use outside of an `unsafe` context is a warning.
+access memory that is not managed the runtime. They remain in [§24][unsafe-code.md], and continue to require an `unsafe` context to be used. Any use outside of an `unsafe` context is an error.
 No semantics about these operators change; they still continue to mean exactly the same thing that they do today. These expressions must always occur in an `unsafe` context.
 
 The [fixed statement][fixed-statement] moves to [§13](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/statements.md), with references to `unsafe` contexts removed.
@@ -126,16 +125,16 @@ contract of `Span<T>` and `ReadOnlySpan<T>`, and so must be subject to extra scr
 
 ### Overriding, inheritance, and implementation
 
-It is a memory safety warning to add `unsafe` at the member level in any override or implementation of a member that does not have `unsafe` on it originally, because callers may be using the base
+It is a memory safety error to add `unsafe` at the member level in any override or implementation of a member that does not have `unsafe` on it originally, because callers may be using the base
 definition and not see any addition of `unsafe` by a derived implementation.
 
 ### Delegates and lambdas
 
-It is a memory safety warning to convert an `unsafe` member to a delegate type that is not marked `unsafe`. The [_function type_](csharp-10.0/lambda-improvements.md#natural-function-type) definition
+It is a memory safety error to convert an `unsafe` member to a delegate type that is not marked `unsafe`. The [_function type_](csharp-10.0/lambda-improvements.md#natural-function-type) definition
 is updated to include whether the _anonymous function_ has the `unsafe` keyword, or the _method group_ is to a member that is marked `unsafe`. If it is, an anonymous function type is created, just as
 it would be if any parameter were a by-`ref`, optional, or `params`.
 
-It is a memory safety warning convert a delegate type that is marked as `unsafe` to `System.Delegate`/`System.Linq.Expressions.Expression`/`System.Linq.Expressions.Expression<T>`.
+It is a memory safety error convert a delegate type that is marked as `unsafe` to `System.Delegate`/`System.Linq.Expressions.Expression`/`System.Linq.Expressions.Expression<T>`.
 
 A delegate type that is marked `unsafe` can only be invoked in an `unsafe` context. If a delegate type is `unsafe`, then its `Invoke`, `BeginInvoke`, and `EndInvoke` methods are also marked as `unsafe`.
 
@@ -159,8 +158,8 @@ When a type is `partial`, `unsafe` on a part of that type marks everything decla
 is considered `unsafe`, even if it is also declared or defined in a part that not marked as `unsafe`. If one part of a member is declared as `unsafe`, then all parts of that member are considered unsafe.
 
 ```cs
-new C1().M1(); // Warning, M1() must be called in an `unsafe` context
-new C2().M2(); // Warning, M2() must be called in an `unsafe` context
+new C1().M1(); // Error, M1() must be called in an `unsafe` context
+new C2().M2(); // Error, M2() must be called in an `unsafe` context
 
 unsafe partial class C1
 {
@@ -186,43 +185,6 @@ partial class C2
 For properties, `get` and `set/init` members can be independently declared as `unsafe`; marking the entire property as `unsafe` means that both the `get` and `set/init` members are unsafe.
 
 ## Open questions
-
-### How breaking do we want to skew
-
-The initial proposal is a maximally-breaking approach, mainly as a litmus test for how aggressive we want to be. It proposes no ability to opt in/out sections of the code, changes the meaning of `unsafe`
-on methods, prohibits the usage of `unsafe` on types, uses errors instead of warnings, and generally forces migration to occur all at once, at the time the compiler is upgraded (and then potentially
-repeatedly as dependencies update and add `unsafe` to members that were already in use). However, we have a wealth of experience in making changes like this that we can draw on to scope the size of
-the breaks down and allow incremental adoption. These options are covered below.
-
-#### Opt in/out for code regions
-
-This is not the first time that C# has redefined the "base" case of unannotated code. C# 8.0 introduced the nullable reference type feature, which in many ways can be seen as a blueprint for how the
-`unsafe` feature is shaping up. It had similar goals (prevent bugs that cost billions of dollars by redefining the way default C# is interpreted) and a similar general featureset (add new info to types
-to propagate states and avoid bugs). It was also heavily breaking, and needed a strong set of opt in and opt out functionality to allow the feature to be adopted over time by codebases. That
-functionality is the "nullable reference type context". This is a lexical scope that informs the compiler, for a given region in code, both how to interpret unannotated type references and what types
-of warnings to give to the user. We could use this as a model for `unsafe` as well, adding an "safety rules context" or similar to allow controlling whether these new rules are being applied or not.
-
-One advantage that we have with the new `unsafe` features is that they are much less prevalent. While there are a decent number of `unsafe` calls in top libraries, our guesstimates on the percentage
-of top libraries that use `unsafe` is much lower than "every single line of C# code ever written". Hopefully this means that, while some ability to opt in/out is possibly needed, we don't need as
-complicated a mechanism as nullable has, with dedicated preprocessor switches and the like.
-
-#### Warnings vs errors
-
-The proposal currently states that memory safety requirements are currently enforced via a warning, rather than error. This is drawing from our experience working with the nullable feature, where warnings
-allowed code bases to incrementally adopt the new feature and not need to convert large swathes of code all at once. We expect a similar process will be needed for unsafe warnings: many codebases will
-simply be able to turn on the new rules globally and move on with their lives. But we expect the codebases we most care about adopting the new rules will have large amounts of code to annotate, and we
-want them to be able to move forward with the feature, rather than seeing a wall of errors and giving up immediately. By making the requirements warnings, we allow these codebases to fix warnings file-by-file
-or method-by-method as required, disabling the warnings everywhere else.
-
-#### Method signature breaks
-
-Right now, we propose that `unsafe` as a keyword on the method move from something that is lexically scoped without a semantic impact to something that has semantic impact, and isn't lexically scoped.
-We could limit this break by introducing a new keyword for when the caller of a method or member must be in an `unsafe` context; for example, `callerunsafe` as a modifier.
-
-#### Defaults for source generators
-
-For nullable, we force generator authors to explicitly opt-in to nullable regardless of whether the entire project has opted into the feature by default, so that generator output isn't broken by the user
-turning on nullable and warn as error. Should we do the same for source generators?
 
 ### Local functions/lambda safe contexts
 
@@ -319,6 +281,55 @@ _ = &i;
 // Incrementing whatever was on the stack
 i++;
 ```
+
+## Answered questions
+
+### How breaking do we want to skew
+
+<details>
+<summary>Question text</summary>
+
+The initial proposal is a maximally-breaking approach, mainly as a litmus test for how aggressive we want to be. It proposes no ability to opt in/out sections of the code, changes the meaning of `unsafe`
+on methods, prohibits the usage of `unsafe` on types, uses errors instead of warnings, and generally forces migration to occur all at once, at the time the compiler is upgraded (and then potentially
+repeatedly as dependencies update and add `unsafe` to members that were already in use). However, we have a wealth of experience in making changes like this that we can draw on to scope the size of
+the breaks down and allow incremental adoption. These options are covered below.
+
+#### Opt in/out for code regions
+
+This is not the first time that C# has redefined the "base" case of unannotated code. C# 8.0 introduced the nullable reference type feature, which in many ways can be seen as a blueprint for how the
+`unsafe` feature is shaping up. It had similar goals (prevent bugs that cost billions of dollars by redefining the way default C# is interpreted) and a similar general featureset (add new info to types
+to propagate states and avoid bugs). It was also heavily breaking, and needed a strong set of opt in and opt out functionality to allow the feature to be adopted over time by codebases. That
+functionality is the "nullable reference type context". This is a lexical scope that informs the compiler, for a given region in code, both how to interpret unannotated type references and what types
+of warnings to give to the user. We could use this as a model for `unsafe` as well, adding an "safety rules context" or similar to allow controlling whether these new rules are being applied or not.
+
+One advantage that we have with the new `unsafe` features is that they are much less prevalent. While there are a decent number of `unsafe` calls in top libraries, our guesstimates on the percentage
+of top libraries that use `unsafe` is much lower than "every single line of C# code ever written". Hopefully this means that, while some ability to opt in/out is possibly needed, we don't need as
+complicated a mechanism as nullable has, with dedicated preprocessor switches and the like.
+
+#### Warnings vs errors
+
+The proposal currently states that memory safety requirements are currently enforced via a warning, rather than error. This is drawing from our experience working with the nullable feature, where warnings
+allowed code bases to incrementally adopt the new feature and not need to convert large swathes of code all at once. We expect a similar process will be needed for unsafe warnings: many codebases will
+simply be able to turn on the new rules globally and move on with their lives. But we expect the codebases we most care about adopting the new rules will have large amounts of code to annotate, and we
+want them to be able to move forward with the feature, rather than seeing a wall of errors and giving up immediately. By making the requirements warnings, we allow these codebases to fix warnings file-by-file
+or method-by-method as required, disabling the warnings everywhere else.
+
+#### Method signature breaks
+
+Right now, we propose that `unsafe` as a keyword on the method move from something that is lexically scoped without a semantic impact to something that has semantic impact, and isn't lexically scoped.
+We could limit this break by introducing a new keyword for when the caller of a method or member must be in an `unsafe` context; for example, `callerunsafe` as a modifier.
+
+#### Defaults for source generators
+
+For nullable, we force generator authors to explicitly opt-in to nullable regardless of whether the entire project has opted into the feature by default, so that generator output isn't broken by the user
+turning on nullable and warn as error. Should we do the same for source generators?
+
+</details>
+
+#### Conclusion
+
+Answered in https://github.com/dotnet/csharplang/blob/main/meetings/2025/LDM-2025-11-05.md#unsafe-evolution. We will report errors for memory safety issues when the new rules are turned on, and no exceptions
+for source generators will be made.
 
 
 [unsafe-code.md]: https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/expressions.md#128-primary-expressions
