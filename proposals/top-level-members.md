@@ -56,8 +56,13 @@ extension<T>(IEnumerable<T> e)
   - Allowed kinds currently are: methods, operators, extension blocks, and fields.
   - Existing declarations like classes still work the same, there shouldn't be any ambiguity.
   - There is no ambiguity with top-level statements because those are not allowed inside namespaces.
-- It is as if the members were in an "implicit" `static` class
-  whose accessibility is either `internal` (by default) or `public` (if any member is also `public`).
+
+- Top-level members in a namespace are semantically members of an "implicit" class which:
+  - is `static` and `partial`,
+  - has accessibility either `internal` (by default) or `public` (if any member is also `public`),
+  - is named `TopLevel` (can be addressed even from C# which is useful for extension member disambiguation or source-generated `partial` implementations),
+  - is synthesized per each compilation unit (so having top-level members in the same namespace across assemblies can lead to [ambiguities](#drawbacks)).
+
   For top-level members, this means:
     - The `static` modifier is disallowed (the members are implicitly static).
     - The default accessibility is `internal`.
@@ -66,27 +71,61 @@ extension<T>(IEnumerable<T> e)
     - Overloading is supported.
     - `extern` and `partial` are supported.
     - XML doc comments work.
+
 - Metadata:
-  - A type synthesized per namespace and file. That means `private` members are only visible in the file.
-  - Cannot be addressed from C#, but has speakable name `TopLevel` so it is callable from other languages.
-    This means that custom types named `TopLevel` become disallowed in a namespace where top-level members are used.
-  - It needs to have an attribute `[TopLevel]` otherwise it is considered a plain old type. This prevents a breaking change.
+  - The implicit class is recognized only if it has name `TopLevel` and an attribute `[TopLevel]` (full attribute name is TBD),
+    otherwise it is considered a plain old type. This prevents a breaking change
+    (where new members are in scope which can lead to ambiguity overload resolution errors).
+
 - Usage (if there is an appropriately-shaped `NS.TopLevel` type):
   - `using NS;` implies `using static NS.TopLevel;`.
   - Lookup for `NS.Member` can find `NS.TopLevel.Member`.
-  - Nothing really changes for extensions.
+  - Nothing really changes for extension member lookup (the class name is already not used for that).
+
 - Entry points:
   - Top-level `Main` methods can be entry points.
-  - Top-level statements are generated into `Program.Main` (speakable function).
-    This is a breaking change (previously the main method was unspeakable).
-  - Simplify the logic: TLS entry-points are normal candidates.
-    This is a breaking change (previously they were not considered to be candidates and for example `-main` could not be used to point to them).
+  - Top-level statements are generated into `Program.Main` (speakable function; previously it was unspeakable).
+    This is a breaking change: there could be a conflict with an existing `Program.Main` method declared by the user.
+  - Simplify the logic: TLS entry-points are normal candidates (previously they were not considered to be candidates and for example `-main` could not be used to point to them).
+    This is a breaking change: if the user has custom `Main` methods and top-level statements, they will get an error now because the compiler doesn't know which entrypoint to choose
+    (to fix that, they can specify `-main`).
 
 ## Drawbacks
 
 - Polluting namespaces with loosely organized helpers.
 - Requires tooling updates to properly surface and organize top-level methods in IntelliSense, refactorings, etc.
 - Entry point resolution breaking changes.
+
+- There might be ambiguities if two assemblies have top-level members in the same namespace:
+  ```cs
+  // A.dll
+  namespace X;
+  public void M1() { } // ok
+  ```
+  ```cs
+  // B.dll
+  namespace X;
+  public void M2() { } // ok
+
+  // generated code
+  namespace X
+  {
+    partial class TopLevel // ambiguity error
+    {
+      // ...
+    }
+  }
+  ```
+  ```cs
+  // C.dll
+  using X;
+  M1(); M2(); // ok
+  X.TopLevel.M1(); // ambiguity error for `TopLevel` type
+  ```
+
+  Since such top-level members would work until one would reference the type,
+  that could lead to people declaring such conflicting APIs and realizing they are blocked when it's too late (e.g., they have shipped a public API).
+  The compiler could report a warning but that would still not work if the other DLL reference is added later.
 
 ## Alternatives
 
@@ -99,14 +138,19 @@ extension<T>(IEnumerable<T> e)
   - Could be brought to scope via `extern alias`.
     - To avoid needing to specify those in project files (e.g., so file-based apps also work),
       there could be a syntax for that like `extern alias Util = Util.dll`.
+    - Or they could be in scope only in the current assembly.
 - Allow declaring top-level statements inside namespaces as well.
   - Top-level local functions would introduce ambiguities with top-level methods. Wouldn't be a breaking change though, just need to decide which one wins.
+- If we ever allow the `file` modifier on members (methods, fields, etc.), that would be naturally useful for top-level members, too.
+  `file` members would be scoped to the current file.
+  Compare that with `private` members which are scoped to the current _namespace_.
 
 ## Open questions
 
 - Which member kinds? Methods, fields, properties, indexers, events, constructors, operators.
-- Allow `file` or `private` or both? What should `private` really mean? Visible to file, namespace, or something else?
-- Shape of the synthesized static class (currently `[TopLevel] TopLevel`)? Should it be speakable?
+- Accessibility: what should be the default and which modifiers should be allowed?
+- Clustering: currently each namespace per assembly gets its `TopLevel` class.
+- Shape of the synthesized static class (currently `[TopLevel] TopLevel`).
 - Should we simplify the TLS entry point logic? Should it be a breaking change?
 - Should we require the `static` modifier (and keep our doors open if we want to introduce some non-`static` top-level members in the future)?
 - Should we disallow mixing top-level members and existing declarations in one file?
