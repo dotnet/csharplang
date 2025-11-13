@@ -20,7 +20,7 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ### Wed Nov 12, 2025
 
-[C# Language Design Meeting for November 5th, 2025](https://github.com/dotnet/csharplang/blob/main/meetings/2025/LDM-2025-11-12.md)
+[C# Language Design Meeting for November 12th, 2025](https://github.com/dotnet/csharplang/blob/main/meetings/2025/LDM-2025-11-12.md)
 
 - Unsafe evolution
 
