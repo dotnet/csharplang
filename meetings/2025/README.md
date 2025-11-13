@@ -16,11 +16,13 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ## Schedule
 
+## C# Language Design Notes for 2025
+
 ### Wed Nov 12, 2025
 
-- [Unsafe evolution (333fred)](https://github.com/dotnet/csharplang/pull/9781)
+[C# Language Design Meeting for November 5th, 2025](https://github.com/dotnet/csharplang/blob/main/meetings/2025/LDM-2025-11-12.md)
 
-## C# Language Design Notes for 2025
+- Unsafe evolution
 
 ### Wed Nov 5, 2025
 
