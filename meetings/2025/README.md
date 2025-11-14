@@ -8,6 +8,7 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 - Triage (working set)
 - [Relaxed ordering for `partial` and `ref` modifiers](https://github.com/dotnet/csharplang/blob/591a2b18cd261d7128e7fc5075c9788f1830abd5/proposals/relaxed-partial-ref-ordering.md) (Rikki)
+- [Support null-conditional operator when the return value is a pointer type](https://github.com/dotnet/roslyn/issues/7502) (CyrusNajmabadi)
 
 ## Recurring topics
 
