@@ -4,6 +4,8 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ## Schedule ASAP
 
+- [`with(...)` and mutable interface translation](https://github.com/dotnet/csharplang/pull/9823) (CyrusNajmabadi)
+
 ## Schedule when convenient
 
 - Triage (working set)
