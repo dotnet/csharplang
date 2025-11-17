@@ -44,7 +44,7 @@ public class C
     }
 }
 
-// Lowered psuedocode, not including async state machine if present
+// Lowered pseudocode, not including async state machine if present
 public class C
 {
     public static void $<Main>()
