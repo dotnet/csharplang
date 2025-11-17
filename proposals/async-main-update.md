@@ -59,3 +59,5 @@ public class C
     }
 }
 ```
+
+See also the approved API discussion in https://github.com/dotnet/runtime/issues/121046.
