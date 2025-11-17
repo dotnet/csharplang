@@ -295,9 +295,10 @@ If the target type is an *interface type*, then:
   |`IDictionary<K, V>`|`()` (no parameters)<br>`(int capacity)`<br>`(IEqualityComparer<K>? comparer)`<br>`(int capacity, IEqualityComparer<K>? comparer)`|
 
 * If a best method signature is found, a method with that signature *or an equivalent initialization* is invoked with the *argument list*.
+  * The candidate signatures for `IList<T>` and `ICollection<T>` bind to the constructors with the corresponding signatures in `List<T>` when constructing the value (see [Mutable Interface Translation](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-12.0/collection-expressions.md#mutable-interface-translation)) 
 * Otherwise, a binding error is reported.
 
-Note: `with()` is always legal for all interface targets, and has the same meaning as not having the `with()` element at all.
+Note: `with()` is always legal for all non-mutable interface targets, and has the same meaning as not having the `with()` element at all.
 
 ```csharp
 IDictionary<string, int> d;
