@@ -136,7 +136,13 @@ it would be if any parameter were a by-`ref`, optional, or `params`.
 
 It is a memory safety error convert a delegate type that is marked as `unsafe` to `System.Delegate`/`System.Linq.Expressions.Expression`/`System.Linq.Expressions.Expression<T>`.
 
-A delegate type that is marked `unsafe` can only be invoked in an `unsafe` context. If a delegate type is `unsafe`, then its `Invoke`, `BeginInvoke`, and `EndInvoke` methods are also marked as `unsafe`.
+A delegate type that is marked `unsafe` can only be invoked in an `unsafe` context. If a delegate type is `unsafe`, then its `Invoke`, `BeginInvoke`, and `EndInvoke` methods are marked as `unsafe`.
+
+> [!NOTE]
+> We don't actually attribute the delegate type itself, just the `Invoke`, `BeginInvoke`, and `EndInvoke` methods. Determining whether a delegate type is `unsafe` is done by examining those 3 methods.
+> If all are marked as `unsafe`, the delegate type is considered `unsafe`. If only some are marked as `unsafe`, then it is presumed that calling the others is safe and only calling the member that is
+> marked as `unsafe` will cause a memory safety error. It will be a memory safety error to convert an `unsafe` lambda or method group to a delegate type that is does not have all of `Invoke`, `BeginInvoke`,
+> and `EndInvoke` marked as `unsafe`.
 
 ### `extern`
 
@@ -146,39 +152,26 @@ value cannot be safely called by C#, as the calling convention used for the meth
 ### Unsafe modifiers and contexts
 
 Today, as covered by the [unsafe context specification][unsafe-context-spec], `unsafe` behaves in a lexical manner, marking the entire textual body contained by the `unsafe` block as an `unsafe` context
-(except for iterator bodies). We propose changing this definition from textual to sematic. `unsafe` on a type will now mean that all members declared by that type are considered `unsafe`, and all of the
-member bodies of that type are considered an `unsafe` context. `unsafe` on a member will mean that that member is `unsafe`, and the body of that member is considered an `unsafe` context. For existing code
-moving to the new definition of `unsafe`, this may produce a number of false positives for methods that don't need to be considered `unsafe`; we believe this better than false positives around not doing
-this, or making it an error to put `unsafe` on a type which would easily be the largest breaking change that we've ever introduced in C#.
+(except for iterator bodies). We propose changing this definition from textual to sematic. `unsafe` on a member will mean that that member is `unsafe`, and the body of that member is considered an `unsafe`
+context. `unsafe` on a type (other than delegate types) will be permitted for source compatibility purposes only; it will have no meaning, and the compiler will produce a warning informing the user that it
+does not have any effect.
 
 `unsafe` on a member is _not_ applied to any nested anonymous or local functions inside the member. To mark a anonymous or local function as `unsafe`, it must manually be marked as `unsafe`. The same goes for
 anonymous and local functions declared inside of an `unsafe` block.
 
-When a type is `partial`, `unsafe` on a part of that type marks everything declared or defined in that part as `unsafe`. If a `partial` member is declared or defined in an `unsafe partial` part, that member
-is considered `unsafe`, even if it is also declared or defined in a part that not marked as `unsafe`. If one part of a member is declared as `unsafe`, then all parts of that member are considered unsafe.
+When a member is `partial`, both parts must agree on the `unsafe` modifier, unchanged from C# rules today.
 
 ```cs
-new C1().M1(); // Error, M1() must be called in an `unsafe` context
-new C2().M2(); // Error, M2() must be called in an `unsafe` context
-
-unsafe partial class C1
+partial class C1
 {
-    public partial void M1();
+    public partial void M1(); // Error: both parts must be unsafe, or neither can be
+    public partial unsafe void M2();
 }
 
 partial class C1
 {
-    public partial void M1() => Console.WriteLine("hello world");
-}
-
-partial class C2
-{
-    public partial unsafe void M2();
-}
-
-partial class C2
-{
-    public partial void M2() => Console.WriteLine("hello world");
+    public unsafe partial void M1() => Console.WriteLine("hello world");
+    public partial void M2() => Console.WriteLine("hello world"); // Error: both parts must be unsafe, or neither can be
 }
 ```
 
@@ -209,7 +202,7 @@ namespace System.Runtime.CompilerServices
         public int Version { get; }
     }
 
-    [AttributeUsage(AttributeTargets.Field | AttributeTargets.Method | AttributeTargets.Property | AttributeTargets.Delegate | AttributeTargets.Constructor, AllowMultiple = false, Inherited = true)]
+    [AttributeUsage(AttributeTargets.Field | AttributeTargets.Method | AttributeTargets.Property | AttributeTargets.Constructor, AllowMultiple = false, Inherited = true)]
     public sealed class RequiresUnsafeAttribute : Attribute
     {
     }
@@ -233,6 +226,16 @@ anonymous and local functions do not keep the unsafe context of their containing
 
 Is conversion of a lambda or method group marked `unsafe` to a non-unsafe delegate type permitted without warning or error in an `unsafe` context? If we don't do this, then it could be fairly painful
 for various parts of the ecosystem, particularly any enumerables that are passed through LINQ queries.
+
+### Delegate type `unsafe`ty
+
+We could remove the ability to make delegate types as `unsafe` entirely, and simply require that all conversions of `unsafe` lambdas or method groups to a delegate type occur inside an `unsafe` context.
+This could simplify the model around `unsafe` in C#, but at the risk of forcing `unsafe` annotations in the wrong spot and having an area where the real area of `unsafe`ty isn't properly called out.
+
+### Lambda/method group natural types
+
+Today, the only real impact on codegen (besides additional metadata) is changing the *function_type* of a lambda or method group when `unsafe` is in the signature. If we were to avoid doing this, then
+there would be no real impact to codegen, which could give adopters more confidence that behavior has not subtly changed under the hood.
 
 ### `stackalloc` as initialized
 
@@ -265,6 +268,12 @@ unsafe
 }
 Console.WriteLine(result);
 ```
+
+### `unsafe` context defaults in members
+
+We could consider not automatically making the entire body of an `unsafe` method an `unsafe` context. Rust did this in [RFC 2585](https://github.com/rust-lang/rfcs/blob/master/text/2585-unsafe-block-in-unsafe-fn.md),
+with the motivation that it helps reduce the scope of `unsafe` blocks to the locations in which `unsafe` is actually used. We could do the same thing in C#, either as a warning or an error, with similar
+motivations.
 
 ### `unsafe` fields
 
