@@ -478,6 +478,37 @@ class Program
 
 In case of a recursive union, the type pattern might give no warning, but it still won’t do what user might think it would do.
 
+### List patter
+
+List pattern always fails with `Union` matching:
+``` c#
+struct S1 : IUnion
+{
+    private readonly object _value;
+    public S1(int[] x) { _value = x; }
+    public S1(string[] x) { _value = x; }
+    object IUnion.Value => _value;
+}
+
+class Program
+{
+    static bool Test1(S1 u)
+    {
+        // error CS8985: List patterns may not be used for a value of type 'object'. No suitable 'Length' or 'Count' property was found.
+        // error CS0021: Cannot apply indexing with [] to an expression of type 'object'
+        return u is [10];
+    }   
+}
+
+static class Extensions
+{
+    extension(object o)
+    {
+        public int Length => 0;
+    }
+}
+```
+
 ### Other questions
 * Both the use of constructors in union conversions and the use of `TryGetValue(...)` in union pattern matching are specified to be lenient when multiple ones apply: They'll just pick one. This should not matter per the well-formedness rules, but are we comfortable with it?
 * The specification subtly relies on the implementation of the `IUnion.Value` property rather than any `Value` property found on the union type itself. This is meant to give greater flexibility for existing types (which may have their own `Value` property for other uses) to implement the pattern. But it is awkward, and inconsistent with how other members are found and used directly on the union type. Should we make a change? Some other options:
