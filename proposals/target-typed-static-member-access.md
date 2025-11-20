@@ -13,9 +13,11 @@ This reduces construction and consumption verbosity for factory methods, nested 
 ```cs
 type.GetMethod("Name", .Public | .Instance | .DeclaredOnly); // BindingFlags.Public | ...
 
-control.ForeColor = .Red;          // Color.Red
-entity.InvoiceDate = .Today;       // DateTime.Today
-ReadJsonDocument(.Parse(stream));  // JsonDocument.Parse
+if (someString.Equals("Value", .OrdinalIgnoreCase)) // StringComparison.OrdinalIgnoreCase
+    ...
+
+control.ForeColor = .Red;    // Color.Red
+entity.InvoiceDate = .Today; // DateTime.Today
 
 // Production (static members on Option<int>)
 Option<int> option = condition ? .None : .Some(42);
@@ -29,6 +31,9 @@ return result switch
     .Success(var val) => val,
     .Error => defaultVal,
 };
+
+[AttributeUsage(.Class | .Struct | .Interface | .Enum | .Delegate)]
+class MyAttribute : Attribute;
 ```
 
 ## Motivation
@@ -461,3 +466,85 @@ We can follow the approach already taken for the similar ambiguity in collection
 Alternatively, target-typed static member access could be always disallowed within the first branch of a conditional expression unless surrounded by parens: `expr ? (.Name) : ...`. The downside is that this puts a usability burden onto users, since the compiler can work out the ambiguity by looking ahead for the `:` as with collection expressions.
 
 **Recommendation:** Allow `expr ? .Name :` by looking ahead for `:`, just as with collection expressions.
+
+## Examples
+
+### Pattern matching enums
+
+```cs
+public static string GetTypeString(ContractTransactionMode mode)
+{
+    return mode switch
+    {
+        .Preproduction => Preproduction,
+        .MoltPreproduction => MoltPreproduction,
+        .Production => ProductionFixedWeekly,
+        .EggProduction => ProductionPerGradeADozen,
+        .LayerBonus => LayerBonus,
+        .PulletGrower or .PulletGrowerFinal or .PulletGrowingFinal
+        or .PulletGrowingAP or .PulletGrowingAR or .PulletGrowerBonus => PulletGrowerOrGrowingPayment,
+    };
+}
+```
+
+```cs
+if (alias.ItemAliasType is not (.Vendor or .User)) ...
+```
+
+### Returning enums
+
+```cs
+private static ContractTransactionMode GetMode(string paymentType)
+{
+    return paymentType switch
+    {
+        Preproduction => .Preproduction,
+        MoltPreproduction => .MoltPreproduction,
+        ProductionFixedWeekly => .Production,
+        ProductionPerGradeADozen => .EggProduction,
+        PulletGrowerOrGrowingPayment => .Pullet,
+        LayerBonus => .LayerBonus,
+    };
+}
+```
+
+### Translating one enum to another
+
+```cs
+LineItemType lineItemType = transactionType switch
+{
+    .Invoice => .Sale,
+    .CreditMemo => .Return,
+};
+```
+
+### Using System.Reflection enums
+
+All the focus is on the meaning and not on repeating the containing enum name four and five times:
+
+```cs
+foreach (var property in type.GetProperties(.Public | .NonPublic | .Static | .Instance | .DeclaredOnly))
+{
+    if (property.SetMethod is not { } setter)
+    {
+        continue;
+    }
+
+    if ((setter.Attributes & .MemberAccessMask) is not (.Public or .Family or .FamORAssem))
+    {
+        continue;
+    }
+    
+    // ...
+}
+```
+
+### Using generated interop (e.g. CsWin32)
+
+It's typical to see generated enum member names be the same as the original constant, which is to say that the enum name itself is pretty redundant:
+
+`FILE_ACCESS_FLAGS.FILE_GENERIC_READ | FILE_ACCESS_FLAGS.FILE_GENERIC_WRITE`
+
+Instead, this could just mention the well-known constant names which are what you'd search anyway :
+
+`.FILE_GENERIC_READ | .FILE_GENERIC_WRITE`
