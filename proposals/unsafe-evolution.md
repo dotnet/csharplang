@@ -134,7 +134,8 @@ It is a memory safety error to convert an `unsafe` member to a delegate type tha
 is updated to include whether the _anonymous function_ has the `unsafe` keyword, or the _method group_ is to a member that is marked `unsafe`. If it is, an anonymous function type is created, just as
 it would be if any parameter were a by-`ref`, optional, or `params`.
 
-It is a memory safety error convert a delegate type that is marked as `unsafe` to `System.Delegate`/`System.Linq.Expressions.Expression`/`System.Linq.Expressions.Expression<T>`.
+It is a memory safety error convert a delegate type that is marked as `unsafe` to `System.Delegate`/`System.Linq.Expressions.Expression`/`System.Linq.Expressions.Expression<T>`, or any interface those
+types implement or base type of those types.
 
 A delegate type that is marked `unsafe` can only be invoked in an `unsafe` context. If a delegate type is `unsafe`, then its `Invoke`, `BeginInvoke`, and `EndInvoke` methods are marked as `unsafe`.
 
