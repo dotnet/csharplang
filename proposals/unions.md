@@ -447,6 +447,37 @@ Some options:
    the declaration, but `Union` matching doesn’t work.    
  - Disallow classes from being union types.
 
+### The is-type operator
+
+[The is-type operator](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/expressions.md#1214121-the-is-type-operator)
+is specified as a runtime type check. Syntactically it looks very much like a type pattern, but it isn’t. Therefore, the special `Union`matching
+won’t be used, which could lead to a user confusion.  
+
+``` c#
+struct S1 : IUnion
+{
+    private readonly object _value;
+    public S1(int x) { _value = x; }
+    public S1(string x) { _value = x; }
+    object IUnion.Value => _value;
+}
+
+class Program
+{
+    static bool Test1(S1 u)
+    {
+        return u is int; // warning CS0184: The given expression is never of the provided ('int') type
+    }   
+
+    static bool Test2(S1 u)
+    {
+        return u is string and ['1', .., '2']; // Good
+    }   
+}
+```
+
+In case of a recursive union, the type pattern might give no warning, but it still won’t do what user might think it would do.
+
 ### Other questions
 * Both the use of constructors in union conversions and the use of `TryGetValue(...)` in union pattern matching are specified to be lenient when multiple ones apply: They'll just pick one. This should not matter per the well-formedness rules, but are we comfortable with it?
 * The specification subtly relies on the implementation of the `IUnion.Value` property rather than any `Value` property found on the union type itself. This is meant to give greater flexibility for existing types (which may have their own `Value` property for other uses) to implement the pattern. But it is awkward, and inconsistent with how other members are found and used directly on the union type. Should we make a change? Some other options:
