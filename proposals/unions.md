@@ -396,6 +396,34 @@ For example:
 When `C` is a `Union` class, ```c is null``` for a value of `C?`is `false`when `c` itself is `null`,
 but it is `true` when `c` itself is not `null`and `c.Value` is `null`.
 
+Another example:
+``` c#
+class C1 : IUnion
+{
+    private readonly object? _value;
+
+    public C1(){}
+    public C1(int x) { _value = x; }
+    public C1(string x) { _value = x; }
+    object? IUnion.Value => _value;
+}
+
+class Program
+{
+    static int Test1(C1? u)
+    {
+        // warning CS8655: The switch expression does not handle some null inputs (it is not exhaustive).
+        //                 For example, the pattern 'null' is not covered.
+        // This is very confusing, the switch expression is indeed not exhaustive (u itself is not
+        // checked for null), but there is a case 'null => 3' in the switch expression. 
+        // It looks like the only way to shut off the warning is to use 'case _'. Adding it removes
+        // all benefits of exhaustiveness checking, any union case could be missing and there would
+        // be no diagnostic about that.  
+        return u switch { int => 1, string => 2, null => 3 };
+    }
+}
+```
+
 This part of the design is clearly optimized around the expectation that a union type is a struct.
 Some options:
  - Too bad. Use `==` for your null check instead of a pattern match.
