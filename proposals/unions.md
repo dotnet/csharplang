@@ -118,6 +118,9 @@ Union types always exhibit the *basic union pattern*, but may additionally imple
 Example of a union type implementing the non-boxing access pattern:
 
 ```csharp
+public struct Case1 {...}
+public struct Case2 {...}
+
 public struct MyUnion : IUnion
 {
     enum Kind { None = 0, Case1, Case2 }
@@ -374,6 +377,14 @@ public record struct Pet : IUnion, IUnion<Pet>
 ## Open questions
 [open]: #open-questions
 
+### Namespace of IUnion interface
+
+Containing namespace for `IUnion` interface remains unspecified. If the intent is to keep it in a `global` namespace,
+Let’s state that explicitly. 
+
+**Proposal**: If this is something simply overlooked,  we could use `System.Runtime.CompilerServices` namespace.
+
+### Other questions
 * Both the use of constructors in union conversions and the use of `TryGetValue(...)` in union pattern matching are specified to be lenient when multiple ones apply: They'll just pick one. This should not matter per the well-formedness rules, but are we comfortable with it?
 * The specification subtly relies on the implementation of the `IUnion.Value` property rather than any `Value` property found on the union type itself. This is meant to give greater flexibility for existing types (which may have their own `Value` property for other uses) to implement the pattern. But it is awkward, and inconsistent with how other members are found and used directly on the union type. Should we make a change? Some other options:
     * Require union types to expose a public `Value` property.
