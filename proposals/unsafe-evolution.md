@@ -33,8 +33,7 @@ Historically, `unsafe` in C# has referred to a specific memory-safety hole: the 
 memory unsafety lie latent in code. It is this issue that we are looking to address with this evolution of `unsafe` in C# and the .NET ecosystem, labeling areas where memory unsafety could
 potentially occur, making it easier for reviewers and auditors to understand the boundaries of potential memory unsafety in a program. Importantly, this means that we will be _changing_
 the meaning of `unsafe`, not just augmenting it. The existence of a pointer is not itself unsafe; the unsafe action is dereferencing the pointer. This extends further to types themselves;
-types cannot be inherently unsafe. It is only the action of using a type that could be unsafe, not the existence of that type. The new meaning of `unsafe` on a type, and what an unsafe context
-is, is covered in [unsafe contexts](#unsafe-contexts).
+types cannot be inherently unsafe. It is only the action of using a type that could be unsafe, not the existence of that type.
 
 In order for this information to flow through the system, we therefore need to have a way to mark methods themselves as `unsafe`. Today, `unsafe` as a method modifier has no external impact,
 it only allows pointers to be used in the signature and body of the member. Going forward, `unsafe` as a modifier will actually publicly change the meaning of the member; it will indicate that
