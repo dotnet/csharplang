@@ -111,7 +111,7 @@ as the _primary_expression_ of an `element_access`; these are evaluated as a _po
 Again, the story for [stack allocation][stack-allocation-spec] is very similar to [pointers](#pointer-types). Converting a `stackalloc` to a pointer is no longer unsafe; it is the deference of that
 pointer that is unsafe. We do add one new rule, however:
 
-A _stackalloc_expression_ has a [safety state](#expression-memory-safety-state) of unsafe if all of the following statements are true:
+A _stackalloc_expression_ is unsafe if all of the following statements are true:
 
 * The _stackalloc_expression_ is being converted to a `Span<T>` or a `ReadOnlySpan<T>`.
 * The _stackalloc_expression_ does not have a _stackalloc_initializer_.
