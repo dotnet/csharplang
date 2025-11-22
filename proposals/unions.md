@@ -537,34 +537,6 @@ static class Extensions
 }
 ```
 
-### Exhaustiveness check for `null`
-
-Since `null` is explicitly one of the `Union` values/cases, exhaustiveness check for it 
-is performed as part of a regular exhaustiveness check rather than as part of nullability
-analysis. Is this acceptable?
-
-``` c#
-struct S1 : IUnion
-{
-    private readonly object _value;
-    public S1(int x) { _value = x; }
-    public S1(string x) { _value = x; }
-    object IUnion.Value => _value;
-}
-
-class Program
-{
-    static int Test4(S1 u)
-    {
-#nullable disable
-        // Still get this warning
-        // warning CS8509: The switch expression does not handle all possible values of its input type (it is not exhaustive).
-        //                 For example, the pattern 'null' is not covered.
-        return u switch { int => 1, string => 2 };
-    }   
-}
-```
-
 ### Other questions
 * Both the use of constructors in union conversions and the use of `TryGetValue(...)` in union pattern matching are specified to be lenient when multiple ones apply: They'll just pick one. This should not matter per the well-formedness rules, but are we comfortable with it?
 * The specification subtly relies on the implementation of the `IUnion.Value` property rather than any `Value` property found on the union type itself. This is meant to give greater flexibility for existing types (which may have their own `Value` property for other uses) to implement the pattern. But it is awkward, and inconsistent with how other members are found and used directly on the union type. Should we make a change? Some other options:
