@@ -124,7 +124,7 @@ contract of `Span<T>` and `ReadOnlySpan<T>`, and so must be subject to extra scr
 
 #### `sizeof`
 
-For certain predefined types, `sizeof` has always been constant and safe ([§12.8.19][sizeof-const]) and that remains unchanged under the rules.
+For certain predefined types, `sizeof` has always been constant and safe ([§12.8.19][sizeof-const]) and that remains unchanged under the new rules.
 For other types, `sizeof` used to require unsafe context ([§24.6.9][sizeof-unsafe]) but it is now safe under the new memory safety rules.
 
 ### Overriding, inheritance, and implementation
