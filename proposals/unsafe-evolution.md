@@ -47,7 +47,7 @@ the new rules to avoid entirely bifurcating the ecosystem.
 
 ### Existing `unsafe` rules
 
-The existing C# specification has a large section devoted to `unsafe`: [§24 Unsafe code][unsafe-code.md]. It is defined as conditionally normative, as it is not required for a valid C# compiler
+The existing C# specification has a large section devoted to `unsafe`: [§24 Unsafe code][unsafe-code]. It is defined as conditionally normative, as it is not required for a valid C# compiler
 to support the `unsafe` feature. Much of what is currently considered conditionally normative will no longer be so after this change, as most of the definition of pointers is no longer considered
 unsafe in itself. [Pointer types][pointer-types-spec], [Fixed and moveable variables][fixed-and-moveable-variables], all [pointer expressions][pointer-expressions] (except for
 [pointer indirection][pointer-indirection], [pointer member access][pointer-member-access], and [pointer element access][pointer-element-access]), and [the `fixed` statement][fixed-statement]
@@ -91,7 +91,7 @@ Similarly, [pointer expressions][pointer-expressions], except for [pointer indir
 removed. No semantics change about the meaning of these expressions; the only change is that they no longer require an `unsafe` context to use.
 
 For [pointer indirection][pointer-indirection], [pointer member access][pointer-member-access], and [pointer element access][pointer-element-access], these operators remain unsafe, as these
-access memory that is not managed the runtime. They remain in [§24][unsafe-code.md], and continue to require an `unsafe` context to be used. Any use outside of an `unsafe` context is an error.
+access memory that is not managed the runtime. They remain in [§24][unsafe-code], and continue to require an `unsafe` context to be used. Any use outside of an `unsafe` context is an error.
 No semantics about these operators change; they still continue to mean exactly the same thing that they do today. These expressions must always occur in an `unsafe` context.
 
 The [fixed statement][fixed-statement] moves to [§13](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/statements.md), with references to `unsafe` contexts removed.
@@ -121,6 +121,11 @@ contract of `Span<T>` and `ReadOnlySpan<T>`, and so must be subject to extra scr
 
 > [!NOTE]
 > This means that assigning a `stackalloc` to a pointer is _always_ safe, regardless of context.
+
+#### `sizeof`
+
+For certain predefined types, `sizeof` has always been constant and safe ([§12.8.19][sizeof-const]) and that remains unchanged under the new rules.
+For other types, `sizeof` used to require unsafe context ([§24.6.9][sizeof-unsafe]) but it is now safe under the new memory safety rules.
 
 ### Overriding, inheritance, and implementation
 
@@ -368,7 +373,8 @@ Answered in https://github.com/dotnet/csharplang/blob/main/meetings/2025/LDM-202
 for source generators will be made.
 
 
-[unsafe-code.md]: https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/expressions.md#128-primary-expressions
+[unsafe-code]: https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/expressions.md#128-primary-expressions
+[sizeof-const]: https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/expressions.md#12819-the-sizeof-operator
 [unsafe-context-spec]: https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/unsafe-code.md#242-unsafe-contexts
 [pointer-types-spec]: https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/unsafe-code.md#243-pointer-types
 [fixed-and-moveable-variables]: https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/unsafe-code.md#244-fixed-and-moveable-variables
@@ -378,6 +384,7 @@ for source generators will be made.
 [pointer-indirection]: https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/unsafe-code.md#2462-pointer-indirection
 [pointer-member-access]: https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/unsafe-code.md#2463-pointer-member-access
 [pointer-element-access]: https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/unsafe-code.md#2464-pointer-element-access
+[sizeof-unsafe]: https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/unsafe-code.md#2469-the-sizeof-operator
 [fixed-statement]: https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/unsafe-code.md#247-the-fixed-statement
 [fixed-size-buffer-declarations]: https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/unsafe-code.md#2482-fixed-size-buffer-declarations
 [stack-allocation-spec]: https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/unsafe-code.md#249-stack-allocation
