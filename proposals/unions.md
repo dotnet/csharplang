@@ -233,6 +233,9 @@ The compiler will prefer implementing pattern behavior by means of members presc
 * Otherwise, for a pattern that implies checking for `null`, if a `HasValue` property is available, that property is used to check if the union value is null.
 * Otherwise, the pattern is applied to the result of accessing the `IUnion.Value` property on the incoming union.
 
+[The is-type operator](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/expressions.md#1214121-the-is-type-operator) applied to a union type
+has the same meaning as a type pattern applied to the union type.
+
 #### Union exhaustiveness
 
 A union type is assumed to be "exhausted" by its case types. This means that a `switch` expression is exhaustive if it handles all of a union's case types:
@@ -505,6 +508,9 @@ class Program
 ```
 
 In case of a recursive union, the type pattern might give no warning, but it still won’t do what user might think it would do.
+
+**Resolution:**
+Should work as a type pattern.
 
 ### List patter
 
