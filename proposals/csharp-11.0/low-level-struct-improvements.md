@@ -719,7 +719,7 @@ The version is currently fixed at `11` regardless of the actual language version
 
 The expectation is that future versions of the compiler will update the ref safe context rules and emit attributes with distinct versions.
 
-If the compiler loads a module that includes a `[module: RefSafetyRules(version)]` _with a `version` other than `11`_, the compiler will report a warning for the unrecognized version if there are any calls to methods declared in that module.
+If the compiler loads a module that includes a `[module: RefSafetyRules(version)]` _with a `version` other than `11`_, the compiler will report an error for the unrecognized version if there are any calls to methods declared in that module.
 
 When the C#11 compiler _analyzes a method call_:
 - If the module containing the method declaration includes `[module: RefSafetyRules(version)]`, regardless of `version`, the method call is analyzed with C#11 rules.
