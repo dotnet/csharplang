@@ -1,6 +1,6 @@
 # Deconstruction in lambda parameters
 
-Champion issue: TODO
+Champion issue: <https://github.com/dotnet/csharplang/issues/9848>
 
 ## Summary
 
@@ -19,7 +19,7 @@ Action<(int, (int, int))> action = ((a, (b, _))) => { };
 There has been steady interest in this feature since tuple deconstruction debuted in C# 7. When using LINQ methods, it is natural to bundle multiple variables into a tuple to be used in later stages. Here is one illustration provided by the community for the desired workflow:
 
 ```cs
-var r = Enumerable
+var item = Enumerable
     .Range(1, 10)
     .Select(i => (i + 1, i * i))
     .Where(((a, b)) => 2 * a < b)
