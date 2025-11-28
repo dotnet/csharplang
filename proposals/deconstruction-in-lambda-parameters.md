@@ -1,6 +1,6 @@
 # Deconstruction in lambda parameters
 
-Champion issue: <https://github.com/dotnet/csharplang/issues/9848>
+Champion issue: TODO
 
 ## Summary
 
@@ -56,6 +56,14 @@ Deconstruction is enabled for implicitly-typed and explicitly-typed lambda expre
 
 A deconstructing tuple element may be one of three operations: variable declaration, discard, or recursive deconstruction. Each of the three operations works the same as it does in a deconstructing assignment or `foreach` iteration variable deconstruction; however, the syntaxes for these operations have some differences in lambda parameter deconstruction.
 
+### Semantics
+
+Code within the body of the lambda may use the declared variable names to access the deconstructed values. Deconstruction is performed before the lambda method body runs. It is performed the same way as in a deconstructing assignment or deconstructing `foreach`, to the extent needed to populate the declared variables, regardless of whether the variables are used in the body of the lambda.
+
+Code within the body of the lambda may assign to the declared variables and take writable references to them. This closely mirrors ordinary lambda parameters.
+
+It is an error if a declared variable name is the same as a lambda parameter name or the same as another declared variable name.
+
 ### Implicit and explicit typing
 
 An implicitly-typed lambda does not specify parameter types (`(a, b) =>`), whereas an explicitly-typed lambda does (`(int a, int b) =>`). Variable declarations and discards in lambda parameters must follow suit, including nested deconstructions.
@@ -96,13 +104,6 @@ We go even further and cause `_` at the top level to be a discard if there is an
 Action<int, (int, int)> action = (_, (a, b)) => { /* _ is not an identifier here */ };
 ```
 
-### Declared variable names
-
-It is an error if a declared variable name is the same as a lambda parameter name or the same as another declared variable name.
-
-Code within the body of the lambda may use the declared variable names to access the deconstructed values. Deconstruction is performed before the lambda method body runs. It is performed the same way as in a deconstructing assignment or deconstructing `foreach`, to the extent needed to populate the declared variables, regardless of whether the variables are used in the body of the lambda.
-
-Code within the body of the lambda may assign to the declared variables and take writable references to them. This closely mirrors ordinary lambda parameters.
 
 ### Parameter list parentheses
 
