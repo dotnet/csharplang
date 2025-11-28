@@ -52,7 +52,7 @@ Overall, this is a small feature aimed at reducing recurring papercuts when usin
 
 ## Detailed design
 
-Deconstruction is enabled for implicitly-typed and explicitly-typed lambda expressions. When deconstructing, tuple syntax is specified in place of one or more of the lambda parameters. The tuple syntax must have at least two elements.
+Deconstruction is enabled for implicitly-typed and explicitly-typed lambda expressions. When deconstructing, tuple syntax is specified in place of one or more of the lambda parameters. The tuple syntax must have at least two elements. Parameter modifiers and attributes are not permitted inside or outside the tuple.
 
 A deconstructing tuple element may be one of three operations: variable declaration, discard, or recursive deconstruction. Each of the three operations works the same as it does in a deconstructing assignment or `foreach` iteration variable deconstruction; however, the syntaxes for these operations have some differences in lambda parameter deconstruction.
 
