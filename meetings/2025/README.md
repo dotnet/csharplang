@@ -7,6 +7,7 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ## Schedule when convenient
 
+- [Target-typed static member access](https://github.com/dotnet/csharplang/blob/afad49721a7b9923efbbc36ae6c455d85b994543/proposals/target-typed-static-member-access.md) (jnm2, CyrusNajmabadi)
 - Triage (working set)
 - [Relaxed ordering for `partial` and `ref` modifiers](https://github.com/dotnet/csharplang/blob/591a2b18cd261d7128e7fc5075c9788f1830abd5/proposals/relaxed-partial-ref-ordering.md) (Rikki)
 - [Support null-conditional operator when the return value is a pointer type](https://github.com/dotnet/roslyn/issues/7502) (CyrusNajmabadi)
