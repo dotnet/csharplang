@@ -36,7 +36,7 @@ ThreadPool.QueueUserWorkItem(
     preferLocal: false);
 ```
 
-In the prior examples, the introduction of tuples was a user decision. However, some APIs (including LINQ's `Zip` method) may always introduce tuples, and sometimes in a nested fashion. The user then has two options. One option is to dot into deeply nested tuples as in `tuple.left.right` below, where the tuple names are chosen by the API rather than by the user and are often less than meaningful. The other option is to add a deconstruction statement to the lambda which may entail converting to a block body:
+In the prior examples, the introduction of tuples was a user decision. However, some APIs (including LINQ's `Zip` method) may always introduce tuples, and sometimes in a nested fashion. The user then has two options. One option is to dot into deeply nested tuples as in `tuple.Left.Right` below, where the tuple names are chosen by the API rather than by the user and are often less than meaningful. The other option is to add a deconstruction statement to the lambda which may entail converting to a block body:
 
 ```cs
 var finalProvider = compilationAndGroupedNodesProvider.SelectMany((tuple, cancellationToken) =>
@@ -215,7 +215,7 @@ A tuple type is determined for a given deconstructed lambda parameter as follows
 
 1. Its arity is the arity of the deconstructing tuple syntax.
 1. For each deconstructing tuple element:
-   1. If the element is a variable declaration, the corresponding tuple type element is of the same type as the variable declaration and has the same name as the variable declaration.¹
+   1. If the element is a variable declaration, the corresponding tuple type element is of the same type as the variable declaration and has the same name as the variable declaration.
    1. If the element is a discard, the corresponding tuple type element is of the same type as the discard and has no name.
    1. If the element is a nested deconstruction, a nested tuple type is formed from the nested deconstruction using the same containing algorithm as for the top level. The corresponding tuple type element is of the resulting nested tuple type and has no name.
 
