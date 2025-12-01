@@ -48,6 +48,8 @@ var finalProvider = compilationAndGroupedNodesProvider.SelectMany((tuple, cancel
     ProcessNodes(tuple.Left.Right);
 ```
 
+While the deconstruction assignment works, it takes the user out of the realm of being able to simply use expression-bodied lambdas.
+
 Overall, this is a small feature aimed at expanding the goodness started in v7 with deconstructible types, and at reducing recurring papercuts when using tuples.
 
 ## Detailed design
@@ -65,8 +67,6 @@ A compile-time error is produced in the same way as in a deconstructing assignme
 Code within the body of the lambda may use the declared variable names to access the deconstructed values. Deconstruction is performed before the lambda method body runs. It is performed the same way as in a deconstructing assignment or deconstructing `foreach`, to the extent needed to populate the declared variables, regardless of whether the variables are used in the body of the lambda.
 
 Code within the body of the lambda may assign to the declared variables and take writable references to them. As with by-value lambda parameters, changes may be written to these declared variables, and such changes are not observable outside the lambda.
-
-If any tuple type is deconstructed, including nested deconstructions, the compiler may decide not to introduce a new local variable for each element, but rather to read and write and take references directly to the fields of the tuple type. This does not produce changes which are observable outside the lambda because the tuple was passed by value. In all other cases, it is necessary to declare new local variables to pass to a Deconstruct call.
 
 It is an error if a declared variable name is the same as a lambda parameter name or the same as another declared variable name.
 
