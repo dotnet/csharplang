@@ -10,8 +10,9 @@ All schedule items must have a public issue or checked-in proposal that can be l
 - Triage (working set)
 - [Relaxed ordering for `partial` and `ref` modifiers](https://github.com/dotnet/csharplang/blob/591a2b18cd261d7128e7fc5075c9788f1830abd5/proposals/relaxed-partial-ref-ordering.md) (Rikki)
 - [Support null-conditional operator when the return value is a pointer type](https://github.com/dotnet/roslyn/issues/7502) (CyrusNajmabadi)
-- [`using` with a discard (333fred or jnm2)](https://github.com/dotnet/csharplang/blob/afad49721a7b9923efbbc36ae6c455d85b994543/proposals/using-with-a-discard.md)
-- [Deconstruction in lambda parameters](https://github.com/dotnet/csharplang/blob/f883e3c7306d134fd86b7aceb7d72c706622798d/proposals/deconstruction-in-lambda-parameters.md)
+- [`using` with a discard](https://github.com/dotnet/csharplang/blob/afad49721a7b9923efbbc36ae6c455d85b994543/proposals/using-with-a-discard.md) (333fred or jnm2)
+- [Deconstruction in lambda parameters](https://github.com/dotnet/csharplang/blob/cab81165d986c458c5ab816a7f1474263a338467/proposals/deconstruction-in-lambda-parameters.md) (CyrusNajmabadi, jnm2)
+- [Unsigned sizeof](https://github.com/dotnet/csharplang/blob/afad49721a7b9923efbbc36ae6c455d85b994543/proposals/unsigned-sizeof.md)  (jnm2)
 
 ## Recurring topics
 
