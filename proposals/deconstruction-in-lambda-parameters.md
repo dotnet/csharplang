@@ -52,7 +52,7 @@ Overall, this is a small feature aimed at expanding the goodness started in v7 w
 
 ## Detailed design
 
-Any lambda parameter may be a deconstructing parameter if its type is deconstructible. A deconstructing lambda parameter consists entirely of tuple syntax with either implicitly-typed or explicitly-typed tuple elements, corresponding to whether the lambda is implicitly-typed or explicitly-typed. The tuple syntax must have at least two elements. Parameter modifiers and attributes are not permitted inside or outside the tuple.
+Any lambda parameter may be deconstructed if its type is deconstructible. A deconstructed lambda parameter consists entirely of tuple syntax with either implicitly-typed or explicitly-typed tuple elements, corresponding to whether the lambda is implicitly-typed or explicitly-typed. The tuple syntax must have at least two elements. Parameter modifiers and attributes are not permitted inside or outside the tuple.
 
 A deconstructing tuple element may be one of three operations: variable declaration, discard, or recursive deconstruction. Each of the three operations works the same as it does in a deconstructing assignment or `foreach` iteration variable deconstruction; however, the syntaxes for these operations have some differences in lambda parameter deconstruction.
 
@@ -137,7 +137,7 @@ void M<T>(Action<T> action) { }
 A deconstructed lambda parameter may also be used to infer individual element types for the tuple:
 
 ```cs
-M(((int a, string b)) => { });        // Success: T1 is int, T2 is string
+M(((int a, string b)) => { });         // Success: T1 is int, T2 is string
 
 void M<T1, T2>(Action<(T1, T2)> action) { }
 ```
@@ -203,9 +203,9 @@ record R(int Prop1, int Prop2);
 
 ### Lambda natural types
 
-An explicitly typed lambda with a deconstructing lambda parameter has a natural type. The deconstructing lambda parameter contributes a tuple type for the corresponding parameter in the lambda natural type as described by [inferred tuple type](#inferred-tuple-type).
+An explicitly typed lambda with a deconstructed lambda parameter has a natural type. The deconstructed lambda parameter contributes a tuple type for the corresponding parameter in the lambda natural type as described by [inferred tuple type](#inferred-tuple-type).
 
-Lambda natural types do not make use of lambda parameter names, so the lack of a specified parameter name in a deconstructing lambda parameter is of no consequence.
+Lambda natural types do not make use of lambda parameter names, so the lack of a specified parameter name in a deconstructed lambda parameter is of no consequence.
 
 ### Inferred tuple type
 
