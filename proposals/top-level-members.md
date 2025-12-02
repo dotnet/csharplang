@@ -162,7 +162,8 @@ extension<T>(IEnumerable<T> e)
   extension(int) { /* ... */ }
   ```
 
-  This makes the declaration side a bit more complicated to write.
+  This makes the declaration side a bit more complicated to write,
+  but it avoids problems with naming the implicit static class.
 
   Open questions for this alternative:
   - Should we allow non-`static` members?
