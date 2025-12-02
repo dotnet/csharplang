@@ -61,7 +61,7 @@ extension<T>(IEnumerable<T> e)
 - Top-level members in a namespace are semantically members of an "implicit" class which:
   - is `static` and `partial`,
   - has accessibility either `internal` (by default) or `public` (if any member is also `public`),
-  - is named `TopLevel` (can be addressed from VB/F# but even from C# which is useful for extension member disambiguation or source-generated `partial` implementations),
+  - is named `TopLevel` (can be addressed from VB/F# but even from C# which is useful for extension member disambiguation),
   - has the namespace in which it is declared in,
   - is synthesized per each namespace and compilation unit (so having top-level members in the same namespace across assemblies can lead to [ambiguities](#drawbacks)).
 
@@ -108,15 +108,6 @@ extension<T>(IEnumerable<T> e)
   // B.dll
   namespace X;
   public void M2() { } // ok
-
-  // generated code
-  namespace X
-  {
-    partial class TopLevel // ambiguity error
-    {
-      // ...
-    }
-  }
   ```
   ```cs
   // C.dll
@@ -207,6 +198,9 @@ extension<T>(IEnumerable<T> e)
 - Accessibility: what should be the default and which modifiers should be allowed?
 - Clustering: currently each namespace per assembly gets its `TopLevel` class.
 - Shape of the synthesized static class (currently `[TopLevel] TopLevel`).
+  - Should it be speakable (in other languages and/or in C#)?
+    In C#, we could make it possible to access the top-level members via `MyNamespace.MyTopLevelMember`,
+    hence for example allowing extension member disambiguation.
 - Should we simplify the TLS entry point logic? Should it be a breaking change?
 - Should we require the `static` modifier (and keep our doors open if we want to introduce some non-`static` top-level members in the future)?
 - Should we disallow mixing top-level members and existing declarations in one file?
