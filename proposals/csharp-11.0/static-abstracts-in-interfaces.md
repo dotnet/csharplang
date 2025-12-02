@@ -196,7 +196,7 @@ We think this behavior was not intentional or important in the original LINQ, an
 ### Variance safety [§18.2.3.2](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/interfaces.md#18232-variance-safety)
 
 Variance safety rules should apply to signatures of static abstract members. The addition proposed in
-https://github.com/dotnet/csharplang/blob/main/proposals/variance-safety-for-static-interface-members.md#variance-safety
+https://github.com/dotnet/csharplang/blob/main/proposals/csharp-9.0/variance-safety-for-static-interface-members.md#variance-safety
 should be adjusted from
 
 *These restrictions do not apply to occurrences of types within declarations of static members.* 

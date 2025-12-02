@@ -469,7 +469,7 @@ and an operator that doesn't have `checked` form (for example, `+`) matches eith
 >*  The set of candidate user-defined operators provided by `X` for the operation `operator op(x)` is determined using the rules of [§12.4.6 - Candidate user-defined operators](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/expressions.md#1246-candidate-user-defined-operators).
 
 will be replaced with the following two bullet points:
-*  The set of candidate user-defined operators provided by `X` for the operation `operator op(x)` **matching the current checked/unchecked context** is determined using the rules of [Candidate user-defined operators](https://github.com/dotnet/csharpstandard/blob/draft-v8/expressions.md#1246-candidate-user-defined-operators).
+*  The set of candidate user-defined operators provided by `X` for the operation `operator op(x)` **matching the current checked/unchecked context** is determined using the rules of [Candidate user-defined operators](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/expressions.md#1246-candidate-user-defined-operators).
 *  If the set of candidate user-defined operators is not empty, then this becomes the set of candidate operators for the operation. Otherwise, the set of candidate user-defined operators provided by `X` for the operation `operator op(x)` **matching the opposite checked/unchecked context** is determined using the rules of [§12.4.6 - Candidate user-defined operators](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/expressions.md#1246-candidate-user-defined-operators).
 
 #### Binary operator overload resolution

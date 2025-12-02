@@ -94,7 +94,7 @@ Constant expressions occur in the contexts listed below. In these contexts, a co
 *  Default arguments of formal parameter lists ([§15.6.2](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/classes.md#1562-method-parameters))
 *  `case` labels of a `switch` statement ([§13.8.3](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/statements.md#1383-the-switch-statement)).
 *  `goto case` statements ([§13.10.4](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/statements.md#13104-the-goto-statement)).
-*  Dimension lengths in an array creation expression ([§12.8.17.5](https://github.com/dotnet/csharpstandard/blob/draft-v/standard/expressions.md#128175-array-creation-expressions)) that includes an initializer.
+*  Dimension lengths in an array creation expression ([§12.8.17.5](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/expressions.md#128175-array-creation-expressions)) that includes an initializer.
 *  Attributes ([§22](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/attributes.md#22-attributes)).
 
 An implicit constant expression conversion ([§10.2.11](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/conversions.md#10211-implicit-constant-expression-conversions)) permits a constant expression of type `int` to be converted to `sbyte`, `byte`, `short`, `ushort`, `uint`, or `ulong`, provided the value of the constant expression is within the range of the destination type.

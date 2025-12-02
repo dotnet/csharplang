@@ -118,6 +118,9 @@ Union types always exhibit the *basic union pattern*, but may additionally imple
 Example of a union type implementing the non-boxing access pattern:
 
 ```csharp
+public struct Case1 {...}
+public struct Case2 {...}
+
 public struct MyUnion : IUnion
 {
     enum Kind { None = 0, Case1, Case2 }
@@ -229,6 +232,9 @@ The compiler will prefer implementing pattern behavior by means of members presc
 * For a pattern that implies checking for a specific type `T`, if a `TryGetValue(S value)` method is available, and there is an implicit conversion from `T` to `S`, then that method is used to obtain the value. The pattern is then applied to that value. If there is more than one such method, then any where the conversion from `T` to `S` is not a boxing conversion is preferred if available. If there is still more than one method, one is chosen in an implementation-defined manner.
 * Otherwise, for a pattern that implies checking for `null`, if a `HasValue` property is available, that property is used to check if the union value is null.
 * Otherwise, the pattern is applied to the result of accessing the `IUnion.Value` property on the incoming union.
+
+[The is-type operator](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/expressions.md#1214121-the-is-type-operator) applied to a union type
+has the same meaning as a type pattern applied to the union type.
 
 #### Union exhaustiveness
 
@@ -374,14 +380,174 @@ public record struct Pet : IUnion, IUnion<Pet>
 ## Open questions
 [open]: #open-questions
 
+### Namespace of IUnion interface
+
+Containing namespace for `IUnion` interface remains unspecified. If the intent is to keep it in a `global` namespace,
+Let’s state that explicitly. 
+
+**Proposal**: If this is something simply overlooked,  we could use `System.Runtime.CompilerServices` namespace.
+
+### Classes as `Union` types
+
+#### Checking instance itself for `null`
+
+If a union type is a class type, it's value might itself be null. What about null checks then?
+The `null` pattern has been co-opted to check the `Value` property, so how do you check that the union itself isn't null?
+
+For example:
+-	When `S` is a `Union` struct, ```s is null``` for a value of `S?`is `true`only when `s` itself is `null`. 
+When `C` is a `Union` class, ```c is null``` for a value of `C?`is `false`when `c` itself is `null`,
+but it is `true` when `c` itself is not `null`and `c.Value` is `null`.
+
+Another example:
+``` c#
+class C1 : IUnion
+{
+    private readonly object? _value;
+
+    public C1(){}
+    public C1(int x) { _value = x; }
+    public C1(string x) { _value = x; }
+    object? IUnion.Value => _value;
+}
+
+class Program
+{
+    static int Test1(C1? u)
+    {
+        // warning CS8655: The switch expression does not handle some null inputs (it is not exhaustive).
+        //                 For example, the pattern 'null' is not covered.
+        // This is very confusing, the switch expression is indeed not exhaustive (u itself is not
+        // checked for null), but there is a case 'null => 3' in the switch expression. 
+        // It looks like the only way to shut off the warning is to use 'case _'. Adding it removes
+        // all benefits of exhaustiveness checking, any union case could be missing and there would
+        // be no diagnostic about that.  
+        return u switch { int => 1, string => 2, null => 3 };
+    }
+}
+```
+
+This part of the design is clearly optimized around the expectation that a union type is a struct.
+Some options:
+ - Too bad. Use `==` for your null check instead of a pattern match.
+ - Let the `null` pattern (and implicit null check in other patterns) apply to both the union value and its `Value` property: `u is null ==> u == null || u.Value == null`.
+ - Disallow classes from being union types!
+
+#### Deriving from a `Union` class
+
+When a class uses a `Union`class as its base class, according to the current specification,
+it becomes a `Union`class itself. This happens because it automatically “inherits” implementation
+of `IUnion` interface, it is not required to re-implement it. At the same time, constructors of the
+derived type define the set of types in this new `Union`. It is very easy to get to very strange language
+behavior around the two classes:
+
+``` c#
+class C1 : IUnion
+{
+    private readonly object _value;
+    public C1(long x) { _value = x; }
+    public C1(string x) { _value = x; }
+    object IUnion.Value => _value;
+}
+
+class C2(int x) : C1(x);
+
+class Program
+{
+    static int Test1(C1 u)
+    {
+        // Good
+        return u switch { long => 1, string => 2, null => 3 };
+    } 
+
+    static int Test2(C2 u)
+    {
+        // error CS8121: An expression of type 'C2' cannot be handled by a pattern of type 'long'.
+        // error CS8121: An expression of type 'C2' cannot be handled by a pattern of type 'string'.
+        return u switch { long => 1, string => 2, null => 3 };
+    } 
+}
+```
+
+Some options:
+ - Change when a class type is a `Union` type. For example, a class is a `Union` type when all true:
+   * It is `sealed` because derived types won't be considered as `Union`types, allowing which is confusing.
+   * None of its bases implement `IUnion`
+     
+   This is still not perfect. The rules are too subtle. It is easy to make a mistake. There is no diagnostic on
+   the declaration, but `Union` matching doesn’t work.    
+ - Disallow classes from being union types.
+
+### The is-type operator
+
+[The is-type operator](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/expressions.md#1214121-the-is-type-operator)
+is specified as a runtime type check. Syntactically it looks very much like a type pattern, but it isn’t. Therefore, the special `Union`matching
+won’t be used, which could lead to a user confusion.  
+
+``` c#
+struct S1 : IUnion
+{
+    private readonly object _value;
+    public S1(int x) { _value = x; }
+    public S1(string x) { _value = x; }
+    object IUnion.Value => _value;
+}
+
+class Program
+{
+    static bool Test1(S1 u)
+    {
+        return u is int; // warning CS0184: The given expression is never of the provided ('int') type
+    }   
+
+    static bool Test2(S1 u)
+    {
+        return u is string and ['1', .., '2']; // Good
+    }   
+}
+```
+
+In case of a recursive union, the type pattern might give no warning, but it still won’t do what user might think it would do.
+
+**Resolution:**
+Should work as a type pattern.
+
+### List patter
+
+List pattern always fails with `Union` matching:
+``` c#
+struct S1 : IUnion
+{
+    private readonly object _value;
+    public S1(int[] x) { _value = x; }
+    public S1(string[] x) { _value = x; }
+    object IUnion.Value => _value;
+}
+
+class Program
+{
+    static bool Test1(S1 u)
+    {
+        // error CS8985: List patterns may not be used for a value of type 'object'. No suitable 'Length' or 'Count' property was found.
+        // error CS0021: Cannot apply indexing with [] to an expression of type 'object'
+        return u is [10];
+    }   
+}
+
+static class Extensions
+{
+    extension(object o)
+    {
+        public int Length => 0;
+    }
+}
+```
+
+### Other questions
 * Both the use of constructors in union conversions and the use of `TryGetValue(...)` in union pattern matching are specified to be lenient when multiple ones apply: They'll just pick one. This should not matter per the well-formedness rules, but are we comfortable with it?
 * The specification subtly relies on the implementation of the `IUnion.Value` property rather than any `Value` property found on the union type itself. This is meant to give greater flexibility for existing types (which may have their own `Value` property for other uses) to implement the pattern. But it is awkward, and inconsistent with how other members are found and used directly on the union type. Should we make a change? Some other options:
     * Require union types to expose a public `Value` property.
     * Prefer a public `Value` property if it exists, but fall back to the `IUnion.Value` implementation if not (similar to `GetEnumerator` rules).
-* If a union type is a class type, it's value might itself be null. What about null checks then? The `null` pattern has been co-opted to check the `Value` property, so how do you check that the union itself isn't null? This part of the design is clearly optimized around the expectation that a union type is a struct. Some options:
-    * Too bad. Use `==` for your null check instead of a pattern match.
-    * Let the `null` pattern (and implicit null check in other patterns) apply to both the union value and its `Value` property: `u is null ==> u == null || u.Value == null`.
-    * Disallow classes from being union types!
 * The proposed union declaration syntax isn't universally loved, particularly when it comes to expressing the case types. Alternatives so far also meet with criticism, but it's possible we will end up making a change. Some top concerns voiced about the current one:
     * Commas as separators between case types may seem to imply that order matters.
     * Parenthesized lists look too much like primary constructors (despite not having parameter names).

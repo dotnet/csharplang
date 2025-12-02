@@ -1,4 +1,4 @@
-# Ignored directives
+# Ignored directives for file-based apps
 
 [!INCLUDE[Specletdisclaimer](../speclet-disclaimer.md)]
 
@@ -17,6 +17,8 @@ Add `#:` directive prefix to be used by tooling, but ignored by the language.
 
 Console.WriteLine("Hello, World!");
 ```
+
+See the [SDK documentation for `dotnet run file.cs`](https://learn.microsoft.com/dotnet/csharp/language-reference/preprocessor-directives#file-based-apps) for more details on directives supported in file-based apps.
 
 ## Motivation
 

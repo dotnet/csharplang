@@ -483,7 +483,7 @@ ArrayDerived([""]);         // ambiguous
 ## Span types
 [span-types]: #span-types
 
-The span types `ReadOnlySpan<T>` and `Span<T>` are both [*constructible collection types*](#conversions).  Support for them follows the design for [`params Span<T>`](https://github.com/dotnet/csharplang/blob/main/proposals/params-span.md). Specifically, constructing either of those spans will result in an array T[] created on the [stack](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/unsafe-code.md#229-stack-allocation) if the params array is within limits (if any) set by the compiler. Otherwise the array will be allocated on the heap.
+The span types `ReadOnlySpan<T>` and `Span<T>` are both [*constructible collection types*](#conversions).  Support for them follows the design for [`params Span<T>`](https://github.com/dotnet/csharplang/blob/main/proposals/rejected/params-span.md). Specifically, constructing either of those spans will result in an array T[] created on the [stack](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/unsafe-code.md#229-stack-allocation) if the params array is within limits (if any) set by the compiler. Otherwise the array will be allocated on the heap.
 
 If the compiler chooses to allocate on the stack, it is not required to translate a literal directly to a `stackalloc` at that specific point.  For example, given:
 
@@ -994,7 +994,7 @@ an application of a `CollectionBuilder` attribute. If we don't know the *iterati
 signature of the *create method* should be. If the *iteration type* comes from context, there is no guarantee that
 the type is always going to be used in a similar context.
 
-[Params Collections](https://github.com/dotnet/csharplang/blob/main/proposals/params-collections.md#method-parameters) feature
+[Params Collections](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-13.0/params-collections.md#method-parameters) feature
 is also affected by this. It feels strange to be unable to reliably predict element type of a `params` parameter at the
 declaration point. The current proposal also requires to ensure that the *create method* is at least as accessible as the
 `params` *collection type*. It is impossible to perform this check in a reliable fashion, unless the *collection type*

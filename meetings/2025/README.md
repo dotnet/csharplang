@@ -4,9 +4,16 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ## Schedule ASAP
 
+
 ## Schedule when convenient
 
+- [Target-typed static member access](https://github.com/dotnet/csharplang/blob/afad49721a7b9923efbbc36ae6c455d85b994543/proposals/target-typed-static-member-access.md) (jnm2, CyrusNajmabadi)
 - Triage (working set)
+- [Relaxed ordering for `partial` and `ref` modifiers](https://github.com/dotnet/csharplang/blob/591a2b18cd261d7128e7fc5075c9788f1830abd5/proposals/relaxed-partial-ref-ordering.md) (Rikki)
+- [Support null-conditional operator when the return value is a pointer type](https://github.com/dotnet/roslyn/issues/7502) (CyrusNajmabadi)
+- [`using` with a discard](https://github.com/dotnet/csharplang/blob/afad49721a7b9923efbbc36ae6c455d85b994543/proposals/using-with-a-discard.md) (333fred or jnm2)
+- [Deconstruction in lambda parameters](https://github.com/dotnet/csharplang/blob/610db3f5334dba5ee5116b0ff6a9b7ddba08edc3/proposals/deconstruction-in-lambda-parameters.md) (CyrusNajmabadi, jnm2)
+- [Unsigned sizeof](https://github.com/dotnet/csharplang/blob/afad49721a7b9923efbbc36ae6c455d85b994543/proposals/unsigned-sizeof.md)  (jnm2)
 
 ## Recurring topics
 
@@ -15,21 +22,62 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ## Schedule
 
+### Wed Dec 3, 2025
+
+- [`with(...)` and mutable interface translation](https://github.com/dotnet/csharplang/pull/9823) (CyrusNajmabadi)
+
+## C# Language Design Notes for 2025
+
+### Wed Nov 12, 2025
+
+[C# Language Design Meeting for November 12th, 2025](https://github.com/dotnet/csharplang/blob/main/meetings/2025/LDM-2025-11-12.md)
+
+- Unsafe evolution
+
+### Wed Nov 5, 2025
+
+[C# Language Design Meeting for November 5th, 2025](https://github.com/dotnet/csharplang/blob/main/meetings/2025/LDM-2025-11-05.md)
+
+- Unsafe evolution
+
+### Wed Oct 29, 2025
+
+[C# Language Design Meeting for October 29th, 2025](https://github.com/dotnet/csharplang/blob/main/meetings/2025/LDM-2025-10-29.md)
+
+- Unsafe evolution
+
+### Mon Oct 13, 2025
+
+[C# Language Design Meeting for October 13th, 2025](https://github.com/dotnet/csharplang/blob/main/meetings/2025/LDM-2025-10-13.md)
+
+- Collection expression safe-context bug fix
+- Immediately-enumerated collection expressions
+
 ### Wed Oct 1, 2025
+
+[C# Language Design Meeting for October 1st, 2025](https://github.com/dotnet/csharplang/blob/main/meetings/2025/LDM-2025-10-01.md)
+
+- Closed enums
+- Closed Hierarchies
 
 ### Mon Sep 29, 2025
 
+[C# Language Design Meeting for September 29th, 2025](https://github.com/dotnet/csharplang/blob/main/meetings/2025/LDM-2025-09-29.md)
+
+- Union Syntax Thunderdome Part 2
+- Enums vs Unions
+
 ### Wed Sep 24, 2025
 
-- [Unions](https://github.com/dotnet/csharplang/blob/main/proposals/unions.md) (Mads & Matt)
-    - Syntax
-    - Other open issues
+[C# Language Design Meeting for September 24th, 2025](https://github.com/dotnet/csharplang/blob/main/meetings/2025/LDM-2025-09-24.md)
 
-### Wed Sep 17, 2025 (2nd hour only)
+- Union Syntax Thunderdome Part 1
 
-- [Annotating members as `unsafe`](https://github.com/dotnet/designs/pull/330) (Andy)
+### Wed Sep 17, 2025
 
-## C# Language Design Notes for 2025
+[C# Language Design Meeting for September 17th, 2025](https://github.com/dotnet/csharplang/blob/main/meetings/2025/LDM-2025-09-17.md)
+
+- Unsafe evolution
 
 ### Wed Sep 10, 2025
 

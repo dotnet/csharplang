@@ -19,7 +19,7 @@ public static class Operators
 }
 ```
 
-Extension operator declarations generally follow the rules for non-extension [user-defined operators in the Standard](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/classes.md#1510-operators) as well as the soon-to-be-added [user-defined compound assignment operators](https://github.com/dotnet/csharplang/blob/main/proposals/user-defined-compound-assignment.md). 
+Extension operator declarations generally follow the rules for non-extension [user-defined operators in the Standard](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/classes.md#1510-operators) as well as the soon-to-be-added [user-defined compound assignment operators](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-14.0/user-defined-compound-assignment.md). 
 
 Generally speaking, the rules pertaining to the *containing type* of the declaration instead apply to the *extended type*. 
 
