@@ -125,7 +125,7 @@ extension<T>(IEnumerable<T> e)
 
   Since such top-level members would work until one would reference the type,
   that could lead to people declaring such conflicting APIs and realizing they are blocked when it's too late (e.g., they have shipped a public API).
-  The compiler could report a warning but that would still not work if the other DLL reference is added later.
+  The compiler could report a warning even if the type isn't explicitly referenced but that would still not help much if the other DLL reference is added later.
 
 ## Alternatives
 
@@ -144,6 +144,36 @@ extension<T>(IEnumerable<T> e)
 - If we ever allow the `file` modifier on members (methods, fields, etc.), that would be naturally useful for top-level members, too.
   `file` members would be scoped to the current file.
   Compare that with `private` members which are scoped to the current _namespace_.
+- Scoping concerns could be resolved with [file-scoped types](https://github.com/dotnet/csharplang/discussions/928) by allowing something like `class MyNamespace.MyClass;`.
+  That wouldn't solve the use-site though, where you'd still need `using static MyNamespace.MyClass;` instead of just `using MyNamespace;` as with this proposal.
+
+- We could have something similar to VB's modules which are mostly like static classes
+  but their members don't need to be qualified with the module name if they are brought to scope via an import:
+  ```vb
+  Imports N
+
+  Namespace N
+      Module M
+          Sub F()
+          End Sub
+      End Module
+  End Namespace
+
+  Class C
+      Sub Main()
+          F()
+      End Sub
+  End Class
+  ```
+
+  F# has something similar, too:
+  ```fs
+  module Utilities =
+    let M() = ()
+
+  open Utilities
+  M()
+  ```
 
 ## Open questions
 
@@ -176,6 +206,7 @@ extension<T>(IEnumerable<T> e)
     extension(object) {} // error
     class C;
     ```
+- Should we [relax the order of mixing top-level statements and declarations](https://github.com/dotnet/csharplang/discussions/5780) as part of this feature?
 - Do we need new name conflict rules for declarations and/or usages?
   For example, should the following be an error when declared (and/or when used)?
   ```cs
