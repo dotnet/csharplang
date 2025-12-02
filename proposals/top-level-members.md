@@ -5,7 +5,8 @@ Champion issue: https://github.com/dotnet/csharplang/issues/9803
 ## Summary
 
 Allow some members (methods, operators, extension blocks, and fields) to be declared in namespaces
-and make them available when the corresponding namespace is imported.
+and make them available when the corresponding namespace is imported
+(this is a similar concept to instance extension members which are also usable without referencing the container class).
 
 ```cs
 // util.cs
@@ -60,8 +61,9 @@ extension<T>(IEnumerable<T> e)
 - Top-level members in a namespace are semantically members of an "implicit" class which:
   - is `static` and `partial`,
   - has accessibility either `internal` (by default) or `public` (if any member is also `public`),
-  - is named `TopLevel` (can be addressed even from C# which is useful for extension member disambiguation or source-generated `partial` implementations),
-  - is synthesized per each compilation unit (so having top-level members in the same namespace across assemblies can lead to [ambiguities](#drawbacks)).
+  - is named `TopLevel` (can be addressed from VB/F# but even from C# which is useful for extension member disambiguation or source-generated `partial` implementations),
+  - has the namespace in which it is declared in,
+  - is synthesized per each namespace and compilation unit (so having top-level members in the same namespace across assemblies can lead to [ambiguities](#drawbacks)).
 
   For top-level members, this means:
     - The `static` modifier is disallowed (the members are implicitly static).
@@ -144,7 +146,10 @@ extension<T>(IEnumerable<T> e)
 - If we ever allow the `file` modifier on members (methods, fields, etc.), that would be naturally useful for top-level members, too.
   `file` members would be scoped to the current file.
   Compare that with `private` members which are scoped to the current _namespace_.
-- Scoping concerns could be resolved with [file-scoped types](https://github.com/dotnet/csharplang/discussions/928) by allowing something like `class MyNamespace.MyClass;`.
+
+- Indentation concerns about current utility/extension methods could be resolved with
+  [file-scoped types](https://github.com/dotnet/csharplang/discussions/928) instead, i.e., allowing something like `class MyNamespace.MyClass;`
+  (although beware that `class MyClass;` has already a valid meaning today).
   That wouldn't solve the use-site though, where you'd still need `using static MyNamespace.MyClass;` instead of just `using MyNamespace;` as with this proposal.
 
 - We could have something similar to VB's modules which are mostly like static classes
@@ -174,6 +179,27 @@ extension<T>(IEnumerable<T> e)
   open Utilities
   M()
   ```
+
+  For example, C# could have `implicit` classes like:
+  ```cs
+  public implicit static class Utilities
+  {
+      public static void M() { }
+  }
+  ```
+
+  Combined with top-level classes feature mentioned above, this could look like:
+  ```cs
+  public implicit static class Utilities;
+  public static void M() { }
+  extension(int) { /* ... */ }
+  ```
+
+  This avoids the drawbacks mentioned above of introducing possible ambiguities.
+  However, it makes the declaration side a bit more complicated to write.
+
+  Open questions for this alternative:
+  - Should we allow non-`static` members?
 
 ## Open questions
 
