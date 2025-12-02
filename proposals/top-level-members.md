@@ -61,7 +61,7 @@ extension<T>(IEnumerable<T> e)
 - Top-level members in a namespace are semantically members of an "implicit" class which:
   - is `static` and `partial`,
   - has accessibility either `internal` (by default) or `public` (if any member is also `public`),
-  - is named `TopLevel` (can be addressed from VB/F# but even from C# which is useful for extension member disambiguation),
+  - has a generated unspeakable name `<>TopLevel`,
   - has the namespace in which it is declared in,
   - is synthesized per each namespace and compilation unit (so having top-level members in the same namespace across assemblies can lead to [ambiguities](#drawbacks)).
 
@@ -75,13 +75,11 @@ extension<T>(IEnumerable<T> e)
     - XML doc comments work.
 
 - Metadata:
-  - The implicit class is recognized only if it has name `TopLevel` and an attribute `[TopLevel]` (full attribute name is TBD),
-    otherwise it is considered a plain old type. This prevents a breaking change
-    (where new members are in scope which can lead to ambiguity overload resolution errors).
+  - The implicit class is recognized only if it has an attribute `[TopLevel]` (full attribute name is TBD).
 
-- Usage (if there is an appropriately-shaped `NS.TopLevel` type):
-  - `using NS;` implies `using static NS.TopLevel;`.
-  - Lookup for `NS.Member` can find `NS.TopLevel.Member`.
+- Usage (if there is an appropriately-shaped `[TopLevel]` type in namespace `NS`):
+  - `using NS;` implies `using static NS.<>TopLevel;`.
+  - Lookup for `NS.Member` can find `NS.<>TopLevel.Member`.
   - Nothing really changes for extension member lookup (the class name is already not used for that).
 
 - Entry points:
@@ -97,28 +95,6 @@ extension<T>(IEnumerable<T> e)
 - Polluting namespaces with loosely organized helpers.
 - Requires tooling updates to properly surface and organize top-level methods in IntelliSense, refactorings, etc.
 - Entry point resolution breaking changes.
-
-- There might be ambiguities if two assemblies have top-level members in the same namespace:
-  ```cs
-  // A.dll
-  namespace X;
-  public void M1() { } // ok
-  ```
-  ```cs
-  // B.dll
-  namespace X;
-  public void M2() { } // ok
-  ```
-  ```cs
-  // C.dll
-  using X;
-  M1(); M2(); // ok
-  X.TopLevel.M1(); // ambiguity error for `TopLevel` type
-  ```
-
-  Since such top-level members would work until one would reference the type,
-  that could lead to people declaring such conflicting APIs and realizing they are blocked when it's too late (e.g., they have shipped a public API).
-  The compiler could report a warning even if the type isn't explicitly referenced but that would still not help much if the other DLL reference is added later.
 
 ## Alternatives
 
@@ -186,8 +162,7 @@ extension<T>(IEnumerable<T> e)
   extension(int) { /* ... */ }
   ```
 
-  This avoids the drawbacks mentioned above of introducing possible ambiguities.
-  However, it makes the declaration side a bit more complicated to write.
+  This makes the declaration side a bit more complicated to write.
 
   Open questions for this alternative:
   - Should we allow non-`static` members?
@@ -196,11 +171,13 @@ extension<T>(IEnumerable<T> e)
 
 - Which member kinds? Methods, fields, properties, indexers, events, constructors, operators.
 - Accessibility: what should be the default and which modifiers should be allowed?
-- Clustering: currently each namespace per assembly gets its `TopLevel` class.
-- Shape of the synthesized static class (currently `[TopLevel] TopLevel`).
-  - Should it be speakable (in other languages and/or in C#)?
-    In C#, we could make it possible to access the top-level members via `MyNamespace.MyTopLevelMember`,
-    hence for example allowing extension member disambiguation.
+- Clustering: currently each namespace per assembly gets its `<>TopLevel` class.
+- Shape of the synthesized static class (currently `[TopLevel] <>TopLevel`).
+  - Should it be speakable at least in other languages (so it's usable from VB/F#)?
+    - We could make that opt in via some attribute (`[file: TopLevel("MyTopLevelClassName")]`).
+    - The naming could be based on the assembly name and/or the file name.
+    - If the name was constant, that could lead to ambiguity errors
+      when the same namespace is declared across multiple assemblies which are then referenced in one place.
 - Should we simplify the TLS entry point logic? Should it be a breaking change?
 - Should we require the `static` modifier (and keep our doors open if we want to introduce some non-`static` top-level members in the future)?
 - Should we disallow mixing top-level members and existing declarations in one file?
