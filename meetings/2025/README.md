@@ -14,6 +14,7 @@ All schedule items must have a public issue or checked-in proposal that can be l
 - [`using` with a discard](https://github.com/dotnet/csharplang/blob/afad49721a7b9923efbbc36ae6c455d85b994543/proposals/using-with-a-discard.md) (333fred or jnm2)
 - [Deconstruction in lambda parameters](https://github.com/dotnet/csharplang/blob/610db3f5334dba5ee5116b0ff6a9b7ddba08edc3/proposals/deconstruction-in-lambda-parameters.md) (CyrusNajmabadi, jnm2)
 - [Unsigned sizeof](https://github.com/dotnet/csharplang/blob/afad49721a7b9923efbbc36ae6c455d85b994543/proposals/unsigned-sizeof.md)  (jnm2)
+- [Top-level members](../../proposals/top-level-members.md) (jjonescz)
 
 ## Recurring topics
 
