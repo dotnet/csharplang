@@ -22,7 +22,7 @@ void M()
 
 ## Motivation
 
-Background for this feature can also be found in https://github.com/dotnet/designs/blob/main/proposed/caller-unsafe.md, which tracks the broader ecosystem changes that will be needed as part of this proposal.
+Background for this feature can also be found in https://github.com/dotnet/designs/blob/main/accepted/2025/memory-safety/caller-unsafe.md, which tracks the broader ecosystem changes that will be needed as part of this proposal.
 These include BCL updates to properly annotate methods as being unsafe, as well as tooling updates for better understanding of where memory unsafety occurs. For C#
 specifically, we want to make sure that memory unsafety is properly tracked by the language; today, it can be difficult to look at a program holistically and understand all locations where
 memory unsafety occurs. This is because various helpers such as the `System.Runtime.CompilerServices.Unsafe`, `System.Runtime.InteropServices.Marshal`, and others do not express that they
@@ -326,6 +326,7 @@ i++;
 ### Value of MemorySafetyRulesAttribute
 
 What should be the "enabled"/"updated" memory safety rules version? `2`? `15`? `11`?
+See also https://github.com/dotnet/designs/blob/main/accepted/2025/memory-safety/sdk-memory-safety-enforcement.md.
 
 ## Answered questions
 
