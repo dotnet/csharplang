@@ -323,6 +323,10 @@ _ = &i;
 i++;
 ```
 
+### Value of MemorySafetyRulesAttribute
+
+What should be the "enabled"/"updated" memory safety rules version? `2`? `15`? `11`?
+
 ## Answered questions
 
 ### How breaking do we want to skew
