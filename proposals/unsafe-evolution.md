@@ -135,14 +135,14 @@ is updated to include whether the _anonymous function_ has the `unsafe` keyword,
 it would be if any parameter were a by-`ref`, optional, or `params`.
 
 It is a memory safety error convert a delegate type that is marked as `unsafe` to `System.Delegate`/`System.Linq.Expressions.Expression`/`System.Linq.Expressions.Expression<T>`, or any interface those
-types implement or base type of those types.
+types implement or base type of those types. They also cannot be used as type parameters.
 
 A delegate type that is marked `unsafe` can only be invoked in an `unsafe` context. If a delegate type is `unsafe`, then its `Invoke`, `BeginInvoke`, and `EndInvoke` methods are marked as `unsafe`.
 
 > [!NOTE]
 > We don't actually attribute the delegate type itself, just the `Invoke`, `BeginInvoke`, and `EndInvoke` methods. Determining whether a delegate type is `unsafe` is done by examining those 3 methods.
 > If all are marked as `unsafe`, the delegate type is considered `unsafe`. If only some are marked as `unsafe`, then it is presumed that calling the others is safe and only calling the member that is
-> marked as `unsafe` will cause a memory safety error. It will be a memory safety error to convert an `unsafe` lambda or method group to a delegate type that is does not have all of `Invoke`, `BeginInvoke`,
+> marked as `unsafe` will cause a memory safety error. It will be a memory safety error to convert an `unsafe` lambda or method group to a delegate type that does not have all of `Invoke`, `BeginInvoke`,
 > and `EndInvoke` marked as `unsafe`.
 
 ### `extern`
@@ -231,12 +231,13 @@ for various parts of the ecosystem, particularly any enumerables that are passed
 ### Delegate type `unsafe`ty
 
 We could remove the ability to make delegate types as `unsafe` entirely, and simply require that all conversions of `unsafe` lambdas or method groups to a delegate type occur inside an `unsafe` context.
-This could simplify the model around `unsafe` in C#, but at the risk of forcing `unsafe` annotations in the wrong spot and having an area where the real area of `unsafe`ty isn't properly called out.
+This could simplify the model around `unsafe` in C#, but at the risk of forcing `unsafe` annotations in the wrong spot and having an area where the real area of `unsafe`ty isn't properly called out. There
+are a lot of corner cases here, particularly involving generics and conversions, so it may be better to simply leave the concept for later when we determine it's needed.
 
 ### Lambda/method group natural types
 
-Today, the only real impact on codegen (besides additional metadata) is changing the *function_type* of a lambda or method group when `unsafe` is in the signature. If we were to avoid doing this, then
-there would be no real impact to codegen, which could give adopters more confidence that behavior has not subtly changed under the hood.
+Today, the only real impact on semantics and codegen (besides additional metadata) is changing the *function_type* of a lambda or method group when `unsafe` is in the signature. If we were to avoid doing this, then
+there would be no real impact to either, which could give adopters more confidence that behavior has not subtly changed under the hood.
 
 ### `stackalloc` as initialized
 
