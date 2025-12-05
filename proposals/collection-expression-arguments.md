@@ -324,6 +324,37 @@ int[] a = [with(), 1, 2, 3]; // error: arguments not supported
 int[] b = [with(length: 1), 3]; // error: arguments not supported
 ```
 
+## Ref safety
+
+We adjust the [collection-expressions.md#ref-safety](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-12.0/collection-expressions.md#ref-safety) rules to account for the `with()` element.
+
+See also [§16.4.15 Safe context constraint](https://github.com/dotnet/csharpstandard/blob/draft-v7/standard/structs.md#16415-safe-context-constraint).
+
+### Create methods
+
+This section applies to collection-expressions whose target type meets the constraints defined in [CollectionBuilderAttribute methods](#collectionbuilderattribute-methods).
+
+The *safe-context* is determined by modifying a clause from [collection-expressions.md#ref-safety](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-12.0/collection-expressions.md#ref-safety) (changes in **bold**):
+
+> * If the target type is a *ref struct type* with a [*create method*](#create-methods), the safe-context of the collection expression is the [*safe-context of an invocation*](https://github.com/dotnet/csharpstandard/blob/draft-v7/standard/structs.md#164126-method-and-property-invocation) of the create method where **the arguments are the `with()` element arguments followed by the collection expression as the argument for the last parameter (the `ReadOnlySpan<E>` parameter).**
+
+The [*method arguments must match*](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-11.0/low-level-struct-improvements.md#method-arguments-must-match) constraint applies to the collection expression. Similarly to the *safe-context* determination above, the *method arguments must match* constraint is applied by treating the collection expression as an invocation of the create method, where the arguments are the `with()` element arguments followed by the collection expression as the argument for the last parameter.
+
+### Constructor calls
+
+This section applies to collection-expressions whose target type meets the constraints defined in [Constructors](#constructors).
+
+For a collection-expression of a *ref struct type* of the following form:  
+`[with(a₁, a₂, ..., aₙ), e₁, e₂, ..., eₙ]`
+
+The *safe-context* of the collection expression is the narrowest of the *safe-contexts* of the following expressions:
+- An object creation expression `new C(a₁, a₂, ..., aₙ)`, where `C` is the target type
+- The element expressions `e₁, e₂, ..., eₙ` (either the expressions themselves, or the spread value in the case of a spread element).
+
+The [*method arguments must match*](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-11.0/low-level-struct-improvements.md#method-arguments-must-match) constraint applies to the collection expression. The constraint is applied by treating the collection expression as an object creation of the form `new C(a₁, a₂, ..., aₙ) { e₁, e₂, ..., eₙ }` per [low-level-struct-improvements.md#rules-for-object-initializers](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-11.0/low-level-struct-improvements.md#rules-for-object-initializers).
+- Expression elements are treated as if they are collection element initializers.
+- Spread elements are treated similarly, by temporarily assuming that `C` has an `Add(SpreadType spread)` method, where `SpreadType` is the type of the spread value.
+
 ## Answered questions
 
 ### `dynamic` arguments
