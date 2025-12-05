@@ -27,7 +27,7 @@ namespace System.Runtime.CompilerServices;
 public class AsyncHelpers
 {
     public static void HandleAsyncEntryPoint(System.Threading.Tasks.Task task);
-    public static void HandleAsyncEntryPoint(System.Threading.Tasks.Task<int> task);
+    public static int HandleAsyncEntryPoint(System.Threading.Tasks.Task<int> task);
 }
 ```
 
