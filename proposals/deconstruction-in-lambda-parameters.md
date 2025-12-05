@@ -143,7 +143,7 @@ void M<T1, T2>(Action<(T1, T2)> action) { }
 ```
 
 ```cs
-M(((int a, string b, byte c)) => { }); // Success: T1 is int, T2 is string, T3 is byte
+M(((int a, (string b, byte c))) => { }); // Success: T1 is int, T2 is string, T3 is byte
 
 void M<T1, T2, T3>(Action<(T1, (T2, T3))> action) { }
 ```
