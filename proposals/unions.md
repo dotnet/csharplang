@@ -380,6 +380,210 @@ public record struct Pet : IUnion, IUnion<Pet>
 ## Open questions
 [open]: #open-questions
 
+### Union conversions
+
+#### Where do they belong among other conversions priority-wise?
+
+Union conversions feel like another form of a user-defined conversion. Therefore, current implementation
+classifies them right after a failed attempt to classify an implicit user-defined conversion, and, in case
+of existence is treated as just another form of a user-defined conversion. This has the
+following consequences:
+- An implicit user-defined conversion takes priority over a union conversion
+- When explicit cast is used in code, an explicit user-defined conversion takes priority over a union conversion 
+- When there is no explicit cast in code, a union conversion takes priority over an explicit user-defined conversion 
+
+``` c#
+struct S1 : System.Runtime.CompilerServices.IUnion
+{
+    public S1(int x) => ...
+    public S1(string x) => ...
+    object System.Runtime.CompilerServices.IUnion.Value => ...
+    public static implicit operator S1(int x) => ...
+}
+
+struct S2 : System.Runtime.CompilerServices.IUnion
+{
+    public S2(int x) => ...
+    public S2(string x) => ...
+    object System.Runtime.CompilerServices.IUnion.Value => ...
+    public static explicit operator S2(int x) => ...
+}
+
+class Program
+{
+    static S1 Test1() => 10; // implicit operator S1(int x) is used
+    static S1 Test2() => (S1)20; // implicit operator S1(int x) is used
+    static S2 Test3() => 10; // Union conversion S2.S2(int) is used
+    static S2 Test4() => (S2)20; // explicit operator S2(int x)
+}
+```
+
+Need to confirm this is the behavior that we like. Otherwise the conversion rules should be clarified.
+
+#### Ref-ness of constructor's parameter
+
+Currently language allows only by-value and `in` parameters for user-defined conversion operators.
+It feels like reasons for this restriction are also applicable to constructors suitable for union
+conversions. 
+
+**Proposal:**
+
+Adjust definition of a `case type constructor` in `Union types` section above:
+``` diff
+-For each public constructor with exactly one parameter, the type of that parameter is considered a *case type* of the union type.
++For each public constructor with exactly one **by-value or `in`** parameter, the type of that parameter is considered a *case type* of the union type.
+```
+
+#### Nullable Conversions
+
+[Nullable Conversions](https://github.com/dotnet/csharpstandard/blob/09d5f56455cab8868ee9798de8807a2e91fb431f/standard/conversions.md#1061-nullable-conversions) section explicitly lists conversions that can be used as underlying. Current specification doesn't propose
+any adjustments to that list. This result in an error for the following scenario:
+``` c#
+struct S1 : System.Runtime.CompilerServices.IUnion
+{
+    public S1(int x) => throw null;
+    public S1(string x) => throw null;
+    object System.Runtime.CompilerServices.IUnion.Value => throw null;
+}
+
+class Program
+{
+    static S1? Test1(int x)
+    {
+        return x; // error CS0029: Cannot implicitly convert type 'int' to 'S1?'
+    }   
+}
+```
+
+**Proposal:**
+
+Adjust the specification to support an implicit nullable conversion from `S` to `T?` backed by a union conversion.
+Specifically, assuming `T` is a union type there's an implicit conversion to a type `T?` from a type or
+expression `E` if there's a union conversion from `E` to a type `C` and `C` is a case type of `T`.
+Note, there is no requirement for type of `E` to be a non-nullable value type.
+The conversion is evaluated as the underlying union conversion from `S` to `T` followed by a wrapping from `T` to `T?`
+
+#### Lifted conversions
+
+Do we want to adjust [Lifted conversions](https://github.com/dotnet/csharpstandard/blob/09d5f56455cab8868ee9798de8807a2e91fb431f/standard/conversions.md#1062-lifted-conversions)
+section to support lifted union conversions? Currently they are not allowed:
+
+``` c#
+struct S1 : System.Runtime.CompilerServices.IUnion
+{
+    public S1(int x) => throw null;
+    public S1(string x) => throw null;
+    object System.Runtime.CompilerServices.IUnion.Value => throw null;
+}
+
+class Program
+{
+    static S1 Test1(int? x)
+    {
+        return x; // error CS0029: Cannot implicitly convert type 'int?' to 'S1'
+    }   
+
+    static S1? Test2(int? y)
+    {
+        return y; // error CS0029: Cannot implicitly convert type 'int?' to 'S1?'
+    }   
+}
+```
+
+#### Block union conversion from an instance of a base type?
+
+One might find the current behavior confusing:
+``` c#
+struct S1 : System.Runtime.CompilerServices.IUnion
+{
+    public S1(System.ValueType x)
+    {
+    }
+    public S1(string x) => throw null;
+    object System.Runtime.CompilerServices.IUnion.Value => throw null;
+}
+
+class Program
+{
+    static S1 Test1(System.ValueType x)
+    {
+        return x; // Union conversion
+    }   
+
+    static S1 Test2(System.ValueType y)
+    {
+        return (S1)y; // Unboxing conversion
+    }   
+}
+```
+
+Note, language explicitly disallows declaring user-defined conversions from a base type. Therefore, it might make sence to not
+allow union conversions like that.
+
+#### Block union conversion from an instance of an interface type?
+
+One might find the current behavior confusing:
+``` c#
+struct S1 : I1, System.Runtime.CompilerServices.IUnion
+{
+    public S1(I1 x) => throw null;
+    public S1(string x) => throw null;
+    object System.Runtime.CompilerServices.IUnion.Value => throw null;
+}
+
+interface I1 { }
+
+struct S2 : System.Runtime.CompilerServices.IUnion
+{
+    public S2(I1 x) => throw null;
+    public S2(string x) => throw null;
+    object System.Runtime.CompilerServices.IUnion.Value => throw null;
+}
+
+class C3 : System.Runtime.CompilerServices.IUnion
+{
+    public C3(I1 x) => throw null;
+    public C3(string x) => throw null;
+    object System.Runtime.CompilerServices.IUnion.Value => throw null;
+}
+
+class Program
+{
+    static S1 Test1(I1 x)
+    {
+        return x; // Union conversion
+    }   
+
+    static S1 Test2(I1 x)
+    {
+        return (S1)x; // Unboxing
+    }   
+
+    static S2 Test3(I1 x)
+    {
+        return x; // Union conversion
+    }   
+
+    static S2 Test4(I1 x)
+    {
+        return (S2)x; // Union conversion
+    }   
+
+    static C3 Test3(I1 x)
+    {
+        return x; // Union conversion
+    }   
+
+    static C3 Test4(I1 x)
+    {
+        return (C3)x; // Reference conversion
+    }   
+}
+```
+
+Note, language explicitly disallows declaring user-defined conversions from a base type. Therefore, it might make sence to not
+allow union conversions like that.
+
 ### Namespace of IUnion interface
 
 Containing namespace for `IUnion` interface remains unspecified. If the intent is to keep it in a `global` namespace,
@@ -512,7 +716,7 @@ In case of a recursive union, the type pattern might give no warning, but it sti
 **Resolution:**
 Should work as a type pattern.
 
-### List patter
+### List pattern
 
 List pattern always fails with `Union` matching:
 ``` c#
