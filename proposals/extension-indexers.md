@@ -11,7 +11,7 @@ public static class Indexers
 {
     extension(int i)
     {
-        public bool this[int index] => ...;
+        public bool this[int bit] => ...;
     }
 }
 ```
