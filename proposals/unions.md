@@ -461,6 +461,33 @@ Specifically, assuming `T` is a union type there's an implicit conversion to a t
 expression `E` if there's a union conversion from `E` to a type `C` and `C` is a case type of `T`.
 The conversion is evaluated as the underlying union conversion from `S` to `T` followed by a wrapping from `T` to `T?`
 
+#### Lifted conversions
+
+Do we want to adjust [Lifted conversions](https://github.com/dotnet/csharpstandard/blob/09d5f56455cab8868ee9798de8807a2e91fb431f/standard/conversions.md#1062-lifted-conversions)
+section to support lifted union conversions? Currently they are not allowed:
+
+``` c#
+struct S1 : System.Runtime.CompilerServices.IUnion
+{
+    public S1(int x) => throw null;
+    public S1(string x) => throw null;
+    object System.Runtime.CompilerServices.IUnion.Value => throw null;
+}
+
+class Program
+{
+    static S1 Test1(int? x)
+    {
+        return x; // error CS0029: Cannot implicitly convert type 'int?' to 'S1'
+    }   
+
+    static S1? Test2(int? y)
+    {
+        return y; // error CS0029: Cannot implicitly convert type 'int?' to 'S1?'
+    }   
+}
+```
+
 ### Namespace of IUnion interface
 
 Containing namespace for `IUnion` interface remains unspecified. If the intent is to keep it in a `global` namespace,
