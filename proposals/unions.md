@@ -433,6 +433,34 @@ Adjust definition of a `case type constructor` in `Union types` section above:
 +For each public constructor with exactly one **by-value or `in`** parameter, the type of that parameter is considered a *case type* of the union type.
 ```
 
+#### Nullable Conversions
+
+[Nullable Conversions](https://github.com/dotnet/csharpstandard/blob/09d5f56455cab8868ee9798de8807a2e91fb431f/standard/conversions.md#1061-nullable-conversions) section explicitly lists conversions that can be used as underlying. Current specification doesn't propose
+any adjustments to that list. This result in an error for the following scenario:
+``` c#
+struct S1 : System.Runtime.CompilerServices.IUnion
+{
+    public S1(int x) => throw null;
+    public S1(string x) => throw null;
+    object System.Runtime.CompilerServices.IUnion.Value => throw null;
+}
+
+class Program
+{
+    static S1? Test1(int x)
+    {
+        return x; // error CS0029: Cannot implicitly convert type 'int' to 'S1?'
+    }   
+}
+```
+
+**Proposal:**
+
+Adjust the specification to support an implicit nullable conversion from `S` to `T?` backed by a union conversion.
+Specifically, assuming `T` is a union type there's an implicit conversion to a type `T?` from a type or
+expression `E` if there's a union conversion from `E` to a type `C` and `C` is a case type of `T`.
+The conversion is evaluated as the underlying union conversion from `S` to `T` followed by a wrapping from `T` to `T?`
+
 ### Namespace of IUnion interface
 
 Containing namespace for `IUnion` interface remains unspecified. If the intent is to keep it in a `global` namespace,
