@@ -380,6 +380,45 @@ public record struct Pet : IUnion, IUnion<Pet>
 ## Open questions
 [open]: #open-questions
 
+### Union conversions
+
+#### Where do they belong among other conversions priority-wise?
+
+Union conversions feel like another form of a user-defined conversion. Therefore, current implementation
+classifies them right after a failed attempt to classify an implicit user-defined conversion, and, in case
+of existence is treated as just another form of a user-defined conversion. This has the
+following consequences:
+- An implicit user-defined conversion takes priority over a union conversion
+- When explicit cast is used in code,  an explicit user-defined conversion takes priority over a union conversion 
+
+``` c#
+struct S1 : System.Runtime.CompilerServices.IUnion
+{
+    public S1(int x) => ...
+    public S1(string x) => ...
+    object System.Runtime.CompilerServices.IUnion.Value => ...
+    public static implicit operator S1(int x) => ...
+}
+
+struct S2 : System.Runtime.CompilerServices.IUnion
+{
+    public S2(int x) => ...
+    public S2(string x) => ...
+    object System.Runtime.CompilerServices.IUnion.Value => ...
+    public static explicit operator S2(int x) => ...
+}
+
+class Program
+{
+    static S1 Test1() => 10; // implicit operator S1(int x) is used
+    static S1 Test2() => (S1)20; // implicit operator S1(int x) is used
+    static S2 Test3() => 10; // Union conversion S2.S2(int) is used
+    static S2 Test4() => (S2)20; // explicit operator S2(int x)
+}
+```
+
+Need to confirm this is the behavior that we like. Otherwise the conversion rules should be clarified.
+
 ### Namespace of IUnion interface
 
 Containing namespace for `IUnion` interface remains unspecified. If the intent is to keep it in a `global` namespace,
