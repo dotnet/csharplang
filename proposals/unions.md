@@ -389,7 +389,7 @@ classifies them right after a failed attempt to classify an implicit user-define
 of existence is treated as just another form of a user-defined conversion. This has the
 following consequences:
 - An implicit user-defined conversion takes priority over a union conversion
-- When explicit cast is used in code,  an explicit user-defined conversion takes priority over a union conversion 
+- When explicit cast is used in code, an explicit user-defined conversion takes priority over a union conversion 
 
 ``` c#
 struct S1 : System.Runtime.CompilerServices.IUnion
@@ -418,6 +418,20 @@ class Program
 ```
 
 Need to confirm this is the behavior that we like. Otherwise the conversion rules should be clarified.
+
+#### Ref-ness of constructor's parameter
+
+Currently language allows only by-value and `in` parameters for user-defined conversion operators.
+It feels like reasons for this restriction are also applicable to constructors suitable for union
+conversions. 
+
+**Proposal:**
+
+Adjust definition of a `case type constructor` in `Union types` section above:
+``` diff
+-For each public constructor with exactly one parameter, the type of that parameter is considered a *case type* of the union type.
++For each public constructor with exactly one **by-value or `in`** parameter, the type of that parameter is considered a *case type* of the union type.
+```
 
 ### Namespace of IUnion interface
 
