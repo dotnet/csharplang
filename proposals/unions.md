@@ -459,6 +459,7 @@ class Program
 Adjust the specification to support an implicit nullable conversion from `S` to `T?` backed by a union conversion.
 Specifically, assuming `T` is a union type there's an implicit conversion to a type `T?` from a type or
 expression `E` if there's a union conversion from `E` to a type `C` and `C` is a case type of `T`.
+Note, there is no requirement for type of `E` to be a non-nullable value type.
 The conversion is evaluated as the underlying union conversion from `S` to `T` followed by a wrapping from `T` to `T?`
 
 #### Lifted conversions
@@ -484,6 +485,33 @@ class Program
     static S1? Test2(int? y)
     {
         return y; // error CS0029: Cannot implicitly convert type 'int?' to 'S1?'
+    }   
+}
+```
+
+#### Block union conversion from an instance of a base type?
+
+One might find the current behavior confusing:
+``` c#
+struct S1 : System.Runtime.CompilerServices.IUnion
+{
+    public S1(System.ValueType x)
+    {
+    }
+    public S1(string x) => throw null;
+    object System.Runtime.CompilerServices.IUnion.Value => throw null;
+}
+
+class Program
+{
+    static S1 Test1(System.ValueType x)
+    {
+        return x; // Union conversion
+    }   
+
+    static S1 Test2(System.ValueType y)
+    {
+        return (S1)y; // Unboxing conversion
     }   
 }
 ```
