@@ -390,6 +390,7 @@ of existence is treated as just another form of a user-defined conversion. This 
 following consequences:
 - An implicit user-defined conversion takes priority over a union conversion
 - When explicit cast is used in code, an explicit user-defined conversion takes priority over a union conversion 
+- When there is no explicit cast in code, a union conversion takes priority over an explicit user-defined conversion 
 
 ``` c#
 struct S1 : System.Runtime.CompilerServices.IUnion
