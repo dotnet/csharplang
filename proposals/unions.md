@@ -516,6 +516,73 @@ class Program
 }
 ```
 
+Note, language explicitly disallows declaring user-defined conversions from a base type. Therefore, it might make sence to not
+allow union conversions like that.
+
+#### Block union conversion from an instance of an interface type?
+
+One might find the current behavior confusing:
+``` c#
+struct S1 : I1, System.Runtime.CompilerServices.IUnion
+{
+    public S1(I1 x) => throw null;
+    public S1(string x) => throw null;
+    object System.Runtime.CompilerServices.IUnion.Value => throw null;
+}
+
+interface I1 { }
+
+struct S2 : System.Runtime.CompilerServices.IUnion
+{
+    public S2(I1 x) => throw null;
+    public S2(string x) => throw null;
+    object System.Runtime.CompilerServices.IUnion.Value => throw null;
+}
+
+class C3 : System.Runtime.CompilerServices.IUnion
+{
+    public C3(I1 x) => throw null;
+    public C3(string x) => throw null;
+    object System.Runtime.CompilerServices.IUnion.Value => throw null;
+}
+
+class Program
+{
+    static S1 Test1(I1 x)
+    {
+        return x; // Union conversion
+    }   
+
+    static S1 Test2(I1 x)
+    {
+        return (S1)x; // Unboxing
+    }   
+
+    static S2 Test3(I1 x)
+    {
+        return x; // Union conversion
+    }   
+
+    static S2 Test4(I1 x)
+    {
+        return (S2)x; // Union conversion
+    }   
+
+    static C3 Test3(I1 x)
+    {
+        return x; // Union conversion
+    }   
+
+    static C3 Test4(I1 x)
+    {
+        return (C3)x; // Reference conversion
+    }   
+}
+```
+
+Note, language explicitly disallows declaring user-defined conversions from a base type. Therefore, it might make sence to not
+allow union conversions like that.
+
 ### Namespace of IUnion interface
 
 Containing namespace for `IUnion` interface remains unspecified. If the intent is to keep it in a `global` namespace,
@@ -648,7 +715,7 @@ In case of a recursive union, the type pattern might give no warning, but it sti
 **Resolution:**
 Should work as a type pattern.
 
-### List patter
+### List pattern
 
 List pattern always fails with `Union` matching:
 ``` c#
