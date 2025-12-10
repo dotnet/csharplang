@@ -290,15 +290,30 @@ If the target type is an *interface type*, then:
   |Interfaces|Candidate signatures|
   |:---:|:---:|
   |`IEnumerable<E>`<br>`IReadOnlyCollection<E>`<br>`IReadOnlyList<E>`|`()` (no parameters)|
-  |`ICollection<E>`<br>`IList<E>`|`()` (no parameters)<br>`(int capacity)`|
-  |`IReadOnlyDictionary<K, V>`|`()` (no parameters)<br>`(IEqualityComparer<K>? comparer)`|
-  |`IDictionary<K, V>`|`()` (no parameters)<br>`(int capacity)`<br>`(IEqualityComparer<K>? comparer)`<br>`(int capacity, IEqualityComparer<K>? comparer)`|
+  |`ICollection<E>`<br>`IList<E>`|`List<T>()`<br>`List<T>(int)`|
 
-* If a best method signature is found, a method with that signature *or an equivalent initialization* is invoked with the *argument list*.
-  * The candidate signatures for `IList<T>` and `ICollection<T>` bind to the constructors with the corresponding signatures in `List<T>` when constructing the value (see [Mutable Interface Translation](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-12.0/collection-expressions.md#mutable-interface-translation)) 
+ If a best method signature is found, the semantics are as follows:
+
+* The candidate signature for `IEnumerable<E>`, `IReadOnlyCollection<E>` and `IReadOnlyList<E>` is simply `()` and has the same meaning as not having the `with()` element at all.
+* The candidate signatures for `IList<T>` and `ICollection<T>` are the signatures of `List<T>()` and `List<T>(int)` constructors.  When constructing the value (see [Mutable Interface Translation](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-12.0/collection-expressions.md#mutable-interface-translation)), the respective `List<T>` constructor will be invoked.
 * Otherwise, a binding error is reported.
 
-Note: `with()` is always legal for all non-mutable interface targets, and has the same meaning as not having the `with()` element at all.
+#### Dictionary-Interface target type
+
+This is specified here as part of the feature defined in https://github.com/dotnet/csharplang/blob/main/proposals/dictionary-expressions.md.
+
+The above list is augmented to have the following items:
+
+  |Interfaces|Candidate signatures|
+  |:---:|:---:|
+  |`IReadOnlyDictionary<K, V>`|`()` (no parameters)<br>`(IEqualityComparer<K>? comparer)`|
+  |`IDictionary<K, V>`|`Dictionary<K, V>()`<br>`Dictionary<K, V>(int)`<br>`Dictionary<K, V>(IEqualityComparer<K>)`<br>`Dictionary<K, V>(int, IEqualityComparer<K>)`|
+
+ If a best method signature is found, the semantics are as followed:
+
+* The candidate signatures for `IReadOnlyDictionary<K, V>` are  `()` (which has the same meaning as not having the `with()` element at all), and `(IEqualityComparer<K>)`.  This comparer will be used to appropriately hash and compare the keys in the destination dictionary the compiler chooses to create (see [Non Mutable Interface Translation](https://github.com/dotnet/csharplang/blob/main/proposals/dictionary-expressions.md#non-mutable-interface-translation)). 
+* The candidate signatures for `IDictionary<T>` are the signatures of `Dictionary<K, V>()`, `Dictionary<K, V>(int)`, `Dictionary<K, V>(IEqualityComparer<K>)` and `Dictionary<K, V>(int, IEqualityComparer<K>)`constructors.  When constructing the value (see [Mutable Interface Translation](https://github.com/dotnet/csharplang/blob/main/proposals/dictionary-expressions.md#mutable-interface-translation)), the respective `Dictionary<K, V>` constructor will be invoked.
+* Otherwise, a binding error is reported.
 
 ```csharp
 IDictionary<string, int> d;
