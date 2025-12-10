@@ -292,7 +292,7 @@ If the target type is an *interface type*, then:
   |`IEnumerable<E>`<br>`IReadOnlyCollection<E>`<br>`IReadOnlyList<E>`|`()` (no parameters)|
   |`ICollection<E>`<br>`IList<E>`|`List<T>()`<br>`List<T>(int)`|
 
- If a best method signature is found, the semantics are as followed:
+ If a best method signature is found, the semantics are as follows:
 
 * The candidate signature for `IEnumerable<E>`, `IReadOnlyCollection<E>` and `IReadOnlyList<E>` is simply `()` and has the same meaning as not having the `with()` element at all.
 * The candidate signatures for `IList<T>` and `ICollection<T>` are the signatures of `List<T>()` and `List<T>(int)` constructors.  When constructing the value (see [Mutable Interface Translation](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-12.0/collection-expressions.md#mutable-interface-translation)), the respective `List<T>` constructor will be invoked.
