@@ -158,8 +158,16 @@ value cannot be safely called by C#, as the calling convention used for the meth
 
 Today, as covered by the [unsafe context specification][unsafe-context-spec], `unsafe` behaves in a lexical manner, marking the entire textual body contained by the `unsafe` block as an `unsafe` context
 (except for iterator bodies). We propose changing this definition from textual to sematic. `unsafe` on a member will mean that that member is `unsafe`, and the body of that member is considered an `unsafe`
-context. `unsafe` on a type (other than delegate types) will be permitted for source compatibility purposes only; it will have no meaning, and the compiler will produce a warning informing the user that it
-does not have any effect.
+context.
+
+`unsafe` on the following declarations will be permitted for source compatibility purposes only; it will have no meaning, and the compiler will produce a warning informing the user that it does not have any effect:
+- type (except delegate type),
+- `using static`,
+- `using` alias.
+
+Note that `unsafe` on the following declarations will not have any effect on the callers but it will have an effect on the body/initializer of the member:
+- field (there is [an open question](#unsafe-fields) for this),
+- destructor.
 
 `unsafe` on a member is _not_ applied to any nested anonymous or local functions inside the member. To mark a anonymous or local function as `unsafe`, it must manually be marked as `unsafe`. The same goes for
 anonymous and local functions declared inside of an `unsafe` block.
@@ -180,7 +188,9 @@ partial class C1
 }
 ```
 
-For properties, `get` and `set/init` members can be independently declared as `unsafe`; marking the entire property as `unsafe` means that both the `get` and `set/init` members are unsafe.
+For properties, `get` and `set/init` accessors can be independently declared as `unsafe`; marking the entire property as `unsafe` means that both the `get` and `set/init` accessors are unsafe.
+It is currently not possible to place any modifiers on event accessors, and this proposal doesn't change that, i.e., `add` and `remove` event accessors cannot be independently declared as `unsafe`.
+Only if the entire event is marked as `unsafe`, it means that the accessors are unsafe; otherwise they are safe.
 
 #### Metadata
 
