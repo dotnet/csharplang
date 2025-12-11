@@ -23,11 +23,13 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ## Schedule
 
-### Wed Dec 3, 2025
-
-- [`with(...)` and mutable interface translation](https://github.com/dotnet/csharplang/pull/9823) (CyrusNajmabadi)
-
 ## C# Language Design Notes for 2025
+
+### Wed Dec 10, 2025
+
+[C# Language Design Meeting for December 10th, 2025](https://github.com/dotnet/csharplang/blob/main/meetings/2025/LDM-2025-12-10.md)
+
+- Collection expression arguments
 
 ### Wed Nov 12, 2025
 
