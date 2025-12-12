@@ -130,6 +130,10 @@ participates in the extension indexer resolution described above.
     `Length`/`Count` members plus instance `this[int]`/`Slice(int, int)` and ignores
     extension members.
 
+### Expression trees
+
+Extension indexers cannot be captured in expression trees.
+
 ## Metadata
 
 Extension indexers follow the same lowering model as extension properties. For
