@@ -1,5 +1,7 @@
 # Labeled `break` and `continue` Statements
 
+* Championed issue: https://github.com/dotnet/csharplang/issues/9875
+
 ## Summary
 
 Allow `break` and `continue` statements to optionally specify a label that identifies which loop or `switch`
