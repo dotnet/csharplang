@@ -5,7 +5,8 @@
 ## Summary
 
 Allow `break` and `continue` statements to optionally specify a label that identifies which loop or `switch`
-statement to target, enabling cleaner control flow in nested constructs without requiring `goto` statements.
+statement to target, enabling cleaner control flow in nested constructs without requiring `goto` statements,
+or other contortions like nested functions, tuple returns, etc.
 
 ## Motivation
 
