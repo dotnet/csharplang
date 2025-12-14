@@ -296,6 +296,7 @@ C# already supports `goto`, which can accomplish the same control flow. However,
 - Requires separate labels for break vs. continue scenarios (break labels go after the loop, continue labels go before the closing brace)
 - Label placement is less intuitive and differs based on whether you're breaking or continuing
 - Less explicit about intent (jumping to a location vs. breaking/continuing a specific loop)
+- Brittle and error-prone: developers must ensure no statements are accidentally placed between labels and their target constructs. For example, with `goto END_LOOP;` followed by `END_LOOP:`, it's easy to inadvertently insert a statement between them during maintenance, breaking the intended control flow. Labeled loops prevent this issue by binding the label directly to the construct.
 - Carries historical stigma that labeled break/continue avoids
 
 ### Use flag variables
@@ -317,6 +318,7 @@ While this is often good practice, it's not always feasible or appropriate, and 
 
 This proposal consolidates and addresses the following community discussions:
 
+<details>
 - [Discussion #6634: C# Break nested loop](https://github.com/dotnet/csharplang/discussions/6634)
 - [Issue #869: Discussion: C# Break nested loop](https://github.com/dotnet/csharplang/issues/869)
 - [Discussion #5525: [Proposal] Labeled loops like in Java](https://github.com/dotnet/csharplang/discussions/5525)
@@ -326,6 +328,7 @@ This proposal consolidates and addresses the following community discussions:
 - [Issue #3511: [Proposal] "doublecontine", to contine outer loop](https://github.com/dotnet/csharplang/issues/3511)
 - [Issue #2024: break and continue inhancements](https://github.com/dotnet/csharplang/issues/2024)
 - [Discussion #8434: Chained Control Flow Statements: break [, break]... [,continue]](https://github.com/dotnet/csharplang/discussions/8434)
+</details>
 
 ## Design meetings
 
