@@ -154,6 +154,14 @@ A delegate type that is marked `unsafe` can only be invoked in an `unsafe` conte
 Because `extern` methods are to native locations that cannot be guaranteed by the runtime, any `extern` method is automatically considered `unsafe`. Even methods that only take `unmanaged` parameters by
 value cannot be safely called by C#, as the calling convention used for the method could be incorrectly specified by the user and must be manually verified by review.
 
+`extern` methods are considered `unsafe` when called from code using the updated rules regardless of the memory safety rules version of the callee.
+
+Only `extern` methods which are recognizable from metadata are handled, i.e., methods with the `pinvokeimpl` flag in IL.
+Therefore, `extern` methods without `DllImport` attribute are not recognized as implicitly `unsafe` when used from a different assembly.
+Such `extern` methods are not a common scenario anyway and there is already a warning for `extern` methods without any attribute
+(albeit absence of that warning doesn't guarantee the method will be recognized as `unsafe` in metadata).
+One can mark such methods as `unsafe` explicitly if needed.
+
 ### Unsafe modifiers and contexts
 
 Today, as covered by the [unsafe context specification][unsafe-context-spec], `unsafe` behaves in a lexical manner, marking the entire textual body contained by the `unsafe` block as an `unsafe` context
