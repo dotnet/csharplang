@@ -158,7 +158,7 @@ value cannot be safely called by C#, as the calling convention used for the meth
 
 Only `extern` methods which are recognizable from metadata are handled, i.e., methods with the `pinvokeimpl` flag in IL.
 Therefore, `extern` methods without `DllImport` attribute are not recognized as implicitly `unsafe` when used from a different assembly.
-Such `extern` methods are not a common scenario anyway and there is already a warning for `extern` methods without any attribute
+Such `extern` methods exposed as API should not be a common scenario anyway and there is already a warning for `extern` methods without any attribute
 (albeit absence of that warning doesn't guarantee the method will be recognized as `unsafe` in metadata).
 One can mark such methods as `unsafe` explicitly if needed.
 
