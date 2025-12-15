@@ -319,6 +319,7 @@ While this is often good practice, it's not always feasible or appropriate, and 
 This proposal consolidates and addresses the following community discussions:
 
 <details>
+
 - [Discussion #6634: C# Break nested loop](https://github.com/dotnet/csharplang/discussions/6634)
 - [Issue #869: Discussion: C# Break nested loop](https://github.com/dotnet/csharplang/issues/869)
 - [Discussion #5525: [Proposal] Labeled loops like in Java](https://github.com/dotnet/csharplang/discussions/5525)
@@ -328,6 +329,7 @@ This proposal consolidates and addresses the following community discussions:
 - [Issue #3511: [Proposal] "doublecontine", to contine outer loop](https://github.com/dotnet/csharplang/issues/3511)
 - [Issue #2024: break and continue inhancements](https://github.com/dotnet/csharplang/issues/2024)
 - [Discussion #8434: Chained Control Flow Statements: break [, break]... [,continue]](https://github.com/dotnet/csharplang/discussions/8434)
+
 </details>
 
 ## Design meetings
