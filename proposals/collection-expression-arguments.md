@@ -573,7 +573,7 @@ Span<int> s = [with()]; // ok?
 
 ## Open questions
 
-Finalizing an open concern from https://github.com/dotnet/csharplang/blob/main/meetings/2025/LDM-2025-03-17.md#conclusion
+### Finalizing an open concern from https://github.com/dotnet/csharplang/blob/main/meetings/2025/LDM-2025-03-17.md#conclusion
 
 `with(...)` is a breaking change in the language with `[with(...)]`.  Before this feature, it means a collection expression with one element, which is the result of calling the `with`-invocation-expression.  After this feature, it is a collection, which has arguments passed to it. 
 
