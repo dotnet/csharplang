@@ -149,6 +149,12 @@ the topic being reintroduced and rerequested continuously.  Similar features exi
 - **Kotlin**: [Returns and Jumps](https://kotlinlang.org/docs/returns.html)
 - **Swift**: [Control Flow - Labeled Statements](https://docs.swift.org/swift-book/documentation/the-swift-programming-language/controlflow/#Labeled-Statements)
 - **Rust**: [Loop Labels](https://doc.rust-lang.org/reference/expressions/loop-expr.html#loop-labels)
+- **Go**: [Labeled statements](https://go.dev/ref/spec#Labeled_statements)
+- **Zig**: [Labelled loops](https://zig.guide/language-basics/labelled-loops/)
+- **Dart**: [Loops](https://dart.dev/language/loops)
+
+In all these cases, the languages operate in the saem way as in this specification.  Namely, some constructs can have a
+label, and it is possible to reference that label from their respective `continue` or `break` statements.  
 
 ## Detailed design
 
