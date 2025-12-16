@@ -4,6 +4,7 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ## Schedule ASAP
 
+- [with(...) breaking change](https://github.com/dotnet/csharplang/blob/main/proposals/collection-expression-arguments.md#open-questions)
 
 ## Schedule when convenient
 
