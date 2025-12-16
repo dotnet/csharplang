@@ -51,9 +51,8 @@ but extension members do not have an implicit or explicit `this`.
 ### `IndexerName` attribute
 
 `IndexerNameAttribute` may be applied to an extension indexer. The attribute is
-carried over to the extension member in metadata and its value determines
-the name of the property and accessors in metadata, 
-and the string used when emitting `[DefaultMemberAttribute]` (see [Metadata](#metadata)).
+not emitted in metadata, but its value determines the name of the property and accessors in metadata, 
+and is used when emitting `[DefaultMemberAttribute]` (see [Metadata](#metadata)).
 
 ## Consumption
 
@@ -203,6 +202,8 @@ static class BitExtensions
 ```
 
 ## Open issues
+
+- Update spec to disallow dynamic scenarios (including dynamic arguments)
 
 ### Should extension `Length`/`Count` properties make a type countable?
 
