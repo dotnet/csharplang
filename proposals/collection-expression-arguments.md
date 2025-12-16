@@ -573,4 +573,8 @@ Span<int> s = [with()]; // ok?
 
 ## Open questions
 
-None currently.
+`with(...)` is a breaking change in the language with `[with(...)]`.  Before this feature, it means a collection expression with one element, which is the result of calling the `with`-invocation-expression.  After this feature, it is a collection, which has arguments passed to it. 
+
+Do we want this break to occur only when a user picks a specific language version (like `C#-14/15`?).  In other words, if they are on an older langversion, they get the prior parsing logic, but on the newer version they get the newer parsing logic.  In  Or do we *always* want it to have the newer parsing logic, even on an older langversion?
+
+We have prior art for both strategies.  `required`, for example, is always parsed with teh new logic, regardless of langversion.  Whereas, `record/field` and others chang their parsing logic depending on language version. 
