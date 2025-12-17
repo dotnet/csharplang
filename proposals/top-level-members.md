@@ -4,7 +4,7 @@ Champion issue: https://github.com/dotnet/csharplang/issues/9803
 
 ## Summary
 
-Allow some members (methods, operators, extension blocks, and fields) to be declared in namespaces
+Allow some members (methods, operators, extension blocks, fields, constants) to be declared in namespaces
 and make them available when the corresponding namespace is imported
 (this is a similar concept to instance extension members which are also usable without referencing the container class).
 
@@ -54,7 +54,7 @@ extension<T>(IEnumerable<T> e)
 ## Detailed design
 
 - Some members can be declared directly in a namespace (file-scoped or block-scoped).
-  - Allowed kinds currently are: methods, operators, extension blocks, and fields.
+  - Allowed kinds currently are: methods, operators, extension blocks, fields, constants.
   - Existing declarations like classes still work the same, there shouldn't be any ambiguity.
   - There is no ambiguity with top-level statements because those are not allowed inside namespaces.
 
@@ -170,7 +170,7 @@ extension<T>(IEnumerable<T> e)
 
 ## Open questions
 
-- Which member kinds? Methods, fields, properties, indexers, events, constructors, operators.
+- Which member kinds? Methods, fields, constants, properties, indexers, events, constructors, operators.
 - Accessibility: what should be the default and which modifiers should be allowed?
 - Clustering: currently each namespace per assembly gets its `<>TopLevel` class.
 - Shape of the synthesized static class (currently `[TopLevel] <>TopLevel`).
