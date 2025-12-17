@@ -79,7 +79,7 @@ extension<T>(IEnumerable<T> e)
 
 - Usage (if there is an appropriately-shaped `[TopLevel]` type in namespace `NS`):
   - `using NS;` implies `using static NS.<>TopLevel;`.
-  - Lookup for `NS.Member` can find `NS.<>TopLevel.Member`.
+  - Lookup for `NS.Member` can find `NS.<>TopLevel.Member` (useful for disambiguation).
   - Nothing really changes for extension member lookup (the class name is already not used for that).
 
 - Entry points:
