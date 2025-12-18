@@ -135,7 +135,7 @@ collection_elements. Specifically, if the element [lexically](https://github.com
 starts with `with(` then it is always treated as a `with_element`.
 
 This is beneficial in two ways. First, a compiler implementation needs only look at the immediately following tokens
-it sees to determine what to parse next. Second, correspondingly, a user can trivially understand what sort of element
+it sees to determine what sort of element to parse. Second, correspondingly, a user can trivially understand what sort of element
 they have without having to mentally try to parse what follows to see if they should think of it as a `with_element` or
 an `expression_element`.
 
