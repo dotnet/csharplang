@@ -69,6 +69,14 @@ primary_no_array_creation_expression
 
 Collection literals are [target-typed](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-7.1/target-typed-default.md#motivation).
 
+The grammar for `collection_element` is known to introduce a syntax ambiguity.  Specifically `.. expr` is both exactly the production-body for `spread_element`, and is also reachable through `expression_element -> expression -> ... -> range_expression`.  There is a simple overarching
+rule for `collection_elements`.  Specifically, if the element [lexically](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/lexical-structure.md) starts with `..` then it is *always* treated as a `spread_element`.  For example, `..x ? y : z;` is always treated as a `spread_element`
+(so `.. (x ? y : z)`) even though it can be legally parsed as an expression (like `(..x) ? y : z`).
+
+This is beneficial in two ways.  First, a compiler implementation needs only look at the very first token it seems to determine what to parse
+next (a `spread_element` or `expression_element`).  And, correspondingly, a user can trivially understand what sort of element they have without
+having to mentally try to parse what follows to see if they should think of it as a spread or an expression.
+
 ### Spec clarifications
 [spec-clarifications]: #spec-clarifications
 
