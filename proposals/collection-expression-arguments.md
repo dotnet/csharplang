@@ -132,7 +132,7 @@ between `spread_element` and `expression_element` (explained [here](https://gith
 Specifically `with(<arguments>)` is both exactly the production-body for `with_element`, and is also reachable through
 `expression_element -> expression -> ... -> invocation_expression`. There is a simple overarching rule for
 collection_elements. Specifically, if the element [lexically](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/lexical-structure.md)
-starts with `with(` then it is always treated as a `with_element`.
+starts with the token sequence `with` `(` then it is always treated as a `with_element`.
 
 This is beneficial in two ways. First, a compiler implementation needs only look at the immediately following tokens
 it sees to determine what sort of element to parse. Second, correspondingly, a user can trivially understand what sort of element
