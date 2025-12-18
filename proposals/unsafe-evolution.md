@@ -151,10 +151,15 @@ A delegate type that is marked `unsafe` can only be invoked in an `unsafe` conte
 
 ### `extern`
 
-Because `extern` methods are to native locations that cannot be guaranteed by the runtime, any `extern` method is automatically considered `unsafe`. Even methods that only take `unmanaged` parameters by
-value cannot be safely called by C#, as the calling convention used for the method could be incorrectly specified by the user and must be manually verified by review.
+Because `extern` methods are to native locations that cannot be guaranteed by the runtime, any `extern` method is automatically considered `unsafe`
+if compiled under the updated memory safety rules (when it gets the `RequiresUnsafeAttribute`).
+Even methods that only take `unmanaged` parameters by value cannot be safely called by C#,
+as the calling convention used for the method could be incorrectly specified by the user and must be manually verified by review.
 
-`extern` methods are considered `unsafe` when called from code which is using the updated rules regardless of the memory safety rules version of the callee.
+`extern` methods from assemblies using the legacy memory safety rules are not considered implicitly `unsafe` because that would be a large breaking change
+(for example, `object.GetType` is `extern` in .NET Framework [reference assemblies](https://github.com/microsoft/referencesource/blob/ec9fa9ae770d522a5b5f0607898044b7478574a3/mscorlib/system/object.cs#L105)).
+Note that this is different from the [compat mode](#compat-mode) which applies to legacy-rules assemblies too
+because methods with pointers in signature would always need an unsafe context at the call site.
 
 ### Unsafe modifiers and contexts
 
@@ -229,7 +234,8 @@ namespace System.Runtime.CompilerServices
 #### Compat mode
 
 For compat purposes, and to reduce the number of false negatives that occur when enabling the new rules, we have a fallback rule for modules that have not been updated to the new rules. For such modules,
-a member is considered `unsafe` if it has a pointer or function pointer type in its signature.
+a member is considered `unsafe` if it contains a pointer or function pointer type somewhere among its parameter types or return type (can be nested in a non-pointer type, e.g., `int*[]`).
+Note that this doesn't apply to pointers in constraint types (e.g., `where T : I<int*[]>`) as those wouldn't need unsafe context at the call sites previously either.
 
 ## Open questions
 
