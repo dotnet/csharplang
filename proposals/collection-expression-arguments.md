@@ -128,7 +128,7 @@ collection_element
 ```
 
 There is a syntactic ambiguity immediately introduced with this grammar production.  Similar to the ambiguity
-between `spread_element` and `expression_element` (explained [here](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-12.0/collection-expressions.md#detailed-design), there is an immediately syntactic ambiguity between `with_element` and `expression_element`.
+between `spread_element` and `expression_element` (explained [here](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-12.0/collection-expressions.md#detailed-design), there is an immediate syntactic ambiguity between `with_element` and `expression_element`.
 Specifically `with(<arguments>)` is both exactly the production-body for `with_element`, and is also reachable through
 `expression_element -> expression -> ... -> invocation_expression`. There is a simple overarching rule for
 collection_elements. Specifically, if the element [lexically](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/lexical-structure.md)
