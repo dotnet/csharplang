@@ -113,7 +113,7 @@ arguments, without stepping out of bounds of the goals of collection expressions
 
 ## `[with(...arguments...)]` Design
 
-Syntax:
+### Syntax:
 
 ```diff
 collection_element
@@ -126,6 +126,20 @@ collection_element
 +  : 'with' argument_list
 +  ;
 ```
+
+There is a syntactic ambiguity immediately introduced with this grammar production.  Similar to the ambiguity
+between `spread_element` and `expression_element` (explained [here](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-12.0/collection-expressions.md#detailed-design), there is an immediately syntactic ambiguity between `with_element` and `expression_element`.
+Specifically `with(<arguments>)` is both exactly the production-body for `with_element`, and is also reachable through
+`expression_element -> expression -> ... -> invocation_expression`. There is a simple overarching rule for
+collection_elements. Specifically, if the element [lexically](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/lexical-structure.md)
+starts with `with(` then it is always treated as a `with_element`.
+
+This is beneficial in two ways. First, a compiler implementation needs only look at the immediately following tokens
+it sees to determine what to parse next. Second, correspondingly, a user can trivially understand what sort of element
+they have without having to mentally try to parse what follows to see if they should think of it as a `with_element` or
+an `expression_element`.
+
+### Examples
 
 Examples of how this would look are:
 
