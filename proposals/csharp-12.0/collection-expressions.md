@@ -74,7 +74,7 @@ rule for `collection_elements`.  Specifically, if the element [lexically](https:
 (so `.. (x ? y : z)`) even though it can be legally parsed as an expression (like `(..x) ? y : z`).
 
 This is beneficial in two ways.  First, a compiler implementation needs only look at the very first token it seems to determine what to parse
-next (a `spread_element` or `expression_element`).  And, correspondingly, a user can trivially understand what sort of element they have without
+next (a `spread_element` or `expression_element`).  Second, correspondingly, a user can trivially understand what sort of element they have without
 having to mentally try to parse what follows to see if they should think of it as a spread or an expression.
 
 ### Spec clarifications
