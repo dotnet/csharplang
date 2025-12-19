@@ -151,8 +151,17 @@ A delegate type that is marked `unsafe` can only be invoked in an `unsafe` conte
 
 ### `extern`
 
-Because `extern` methods are to native locations that cannot be guaranteed by the runtime, any `extern` method is automatically considered `unsafe`. Even methods that only take `unmanaged` parameters by
-value cannot be safely called by C#, as the calling convention used for the method could be incorrectly specified by the user and must be manually verified by review.
+Because `extern` methods are to native locations that cannot be guaranteed by the runtime, any `extern` method is automatically considered `unsafe`
+if compiled under the updated memory safety rules (i.e., it gets the `RequiresUnsafeAttribute`).
+Even methods that only take `unmanaged` parameters by value cannot be safely called by C#,
+as the calling convention used for the method could be incorrectly specified by the user and must be manually verified by review.
+
+`extern` methods from assemblies using the legacy memory safety rules are not considered implicitly `unsafe` because
+`extern` is considered implementation detail that is not part of public surface.
+`extern` is not guaranteed to be preserved in reference assemblies.
+
+Note that this is different from the [compat mode](#compat-mode) which applies to legacy-rules assemblies too
+because methods with pointers in signature would always need an unsafe context at the call site.
 
 ### Unsafe modifiers and contexts
 
@@ -227,7 +236,8 @@ namespace System.Runtime.CompilerServices
 #### Compat mode
 
 For compat purposes, and to reduce the number of false negatives that occur when enabling the new rules, we have a fallback rule for modules that have not been updated to the new rules. For such modules,
-a member is considered `unsafe` if it has a pointer or function pointer type in its signature.
+a member is considered `unsafe` if it contains a pointer or function pointer type somewhere among its parameter types or return type (can be nested in a non-pointer type, e.g., `int*[]`).
+Note that this doesn't apply to pointers in constraint types (e.g., `where T : I<int*[]>`) as those wouldn't need unsafe context at the call sites previously either.
 
 ## Open questions
 
@@ -352,6 +362,15 @@ i++;
 
 What should be the "enabled"/"updated" memory safety rules version? `2`? `15`? `11`?
 See also https://github.com/dotnet/designs/blob/main/accepted/2025/memory-safety/sdk-memory-safety-enforcement.md.
+
+### `extern` implicitly unsafe
+
+This is currently the only place where `RequiresUnsafeAttribute` is synthesized without an explicit `unsafe` keyword.
+Are we okay with this outlier?
+
+Also, CoreLib exposes many extern methods (FCalls) as safe today.
+Treating extern methods as implicitly unsafe will require wrapping the implicitly unsafe extern methods with a safe wrapper.
+We may run into situations where adding the extra wrapper is difficult due to runtime implementation details.
 
 ## Answered questions
 
