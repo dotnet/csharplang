@@ -157,9 +157,8 @@ Even methods that only take `unmanaged` parameters by value cannot be safely cal
 as the calling convention used for the method could be incorrectly specified by the user and must be manually verified by review.
 
 `extern` methods from assemblies using the legacy memory safety rules are not considered implicitly `unsafe` because
-- it is not guaranteed that `extern` will be always preserved in reference assemblies (i.e., compiler cannot reliably recognize `extern` methods from metadata), and
-- it would be a large breaking change (e.g., `object.GetType` currently appears as `extern` in .NET Framework reference assemblies
-  because `extern` is preserved in reference assemblies by current tooling from the [implementation assembly](https://github.com/microsoft/referencesource/blob/ec9fa9ae770d522a5b5f0607898044b7478574a3/mscorlib/system/object.cs#L105)).
+`extern` is considered implementation detail that is not part of public surface.
+`extern` is not guaranteed to be preserved in reference assemblies.
 
 Note that this is different from the [compat mode](#compat-mode) which applies to legacy-rules assemblies too
 because methods with pointers in signature would always need an unsafe context at the call site.
@@ -363,6 +362,15 @@ i++;
 
 What should be the "enabled"/"updated" memory safety rules version? `2`? `15`? `11`?
 See also https://github.com/dotnet/designs/blob/main/accepted/2025/memory-safety/sdk-memory-safety-enforcement.md.
+
+### `extern` implicitly unsafe
+
+This is currently the only place where `RequiresUnsafeAttribute` is synthesized without an explicit `unsafe` keyword.
+Are we okay with this outlier?
+
+Also, CoreLib exposes many extern methods (FCalls) as safe today.
+Treating extern methods as implicitly unsafe will require wrapping the implicitly unsafe extern methods with a safe wrapper.
+We may run into situations where adding the extra wrapper is difficult due to runtime implementation details.
 
 ## Answered questions
 
