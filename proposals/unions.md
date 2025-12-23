@@ -179,6 +179,7 @@ The union behaviors are generally implemented by means of the basic union patter
 #### Union conversions
 
 A *union conversion* implicitly converts to a union type from each of its case types. Specifically, there's a union conversion to a union type `U` from a type or expression `E` if there's a standard implicit conversion from `E` to a type `C` and `C` is a case type of `U`.
+If union type `U` is a struct, there's a union conversion to type `U?` from a type or expression `E` if there's a standard implicit conversion from `E` to a type `C` and `C` is a case type of `U`.
 
 A union conversion is not itself a standard implicit conversion. It may therefore not participate in a user-defined implicit conversion or another union conversion.
 
@@ -462,6 +463,10 @@ Specifically, assuming `T` is a union type there's an implicit conversion to a t
 expression `E` if there's a union conversion from `E` to a type `C` and `C` is a case type of `T`.
 Note, there is no requirement for type of `E` to be a non-nullable value type.
 The conversion is evaluated as the underlying union conversion from `S` to `T` followed by a wrapping from `T` to `T?`
+
+**Resolution:**
+
+Approved.
 
 #### Lifted conversions
 
