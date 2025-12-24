@@ -1090,7 +1090,7 @@ class Program
 }
 ```
 
-The notion of *iteration type* is fundamental to [Params Collections](https://github.com/dotnet/csharplang/blob/main/proposals/params-collections.md#applicable-function-member) feature.
+The notion of *iteration type* is fundamental to [Params Collections](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-13.0/params-collections.md#applicable-function-member) feature.
 And this issue leads to a strange discrepancy between the two features. For Example:
 
 ``` C#
@@ -1279,7 +1279,7 @@ For a *struct* or *class type* that implements `System.Collections.IEnumerable` 
 - An accessible constructor that is applicable with no arguments.
 - An accessible `Add` instance or extension method that can be invoked with value of *iteration type* as the argument.
 
-For the purpose of [Params Collectons](https://github.com/dotnet/csharplang/blob/main/proposals/params-collections.md#method-parameters) feature,
+For the purpose of [Params Collections](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-13.0/params-collections.md#method-parameters) feature,
 such types are valid `params` types when these APIs are declared public and are instance (vs. extension) methods.
 
 #### Conclusion
