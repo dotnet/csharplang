@@ -1,6 +1,6 @@
 # Relaxed ordering for `partial` and `ref` modifiers
 
-Champion issue: https://github.com/dotnet/csharplang/issues/946
+Champion issue: https://github.com/dotnet/csharplang/issues/9804
 
 ## Summary
 [summary]: #summary
