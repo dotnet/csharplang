@@ -1,6 +1,6 @@
 # Allow arrays as CollectionBuilder Create parameter type
 
-Champion issue: TBD
+Champion issue: <https://github.com/dotnet/csharplang/issues/9923>
 
 ## Summary
 
