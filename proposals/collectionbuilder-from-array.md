@@ -20,6 +20,8 @@ public static class ReadOnlyMemory
 }
 ```
 
+(Note: for `Memory<T>` and `ReadOnlyMemory<T>` to be used with a collection expressions, the already-approved [Relax requirement that type be enumerable to participate in collection expressions](https://github.com/dotnet/csharplang/issues/9009) feature must also be implemented.)
+
 ## Motivation
 
 This proposal addresses two pain points with core types, while also opening the door for collection expressions to be used efficiently with user-defined array wrapper types.
