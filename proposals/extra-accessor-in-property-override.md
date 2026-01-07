@@ -1,6 +1,6 @@
 # Extra accessor in property override
 
-Champion issue: TBD
+Champion issue: <https://github.com/dotnet/csharplang/issues/9921>
 
 Many thanks to [@MrJul](https://github.com/MrJul) for putting together the original proposal and investigating the implementation.
 
