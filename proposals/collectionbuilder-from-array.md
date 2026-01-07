@@ -20,7 +20,7 @@ public static class ReadOnlyMemory
 }
 ```
 
-(Note: for `Memory<T>` and `ReadOnlyMemory<T>` to be used with a collection expressions, the already-approved [Relax requirement that type be enumerable to participate in collection expressions](https://github.com/dotnet/csharplang/issues/9009) feature must also be implemented.)
+(Note: for `Memory<T>` and `ReadOnlyMemory<T>` to be used with collection expressions, the already-approved [Relax requirement that type be enumerable to participate in collection expressions](https://github.com/dotnet/csharplang/issues/9009) feature must also be implemented.)
 
 ## Motivation
 
