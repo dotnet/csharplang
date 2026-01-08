@@ -301,7 +301,7 @@ If the target type is an *interface type*, then:
   |Interfaces|Candidate signatures|
   |:---:|:---:|
   |`IEnumerable<E>`<br>`IReadOnlyCollection<E>`<br>`IReadOnlyList<E>`|`()` (no parameters)|
-  |`ICollection<E>`<br>`IList<E>`|`List<T>()`<br>`List<T>(int)`|
+  |`ICollection<E>`<br>`IList<E>`|`List<E>()`<br>`List<E>(int)`|
 
  If a best method signature is found, the semantics are as follows:
 
