@@ -44,9 +44,6 @@ This syntax was chosen as it:
 1. Ensures any user need for passing arguments, or any needs we ourselves have beyond comparers in the future are already handled.
 1. Does not conflict with any existing code (using https://grep.app/ to search).
 
-A minor question exists if the preferred form would be `args(...)` or `init(...)` instead of `with(...)`.  But the forms are
-otherwise identical.
-
 ## Design Philosophy
 
 The below section covers prior design philosophy discussions.  Including why certain forms were rejected. 
