@@ -1,10 +1,10 @@
-# `using` with a discard
+# Anonymous using declarations
 
 Champion issue: <https://github.com/dotnet/csharplang/issues/8606>
 
 ## Summary
 
-Permit `using` variable declarations with a discard variable:
+Permit `using` declarations whose variable is anonymous:
 
 ```cs
 void M()
@@ -17,10 +17,10 @@ void M()
 
 This statement form adds the final corner to the following square:
 
-|                  | **New variable**            | **No new variable** |
-|------------------|-----------------------------|---------------------|
-| **New scope**    | `using (var name = expr) {` | `using (expr) {`    |
-| **No new scope** | `using var name = expr;`    | `using _ = expr;` 🆕 |
+|                  | **New variable name**       | **No new variable name** |
+|------------------|-----------------------------|--------------------------|
+| **New scope**    | `using (var name = expr) {` | `using (expr) {`         |
+| **No new scope** | `using var name = expr;`    | `using _ = expr;` 🆕      |
 
 It has been wildly popular to remove or avoid nesting by preferring the bottom form inside the "New variable" column to the top form. However, there has been no corresponding opportunity in the other column. The absence of this corner has been painfully felt. When a language user doesn't want the extra nesting, but also has no use for the variable, this results in workarounds such as creating variables named `_`, `_1`, `_2`, and so on.
 
