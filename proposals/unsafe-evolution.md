@@ -258,14 +258,16 @@ We could remove the ability to make delegate types as `unsafe` entirely, and sim
 This could simplify the model around `unsafe` in C#, but at the risk of forcing `unsafe` annotations in the wrong spot and having an area where the real area of `unsafe`ty isn't properly called out. There
 are a lot of corner cases here, particularly involving generics and conversions, so it may be better to simply leave the concept for later when we determine it's needed.
 
-> [!NOTE] If we decide to disallow `unsafe` delegates, we need to add them to the list of declarations that warn for meaningless `unsafe`.
+> [!NOTE]
+> If we decide to disallow `unsafe` delegates, we need to add them to the list of declarations that warn for meaningless `unsafe`.
 
 ### Lambda/method group natural types
 
 Today, the only real impact on semantics and codegen (besides additional metadata) is changing the *function_type* of a lambda or method group when `unsafe` is in the signature. If we were to avoid doing this, then
 there would be no real impact to either, which could give adopters more confidence that behavior has not subtly changed under the hood.
 
-> [!NOTE] If we decide to keep the ability to have `unsafe` lambdas, we need to update this proposal to include a syntax change to allow lambdas to be declared `unsafe` in the first place.
+> [!NOTE]
+> If we decide to keep the ability to have `unsafe` lambdas, we need to update this proposal to include a syntax change to allow lambdas to be declared `unsafe` in the first place.
 
 ### `stackalloc` as initialized
 
