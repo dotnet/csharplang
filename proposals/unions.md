@@ -381,6 +381,29 @@ public record struct Pet : IUnion, IUnion<Pet>
 ## Open questions
 [open]: #open-questions
 
+### Should post-condition attributes affect default nullability of a Union instance?
+
+Is the warning expected in the following scenario
+``` c#
+#nullable enable
+
+struct S1 : System.Runtime.CompilerServices.IUnion
+{
+    public S1(int x) => throw null!;
+    public S1([System.Diagnostics.CodeAnalysis.NotNull] bool? x) => throw null!;
+    object? System.Runtime.CompilerServices.IUnion.Value => throw null!;
+}
+class Program
+{
+    static void Test2(S1 s)
+    {
+       // warning CS8655: The switch expression does not handle some null inputs (it is not exhaustive).
+       //                 For example, the pattern 'null' is not covered.
+        _ = s switch { int => 1, bool => 3 }; // 
+    } 
+}
+```
+
 ### Union conversions
 
 #### Where do they belong among other conversions priority-wise?
