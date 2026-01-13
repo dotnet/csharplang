@@ -574,6 +574,15 @@ class Program
 }
 ```
 
+**Resolution:**
+
+No lifted union conversions for now.
+Some notes from the discussion:
+> The analogy to the user defined conversions breaks down a little here.
+> In general unions are able to contain a null value that comes in.
+> It is not clear whether lifting should create an instance of a union type with `null`
+> value stored in it, or whether it should create a `null` value of `Nullable<Union>`.
+
 #### Block union conversion from an instance of a base type?
 
 One might find the current behavior confusing:
@@ -603,6 +612,10 @@ class Program
 
 Note, language explicitly disallows declaring user-defined conversions from a base type. Therefore, it might make sence to not
 allow union conversions like that.
+
+**Resolution:**
+
+Do nothing special for now. Generic scenarios cannot be fully protected anyway.
 
 #### Block union conversion from an instance of an interface type?
 
@@ -667,6 +680,10 @@ class Program
 
 Note, language explicitly disallows declaring user-defined conversions from a base type. Therefore, it might make sence to not
 allow union conversions like that.
+
+**Resolution:**
+
+Do nothing special for now. Generic scenarios cannot be fully protected anyway.
 
 ### Namespace of IUnion interface
 
