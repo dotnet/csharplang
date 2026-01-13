@@ -428,6 +428,31 @@ public record struct Pet : IUnion, IUnion<Pet>
 ## Open questions
 [open]: #open-questions
 
+### Confirm that a type parameter is never a union type, even when constrained to one.
+
+``` C#
+class C1 : System.Runtime.CompilerServices.IUnion
+{
+    private readonly object _value;
+    public C1(int x) { _value = x; }
+    public C1(string x) { _value = x; }
+    object System.Runtime.CompilerServices.IUnion.Value => _value;
+}
+
+class Program
+{
+    static bool Test1<T>(T u) where T : C1
+    {
+        return u is int; // Not a union matching
+    }   
+
+    static bool Test2<T>(T u) where T : C1
+    {
+        return u is string; // Not a union matching
+    }   
+}
+```
+
 ### Should post-condition attributes affect default nullability of a Union instance?
 
 Is the warning expected in the following scenario
