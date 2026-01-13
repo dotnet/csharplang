@@ -87,7 +87,9 @@ TUnion ReadUnion<TUnion>() where TUnion : IUnion<TUnion>
 
 ### Union types
 
-Any non-abstract class or struct type that implements the `IUnion` interface is considered a *union type*. For each public constructor with exactly one parameter, the type of that parameter is considered a *case type* of the union type.
+Any non-abstract class or struct type that implements the `IUnion` interface is considered a *union type*.
+For each public constructor with exactly one by-value or `in` parameter, the type of that parameter is considered
+a *case type* of the union type.
 
 The contents of a union value can be accessed through the `IUnion.Value` property. The language assumes that `Value` only ever contains a value of one of the case types, or null (see [Well-formedness](#well-formedness)).
 
@@ -506,6 +508,11 @@ Adjust definition of a `case type constructor` in `Union types` section above:
 -For each public constructor with exactly one parameter, the type of that parameter is considered a *case type* of the union type.
 +For each public constructor with exactly one **by-value or `in`** parameter, the type of that parameter is considered a *case type* of the union type.
 ```
+
+**Resolution:**
+
+Approved by the working group for now. However, we might consider "splitting" the set of case type constructors
+and the set of constructors suitable for union type conversions.
 
 #### Nullable Conversions
 
