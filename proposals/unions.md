@@ -428,6 +428,32 @@ public record struct Pet : IUnion, IUnion<Pet>
 ## Open questions
 [open]: #open-questions
 
+### Clarify rules around `default` values of struct union types
+
+[Nullability](#Nullability) section says:
+> For union types where none of the case types are nullable, the default state for `Value` is "not null" rather than "maybe null". 
+
+Given that, for the example below, current implementation considers `Value` of `s2` as "not null":
+``` c#
+S2 s2 = default;
+
+struct S2 : System.Runtime.CompilerServices.IUnion
+{
+    public S2(int x) => throw null!;
+    public S2(bool x) => throw null!;
+    object? System.Runtime.CompilerServices.IUnion.Value => throw null!;
+}
+```
+
+At the same time, [Well-formedness](#Well-formedness) section says:
+>* *Default value*: If a union type is a value type, it's default value has `null` as its `Value`.
+>* *Default constructor*: If a union type has a nullary (no-argument) constructor, the resulting union has `null` as its `Value`.
+
+An implementation like that will be in contradiction with nullable analysis behavior for the example above.
+
+Should the [Well-formedness](#Well-formedness) rules be adjusted, or should state of `Value` of `default` be "maybe null"?
+If the latter, should initialization ```S2 s2 = default;``` produce a nullability warning?
+
 ### Confirm that a type parameter is never a union type, even when constrained to one.
 
 ``` C#
