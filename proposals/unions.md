@@ -195,6 +195,51 @@ Pet pet = new Pet(dog);
 
 It is not an ambiguity error if more than one constructor overload applies. Instead, one is chosen in an implementation-defined manner. Note that, per the well-formedness rules, the observable behavior of these constructors is assumed to be the same.
 
+Union conversion is just another "form" of an implicit user-defined conversion. An applicable
+user-defined conversion operator "shadows" union conversion.
+
+The rationale behind this decision:
+> If someone written a user-defined operator, it should get priority.
+> In other words, if the user actually wrote their own operator, they want us to call it.
+> Existing types with conversion operators transformed into union types continue to work
+> the same way with respect to existing code utilizing the operators today.
+
+In the following example an implicit user-defined conversion takes priority over a union conversion. 
+``` c#
+struct S1 : System.Runtime.CompilerServices.IUnion
+{
+    public S1(int x) => ...
+    public S1(string x) => ...
+    object System.Runtime.CompilerServices.IUnion.Value => ...
+    public static implicit operator S1(int x) => ...
+}
+
+class Program
+{
+    static S1 Test1() => 10; // implicit operator S1(int x) is used
+    static S1 Test2() => (S1)20; // implicit operator S1(int x) is used
+}
+```
+
+In the following example, when explicit cast is used in code, an explicit user-defined conversion
+takes priority over a union conversion. But, when there is no explicit cast in code, a union conversion
+is used because explicit user-defined conversion is not applicable.
+``` c#
+struct S2 : System.Runtime.CompilerServices.IUnion
+{
+    public S2(int x) => ...
+    public S2(string x) => ...
+    object System.Runtime.CompilerServices.IUnion.Value => ...
+    public static explicit operator S2(int x) => ...
+}
+
+class Program
+{
+    static S2 Test3() => 10; // Union conversion S2.S2(int) is used
+    static S2 Test4() => (S2)20; // explicit operator S2(int x)
+}
+```
+
 #### Union matching
 
 When the incoming value of a pattern is of a union type, the union value's contents may be "unwrapped", depending on the pattern.
@@ -443,6 +488,10 @@ class Program
 ```
 
 Need to confirm this is the behavior that we like. Otherwise the conversion rules should be clarified.
+
+**Resolution:**
+
+Approved by the working group.
 
 #### Ref-ness of constructor's parameter
 
