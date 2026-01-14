@@ -428,6 +428,40 @@ public record struct Pet : IUnion, IUnion<Pet>
 ## Open questions
 [open]: #open-questions
 
+### *The non-boxing union access pattern*
+
+Need to specify precise rules for finding suitable `HasValue` and `TryGetValue` APIs.
+Is inheritance involved? Etc.
+
+### `TryGetValue` matching conversions
+
+The Union Matching section says:
+> For a pattern that implies checking for a specific type `T`, if a `TryGetValue(S value)`
+> method is available, and there is an implicit conversion from `T` to `S`,
+> then that method is used to obtain the value.
+
+Is the set of implicit conversions restricted in any way? For example, are user-defined conversions allowed?
+What about tuple conversions and other not so trivial conversions? Some of those are even standard conversions. 
+
+Is the set of `TryGetValue` methods restricted in any other way? For example, Union Patterns section implies
+that only methods with a parameter type matching a case type are considered:
+> a `public bool TryGetValue(out T value)` method for each case type `T`.
+
+It would be good to have an explicit answer. 
+
+### `TryGetValue` and nullable analysis
+
+> When the non-boxing access pattern's `HasValue` or `TryGetValue(...)`
+> are used to query the contents of a union type (explicitly or via pattern matching),
+> it impacts `Value`'s nullability state in the same way as if `Value` had been
+> checked directly: The null state of `Value` becomes "not null" on the `true` branch.
+
+Is the set of `TryGetValue` methods restricted in any way? For example, Union Patterns section implies
+that only methods with a parameter type matching a case type are considered:
+> a `public bool TryGetValue(out T value)` method for each case type `T`.
+
+It would be good to have an explicit answer. 
+
 ### Clarify rules around `default` values of struct union types
 
 [Nullability](#Nullability) section says:
