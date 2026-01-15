@@ -34,7 +34,9 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ### Mon Jan 26, 2026
 
-### Wed Jan 21, 2026
+### Wed Jan 21, 2026 (one hour only)
+
+- Unsafe syntax (Mads)
 
 ## C# Language Design Notes for 2026
 
