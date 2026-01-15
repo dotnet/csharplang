@@ -2,6 +2,8 @@
 
 [!INCLUDE[Specletdisclaimer](../speclet-disclaimer.md)]
 
+Closed in favor of [immediately enumerated collection expressions](../immediately-enumerated-collection-expressions.md).
+
 Champion issue: https://github.com/dotnet/csharplang/issues/9739
 
 ## Summary
