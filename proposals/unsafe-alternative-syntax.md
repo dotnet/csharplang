@@ -103,6 +103,12 @@ This means that the member's author doesn't get more fine-grained control over w
 
 **With this proposal** the `[RequiresUnsafe]` attribute does not imply that the member is an unsafe context. The author is free to mark the boundaries that make the most sense.
 
+### Meaningless uses of unsafe
+
+The original proposal introduces a warning for a few places where the `unsafe` modifier is allowed only for compat purposes, but no longer has an effect.
+
+**With this proposal** there is no need for such a warning, since the meaning of `unsafe` doesn't change.
+
 ## Detailed design
 
 - Keep the `unsafe` keyword with the same meaning in the same places as today: In every location it simply denotes a region of code as an unsafe context.
