@@ -125,6 +125,7 @@ There is an open question around "compat mode" below.
 ## Drawbacks
 
 - **No dedicated syntax:** Unlike the original proposal, this version falls back to attributes to express the intended semantics. It wouldn't be the only place in the language where member annotations are by attribute, but maybe there are arguments why this situation is more common or important and deserves a keyword.
+- **Lack of "uniformity":** Arguably, using `unsafe` both to *produce* (on members) and *consume* (on blocks) unsafe operations is a simpler mental model. It's similar to how `Obsolete` members can call other `Obsolete` members.
 
 ## Alternatives
 
