@@ -137,4 +137,17 @@ Closed classes are generated with a `Closed` attribute, to allow them to be reco
 
 ## Open questions
 
-- Can closed classes be generated into IL in a way that prevents other languages and compilers from deriving from them even if they do not implement the feature?
+### Blocking subtyping from other languages/compilers
+
+Can closed classes be generated into IL in a way that prevents other languages and compilers from deriving from them even if they do not implement the feature?
+
+We propose accomplishing this by adding `[CompilerFeatureRequired("ClosedClasses")]` to all constructors of closed classes. Since constructors of abstract types can generally only be used in a constructor initializer, this seems to effectively prevent languages which don't understand the feature, from allowing user to declare a subclass of a closed class.
+
+### Same module restriction
+
+The proposal text mentions that there must be a "same assembly" restriction. We propose strengthening this restriction so that subtypes may only be declared in the same module. That is, declaring a closed class in a netmodule, and subtyping it in a different module, should not be permitted, because it breaks the ability to determine the exhaustive set of subtypes from the context of the original declaration in a similar way as cross-assembly subtyping.
+
+### TODO: Should subtypes be marked in metadata?
+
+It seems like when a closed type is referenced from metadata, there is a need to search its containing assembly for all possible subtypes of it, to check exhaustiveness of patterns in the consuming compilation.
+Perhaps we could reduce the amount of work the compiler needs to do, by adding a `[ClosedSubtype(typeof(Subtype1), typeof(Subtype2), ...)]` attribute to the closed class itself.
