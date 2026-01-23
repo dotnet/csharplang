@@ -32,7 +32,11 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ### Wed Jan 28, 2026
 
+- Unions (details TBD) (Matt and Mads)
+
 ### Mon Jan 26, 2026
+
+- [Unsafe syntax alternative](https://github.com/dotnet/csharplang/blob/main/proposals/unsafe-alternative-syntax.md) continued (Mads)
 
 ### Wed Jan 21, 2026 (one hour only)
 
