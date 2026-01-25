@@ -431,7 +431,7 @@ public record struct Pet : IUnion, IUnion<Pet>
 ### *The non-boxing union access pattern*
 
 Need to specify precise rules for finding suitable `HasValue` and `TryGetValue` APIs.
-Is inheritance involved? Etc.
+Is inheritance involved? Is read/write `HasValue` an acceptable match? Etc.
 
 ### `TryGetValue` matching conversions
 
