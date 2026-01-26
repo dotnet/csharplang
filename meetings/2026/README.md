@@ -30,11 +30,9 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ### Wed Feb 4, 2026
 
-### Mon Feb 2, 2026
-
-### Wed Jan 28, 2026
-
 - Unions (details TBD) (Matt and Mads)
+
+### Mon Feb 2, 2026
 
 ### Mon Jan 26, 2026
 
