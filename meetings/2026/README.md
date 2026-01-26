@@ -38,7 +38,7 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ### Mon Jan 26, 2026
 
-- [Unsafe syntax alternative](https://github.com/dotnet/csharplang/blob/main/proposals/unsafe-alternative-syntax.md) continued (Mads)
+- [Unsafe syntax alternative](https://github.com/dotnet/csharplang/blob/main/meetings/working-groups/unsafe-evolution/unsafe-alternative-syntax.md) continued (Mads)
 
 ## C# Language Design Notes for 2026
 
