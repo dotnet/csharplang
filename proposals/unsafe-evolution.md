@@ -45,7 +45,9 @@ the new rules to avoid entirely bifurcating the ecosystem.
 
 ## Detailed Design
 
-Terminology: members which [have the `RequiresUnsafe` attribute](#metadata) or [are `extern`](#extern) or [contain pointers in signature](#compat-mode) are called *requires-unsafe*.
+Terminology: we call members *requires-unsafe* (a.k.a. *caller-unsafe*) if
+- under [the updated memory safety rules](#metadata) they [have the `RequiresUnsafe` attribute](#metadata) or [are `extern`](#extern),
+- under [the legacy memory safety rules](#metadata) they [contain pointers in signature](#compat-mode).
 
 ### Existing `unsafe` rules
 
@@ -140,7 +142,7 @@ It is a memory safety error to convert a requires-unsafe member to a delegate ty
 is updated to include whether the _anonymous function_ has the `RequiresUnsafe` attribute, or the _method group_ is to a member that is requires-unsafe. If it is, a requires-unsafe anonymous function type is created, just as
 it would be if any parameter were a by-`ref`, optional, or `params`.
 
-It is a memory safety error convert a delegate type that is requires-unsafe to `System.Delegate`/`System.Linq.Expressions.Expression`/`System.Linq.Expressions.Expression<T>`, or any interface those
+It is a memory safety error to convert a delegate type that is requires-unsafe to `System.Delegate`/`System.Linq.Expressions.Expression`/`System.Linq.Expressions.Expression<T>`, or any interface those
 types implement or base type of those types. They also cannot be used as type parameters.
 
 A delegate type that is requires-unsafe can only be invoked in an `unsafe` context. A delegate type is requires-unsafe if and only if its `Invoke`, `BeginInvoke`, and `EndInvoke` methods are marked as `RequiresUnsafe`
