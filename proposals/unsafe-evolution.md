@@ -63,7 +63,7 @@ of the existing rules of the specification. Instead, we will provide an overview
 
 #### Redefining expressions that require unsafe contexts
 
-The following expression require an `unsafe` context when used:
+The following expressions require an `unsafe` context when used:
 
 * [Pointer indirections][pointer-indirection]
 * [Pointer member access][pointer-member-access]
@@ -171,11 +171,11 @@ because methods with pointers in signature would always need an unsafe context a
 ### Unsafe modifiers and contexts
 
 Today, as covered by the [unsafe context specification][unsafe-context-spec], `unsafe` behaves in a lexical manner, marking the entire textual body contained by the `unsafe` block as an `unsafe` context
-(except for iterator bodies). Since pointer types are now safe, `unsafe` modifier on declarations without bodies is not necessary anymore. Hence `unsafe` on the following declarations will produce a warning:
+(except for iterator bodies). Since pointer types are now safe, an `unsafe` modifier on declarations without bodies does not have a meaning anymore. Hence `unsafe` on the following declarations will produce a warning:
 - `using static`,
 - `using` alias.
 
-`RequiresUnsafe` on a member is _not_ applied to any nested anonymous or local functions inside the member. To mark a anonymous or local function as requires-unsafe, it must manually be marked as `RequiresUnsafe`. The same goes for
+`RequiresUnsafe` on a member is _not_ applied to any nested anonymous or local functions inside the member. To mark an anonymous or local function as requires-unsafe, it must manually be marked as `RequiresUnsafe`. The same goes for
 anonymous and local functions declared inside of an `unsafe` block.
 
 When a member is `partial`, both parts must agree on the `unsafe` modifier, but only one can specify the `RequiresUnsafe` attribute, unchanged from C# rules today.
@@ -265,6 +265,9 @@ are a lot of corner cases here, particularly involving generics and conversions,
 > [!NOTE]
 > This is currently implemented (i.e., it's not possible to mark delegates as requires-unsafe and converting requires-unsafe methods/lambdas must happen in an `unsafe` context) because it seems like a good starting point.
 
+> [!NOTE]
+> If delegates indeed cannot be marked requires-unsafe, we should add them to the list of declarations that produce a warning for the `unsafe` modifier being meaningless.
+
 ### Lambda/method group natural types
 
 Today, the only real impact on semantics and codegen (besides additional metadata) is changing the *function_type* of a lambda or method group when marked as `RequiresUnsafe`. If we were to avoid doing this, then
@@ -315,6 +318,12 @@ class A : System.Attribute
 [A] class C; // unavoidable error for using requires-unsafe A..ctor?
 [A] unsafe class C; // if unsafe still introduces an unsafe context, this makes the error go away
 ```
+
+### More meaningless `unsafe` warnings
+
+Should more declarations produce the meaningless `unsafe` warning?
+For example, fields without initializers (assuming we don't support [requires-unsafe fields](#requires-unsafe-fields)), methods with empty bodies (or `extern`), etc.
+We already have an IDE analyzer for unnecessary `unsafe` though.
 
 ### Requires-unsafe fields
 
