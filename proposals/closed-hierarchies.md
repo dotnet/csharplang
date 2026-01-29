@@ -184,7 +184,10 @@ closed abstract class C { } // equivalent to:
 closed class C { }
 
 // compare with:
-abstract interface I { } // error
+abstract interface I // error
+{
+    abstract void M(); // ok
+}
 internal class C { } // ok, explicitly specifying the default accessibility
 ```
 
