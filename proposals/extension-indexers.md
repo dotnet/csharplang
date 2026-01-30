@@ -205,6 +205,38 @@ static class BitExtensions
 
 - Update spec to disallow dynamic scenarios (including dynamic arguments)
 
+### Dealing with `params`
+
+If you have an extension indexer with `params`, such as `int this[int i, params string[] s] { get; set; }`,
+there are three ways you could use it:
+- extension indexing:  `receiver[i: 0, "Alice", "Bob"]`
+- getter implementation invocation: `E.get_Item(receiver, i: 0, "Alice", "Bob")`
+- setter implementation invocation: `E.set_Item(...)`
+
+But what is the signature of the setter implementation method?  
+It only makes sense for the last parameter of a user-invocable method signature to have `params`,
+so it serves no purpose in `E.set_Item(... extension parameter ..., this i, params string[] s, int value)`.
+
+Some options:
+1. disallow `params` for extension indexers that have a setter
+2. omit the `[ParamArray]` attribute on the setter implementation method
+
+I would propose option 2, as it maximizes `params` usefulness. The cost is only a small difference between
+extension indexing and disambiguation syntax. But they are not exactly the same to start with anyways:
+
+```csharp
+0[42, null] = new object();
+E.set_Item(0, 42, null, new object());
+
+public static class E
+{
+    extension<T>(int i)
+    {
+        public T this[int j, T t] { set { } }
+    }
+}
+```
+
 ### Should extension `Length`/`Count` properties make a type countable?
 
 If we expose `this[Index]` or `this[Range]` extension indexers in element access scenarios,
