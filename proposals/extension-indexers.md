@@ -227,14 +227,31 @@ I would propose option 2, as it maximizes `params` usefulness. The cost is only 
 extension indexing and disambiguation syntax. But they are not exactly the same to start with anyways:
 
 ```csharp
-0[42, null] = new object();
-E.set_Item(0, 42, null, new object());
+int i = 0;
+i[42, null] = new object(); // fails inference
+E.set_Item(i, 42, null, new object()); // infer `E.set_Item<object>`
 
 public static class E
 {
     extension<T>(int i)
     {
         public T this[int j, T t] { set { } }
+    }
+}
+```
+
+```csharp
+#nullable enable
+
+int i = 0;
+i[new object()] = null; // infer `E.extension<object!>` and warn on conversion of null literal to `object!`
+E.set_Item(i, new object(), null); // infer `E.set_Item<object?>`
+
+public static class E
+{
+    extension<T>(int i)
+    {
+        public T this[T t] { set { } }
     }
 }
 ```
