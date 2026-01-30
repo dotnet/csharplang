@@ -35,9 +35,10 @@ potentially occur, making it easier for reviewers and auditors to understand the
 the meaning of `unsafe`, not just augmenting it. The existence of a pointer is not itself unsafe; the unsafe action is dereferencing the pointer. This extends further to types themselves;
 types cannot be inherently unsafe. It is only the action of using a type that could be unsafe, not the existence of that type.
 
-In order for this information to flow through the system, we therefore need to have a way to mark methods themselves as unsafe. Today, `unsafe` as a method modifier has no external impact,
-it only allows pointers to be used in the signature and body of the member. To avoid a breaking change, we are not going to change that, instead an attribute (`RequiresUnsafe`) will be used to indicate that
+In order for this information to flow through the system, we therefore need to have a way to mark methods themselves as unsafe. Applying an attribute (`RequiresUnsafe`) to a member will indicate that
 the member has memory safety concerns and any usages must be manually validated by the programmer using the member (the error will go away if the member is used inside an `unsafe` context).
+We are not going to use the `unsafe` modifier in signature to denote requires-unsafe members to avoid a breaking change
+(it won't even be required to allow pointers in signature as pointers are now safe; it will merely introduce an `unsafe` context).
 
 Nevertheless, this is still a breaking change for particular segments of the C# user base. Our hope is that, for many of our users, this is effectively transparent, and updating to the new rules
 will be seamless. However, given that some large API surfaces like large parts of reflection may need to be marked `unsafe`, we do think it likely that there will need to be a decent on-ramp to
@@ -45,7 +46,7 @@ the new rules to avoid entirely bifurcating the ecosystem.
 
 ## Detailed Design
 
-Terminology: we call members *requires-unsafe* (a.k.a. *caller-unsafe*) if
+Terminology: we call members *requires-unsafe* (previously known as *caller-unsafe*) if
 - under [the updated memory safety rules](#metadata) they [have the `RequiresUnsafe` attribute](#metadata) or [are `extern`](#extern),
 - under [the legacy memory safety rules](#metadata) they [contain pointers in signature](#compat-mode).
 
@@ -170,8 +171,23 @@ because methods with pointers in signature would always need an unsafe context a
 
 ### Unsafe modifiers and contexts
 
-Today, as covered by the [unsafe context specification][unsafe-context-spec], `unsafe` behaves in a lexical manner, marking the entire textual body contained by the `unsafe` block as an `unsafe` context
-(except for iterator bodies). Since pointer types are now safe, an `unsafe` modifier on declarations without bodies does not have a meaning anymore. Hence `unsafe` on the following declarations will produce a warning:
+Today (and unchanged in this proposal), as covered by the [unsafe context specification][unsafe-context-spec], `unsafe` behaves in a lexical manner,
+marking the entire textual body contained by the `unsafe` block as an `unsafe` context (except for iterator bodies),
+and also some surrounding contexts in case of declarations:
+
+```cs
+class A : Attribute
+{
+    [RequiresUnsafe] public A() { }
+}
+class C
+{
+    [A] void M1() { } // error: cannot use `A..ctor` in safe context
+    [A] unsafe void M1() { } // ok: the `unsafe` context applies to the `A..ctor` usage
+}
+```
+
+Since pointer types are now safe, an `unsafe` modifier on declarations without bodies does not have a meaning anymore. Hence `unsafe` on the following declarations will produce a warning:
 - `using static`,
 - `using` alias.
 
@@ -311,7 +327,7 @@ We could consider not automatically making the entire lexical scope of an `unsaf
 apart from edge cases like the following which we might not care about because they have no real-world use-cases:
 
 ```cs
-class A : System.Attribute
+class A : Attribute
 {
     [RequiresUnsafe] public A() { }
 }
@@ -378,7 +394,7 @@ _ = &i;
 i++;
 ```
 
-### Value of MemorySafetyRulesAttribute
+### Value of `MemorySafetyRulesAttribute`
 
 What should be the "enabled"/"updated" memory safety rules version? `2`? `15`? `11`?
 See also https://github.com/dotnet/designs/blob/main/accepted/2025/memory-safety/sdk-memory-safety-enforcement.md.
@@ -391,6 +407,16 @@ Are we okay with this outlier?
 Also, CoreLib exposes many extern methods (FCalls) as safe today.
 Treating extern methods as implicitly unsafe will require wrapping the implicitly unsafe extern methods with a safe wrapper.
 We may run into situations where adding the extra wrapper is difficult due to runtime implementation details.
+
+### `RequiresUnsafe` on `partial` members
+
+It is required to have the `unsafe` modifier at both partial member parts by pre-existing C# rules.
+On the other hand, attributes may be specified only at one of those parts
+and even cannot be specified at both parts unless they have `AllowMultiple`, but then they are effectively present multiple times.
+We have [changed](#use-unsafe-to-denote-requires-unsafe-members) the way to denote requires-unsafe members via an attribute instead of the `unsafe` modifier
+but haven't discussed this aspect of the change.
+Should we allow the attribute to be specified multiple times (via `AllowMultiple` or via special compiler behavior for this attribute and `partial` members only),
+or even require it (via special compiler checks for this attribute only)?
 
 ## Answered questions
 
