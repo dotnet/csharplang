@@ -44,9 +44,11 @@ This behavior is both unexpected and can cause subtle bugs. It would be benefici
 A new modifier combination `static this` is introduced for interface members. When applied to a method, property, or indexer, it indicates that the member should be treated as a static virtual member with an explicit receiver parameter:
 
 ```csharp
-interface IFace<TSelf> where TSelf : IFace<TSelf>
+interface ICounter<TSelf> where TSelf : ICounter<TSelf>
 {
-    static this int M(ref TSelf @this) => 0;
+    int Count { get; set; }
+    
+    static this void Increment(ref TSelf @this) => @this.Count++;
 }
 ```
 
