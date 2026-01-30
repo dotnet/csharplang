@@ -88,15 +88,17 @@ The `static this` syntax is lowered to a static virtual method in the interface.
 #### Source code
 
 ```csharp
-interface IFace<TSelf> where TSelf : IFace<TSelf>
+interface ICounter<TSelf> where TSelf : ICounter<TSelf>
 {
-    static this int M(ref TSelf @this) => 0;
+    int Count { get; set; }
+    
+    static this void Increment(ref TSelf @this) => @this.Count++;
 }
 
-struct S(int x) : IFace<S>
+struct Counter : ICounter<Counter>
 {
-    private readonly int _x = x;
-    static int IFace<S>.M(ref S @this) => @this._x;
+    public int Count { get; set; }
+    // Uses default Increment() implementation
 }
 ```
 
@@ -105,15 +107,17 @@ struct S(int x) : IFace<S>
 The compiler transforms the above into:
 
 ```csharp
-interface IFace<TSelf> where TSelf : IFace<TSelf>
+interface ICounter<TSelf> where TSelf : ICounter<TSelf>
 {
-    static virtual int M(ref TSelf @this) => 0;
+    int Count { get; set; }
+    
+    static virtual void Increment(ref TSelf @this) => @this.Count++;
 }
 
-struct S(int x) : IFace<S>
+struct Counter : ICounter<Counter>
 {
-    private readonly int _x = x;
-    static int IFace<S>.M(ref S @this) => @this._x;
+    public int Count { get; set; }
+    // Uses default Increment() implementation
 }
 ```
 
@@ -124,11 +128,12 @@ The key insight is that no extension methods are generated. Instead, the compile
 With this feature, users can write:
 
 ```csharp
-var s = new S(1);
-Console.WriteLine(s.M()); // Outputs: 1
+var c = new Counter();
+c.Increment();
+Console.WriteLine(c.Count); // Outputs: 1
 ```
 
-The call to `s.M()` is resolved by the compiler as if `M` were an instance method on the interface. The compiler generates a call to the static virtual method, passing the receiver by reference. No boxing occurs because the struct is never converted to the interface type.
+The call to `c.Increment()` is resolved by the compiler as if `Increment` were an instance method on the interface. The compiler generates a call to the static virtual method, passing the receiver by reference. No boxing occurs because the struct is never converted to the interface type.
 
 ### Signature collision rules
 
@@ -178,12 +183,12 @@ interface IHasValue<TSelf> where TSelf : IHasValue<TSelf>
 When a struct implements an interface with `static this` members, it can provide an implementation using explicit interface implementation:
 
 ```csharp
-struct MyStruct : IFace<MyStruct>
+struct Counter : ICounter<Counter>
 {
-    private int _value;
+    public int Count { get; set; }
     
     // Explicit implementation of the static this member
-    static int IFace<MyStruct>.M(ref MyStruct @this) => @this._value;
+    static void ICounter<Counter>.Increment(ref Counter @this) => @this.Count += 2; // Custom increment
 }
 ```
 
@@ -232,16 +237,18 @@ interface ICloneable<TSelf> where TSelf : ICloneable<TSelf>
 Developers can already achieve this behavior manually using static virtual methods and [C# 14 extension members](csharp-14.0/extensions.md):
 
 ```csharp
-interface IFace<TSelf> where TSelf : IFace<TSelf>
+interface ICounter<TSelf> where TSelf : ICounter<TSelf>
 {
-    static virtual int M(ref TSelf @this) => 0;
+    int Count { get; set; }
+    
+    static virtual void Increment(ref TSelf @this) => @this.Count++;
 }
 
-static class IFaceExt
+static class ICounterExt
 {
-    extension<T>(ref T @this) where T : struct, IFace<T>
+    extension<T>(ref T @this) where T : struct, ICounter<T>
     {
-        public int M() => T.M(ref @this);
+        public void Increment() => T.Increment(ref @this);
     }
 }
 ```
@@ -253,9 +260,11 @@ However, this requires significant boilerplate and is error-prone. The proposed 
 An alternative syntax could repurpose existing modifiers:
 
 ```csharp
-interface IFace<TSelf> where TSelf : IFace<TSelf>
+interface ICounter<TSelf> where TSelf : ICounter<TSelf>
 {
-    virtual int M(ref TSelf @this) => 0;
+    int Count { get; set; }
+    
+    virtual void Increment(ref TSelf @this) => @this.Count++;
 }
 ```
 
