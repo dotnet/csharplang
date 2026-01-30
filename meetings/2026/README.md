@@ -7,7 +7,7 @@ All schedule items must have a public issue or checked-in proposal that can be l
 ## Schedule when convenient
 
 - [Target-typed static member access](https://github.com/dotnet/csharplang/blob/afad49721a7b9923efbbc36ae6c455d85b994543/proposals/target-typed-static-member-access.md) (jnm2, CyrusNajmabadi)
-- [Closed class hierarchies open questions](https://github.com/dotnet/csharplang/blob/8421c126a088c032c9ed671588f40e221ca53dea/proposals/closed-hierarchies.md#open-questions) (Rikki)
+
 - Triage (working set)
 
 ## Recurring topics
@@ -26,6 +26,8 @@ All schedule items must have a public issue or checked-in proposal that can be l
 ### Wed Feb 11, 2026
 
 ### Mon Feb 9, 2026
+
+- [Closed class hierarchies open questions](https://github.com/dotnet/csharplang/blob/8421c126a088c032c9ed671588f40e221ca53dea/proposals/closed-hierarchies.md#open-questions) (Rikki)
 
 ### Wed Feb 4, 2026
 
