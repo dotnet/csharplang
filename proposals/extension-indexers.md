@@ -51,7 +51,8 @@ but extension members do not have an implicit or explicit `this`.
 ### `IndexerName` attribute
 
 `IndexerNameAttribute` may be applied to an extension indexer. The attribute is
-not emitted in metadata, but its value determines the name of the property and accessors in metadata, 
+not emitted in metadata, but its value affects conflicts between members,
+it determines the name of the property and accessors in metadata, 
 and is used when emitting `[DefaultMemberAttribute]` (see [Metadata](#metadata)).
 
 ## Consumption
@@ -71,6 +72,9 @@ an attempt is made to process the construct as an extension indexer access.
     an attempt is made to process the **element_access** as
     an implicit `System.Index`/`System.Range` indexer access
     (which relies on `Length`/`Count` plus `this[int]`/`Slice(int, int)`).
+
+Note: the element access section handles the case where an argument has type `dynamic`,
+so it never gets processed as an indexer access.
 
 #### Extension indexer access
 
@@ -93,7 +97,7 @@ extension method invocation, including the current and enclosing lexical scopes
 and `using` namespace or `using static` imports.
 
 Considering each scope in turn:
-- Extension blocks in non-generic class declarations in the current scope are considered.
+- Extension blocks in non-generic static class declarations in the current scope are considered.
 - The indexers in those extension blocks comprise the candidate set.
 - Candidates that are not accessible are removed from the set.
 - Candidates that are not applicable (as defined above) are removed from the set.
@@ -178,10 +182,10 @@ Emitted metadata (simplified to C#-like syntax):
 static class BitExtensions
 {
     [Extension, SpecialName, DefaultMember("Item")]
-    public sealed class <G>$T0
+    public sealed class <G>$T0 // grouping type
     {
         [SpecialName]
-        public static class <M>$T_t
+        public static class <M>$T_t // marker type
         {
             [SpecialName]
             public static void <Extension>$(T t) { } // marker method
@@ -202,8 +206,6 @@ static class BitExtensions
 ```
 
 ## Open issues
-
-- Update spec to disallow dynamic scenarios (including dynamic arguments)
 
 ### Dealing with `params`
 
@@ -248,3 +250,27 @@ Should extension properties satisfy that requirement? (that would seem natural)
 But then, should those properties also contribute to the implicit indexer fallback
 (`Length`/`Count` + `Slice`) that is used when an explicit `Index`/`Range` indexer
 is missing?
+
+### Confirm whether extension indexer access comes before or after implicit indexers
+
+```csharp
+C c = new C();
+_ = c[^1];
+
+class C
+{
+  public int Length => ...;
+  public int this[int i] => ...;
+}
+
+static class E
+{
+  extension(C c)
+  {
+    public int this[System.Index i] => ...;
+  }
+}
+```
+
+I've spec'ed and implemented extension indexer access as having priority over implicit indexers,
+but now think they should come after to avoid unnecessary compat breaks.
