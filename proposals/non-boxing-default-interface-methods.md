@@ -77,7 +77,11 @@ When `static this` is applied to an interface member:
 
 ### Lowering
 
-The `static this` syntax is lowered to the existing runtime encoding for static virtual methods combined with extension methods for convenient invocation.
+The `static this` syntax is lowered to a static virtual method in the interface. However, rather than generating actual extension methods, the `static this` member is **treated as an instance method on the containing interface**. This means:
+
+- The method can be invoked using instance method syntax on values of the implementing type
+- For structs, the receiver is passed by reference (avoiding boxing)
+- Method resolution treats these members as instance methods, even though the underlying implementation uses static virtual methods
 
 #### Source code
 
@@ -96,7 +100,7 @@ struct S(int x) : IFace<S>
 
 #### Lowered equivalent
 
-The compiler transforms the above into the following. Note that the extension syntax uses the [C# 14 extension members](csharp-14.0/extensions.md) feature:
+The compiler transforms the above into:
 
 ```csharp
 interface IFace<TSelf> where TSelf : IFace<TSelf>
@@ -109,16 +113,9 @@ struct S(int x) : IFace<S>
     private readonly int _x = x;
     static int IFace<S>.M(ref S @this) => @this._x;
 }
-
-// Compiler-generated extension for convenient invocation
-static class IFaceExtensions
-{
-    extension<T>(ref T @this) where T : struct, IFace<T>
-    {
-        public int M() => T.M(ref @this);
-    }
-}
 ```
+
+The key insight is that no extension methods are generated. Instead, the compiler treats the `static this` member as an instance method for lookup and invocation purposes, while the underlying implementation uses static virtual methods.
 
 ### Usage
 
@@ -129,7 +126,33 @@ var s = new S(1);
 Console.WriteLine(s.M()); // Outputs: 1
 ```
 
-The call to `s.M()` is resolved to the extension method, which in turn calls the static virtual method. No boxing occurs because the struct is passed by reference.
+The call to `s.M()` is resolved by the compiler as if `M` were an instance method on the interface. The compiler generates a call to the static virtual method, passing the receiver by reference. No boxing occurs because the struct is never converted to the interface type.
+
+### Signature collision rules
+
+Because `static this` members are treated as instance methods on the interface, signature collision rules apply. For the purposes of determining signature collisions, the receiver parameter of a `static this` member is excluded (since it represents the implicit `this` when invoked as an instance method).
+
+Therefore, a `static this void M(ref TSelf @this)` has the "invocation signature" of `void M()`, and it is an error to declare both:
+
+```csharp
+interface IExample<TSelf> where TSelf : IExample<TSelf>
+{
+    void Foo();                           // Instance method with signature Foo()
+    static this void Foo(ref TSelf @this); // Error: invocation signature is also Foo()
+}
+```
+
+Additional parameters beyond the receiver are included in the signature:
+
+```csharp
+interface IExample<TSelf> where TSelf : IExample<TSelf>
+{
+    void Bar();                                       // Instance method Bar()
+    static this void Bar(ref TSelf @this, int value); // OK: invocation signature is Bar(int)
+}
+```
+
+This rule ensures that method resolution is unambiguous when invoking members on implementing types.
 
 ### Properties and indexers
 
@@ -187,8 +210,9 @@ interface ICloneable<TSelf> where TSelf : ICloneable<TSelf>
 ### Complexity
 
 - Introduces a new modifier combination (`static this`) that may be confusing to developers unfamiliar with the feature
-- The lowering involves generating extension methods, which adds to compilation complexity
+- The compiler must treat these members as instance methods for resolution purposes while emitting static virtual methods, adding implementation complexity
 - Developers must understand the difference between regular default interface methods and `static this` members
+- Signature collision rules add additional constraints to learn
 
 ### Breaking changes
 
@@ -197,7 +221,7 @@ interface ICloneable<TSelf> where TSelf : ICloneable<TSelf>
 ### Interop concerns
 
 - The lowered form uses existing CLR features (static virtual methods), so runtime support should not be an issue
-- However, languages that don't understand the extension generation pattern may not be able to use these members conveniently
+- Languages that don't understand the `static this` semantic treatment may see these as regular static virtual methods and require explicit static invocation syntax
 
 ## Alternatives
 
@@ -220,7 +244,7 @@ static class IFaceExt
 }
 ```
 
-However, this requires significant boilerplate and is error-prone. The proposed syntax automates this pattern.
+However, this requires significant boilerplate and is error-prone. The proposed `static this` syntax achieves the same semantics without requiring explicit extension method definitions.
 
 ### Using `virtual` with explicit receiver
 
@@ -241,15 +265,15 @@ Developers could continue using the manual pattern or accept boxing for default 
 
 ## Open questions
 
-1. **Extension method generation**: Should the compiler always generate extension methods, or should this be opt-in?
+1. **Class support**: Should `static this` members also work with classes, or only with struct constraints?
 
-2. **Class support**: Should `static this` members also work with classes, or only with struct constraints?
+2. **Ref kind flexibility**: Should the receiver parameter support `ref`, `in`, `ref readonly`, or all of them? The proposal currently allows any ref kind.
 
-3. **Ref kind flexibility**: Should the receiver parameter support `ref`, `in`, `ref readonly`, or all of them? The proposal currently allows any ref kind.
+3. **Naming**: Is `static this` the best modifier combination, or would alternatives like `instance static` or a new keyword be clearer?
 
-4. **Naming**: Is `static this` the best modifier combination, or would alternatives like `instance static` or a new keyword be clearer?
+4. **Lookup precedence**: When a `static this` member and a true instance member could both match, what are the exact precedence rules?
 
-5. **Visibility of generated extensions**: Should the generated extension methods be public or should there be a way to control their visibility?
+5. **Explicit invocation syntax**: Should there be a way to explicitly invoke the underlying static virtual method (e.g., for cases where the implicit instance-like syntax is not desired)?
 
 ## Design meetings
 
