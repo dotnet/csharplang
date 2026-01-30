@@ -48,6 +48,9 @@ public static class BitExtensions
 All rules from the C# standard that apply to ordinary indexers apply to extension indexers,
 but extension members do not have an implicit or explicit `this`.
 
+The existing extension member inferrability rule still applies: For each non-method extension member, 
+all the type parameters of its extension block must be used in the combined set of parameters from the extension and the member.
+
 ### `IndexerName` attribute
 
 `IndexerNameAttribute` may be applied to an extension indexer. The attribute is
@@ -136,6 +139,35 @@ participates in the extension indexer resolution described above.
 ### Expression trees
 
 Extension indexers cannot be captured in expression trees.
+
+### XML docs
+
+CREF syntax allows referring to an extension indexer and its accessors, as well as its implementation methods.
+
+Example:
+```csharp
+/// <see cref="E.extension(int).this[string]"/>
+/// <see cref="E.extension(int).get_Item(string)"/>
+/// <see cref="E.extension(int).get_Item"/>
+/// <see cref="E.extension(int).set_Item(string, int)"/>
+/// <see cref="E.extension(int).set_Item"/>
+/// <see cref="E.get_Item(int, string)"/>
+/// <see cref="E.get_Item"/>
+/// <see cref="E.set_Item(int, string, int)"/>
+/// <see cref="E.set_Item"/>
+public static class E
+{
+    extension(int i)
+    {
+        /// <summary></summary>
+        public int this[string s]
+        {
+            get => throw null;
+            set => throw null;
+        }
+    }
+}
+```
 
 ## Metadata
 
