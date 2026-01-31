@@ -100,7 +100,9 @@ When `this` is applied to an interface member:
 
 1. The interface must have a first type parameter with a recursive constraint to the containing interface
 2. Within the member body, `this` has the type of that self-constrained type parameter (not the interface type)
-3. For structs, the receiver is passed by reference (avoiding boxing)
+3. The receiver is always passed by reference
+   - For structs, this avoids boxing
+   - For classes, the caller passes a reference to a temporary local copy of the reference variable (to avoid mutating the caller's variable if the method reassigns `this`)
 4. The member is lowered to a static virtual method with an explicit receiver parameter
 5. Implementations can override this member using explicit interface implementation
 
@@ -109,7 +111,9 @@ When `this` is applied to an interface member:
 The `this` modifier is lowered to a static virtual method with an explicit receiver parameter. However, the member is **treated as an instance method on the containing interface** for lookup and invocation purposes. This means:
 
 - The method can be invoked using instance method syntax on values of the implementing type
-- For structs, the receiver is passed by reference (avoiding boxing)
+- The receiver is always passed by reference, regardless of whether it's a struct or class
+  - For structs, this avoids boxing
+  - For classes, the caller passes a reference to a temporary local copy of the reference variable (to avoid mutating the caller's variable if the method reassigns `this`)
 - Method resolution treats these members as instance methods, even though the underlying implementation uses static virtual methods
 
 #### Source code
@@ -301,15 +305,13 @@ Developers could continue using the manual pattern or accept boxing for default 
 
 ## Open questions
 
-1. **Class support**: Should `this` members also work with classes, or only with struct constraints?
+1. **Ref kind**: Should the implicit receiver be `ref`, `in`, or `ref readonly`? The proposal currently assumes `ref` for mutability.
 
-2. **Ref kind**: Should the implicit receiver be `ref`, `in`, or `ref readonly`? The proposal currently assumes `ref` for mutability.
+2. **Naming**: Is `this` the best modifier, or would alternatives like `self` or a new keyword be clearer?
 
-3. **Naming**: Is `this` the best modifier, or would alternatives like `self` or a new keyword be clearer?
+3. **Lookup precedence**: When a `this` member and a true instance member could both match, what are the exact precedence rules?
 
-4. **Lookup precedence**: When a `this` member and a true instance member could both match, what are the exact precedence rules?
-
-5. **Explicit invocation syntax**: Should there be a way to explicitly invoke the underlying static virtual method (e.g., for cases where the implicit instance-like syntax is not desired)?
+4. **Explicit invocation syntax**: Should there be a way to explicitly invoke the underlying static virtual method (e.g., for cases where the implicit instance-like syntax is not desired)?
 
 ## Design meetings
 
