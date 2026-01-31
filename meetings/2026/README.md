@@ -37,11 +37,13 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 - [Extension indexers](https://github.com/dotnet/csharplang/blob/main/proposals/extension-indexers.md#open-issues) (Julien)
 
+## C# Language Design Notes for 2026
+
 ### Mon Jan 26, 2026
 
-- [Unsafe syntax alternative](https://github.com/dotnet/csharplang/blob/main/meetings/working-groups/unsafe-evolution/unsafe-alternative-syntax.md) continued (Mads)
+[C# Language Design Meeting for January 26th, 2026](https://github.com/dotnet/csharplang/blob/main/meetings/2026/LDM-2026-01-26.md)
 
-## C# Language Design Notes for 2026
+- Alternative syntax for caller-unsafe
 
 ### Wed Jan 21, 2026
 
