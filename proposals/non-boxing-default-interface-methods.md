@@ -73,18 +73,18 @@ The grammar for interface members is extended to allow the `this` modifier:
 When `this` is applied to an interface member:
 
 1. Within the member body, `this` has the type of the implementing type (not the interface type)
-2. The receiver is always passed by reference
+2. The receiver is an anonymous type parameter constrained to the containing interface, passed by reference
    - For structs, this avoids boxing
    - For classes, the caller passes a reference to a temporary local copy of the reference variable (to avoid mutating the caller's variable if the method reassigns `this`)
-3. The member is lowered to a static virtual method with a method-level type parameter and an explicit receiver parameter
+3. The member is lowered to a static virtual method with an anonymous type parameter and a by-ref receiver parameter
 4. Implementations can override this member using explicit interface implementation
 
 ### Lowering
 
-The `this` modifier is lowered to a static virtual method with a method-level type parameter and an explicit receiver parameter. However, the member is **treated as an instance method on the containing interface** for lookup and invocation purposes. This means:
+The `this` modifier is lowered to a static virtual method with an anonymous type parameter constrained to the containing interface, and a by-ref receiver parameter. However, the member is **treated as an instance method on the containing interface** for lookup and invocation purposes. This means:
 
 - The method can be invoked using instance method syntax on values of the implementing type
-- The receiver is always passed by reference, regardless of whether it's a struct or class
+- The receiver is an anonymous type parameter constrained to the containing interface, passed by reference
   - For structs, this avoids boxing
   - For classes, the caller passes a reference to a temporary local copy of the reference variable (to avoid mutating the caller's variable if the method reassigns `this`)
 - Method resolution treats these members as instance methods, even though the underlying implementation uses static virtual methods
@@ -108,7 +108,7 @@ struct Counter : ICounter
 
 #### Lowered equivalent
 
-The compiler transforms the above into a static virtual method with a method-level type parameter:
+The compiler transforms the above into a static virtual method with an anonymous type parameter constrained to the containing interface and a by-ref receiver parameter:
 
 ```csharp
 interface ICounter
@@ -125,7 +125,7 @@ struct Counter : ICounter
 }
 ```
 
-The key insight is that the `this` modifier provides a simple syntax that lowers to static virtual methods with method-level type parameters and explicit receiver parameters. The compiler generates the type parameter and receiver parameter automatically.
+The key insight is that the `this` modifier provides a simple syntax that lowers to static virtual methods with an anonymous type parameter and a by-ref receiver parameter. The compiler generates these automatically.
 
 ### Usage
 
@@ -224,7 +224,7 @@ Within the body of a `this` member, the `this` keyword refers to the implementin
 ### Complexity
 
 - Introduces a new `this` modifier that may be confusing to developers unfamiliar with the feature
-- The compiler must treat these members as instance methods for resolution purposes while emitting static virtual methods with method-level type parameters, adding implementation complexity
+- The compiler must treat these members as instance methods for resolution purposes while emitting static virtual methods with anonymous type parameters, adding implementation complexity
 - Developers must understand the difference between regular default interface methods and `this` members
 
 ### Breaking changes
