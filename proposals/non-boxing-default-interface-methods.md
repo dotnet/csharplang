@@ -4,7 +4,7 @@ Champion issue: <https://github.com/dotnet/csharplang/issues/9969>
 
 ## Summary
 
-Introduce a syntax for declaring default interface methods that avoid boxing when implemented by value types. This is achieved by using a `static this` modifier that transforms the method into a static virtual method with an explicit receiver parameter, enabling non-boxing invocation on structs.
+Introduce a syntax for declaring default interface methods that avoid boxing when implemented by value types. This is achieved by using a `this` modifier on interface members, which provides an implicit receiver typed as the self-constrained type parameter, enabling non-boxing invocation on structs.
 
 ## Motivation
 
@@ -41,45 +41,72 @@ This behavior is both unexpected and can cause subtle bugs. It would be benefici
 
 ### Syntax
 
-A new modifier combination `static this` is introduced for interface members. When applied to a method, property, or indexer, it indicates that the member should be treated as a static virtual member with an explicit receiver parameter:
+A new `this` modifier is introduced for interface members. When applied to a method, property, or indexer, it indicates that the member has an implicit receiver typed as the self-constrained type parameter (rather than the interface type):
 
 ```csharp
 interface ICounter<TSelf> where TSelf : ICounter<TSelf>
 {
     int Count { get; set; }
     
-    static this void Increment(ref TSelf @this) => @this.Count++;
+    this void Increment() => Count++;
 }
 ```
 
-The `static this` modifier:
+The `this` modifier:
+- Indicates the member has an implicit receiver of type `TSelf` (the first type parameter with a recursive constraint)
 - Takes the place of `virtual`/`abstract` modifiers
-- Indicates the member has an explicit receiver parameter
 - Whether the member is abstract or has a default implementation is inferred based on whether a body is provided
+
+### Type parameter requirements
+
+The `this` modifier requires the interface to have a self-constrained type parameter:
+- The type parameter must be the **first** type parameter on the interface
+- It must have a **recursive constraint** to the containing interface (e.g., `TSelf : ICounter<TSelf>`)
+
+```csharp
+// Valid: TSelf is first parameter with recursive constraint
+interface IExample<TSelf> where TSelf : IExample<TSelf>
+{
+    this void M();
+}
+
+// Invalid: no self-constrained type parameter
+interface IInvalid
+{
+    this void M(); // Error: interface must have a self-constrained type parameter
+}
+
+// Invalid: self-constraint is not on the first type parameter
+interface IInvalidParameterOrder<T, TSelf> where TSelf : IInvalidParameterOrder<T, TSelf>
+{
+    this void M(); // Error: TSelf must be the first type parameter
+}
+```
 
 ### Grammar changes
 
-The grammar for interface members is extended to allow the `static this` modifier combination:
+The grammar for interface members is extended to allow the `this` modifier:
 
 ```diff
  interface_method_declaration
 -    : attributes? 'new'? ('abstract' | 'virtual' | 'sealed')? return_type identifier type_parameter_list? '(' formal_parameter_list? ')' type_parameter_constraints_clause* ';'
-+    : attributes? 'new'? ('abstract' | 'virtual' | 'sealed' | 'static' 'this')? return_type identifier type_parameter_list? '(' formal_parameter_list? ')' type_parameter_constraints_clause* (';' | method_body)
++    : attributes? 'new'? ('abstract' | 'virtual' | 'sealed' | 'this')? return_type identifier type_parameter_list? '(' formal_parameter_list? ')' type_parameter_constraints_clause* (';' | method_body)
      ;
 ```
 
 ### Semantic rules
 
-When `static this` is applied to an interface member:
+When `this` is applied to an interface member:
 
-1. The member becomes a static virtual (or static abstract if no body) member
-2. The first parameter must be a reference to the self-constrained type parameter (using `ref`, `in`, or `ref readonly`)
-3. The self-constrained type parameter must be constrained to the containing interface
-4. Implementations can override this member using explicit interface implementation with the concrete type
+1. The interface must have a first type parameter with a recursive constraint to the containing interface
+2. Within the member body, `this` has the type of that self-constrained type parameter (not the interface type)
+3. For structs, the receiver is passed by reference (avoiding boxing)
+4. The member is lowered to a static virtual method with an explicit receiver parameter
+5. Implementations can override this member using explicit interface implementation
 
 ### Lowering
 
-The `static this` syntax is lowered to a static virtual method in the interface. However, rather than generating actual extension methods, the `static this` member is **treated as an instance method on the containing interface**. This means:
+The `this` modifier is lowered to a static virtual method with an explicit receiver parameter. However, the member is **treated as an instance method on the containing interface** for lookup and invocation purposes. This means:
 
 - The method can be invoked using instance method syntax on values of the implementing type
 - For structs, the receiver is passed by reference (avoiding boxing)
@@ -92,7 +119,7 @@ interface ICounter<TSelf> where TSelf : ICounter<TSelf>
 {
     int Count { get; set; }
     
-    static this void Increment(ref TSelf @this) => @this.Count++;
+    this void Increment() => Count++;
 }
 
 struct Counter : ICounter<Counter>
@@ -121,7 +148,7 @@ struct Counter : ICounter<Counter>
 }
 ```
 
-The key insight is that no extension methods are generated. Instead, the compiler treats the `static this` member as an instance method for lookup and invocation purposes, while the underlying implementation uses static virtual methods.
+The key insight is that the `this` modifier provides a simpler syntax that lowers to static virtual methods with explicit receiver parameters. The compiler generates the receiver parameter automatically.
 
 ### Usage
 
@@ -137,25 +164,23 @@ The call to `c.Increment()` is resolved by the compiler as if `Increment` were a
 
 ### Signature collision rules
 
-Because `static this` members are treated as instance methods on the interface, signature collision rules apply. For the purposes of determining signature collisions, the receiver parameter of a `static this` member is excluded (since it represents the implicit `this` when invoked as an instance method).
-
-Therefore, a `static this void M(ref TSelf @this)` has the "invocation signature" of `void M()`, and it is an error to declare both:
+Because `this` members are treated as instance methods on the interface, signature collision rules apply. A `this` member with the same name and parameter types as an instance method is an error:
 
 ```csharp
 interface IExample<TSelf> where TSelf : IExample<TSelf>
 {
-    void Foo();                           // Instance method with signature Foo()
-    static this void Foo(ref TSelf @this); // Error: invocation signature is also Foo()
+    void Foo();          // Instance method with signature Foo()
+    this void Foo();     // Error: collision with Foo()
 }
 ```
 
-Additional parameters beyond the receiver are included in the signature:
+Members with different parameters are allowed:
 
 ```csharp
 interface IExample<TSelf> where TSelf : IExample<TSelf>
 {
-    void Bar();                                       // Instance method Bar()
-    static this void Bar(ref TSelf @this, int value); // OK: invocation signature is Bar(int)
+    void Bar();              // Instance method Bar()
+    this void Bar(int value); // OK: signature is Bar(int)
 }
 ```
 
@@ -163,12 +188,12 @@ This rule ensures that method resolution is unambiguous when invoking members on
 
 ### Properties and indexers
 
-The `static this` modifier can also be applied to properties and indexers:
+The `this` modifier can also be applied to properties and indexers:
 
 ```csharp
 interface IHasValue<TSelf> where TSelf : IHasValue<TSelf>
 {
-    static this int Value { get; }
+    this int Value { get; }
 }
 
 // Lowered equivalent:
@@ -180,32 +205,32 @@ interface IHasValue<TSelf> where TSelf : IHasValue<TSelf>
 
 ### Implementation in structs
 
-When a struct implements an interface with `static this` members, it can provide an implementation using explicit interface implementation:
+When a struct implements an interface with `this` members, it can provide an implementation using explicit interface implementation:
 
 ```csharp
 struct Counter : ICounter<Counter>
 {
     public int Count { get; set; }
     
-    // Explicit implementation of the static this member
+    // Explicit implementation of the this member
     static void ICounter<Counter>.Increment(ref Counter @this) => @this.Count += 2; // Custom increment
 }
 ```
 
 ### Default implementations
 
-If a `static this` member has a body, that body serves as the default implementation:
+If a `this` member has a body, that body serves as the default implementation:
 
 ```csharp
 interface ICloneable<TSelf> where TSelf : ICloneable<TSelf>
 {
     // Abstract - no default implementation
-    static this TSelf Clone(ref TSelf @this);
+    this TSelf Clone();
     
-    // Has default implementation
-    static this TSelf CloneAndModify(ref TSelf @this, Action<TSelf> modify)
+    // Has default implementation - can call other 'this' members directly
+    this TSelf CloneAndModify(Action<TSelf> modify)
     {
-        var clone = TSelf.Clone(ref @this);
+        var clone = Clone(); // Calls this.Clone() implicitly
         modify(clone);
         return clone;
     }
@@ -216,10 +241,10 @@ interface ICloneable<TSelf> where TSelf : ICloneable<TSelf>
 
 ### Complexity
 
-- Introduces a new modifier combination (`static this`) that may be confusing to developers unfamiliar with the feature
+- Introduces a new `this` modifier that may be confusing to developers unfamiliar with the feature
 - The compiler must treat these members as instance methods for resolution purposes while emitting static virtual methods, adding implementation complexity
-- Developers must understand the difference between regular default interface methods and `static this` members
-- Signature collision rules add additional constraints to learn
+- Developers must understand the difference between regular default interface methods and `this` members
+- Requires understanding the type parameter requirements (first parameter, recursive constraint)
 
 ### Breaking changes
 
@@ -228,7 +253,7 @@ interface ICloneable<TSelf> where TSelf : ICloneable<TSelf>
 ### Interop concerns
 
 - The lowered form uses existing CLR features (static virtual methods), so runtime support should not be an issue
-- Languages that don't understand the `static this` semantic treatment may see these as regular static virtual methods and require explicit static invocation syntax
+- Languages that don't understand the `this` semantic treatment may see these as regular static virtual methods and require explicit static invocation syntax
 
 ## Alternatives
 
@@ -253,22 +278,22 @@ static class ICounterExt
 }
 ```
 
-However, this requires significant boilerplate and is error-prone. The proposed `static this` syntax achieves the same semantics without requiring explicit extension method definitions.
+However, this requires significant boilerplate and is error-prone. The proposed `this` modifier achieves the same semantics without requiring explicit extension method definitions.
 
-### Using `virtual` with explicit receiver
+### Using `static this` with explicit receiver
 
-An alternative syntax could repurpose existing modifiers:
+An alternative syntax could require an explicit receiver parameter:
 
 ```csharp
 interface ICounter<TSelf> where TSelf : ICounter<TSelf>
 {
     int Count { get; set; }
     
-    virtual void Increment(ref TSelf @this) => @this.Count++;
+    static this void Increment(ref TSelf @this) => @this.Count++;
 }
 ```
 
-This was rejected because it doesn't clearly indicate that the method is static and would conflict with existing virtual method semantics.
+This was considered but rejected in favor of the simpler implicit receiver syntax, which is more consistent with how instance methods work.
 
 ### Do nothing
 
@@ -276,13 +301,13 @@ Developers could continue using the manual pattern or accept boxing for default 
 
 ## Open questions
 
-1. **Class support**: Should `static this` members also work with classes, or only with struct constraints?
+1. **Class support**: Should `this` members also work with classes, or only with struct constraints?
 
-2. **Ref kind flexibility**: Should the receiver parameter support `ref`, `in`, `ref readonly`, or all of them? The proposal currently allows any ref kind.
+2. **Ref kind**: Should the implicit receiver be `ref`, `in`, or `ref readonly`? The proposal currently assumes `ref` for mutability.
 
-3. **Naming**: Is `static this` the best modifier combination, or would alternatives like `instance static` or a new keyword be clearer?
+3. **Naming**: Is `this` the best modifier, or would alternatives like `self` or a new keyword be clearer?
 
-4. **Lookup precedence**: When a `static this` member and a true instance member could both match, what are the exact precedence rules?
+4. **Lookup precedence**: When a `this` member and a true instance member could both match, what are the exact precedence rules?
 
 5. **Explicit invocation syntax**: Should there be a way to explicitly invoke the underlying static virtual method (e.g., for cases where the implicit instance-like syntax is not desired)?
 
