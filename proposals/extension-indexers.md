@@ -239,7 +239,7 @@ static class BitExtensions
 
 ## Open issues
 
-### Dealing with `params`
+### ~~Dealing with `params`~~
 
 If you have an extension indexer with `params`, such as `int this[int i, params string[] s] { get; set; }`,
 there are three ways you could use it:
@@ -254,9 +254,14 @@ so it serves no purpose in `E.set_Item(... extension parameter ..., this i, para
 Some options:
 1. disallow `params` for extension indexers that have a setter
 2. omit the `[ParamArray]` attribute on the setter implementation method
+3. do nothing special (emit the `[ParamArray]`)
 
 I would propose option 2, as it maximizes `params` usefulness. The cost is only a small difference between
-extension indexing and disambiguation syntax. But they are not exactly the same to start with anyways:
+extension indexing and disambiguation syntax.
+
+Decision (LDM 2026-02-02): emit the `[ParamArray]` and verify no negative impact on tooling
+
+### ~~Impact of assigned value to type inference~~
 
 ```csharp
 int i = 0;
@@ -288,7 +293,9 @@ public static class E
 }
 ```
 
-### Should extension `Length`/`Count` properties make a type countable?
+Decision (LDM 2026-02-02): the indexer is inferred only given the receiver and arguments in the argument list (ie. the assigned value doesn't contribute).
+
+### ~~Should extension `Length`/`Count` properties make a type countable?~~
 
 As a reminder, extensions do not come into play when binding [implicit Index or Range indexers](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-8.0/ranges.md#adding-index-and-range-support-to-existing-library-types):
 ```csharp
@@ -340,7 +347,6 @@ But then, should those properties also contribute to the implicit indexer fallba
 (`Length`/`Count` + `Slice`) that is used when an explicit `Index`/`Range` indexer
 is missing?
 
-
 ```csharp
 C c = new C();
 if (c is [var y1, .. var y2]) { }
@@ -359,6 +365,8 @@ static class E
   }
 }
 ```
+
+Decision (LDM 2026-02-02): extensions should contribute everywhere, including countable properties and implicit indexer fallback.
 
 ### Confirm whether extension indexer access comes before or after implicit indexers
 
@@ -383,3 +391,11 @@ static class E
 
 I've spec'ed and implemented extension indexer access as having priority over implicit indexers,
 but now think they should come after to avoid unnecessary compat breaks.
+
+Update (LDM 2026-02-02): this needs further investigation. Yes, extensions should come after non-extension members,
+but beyond that we need some concrete proposals in light of above decision to allow extensions to contribute to implicit indexer fallback.
+
+### Count/Length: Is the name prioritized first, or non-extension vs extension?
+
+We also have an existing fallback: `Length` is prioritized over `Count` property.
+Should an extension `Length` come before or after a non-extension `Count` property?
