@@ -48,10 +48,14 @@ public static class BitExtensions
 All rules from the C# standard that apply to ordinary indexers apply to extension indexers,
 but extension members do not have an implicit or explicit `this`.
 
+The existing extension member inferrability rule still applies: For each non-method extension member, 
+all the type parameters of its extension block must be used in the combined set of parameters from the extension and the member.
+
 ### `IndexerName` attribute
 
 `IndexerNameAttribute` may be applied to an extension indexer. The attribute is
-not emitted in metadata, but its value determines the name of the property and accessors in metadata, 
+not emitted in metadata, but its value affects conflicts between members,
+it determines the name of the property and accessors in metadata, 
 and is used when emitting `[DefaultMemberAttribute]` (see [Metadata](#metadata)).
 
 ## Consumption
@@ -71,6 +75,9 @@ an attempt is made to process the construct as an extension indexer access.
     an attempt is made to process the **element_access** as
     an implicit `System.Index`/`System.Range` indexer access
     (which relies on `Length`/`Count` plus `this[int]`/`Slice(int, int)`).
+
+Note: the element access section handles the case where an argument has type `dynamic`,
+so it never gets processed as an indexer access.
 
 #### Extension indexer access
 
@@ -93,7 +100,7 @@ extension method invocation, including the current and enclosing lexical scopes
 and `using` namespace or `using static` imports.
 
 Considering each scope in turn:
-- Extension blocks in non-generic class declarations in the current scope are considered.
+- Extension blocks in non-generic static class declarations in the current scope are considered.
 - The indexers in those extension blocks comprise the candidate set.
 - Candidates that are not accessible are removed from the set.
 - Candidates that are not applicable (as defined above) are removed from the set.
@@ -132,6 +139,35 @@ participates in the extension indexer resolution described above.
 ### Expression trees
 
 Extension indexers cannot be captured in expression trees.
+
+### XML docs
+
+CREF syntax allows referring to an extension indexer and its accessors, as well as its implementation methods.
+
+Example:
+```csharp
+/// <see cref="E.extension(int).this[string]"/>
+/// <see cref="E.extension(int).get_Item(string)"/>
+/// <see cref="E.extension(int).get_Item"/>
+/// <see cref="E.extension(int).set_Item(string, int)"/>
+/// <see cref="E.extension(int).set_Item"/>
+/// <see cref="E.get_Item(int, string)"/>
+/// <see cref="E.get_Item"/>
+/// <see cref="E.set_Item(int, string, int)"/>
+/// <see cref="E.set_Item"/>
+public static class E
+{
+    extension(int i)
+    {
+        /// <summary></summary>
+        public int this[string s]
+        {
+            get => throw null;
+            set => throw null;
+        }
+    }
+}
+```
 
 ## Metadata
 
@@ -178,10 +214,10 @@ Emitted metadata (simplified to C#-like syntax):
 static class BitExtensions
 {
     [Extension, SpecialName, DefaultMember("Item")]
-    public sealed class <G>$T0
+    public sealed class <G>$T0 // grouping type
     {
         [SpecialName]
-        public static class <M>$T_t
+        public static class <M>$T_t // marker type
         {
             [SpecialName]
             public static void <Extension>$(T t) { } // marker method
@@ -203,9 +239,75 @@ static class BitExtensions
 
 ## Open issues
 
-- Update spec to disallow dynamic scenarios (including dynamic arguments)
+### Dealing with `params`
+
+If you have an extension indexer with `params`, such as `int this[int i, params string[] s] { get; set; }`,
+there are three ways you could use it:
+- extension indexing:  `receiver[i: 0, "Alice", "Bob"]`
+- getter implementation invocation: `E.get_Item(receiver, i: 0, "Alice", "Bob")`
+- setter implementation invocation: `E.set_Item(...)`
+
+But what is the signature of the setter implementation method?  
+It only makes sense for the last parameter of a user-invocable method signature to have `params`,
+so it serves no purpose in `E.set_Item(... extension parameter ..., this i, params string[] s, int value)`.
+
+Some options:
+1. disallow `params` for extension indexers that have a setter
+2. omit the `[ParamArray]` attribute on the setter implementation method
+
+I would propose option 2, as it maximizes `params` usefulness. The cost is only a small difference between
+extension indexing and disambiguation syntax. But they are not exactly the same to start with anyways:
+
+```csharp
+int i = 0;
+i[42, null] = new object(); // fails inference
+E.set_Item(i, 42, null, new object()); // infer `E.set_Item<object>`
+
+public static class E
+{
+    extension<T>(int i)
+    {
+        public T this[int j, T t] { set { } }
+    }
+}
+```
+
+```csharp
+#nullable enable
+
+int i = 0;
+i[new object()] = null; // infer `E.extension<object!>` and warn on conversion of null literal to `object!`
+E.set_Item(i, new object(), null); // infer `E.set_Item<object?>`
+
+public static class E
+{
+    extension<T>(int i)
+    {
+        public T this[T t] { set { } }
+    }
+}
+```
 
 ### Should extension `Length`/`Count` properties make a type countable?
+
+As a reminder, extensions do not come into play when binding [implicit Index or Range indexers](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-8.0/ranges.md#adding-index-and-range-support-to-existing-library-types):
+```csharp
+C c = new C();
+_ = c[..]; // Cannot apply indexing with [] to an expression of type 'C'
+
+class C
+{
+    public int Length => 0;
+}
+
+static class E
+{
+    public static C Slice(this C c, int i, int j) => null!;
+}
+```
+
+So our position so far has been that extensions properties should not count as "countable properties"
+in list-patterns, collection expressions and implicit indexers.
 
 If we expose `this[Index]` or `this[Range]` extension indexers in element access scenarios,
 it is natural to expect the target type to work in list patterns.  
@@ -213,6 +315,71 @@ List patterns, however, require a `Length` or `Count` property.
 
 Should extension properties satisfy that requirement? (that would seem natural)
 
+```csharp
+C c = new C();
+var x1 = c[^1];
+var x2 = c[1..];
+
+if (c is [.., var y1]) { }
+if (c is [_, .. var y2]) { }
+
+class C { }
+
+static class E
+{
+  extension(C c)
+  {
+    object this[System.Index] => ...;
+    C this[System.Range] => ...;
+    int Length => ...;
+  }
+}
+```
+
 But then, should those properties also contribute to the implicit indexer fallback
 (`Length`/`Count` + `Slice`) that is used when an explicit `Index`/`Range` indexer
 is missing?
+
+
+```csharp
+C c = new C();
+if (c is [var y1, .. var y2]) { }
+
+class C
+{
+  C Slice(int i, int j) => ...;
+}
+
+static class E
+{
+  extension(C c)
+  {
+    object this[System.Index] => ...;
+    int Length => ...;
+  }
+}
+```
+
+### Confirm whether extension indexer access comes before or after implicit indexers
+
+```csharp
+C c = new C();
+_ = c[^1];
+
+class C
+{
+  public int Length => ...;
+  public int this[int i] => ...;
+}
+
+static class E
+{
+  extension(C c)
+  {
+    public int this[System.Index i] => ...;
+  }
+}
+```
+
+I've spec'ed and implemented extension indexer access as having priority over implicit indexers,
+but now think they should come after to avoid unnecessary compat breaks.
