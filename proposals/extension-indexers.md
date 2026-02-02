@@ -290,15 +290,75 @@ public static class E
 
 ### Should extension `Length`/`Count` properties make a type countable?
 
+As a reminder, extensions do not come into play when binding [implicit Index or Range indexers](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-8.0/ranges.md#adding-index-and-range-support-to-existing-library-types):
+```csharp
+C c = new C();
+_ = c[..]; // Cannot apply indexing with [] to an expression of type 'C'
+
+class C
+{
+    public int Length => 0;
+}
+
+static class E
+{
+    public static C Slice(this C c, int i, int j) => null!;
+}
+```
+
+So our position so far has been that extensions properties should not count as "countable properties"
+in list-patterns, collection expressions and implicit indexers.
+
 If we expose `this[Index]` or `this[Range]` extension indexers in element access scenarios,
 it is natural to expect the target type to work in list patterns.  
 List patterns, however, require a `Length` or `Count` property.
 
 Should extension properties satisfy that requirement? (that would seem natural)
 
+```csharp
+C c = new C();
+var x1 = c[^1];
+var x2 = c[1..];
+
+if (c is [.., var y1]) { }
+if (c is [_, .. var y2]) { }
+
+class C { }
+
+static class E
+{
+  extension(C c)
+  {
+    object this[System.Index] => ...;
+    C this[System.Range] => ...;
+    int Length => ...;
+  }
+}
+```
+
 But then, should those properties also contribute to the implicit indexer fallback
 (`Length`/`Count` + `Slice`) that is used when an explicit `Index`/`Range` indexer
 is missing?
+
+
+```csharp
+C c = new C();
+if (c is [var y1, .. var y2]) { }
+
+class C
+{
+  C Slice(int i, int j) => ...;
+}
+
+static class E
+{
+  extension(C c)
+  {
+    object this[System.Index] => ...;
+    int Length => ...;
+  }
+}
+```
 
 ### Confirm whether extension indexer access comes before or after implicit indexers
 
