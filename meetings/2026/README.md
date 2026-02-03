@@ -4,11 +4,10 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ## Schedule ASAP
 
-- Extension indexers (Julien)
-
 ## Schedule when convenient
 
 - [Target-typed static member access](https://github.com/dotnet/csharplang/blob/afad49721a7b9923efbbc36ae6c455d85b994543/proposals/target-typed-static-member-access.md) (jnm2, CyrusNajmabadi)
+
 - Triage (working set)
 
 ## Recurring topics
@@ -28,17 +27,23 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ### Mon Feb 9, 2026
 
+- [Closed class hierarchies open questions](https://github.com/dotnet/csharplang/blob/8421c126a088c032c9ed671588f40e221ca53dea/proposals/closed-hierarchies.md#open-questions) (Rikki)
+
 ### Wed Feb 4, 2026
 
-- Unions (details TBD) (Matt and Mads)
+- Union patterns (details TBD) (Matt and Mads)
 
 ### Mon Feb 2, 2026
 
-### Mon Jan 26, 2026
-
-- [Unsafe syntax alternative](https://github.com/dotnet/csharplang/blob/main/meetings/working-groups/unsafe-evolution/unsafe-alternative-syntax.md) continued (Mads)
+- [Extension indexers](https://github.com/dotnet/csharplang/blob/main/proposals/extension-indexers.md#open-issues) (Julien)
 
 ## C# Language Design Notes for 2026
+
+### Mon Jan 26, 2026
+
+[C# Language Design Meeting for January 26th, 2026](https://github.com/dotnet/csharplang/blob/main/meetings/2026/LDM-2026-01-26.md)
+
+- Alternative syntax for caller-unsafe
 
 ### Wed Jan 21, 2026
 

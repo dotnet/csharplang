@@ -137,4 +137,63 @@ Closed classes are generated with a `Closed` attribute, to allow them to be reco
 
 ## Open questions
 
-- Can closed classes be generated into IL in a way that prevents other languages and compilers from deriving from them even if they do not implement the feature?
+### ClosedAttribute
+
+We propose using the following attribute to denote that a class is closed in metadata:
+
+```cs
+namespace System.Runtime.CompilerServices
+{
+    [AttributeUsage(AttributeTargets.Class, AllowMultiple = false, Inherited = false)]
+    public sealed class ClosedAttribute : Attribute { }
+}
+```
+
+### Blocking subtyping from other languages/compilers
+
+Can closed classes be generated into IL in a way that prevents other languages and compilers from deriving from them even if they do not implement the feature?
+
+We propose accomplishing this by adding `[CompilerFeatureRequired("ClosedClasses")]` to all constructors of closed classes. Since constructors of abstract types can generally only be used in a constructor initializer, this seems to effectively prevent languages which don't understand the feature, from allowing user to declare a subclass of a closed class.
+
+```cs
+// Assembly 1, built with .NET 10 SDK
+closed class C1
+{
+    public C1() { }
+    public C1(int param) { }
+}
+
+// Assembly 2, built with .NET 8 SDK
+class C2 : C1
+{
+    public C2() { } // error: 'C1.C1()' requires compiler feature "ClosedClasses"
+    public C2() : base(42) { } // error: 'C1.C1(int)' requires compiler feature "ClosedClasses"
+}
+```
+
+### Same module restriction
+
+The proposal text mentions that there must be a "same assembly" restriction. We propose strengthening this restriction so that subtypes may only be declared in the same module. That is, declaring a closed class in a netmodule, and subtyping it in a different module, should not be permitted, because it breaks the ability to determine the exhaustive set of subtypes from the context of the original declaration in a similar way as cross-assembly subtyping.
+
+### Permit explicit use of abstract modifier
+
+The `closed` modifier also makes the class abstract. Should we permit both `closed` and `abstract` to be used on a declaration? Permitting it may give an impression that the `abstract` modifier is making a difference.
+
+```cs
+closed abstract class C { } // equivalent to:
+closed class C { }
+
+// compare with:
+abstract interface I // error
+{
+    abstract void M(); // ok
+}
+internal class C { } // ok, explicitly specifying the default accessibility
+```
+
+### TODO: Should subtypes be marked in metadata?
+Note: this is more of an engineering question, and, probably should not be brought to LDM until we have evidence this solves a perf problem, we have considered the tradeoffs, etc.
+
+It seems like when a closed type is referenced from metadata, there is a need to search its containing assembly for all possible subtypes of it, to check exhaustiveness of patterns in the consuming compilation. This might be expensive. Would there be a benefit in encoding on a closed type itself, the list of subtypes which have it as a base type?
+
+At first glance, something like `[ClosedSubtype(typeof(Subtype1), typeof(Subtype2), typeof(GenericSubtype1<>), ...)]` in metadata seems viable. Note that the compiler would still need to examine the base type of each subtype to look at the way a generic closed type is being constructed, for example, to handle cases such as `class GenericSubtype1<T> : ClosedType<IEnumerable<T>>`. In this case, the amount and identities of the subtypes will depend on the specific type arguments to `ClosedType<T>`.

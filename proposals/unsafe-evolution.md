@@ -245,6 +245,9 @@ For compat purposes, and to reduce the number of false negatives that occur when
 a member is considered *requires-unsafe* if it contains a pointer or function pointer type somewhere among its parameter types or return type (can be nested in a non-pointer type, e.g., `int*[]`).
 Note that this doesn't apply to pointers in constraint types (e.g., `where T : I<int*[]>`) as those wouldn't need unsafe context at the call sites previously either.
 
+This does not include substituted generic parameters (e.g., method `I<T>.M(T)` when substituted `T` for `int*[]`)
+as there is no type-safe way for the target member to use that pointer type for anything anyway.
+
 ## Alternatives
 
 ### Use `unsafe` to denote *requires-unsafe* members
