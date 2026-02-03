@@ -112,4 +112,4 @@ There may be ways in which we can amend this, either by removing the requirement
 
 The original proposal includes an optional non-boxing access pattern, and this proposal preserves that. Additional `HasValue` and `TryGetValue` members can be used by the compiler as strongly typed alternatives to matching through the weakly typed `Value` property. This can be used for efficiency purposes, e.g. when a union type stores value types directly instead of boxing them.
 
-The current non-boxing access pattern is definitely worth revisiting before we lock it in, but we don't yet have specific proposals.
+The current non-boxing access pattern is definitely worth revisiting before we lock it in, but we don't yet have specific alternate proposals.
