@@ -31,7 +31,7 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ### Wed Feb 4, 2026
 
-- Union patterns (details TBD) (Matt and Mads)
+- [Union patterns update](https://github.com/dotnet/csharplang/blob/main/meetings/working-groups/discriminated-unions/union-patterns-update.md) (Matt and Mads)
 
 ### Mon Feb 2, 2026
 
