@@ -7,7 +7,6 @@ We propose a few changes to the current patterns in order to better serve more s
 - Union types are marked with a `[Union]` attribute instead of the `IUnion` interface.
 - Creation members can be static factory methods, not just constructors.
 - Union members are either found on the union type itself or delegated to an interface that the union type implements.
-- Case types can be declared without offering creation members.
 
 In addition there are some potential scenarios that we don't currently have proposals for, but that are likely to come up.
 
@@ -99,18 +98,7 @@ For interface members implemented by the union type, the compiler can use constr
 
 Not all union types may want to offer the ability for their users to create union values directly; perhaps instead they offer APIs that create them internally and hand them out.
 
-Such unions wouldn't have creation members (constructors or factories), but they could instead specify case types through dummy methods that the compiler recognizes but never calls:
-
-```csharp
-[Union] public record struct Pet
-{
-    public static void Case(Dog value) {}
-    public static void Case(Cat value) {}
-    public static void Case(Bird? value) {}
-
-    public object? Value { get; }
-}
-```
+Such unions wouldn't have creation members (constructors or factories), so they need another way of specifying their case types. We don't yet have specific proposals.
 
 ## Non-object case types
 
@@ -124,4 +112,4 @@ There may be ways in which we can amend this, either by removing the requirement
 
 The original proposal includes an optional non-boxing access pattern, and this proposal preserves that. Additional `HasValue` and `TryGetValue` members can be used by the compiler as strongly typed alternatives to matching through the weakly typed `Value` property. This can be used for efficiency purposes, e.g. when a union type stores value types directly instead of boxing them.
 
-The current non-boxing access pattern is definitely worth revisiting before we lock it in, but we don't yet have specific proposals.
+The current non-boxing access pattern is definitely worth revisiting before we lock it in, but we don't yet have specific alternate proposals.
