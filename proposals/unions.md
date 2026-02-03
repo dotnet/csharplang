@@ -87,7 +87,9 @@ TUnion ReadUnion<TUnion>() where TUnion : IUnion<TUnion>
 
 ### Union types
 
-Any non-abstract class or struct type that implements the `IUnion` interface is considered a *union type*. For each public constructor with exactly one parameter, the type of that parameter is considered a *case type* of the union type.
+Any non-abstract class or struct type that implements the `IUnion` interface is considered a *union type*.
+For each public constructor with exactly one by-value or `in` parameter, the type of that parameter is considered
+a *case type* of the union type.
 
 The contents of a union value can be accessed through the `IUnion.Value` property. The language assumes that `Value` only ever contains a value of one of the case types, or null (see [Well-formedness](#well-formedness)).
 
@@ -118,6 +120,9 @@ Union types always exhibit the *basic union pattern*, but may additionally imple
 Example of a union type implementing the non-boxing access pattern:
 
 ```csharp
+public struct Case1 {...}
+public struct Case2 {...}
+
 public struct MyUnion : IUnion
 {
     enum Kind { None = 0, Case1, Case2 }
@@ -176,6 +181,7 @@ The union behaviors are generally implemented by means of the basic union patter
 #### Union conversions
 
 A *union conversion* implicitly converts to a union type from each of its case types. Specifically, there's a union conversion to a union type `U` from a type or expression `E` if there's a standard implicit conversion from `E` to a type `C` and `C` is a case type of `U`.
+If union type `U` is a struct, there's a union conversion to type `U?` from a type or expression `E` if there's a standard implicit conversion from `E` to a type `C` and `C` is a case type of `U`.
 
 A union conversion is not itself a standard implicit conversion. It may therefore not participate in a user-defined implicit conversion or another union conversion.
 
@@ -190,6 +196,51 @@ Pet pet = new Pet(dog);
 ```
 
 It is not an ambiguity error if more than one constructor overload applies. Instead, one is chosen in an implementation-defined manner. Note that, per the well-formedness rules, the observable behavior of these constructors is assumed to be the same.
+
+Union conversion is just another "form" of an implicit user-defined conversion. An applicable
+user-defined conversion operator "shadows" union conversion.
+
+The rationale behind this decision:
+> If someone written a user-defined operator, it should get priority.
+> In other words, if the user actually wrote their own operator, they want us to call it.
+> Existing types with conversion operators transformed into union types continue to work
+> the same way with respect to existing code utilizing the operators today.
+
+In the following example an implicit user-defined conversion takes priority over a union conversion. 
+``` c#
+struct S1 : System.Runtime.CompilerServices.IUnion
+{
+    public S1(int x) => ...
+    public S1(string x) => ...
+    object System.Runtime.CompilerServices.IUnion.Value => ...
+    public static implicit operator S1(int x) => ...
+}
+
+class Program
+{
+    static S1 Test1() => 10; // implicit operator S1(int x) is used
+    static S1 Test2() => (S1)20; // implicit operator S1(int x) is used
+}
+```
+
+In the following example, when explicit cast is used in code, an explicit user-defined conversion
+takes priority over a union conversion. But, when there is no explicit cast in code, a union conversion
+is used because explicit user-defined conversion is not applicable.
+``` c#
+struct S2 : System.Runtime.CompilerServices.IUnion
+{
+    public S2(int x) => ...
+    public S2(string x) => ...
+    object System.Runtime.CompilerServices.IUnion.Value => ...
+    public static explicit operator S2(int x) => ...
+}
+
+class Program
+{
+    static S2 Test3() => 10; // Union conversion S2.S2(int) is used
+    static S2 Test4() => (S2)20; // explicit operator S2(int x)
+}
+```
 
 #### Union matching
 
@@ -229,6 +280,9 @@ The compiler will prefer implementing pattern behavior by means of members presc
 * For a pattern that implies checking for a specific type `T`, if a `TryGetValue(S value)` method is available, and there is an implicit conversion from `T` to `S`, then that method is used to obtain the value. The pattern is then applied to that value. If there is more than one such method, then any where the conversion from `T` to `S` is not a boxing conversion is preferred if available. If there is still more than one method, one is chosen in an implementation-defined manner.
 * Otherwise, for a pattern that implies checking for `null`, if a `HasValue` property is available, that property is used to check if the union value is null.
 * Otherwise, the pattern is applied to the result of accessing the `IUnion.Value` property on the incoming union.
+
+[The is-type operator](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/expressions.md#1214121-the-is-type-operator) applied to a union type
+has the same meaning as a type pattern applied to the union type.
 
 #### Union exhaustiveness
 
@@ -374,14 +428,516 @@ public record struct Pet : IUnion, IUnion<Pet>
 ## Open questions
 [open]: #open-questions
 
+### *The non-boxing union access pattern*
+
+Need to specify precise rules for finding suitable `HasValue` and `TryGetValue` APIs.
+Is inheritance involved? Is read/write `HasValue` an acceptable match? Etc.
+
+### `TryGetValue` matching conversions
+
+The Union Matching section says:
+> For a pattern that implies checking for a specific type `T`, if a `TryGetValue(S value)`
+> method is available, and there is an implicit conversion from `T` to `S`,
+> then that method is used to obtain the value.
+
+Is the set of implicit conversions restricted in any way? For example, are user-defined conversions allowed?
+What about tuple conversions and other not so trivial conversions? Some of those are even standard conversions. 
+
+Is the set of `TryGetValue` methods restricted in any other way? For example, Union Patterns section implies
+that only methods with a parameter type matching a case type are considered:
+> a `public bool TryGetValue(out T value)` method for each case type `T`.
+
+It would be good to have an explicit answer. 
+
+### `TryGetValue` and nullable analysis
+
+> When the non-boxing access pattern's `HasValue` or `TryGetValue(...)`
+> are used to query the contents of a union type (explicitly or via pattern matching),
+> it impacts `Value`'s nullability state in the same way as if `Value` had been
+> checked directly: The null state of `Value` becomes "not null" on the `true` branch.
+
+Is the set of `TryGetValue` methods restricted in any way? For example, Union Patterns section implies
+that only methods with a parameter type matching a case type are considered:
+> a `public bool TryGetValue(out T value)` method for each case type `T`.
+
+It would be good to have an explicit answer. 
+
+### Clarify rules around `default` values of struct union types
+
+[Nullability](#Nullability) section says:
+> For union types where none of the case types are nullable, the default state for `Value` is "not null" rather than "maybe null". 
+
+Given that, for the example below, current implementation considers `Value` of `s2` as "not null":
+``` c#
+S2 s2 = default;
+
+struct S2 : System.Runtime.CompilerServices.IUnion
+{
+    public S2(int x) => throw null!;
+    public S2(bool x) => throw null!;
+    object? System.Runtime.CompilerServices.IUnion.Value => throw null!;
+}
+```
+
+At the same time, [Well-formedness](#Well-formedness) section says:
+>* *Default value*: If a union type is a value type, it's default value has `null` as its `Value`.
+>* *Default constructor*: If a union type has a nullary (no-argument) constructor, the resulting union has `null` as its `Value`.
+
+An implementation like that will be in contradiction with nullable analysis behavior for the example above.
+
+Should the [Well-formedness](#Well-formedness) rules be adjusted, or should state of `Value` of `default` be "maybe null"?
+If the latter, should initialization ```S2 s2 = default;``` produce a nullability warning?
+
+### Confirm that a type parameter is never a union type, even when constrained to one.
+
+``` C#
+class C1 : System.Runtime.CompilerServices.IUnion
+{
+    private readonly object _value;
+    public C1(int x) { _value = x; }
+    public C1(string x) { _value = x; }
+    object System.Runtime.CompilerServices.IUnion.Value => _value;
+}
+
+class Program
+{
+    static bool Test1<T>(T u) where T : C1
+    {
+        return u is int; // Not a union matching
+    }   
+
+    static bool Test2<T>(T u) where T : C1
+    {
+        return u is string; // Not a union matching
+    }   
+}
+```
+
+### Should post-condition attributes affect default nullability of a Union instance?
+
+Is the warning expected in the following scenario
+``` c#
+#nullable enable
+
+struct S1 : System.Runtime.CompilerServices.IUnion
+{
+    public S1(int x) => throw null!;
+    public S1([System.Diagnostics.CodeAnalysis.NotNull] bool? x) => throw null!;
+    object? System.Runtime.CompilerServices.IUnion.Value => throw null!;
+}
+class Program
+{
+    static void Test2(S1 s)
+    {
+       // warning CS8655: The switch expression does not handle some null inputs (it is not exhaustive).
+       //                 For example, the pattern 'null' is not covered.
+        _ = s switch { int => 1, bool => 3 }; // 
+    } 
+}
+```
+
+### Union conversions
+
+#### Where do they belong among other conversions priority-wise?
+
+Union conversions feel like another form of a user-defined conversion. Therefore, current implementation
+classifies them right after a failed attempt to classify an implicit user-defined conversion, and, in case
+of existence is treated as just another form of a user-defined conversion. This has the
+following consequences:
+- An implicit user-defined conversion takes priority over a union conversion
+- When explicit cast is used in code, an explicit user-defined conversion takes priority over a union conversion 
+- When there is no explicit cast in code, a union conversion takes priority over an explicit user-defined conversion 
+
+``` c#
+struct S1 : System.Runtime.CompilerServices.IUnion
+{
+    public S1(int x) => ...
+    public S1(string x) => ...
+    object System.Runtime.CompilerServices.IUnion.Value => ...
+    public static implicit operator S1(int x) => ...
+}
+
+struct S2 : System.Runtime.CompilerServices.IUnion
+{
+    public S2(int x) => ...
+    public S2(string x) => ...
+    object System.Runtime.CompilerServices.IUnion.Value => ...
+    public static explicit operator S2(int x) => ...
+}
+
+class Program
+{
+    static S1 Test1() => 10; // implicit operator S1(int x) is used
+    static S1 Test2() => (S1)20; // implicit operator S1(int x) is used
+    static S2 Test3() => 10; // Union conversion S2.S2(int) is used
+    static S2 Test4() => (S2)20; // explicit operator S2(int x)
+}
+```
+
+Need to confirm this is the behavior that we like. Otherwise the conversion rules should be clarified.
+
+**Resolution:**
+
+Approved by the working group.
+
+#### Ref-ness of constructor's parameter
+
+Currently language allows only by-value and `in` parameters for user-defined conversion operators.
+It feels like reasons for this restriction are also applicable to constructors suitable for union
+conversions. 
+
+**Proposal:**
+
+Adjust definition of a `case type constructor` in `Union types` section above:
+``` diff
+-For each public constructor with exactly one parameter, the type of that parameter is considered a *case type* of the union type.
++For each public constructor with exactly one **by-value or `in`** parameter, the type of that parameter is considered a *case type* of the union type.
+```
+
+**Resolution:**
+
+Approved by the working group for now. However, we might consider "splitting" the set of case type constructors
+and the set of constructors suitable for union type conversions.
+
+#### Nullable Conversions
+
+[Nullable Conversions](https://github.com/dotnet/csharpstandard/blob/09d5f56455cab8868ee9798de8807a2e91fb431f/standard/conversions.md#1061-nullable-conversions) section explicitly lists conversions that can be used as underlying. Current specification doesn't propose
+any adjustments to that list. This result in an error for the following scenario:
+``` c#
+struct S1 : System.Runtime.CompilerServices.IUnion
+{
+    public S1(int x) => throw null;
+    public S1(string x) => throw null;
+    object System.Runtime.CompilerServices.IUnion.Value => throw null;
+}
+
+class Program
+{
+    static S1? Test1(int x)
+    {
+        return x; // error CS0029: Cannot implicitly convert type 'int' to 'S1?'
+    }   
+}
+```
+
+**Proposal:**
+
+Adjust the specification to support an implicit nullable conversion from `S` to `T?` backed by a union conversion.
+Specifically, assuming `T` is a union type there's an implicit conversion to a type `T?` from a type or
+expression `E` if there's a union conversion from `E` to a type `C` and `C` is a case type of `T`.
+Note, there is no requirement for type of `E` to be a non-nullable value type.
+The conversion is evaluated as the underlying union conversion from `S` to `T` followed by a wrapping from `T` to `T?`
+
+**Resolution:**
+
+Approved.
+
+#### Lifted conversions
+
+Do we want to adjust [Lifted conversions](https://github.com/dotnet/csharpstandard/blob/09d5f56455cab8868ee9798de8807a2e91fb431f/standard/conversions.md#1062-lifted-conversions)
+section to support lifted union conversions? Currently they are not allowed:
+
+``` c#
+struct S1 : System.Runtime.CompilerServices.IUnion
+{
+    public S1(int x) => throw null;
+    public S1(string x) => throw null;
+    object System.Runtime.CompilerServices.IUnion.Value => throw null;
+}
+
+class Program
+{
+    static S1 Test1(int? x)
+    {
+        return x; // error CS0029: Cannot implicitly convert type 'int?' to 'S1'
+    }   
+
+    static S1? Test2(int? y)
+    {
+        return y; // error CS0029: Cannot implicitly convert type 'int?' to 'S1?'
+    }   
+}
+```
+
+**Resolution:**
+
+No lifted union conversions for now.
+Some notes from the discussion:
+> The analogy to the user defined conversions breaks down a little here.
+> In general unions are able to contain a null value that comes in.
+> It is not clear whether lifting should create an instance of a union type with `null`
+> value stored in it, or whether it should create a `null` value of `Nullable<Union>`.
+
+#### Block union conversion from an instance of a base type?
+
+One might find the current behavior confusing:
+``` c#
+struct S1 : System.Runtime.CompilerServices.IUnion
+{
+    public S1(System.ValueType x)
+    {
+    }
+    public S1(string x) => throw null;
+    object System.Runtime.CompilerServices.IUnion.Value => throw null;
+}
+
+class Program
+{
+    static S1 Test1(System.ValueType x)
+    {
+        return x; // Union conversion
+    }   
+
+    static S1 Test2(System.ValueType y)
+    {
+        return (S1)y; // Unboxing conversion
+    }   
+}
+```
+
+Note, language explicitly disallows declaring user-defined conversions from a base type. Therefore, it might make sence to not
+allow union conversions like that.
+
+**Resolution:**
+
+Do nothing special for now. Generic scenarios cannot be fully protected anyway.
+
+#### Block union conversion from an instance of an interface type?
+
+One might find the current behavior confusing:
+``` c#
+struct S1 : I1, System.Runtime.CompilerServices.IUnion
+{
+    public S1(I1 x) => throw null;
+    public S1(string x) => throw null;
+    object System.Runtime.CompilerServices.IUnion.Value => throw null;
+}
+
+interface I1 { }
+
+struct S2 : System.Runtime.CompilerServices.IUnion
+{
+    public S2(I1 x) => throw null;
+    public S2(string x) => throw null;
+    object System.Runtime.CompilerServices.IUnion.Value => throw null;
+}
+
+class C3 : System.Runtime.CompilerServices.IUnion
+{
+    public C3(I1 x) => throw null;
+    public C3(string x) => throw null;
+    object System.Runtime.CompilerServices.IUnion.Value => throw null;
+}
+
+class Program
+{
+    static S1 Test1(I1 x)
+    {
+        return x; // Union conversion
+    }   
+
+    static S1 Test2(I1 x)
+    {
+        return (S1)x; // Unboxing
+    }   
+
+    static S2 Test3(I1 x)
+    {
+        return x; // Union conversion
+    }   
+
+    static S2 Test4(I1 x)
+    {
+        return (S2)x; // Union conversion
+    }   
+
+    static C3 Test3(I1 x)
+    {
+        return x; // Union conversion
+    }   
+
+    static C3 Test4(I1 x)
+    {
+        return (C3)x; // Reference conversion
+    }   
+}
+```
+
+Note, language explicitly disallows declaring user-defined conversions from a base type. Therefore, it might make sence to not
+allow union conversions like that.
+
+**Resolution:**
+
+Do nothing special for now. Generic scenarios cannot be fully protected anyway.
+
+### Namespace of IUnion interface
+
+Containing namespace for `IUnion` interface remains unspecified. If the intent is to keep it in a `global` namespace,
+Let’s state that explicitly. 
+
+**Proposal**: If this is something simply overlooked,  we could use `System.Runtime.CompilerServices` namespace.
+
+### Classes as `Union` types
+
+#### Checking instance itself for `null`
+
+If a union type is a class type, it's value might itself be null. What about null checks then?
+The `null` pattern has been co-opted to check the `Value` property, so how do you check that the union itself isn't null?
+
+For example:
+-	When `S` is a `Union` struct, ```s is null``` for a value of `S?`is `true`only when `s` itself is `null`. 
+When `C` is a `Union` class, ```c is null``` for a value of `C?`is `false`when `c` itself is `null`,
+but it is `true` when `c` itself is not `null`and `c.Value` is `null`.
+
+Another example:
+``` c#
+class C1 : IUnion
+{
+    private readonly object? _value;
+
+    public C1(){}
+    public C1(int x) { _value = x; }
+    public C1(string x) { _value = x; }
+    object? IUnion.Value => _value;
+}
+
+class Program
+{
+    static int Test1(C1? u)
+    {
+        // warning CS8655: The switch expression does not handle some null inputs (it is not exhaustive).
+        //                 For example, the pattern 'null' is not covered.
+        // This is very confusing, the switch expression is indeed not exhaustive (u itself is not
+        // checked for null), but there is a case 'null => 3' in the switch expression. 
+        // It looks like the only way to shut off the warning is to use 'case _'. Adding it removes
+        // all benefits of exhaustiveness checking, any union case could be missing and there would
+        // be no diagnostic about that.  
+        return u switch { int => 1, string => 2, null => 3 };
+    }
+}
+```
+
+This part of the design is clearly optimized around the expectation that a union type is a struct.
+Some options:
+ - Too bad. Use `==` for your null check instead of a pattern match.
+ - Let the `null` pattern (and implicit null check in other patterns) apply to both the union value and its `Value` property: `u is null ==> u == null || u.Value == null`.
+ - Disallow classes from being union types!
+
+#### Deriving from a `Union` class
+
+When a class uses a `Union`class as its base class, according to the current specification,
+it becomes a `Union`class itself. This happens because it automatically “inherits” implementation
+of `IUnion` interface, it is not required to re-implement it. At the same time, constructors of the
+derived type define the set of types in this new `Union`. It is very easy to get to very strange language
+behavior around the two classes:
+
+``` c#
+class C1 : IUnion
+{
+    private readonly object _value;
+    public C1(long x) { _value = x; }
+    public C1(string x) { _value = x; }
+    object IUnion.Value => _value;
+}
+
+class C2(int x) : C1(x);
+
+class Program
+{
+    static int Test1(C1 u)
+    {
+        // Good
+        return u switch { long => 1, string => 2, null => 3 };
+    } 
+
+    static int Test2(C2 u)
+    {
+        // error CS8121: An expression of type 'C2' cannot be handled by a pattern of type 'long'.
+        // error CS8121: An expression of type 'C2' cannot be handled by a pattern of type 'string'.
+        return u switch { long => 1, string => 2, null => 3 };
+    } 
+}
+```
+
+Some options:
+ - Change when a class type is a `Union` type. For example, a class is a `Union` type when all true:
+   * It is `sealed` because derived types won't be considered as `Union`types, allowing which is confusing.
+   * None of its bases implement `IUnion`
+     
+   This is still not perfect. The rules are too subtle. It is easy to make a mistake. There is no diagnostic on
+   the declaration, but `Union` matching doesn’t work.    
+ - Disallow classes from being union types.
+
+### The is-type operator
+
+[The is-type operator](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/expressions.md#1214121-the-is-type-operator)
+is specified as a runtime type check. Syntactically it looks very much like a type pattern, but it isn’t. Therefore, the special `Union`matching
+won’t be used, which could lead to a user confusion.  
+
+``` c#
+struct S1 : IUnion
+{
+    private readonly object _value;
+    public S1(int x) { _value = x; }
+    public S1(string x) { _value = x; }
+    object IUnion.Value => _value;
+}
+
+class Program
+{
+    static bool Test1(S1 u)
+    {
+        return u is int; // warning CS0184: The given expression is never of the provided ('int') type
+    }   
+
+    static bool Test2(S1 u)
+    {
+        return u is string and ['1', .., '2']; // Good
+    }   
+}
+```
+
+In case of a recursive union, the type pattern might give no warning, but it still won’t do what user might think it would do.
+
+**Resolution:**
+Should work as a type pattern.
+
+### List pattern
+
+List pattern always fails with `Union` matching:
+``` c#
+struct S1 : IUnion
+{
+    private readonly object _value;
+    public S1(int[] x) { _value = x; }
+    public S1(string[] x) { _value = x; }
+    object IUnion.Value => _value;
+}
+
+class Program
+{
+    static bool Test1(S1 u)
+    {
+        // error CS8985: List patterns may not be used for a value of type 'object'. No suitable 'Length' or 'Count' property was found.
+        // error CS0021: Cannot apply indexing with [] to an expression of type 'object'
+        return u is [10];
+    }   
+}
+
+static class Extensions
+{
+    extension(object o)
+    {
+        public int Length => 0;
+    }
+}
+```
+
+### Other questions
 * Both the use of constructors in union conversions and the use of `TryGetValue(...)` in union pattern matching are specified to be lenient when multiple ones apply: They'll just pick one. This should not matter per the well-formedness rules, but are we comfortable with it?
 * The specification subtly relies on the implementation of the `IUnion.Value` property rather than any `Value` property found on the union type itself. This is meant to give greater flexibility for existing types (which may have their own `Value` property for other uses) to implement the pattern. But it is awkward, and inconsistent with how other members are found and used directly on the union type. Should we make a change? Some other options:
     * Require union types to expose a public `Value` property.
     * Prefer a public `Value` property if it exists, but fall back to the `IUnion.Value` implementation if not (similar to `GetEnumerator` rules).
-* If a union type is a class type, it's value might itself be null. What about null checks then? The `null` pattern has been co-opted to check the `Value` property, so how do you check that the union itself isn't null? This part of the design is clearly optimized around the expectation that a union type is a struct. Some options:
-    * Too bad. Use `==` for your null check instead of a pattern match.
-    * Let the `null` pattern (and implicit null check in other patterns) apply to both the union value and its `Value` property: `u is null ==> u == null || u.Value == null`.
-    * Disallow classes from being union types!
 * The proposed union declaration syntax isn't universally loved, particularly when it comes to expressing the case types. Alternatives so far also meet with criticism, but it's possible we will end up making a change. Some top concerns voiced about the current one:
     * Commas as separators between case types may seem to imply that order matters.
     * Parenthesized lists look too much like primary constructors (despite not having parameter names).

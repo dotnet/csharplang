@@ -169,6 +169,7 @@ public static class Enumerable
 
 It is an error to specify the following modifiers on a member of an extension declaration:
 `abstract`, `virtual`, `override`, `new`, `sealed`, `partial`, and `protected` (and related accessibility modifiers).  
+It is an error to specify the `readonly` modifier on a member of an extension declaration.  
 Properties in extension declarations may not have `init` accessors.  
 The instance members are disallowed if the _receiver parameter_ is unnamed.  
 
@@ -181,23 +182,6 @@ It is an error to decorate an extension member with the `[ModuleInitializer]` at
 By default the receiver is passed to instance extension members by value, just like other parameters. 
 However, an extension declaration receiver in parameter form can specify `ref`, `ref readonly` and `in`, 
 as long as the receiver type is known to be a value type. 
-
-If `ref` is specified, an instance member or one of its accessors can be declared `readonly`, which prevents it from mutating the receiver:
-
-``` c#
-public static class Bits
-{
-    extension(ref ulong bits) // receiver is passed by ref
-    {
-        public bool this[int index]
-        {
-            set => bits = value ? bits | Mask(index) : bits & ~Mask(index); // mutates receiver
-            readonly get => (bits & Mask(index)) != 0;                // cannot mutate receiver
-        }
-    }
-    static ulong Mask(int index) => 1ul << index;
-}
-```
 
 ### Nullability and attributes
 
@@ -376,6 +360,84 @@ static class E2
 
 Static extension methods will be resolved like instance extension methods (we will consider an extra argument of the receiver type).  
 Extension properties will be resolved like extension methods, with a single parameter (the receiver parameter) and a single argument (the actual receiver value).  
+
+### `using static` directives
+
+A **using_static_directive** makes members of extension blocks in the type declaration available for extension access.  
+
+```cs
+using static N.E;
+
+new object().M();
+object.M2();
+
+_ = new object().Property;
+_ = object.Property2;
+
+C c = null;
+_ = c + c;
+c += 1;
+
+namespace N
+{
+    static class E
+    {
+        extension(object o)
+        {
+            public void M() { }
+            public static void M2() { }
+            public int Property => 0;
+            public static int Property2 => 0;
+        }
+
+        extension(C c)
+        {
+            public static C operator +(C c1, C c2) => throw null;
+            public void operator +=(int i) => throw null;
+        }
+    }
+}
+
+class C { } 
+```
+
+As before, the accessible static members (except extension methods) contained directly in the declaration of the given type can be referenced directly.  
+This means that implementation methods (except those that are extension methods) can be used directly as static methods:
+
+```cs
+using static E;
+
+M();
+System.Console.Write(get_P());
+set_P(43);
+_ = op_Addition(0, 0);
+_ = new object() + new object();
+
+static class E
+{
+    extension(object)
+    {
+        public static void M() { }
+        public static int P { get => 42; set { } }
+        public static object operator +(object o1, object o2) { return o1; }
+    }
+}
+```
+
+A **using_static_directive** still does not import extension methods directly as static methods, so the implementation method for non-static extension methods cannot be invoked directly as a static method.  
+```cs
+using static E;
+
+M(1); // error: The name 'M' does not exist in the current context
+
+static class E
+{
+    extension(int i)
+    {
+        public void M() { }
+    }
+}
+```
 
 ### OverloadResolutionPriorityAttribute
 
