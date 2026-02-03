@@ -47,8 +47,8 @@ the new rules to avoid entirely bifurcating the ecosystem.
 ## Detailed Design
 
 Terminology: we call members *requires-unsafe* (previously known as *caller-unsafe*) if
-- under [the updated memory safety rules](#metadata) they [have the `RequiresUnsafe` attribute](#metadata) or [are `extern`](#extern),
-- under [the legacy memory safety rules](#metadata) they [contain pointers in signature](#compat-mode).
+- under [the updated memory safety rules](#attributes) they [have the `RequiresUnsafe` attribute](#attributes) or [are `extern`](#extern),
+- under [the legacy memory safety rules](#attributes) they [contain pointers in signature](#compat-mode).
 
 ### Existing `unsafe` rules
 
@@ -199,7 +199,7 @@ When a member is `partial`, both parts must agree on the `unsafe` modifier, but 
 For properties, `get` and `set/init` accessors can be independently declared as `RequiresUnsafe`; marking the entire property as `RequiresUnsafe` means that both the `get` and `set/init` accessors are requires-unsafe.
 For events, `add` and `remove` accessors can be independently declared as `RequiresUnsafe`; marking the entire event as `RequiresUnsafe` means that both the `add` and `remove` accessors are requires-unsafe.
 
-#### Metadata
+#### Attributes
 
 When an assembly is compiled with the new memory safety rules, it gets marked with `MemorySafetyRulesAttribute` (detailed below), filled in with `15` as the language version. This is a signal to
 any downstream consumers that any members defined in the assembly will be properly attributed with `RequiresUnsafeAttribute` (detailed below) if an `unsafe` context is required to call them.
