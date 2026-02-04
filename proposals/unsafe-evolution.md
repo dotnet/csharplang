@@ -35,15 +35,20 @@ potentially occur, making it easier for reviewers and auditors to understand the
 the meaning of `unsafe`, not just augmenting it. The existence of a pointer is not itself unsafe; the unsafe action is dereferencing the pointer. This extends further to types themselves;
 types cannot be inherently unsafe. It is only the action of using a type that could be unsafe, not the existence of that type.
 
-In order for this information to flow through the system, we therefore need to have a way to mark methods themselves as `unsafe`. Today, `unsafe` as a method modifier has no external impact,
-it only allows pointers to be used in the signature and body of the member. Going forward, `unsafe` as a modifier will actually publicly change the meaning of the member; it will indicate that
-the member has memory safety concerns and any usages must be manually validated by the programmer using the member.
+In order for this information to flow through the system, we therefore need to have a way to mark methods themselves as unsafe. Applying an attribute (`RequiresUnsafe`) to a member will indicate that
+the member has memory safety concerns and any usages must be manually validated by the programmer using the member (the error will go away if the member is used inside an `unsafe` context).
+We are not going to use the `unsafe` modifier in signature to denote *requires-unsafe* members to avoid a breaking change
+(it won't even be required to allow pointers in signature as pointers are now safe; it will merely introduce an `unsafe` context).
 
-This is a potentially large breaking change for particular segments of the C# user base. Our hope is that, for many of our users, this is effectively transparent, and updating to the new rules
+Nevertheless, this is still a breaking change for particular segments of the C# user base. Our hope is that, for many of our users, this is effectively transparent, and updating to the new rules
 will be seamless. However, given that some large API surfaces like large parts of reflection may need to be marked `unsafe`, we do think it likely that there will need to be a decent on-ramp to
 the new rules to avoid entirely bifurcating the ecosystem.
 
 ## Detailed Design
+
+Terminology: we call members *requires-unsafe* (previously known as *caller-unsafe*) if
+- under [the updated memory safety rules](#attributes) they [have the `RequiresUnsafe` attribute](#attributes) or [are `extern`](#extern),
+- under [the legacy memory safety rules](#attributes) they [contain pointers in signature](#compat-mode).
 
 ### Existing `unsafe` rules
 
@@ -59,7 +64,7 @@ of the existing rules of the specification. Instead, we will provide an overview
 
 #### Redefining expressions that require unsafe contexts
 
-The following expression require an `unsafe` context when used:
+The following expressions require an `unsafe` context when used:
 
 * [Pointer indirections][pointer-indirection]
 * [Pointer member access][pointer-member-access]
@@ -69,8 +74,8 @@ The following expression require an `unsafe` context when used:
 * `stackalloc` under the conditions defined [below](#stack-allocation)
 
 In addition to these expressions, expressions and statements can also conditionally require an `unsafe` context if they depend on any symbol that is marked as `unsafe`. For example, calling a method
-that is marked as `unsafe` will cause the _invocation_expression_ to require an `unsafe` context. Statements with invocations embedded (such as `using`s, `foreach`, and similar) can also require an
-`unsafe` context when they use a member that is marked as `unsafe`.
+that is *requires-unsafe* will cause the _invocation_expression_ to require an `unsafe` context. Statements with invocations embedded (such as `using`s, `foreach`, and similar) can also require an
+`unsafe` context when they use a *requires-unsafe* member.
 
 When we say "requires an unsafe context" or similar in this document, it means emitting an error that the construct requires an `unsafe` context to be used.
 
@@ -129,29 +134,30 @@ For other types, `sizeof` used to require unsafe context ([§24.6.9][sizeof-unsa
 
 ### Overriding, inheritance, and implementation
 
-It is a memory safety error to add `unsafe` at the member level in any override or implementation of a member that does not have `unsafe` on it originally, because callers may be using the base
-definition and not see any addition of `unsafe` by a derived implementation.
+It is a memory safety error to add `RequiresUnsafe` at the member level in any override or implementation of a member that is not *requires-unsafe* originally, because callers may be using the base
+definition and not see any addition of `RequiresUnsafe` by a derived implementation.
 
 ### Delegates and lambdas
 
-It is a memory safety error to convert an `unsafe` member to a delegate type that is not marked `unsafe`. The [_function type_](csharp-10.0/lambda-improvements.md#natural-function-type) definition
-is updated to include whether the _anonymous function_ has the `unsafe` keyword, or the _method group_ is to a member that is marked `unsafe`. If it is, an anonymous function type is created, just as
+It is a memory safety error to convert a *requires-unsafe* member to a delegate type that is not *requires-unsafe*. The [_function type_](csharp-10.0/lambda-improvements.md#natural-function-type) definition
+is updated to include whether the _anonymous function_ has the `RequiresUnsafe` attribute, or the _method group_ is to a member that is *requires-unsafe*. If it is, a *requires-unsafe* anonymous function type is created, just as
 it would be if any parameter were a by-`ref`, optional, or `params`.
 
-It is a memory safety error convert a delegate type that is marked as `unsafe` to `System.Delegate`/`System.Linq.Expressions.Expression`/`System.Linq.Expressions.Expression<T>`, or any interface those
+It is a memory safety error to convert a delegate type that is *requires-unsafe* to `System.Delegate`/`System.Linq.Expressions.Expression`/`System.Linq.Expressions.Expression<T>`, or any interface those
 types implement or base type of those types. They also cannot be used as type parameters.
 
-A delegate type that is marked `unsafe` can only be invoked in an `unsafe` context. If a delegate type is `unsafe`, then its `Invoke`, `BeginInvoke`, and `EndInvoke` methods are marked as `unsafe`.
+A delegate type that is *requires-unsafe* can only be invoked in an `unsafe` context. A delegate type is *requires-unsafe* if and only if its `Invoke`, `BeginInvoke`, and `EndInvoke` methods are marked as `RequiresUnsafe`
+(note that *requires-unsafe* is not enough, i.e., `extern` or pointer-containing invoke methods don't count).
 
 > [!NOTE]
-> We don't actually attribute the delegate type itself, just the `Invoke`, `BeginInvoke`, and `EndInvoke` methods. Determining whether a delegate type is `unsafe` is done by examining those 3 methods.
-> If all are marked as `unsafe`, the delegate type is considered `unsafe`. If only some are marked as `unsafe`, then it is presumed that calling the others is safe and only calling the member that is
-> marked as `unsafe` will cause a memory safety error. It will be a memory safety error to convert an `unsafe` lambda or method group to a delegate type that does not have all of `Invoke`, `BeginInvoke`,
-> and `EndInvoke` marked as `unsafe`.
+> We don't actually attribute the delegate type itself, just the `Invoke`, `BeginInvoke`, and `EndInvoke` methods. Determining whether a delegate type is *requires-unsafe* is done by examining those 3 methods.
+> If all are marked as `RequiresUnsafe`, the delegate type is considered *requires-unsafe*. If only some are marked as `RequiresUnsafe`, then it is presumed that calling the others is safe and only calling the member that is
+> marked as `RequiresUnsafe` will cause a memory safety error. It will be a memory safety error to convert a *requires-unsafe* lambda or method group to a delegate type that does not have all of `Invoke`, `BeginInvoke`,
+> and `EndInvoke` marked as `RequiresUnsafe`.
 
 ### `extern`
 
-Because `extern` methods are to native locations that cannot be guaranteed by the runtime, any `extern` method is automatically considered `unsafe`
+Because `extern` methods are to native locations that cannot be guaranteed by the runtime, any `extern` method is automatically considered *requires-unsafe*
 if compiled under the updated memory safety rules (i.e., it gets the `RequiresUnsafeAttribute`).
 Even methods that only take `unmanaged` parameters by value cannot be safely called by C#,
 as the calling convention used for the method could be incorrectly specified by the user and must be manually verified by review.
@@ -165,51 +171,56 @@ because methods with pointers in signature would always need an unsafe context a
 
 ### Unsafe modifiers and contexts
 
-Today, as covered by the [unsafe context specification][unsafe-context-spec], `unsafe` behaves in a lexical manner, marking the entire textual body contained by the `unsafe` block as an `unsafe` context
-(except for iterator bodies). We propose changing this definition from textual to sematic. `unsafe` on a member will mean that that member is `unsafe`, and the body of that member is considered an `unsafe`
-context.
-
-`unsafe` on the following declarations will be permitted for source compatibility purposes only; it will have no meaning, and the compiler will produce a warning informing the user that it does not have any effect:
-- type (except delegate type),
-- `using static`,
-- `using` alias.
-
-Note that `unsafe` on the following declarations will not have any effect on the callers but it will have an effect on the body/initializer of the member:
-- field (there is [an open question](#unsafe-fields) for this),
-- destructor.
-
-`unsafe` on a member is _not_ applied to any nested anonymous or local functions inside the member. To mark a anonymous or local function as `unsafe`, it must manually be marked as `unsafe`. The same goes for
-anonymous and local functions declared inside of an `unsafe` block.
-
-When a member is `partial`, both parts must agree on the `unsafe` modifier, unchanged from C# rules today.
+Today (and unchanged in this proposal), as covered by the [unsafe context specification][unsafe-context-spec], `unsafe` behaves in a lexical manner,
+marking the entire textual body contained by the `unsafe` block as an `unsafe` context (except for iterator bodies),
+and also some surrounding contexts in case of declarations:
 
 ```cs
-partial class C1
+class A : Attribute
 {
-    public partial void M1(); // Error: both parts must be unsafe, or neither can be
-    public partial unsafe void M2();
+    [RequiresUnsafe] public A() { }
 }
-
-partial class C1
+class C
 {
-    public unsafe partial void M1() => Console.WriteLine("hello world");
-    public partial void M2() => Console.WriteLine("hello world"); // Error: both parts must be unsafe, or neither can be
+    [A] void M1() { } // error: cannot use `A..ctor` in safe context
+    [A] unsafe void M1() { } // ok: the `unsafe` context applies to the `A..ctor` usage
 }
 ```
 
-For properties, `get` and `set/init` accessors can be independently declared as `unsafe`; marking the entire property as `unsafe` means that both the `get` and `set/init` accessors are unsafe.
-It is currently not possible to place any modifiers on event accessors, and this proposal doesn't change that, i.e., `add` and `remove` event accessors cannot be independently declared as `unsafe`.
-Only if the entire event is marked as `unsafe`, it means that the accessors are unsafe; otherwise they are safe.
+Since pointer types are now safe, an `unsafe` modifier on declarations without bodies does not have a meaning anymore. Hence `unsafe` on the following declarations will produce a warning:
+- `using static`,
+- `using` alias.
 
-#### Metadata
+`RequiresUnsafe` on a member is _not_ applied to any nested anonymous or local functions inside the member. To mark an anonymous or local function as *requires-unsafe*, it must manually be marked as `RequiresUnsafe`. The same goes for
+anonymous and local functions declared inside of an `unsafe` block.
+
+When a member is `partial`, both parts must agree on the `unsafe` modifier, but only one can specify the `RequiresUnsafe` attribute, unchanged from C# rules today.
+
+For properties, `get` and `set/init` accessors can be independently declared as `RequiresUnsafe`; marking the entire property as `RequiresUnsafe` means that both the `get` and `set/init` accessors are *requires-unsafe*.
+For events, `add` and `remove` accessors can be independently declared as `RequiresUnsafe`; marking the entire event as `RequiresUnsafe` means that both the `add` and `remove` accessors are *requires-unsafe*.
+
+#### Attributes
 
 When an assembly is compiled with the new memory safety rules, it gets marked with `MemorySafetyRulesAttribute` (detailed below), filled in with `15` as the language version. This is a signal to
 any downstream consumers that any members defined in the assembly will be properly attributed with `RequiresUnsafeAttribute` (detailed below) if an `unsafe` context is required to call them.
 Any member in such an assembly that is not marked with `RequiresUnsafeAttribute` does not require an `unsafe` context to be called, regardless of the types in the signature of the member.
 
-When a member is marked as `unsafe`, the compiler will synthesize a `RequiresUnsafeAttribute` application on the member in metadata. When a user-facing member marked as `unsafe` generates
-hidden members, such as an auto-property's backing field or get/set methods, both the user-facing member and any hidden members generated by that user-facing member are all marked as `unsafe`,
-and `RequiresUnsafeAttribute` is applied to all of them.
+It is an error to apply the `MemorySafetyRulesAttribute` to any symbol explicitly in source.
+
+The compiler ignores `RequiresUnsafeAttribute`-marked members from assemblies that are using the legacy memory safety rules (instead, the [compat mode](#compat-mode) is used there).
+
+The compiler will emit a warning about meaningless `RequiresUnsafe` if it is used under the legacy memory safety rules or applied to unsupported members:
+- types (except delegates),
+- enums,
+- fields,
+- destructors.
+
+When a member under the new memory safety rules is `extern`, the compiler will implicitly apply the `RequiresUnsafeAttribute` to the member in metadata.
+When a user-facing *requires-unsafe* member generates hidden members, such as an auto-property's backing field or get/set methods,
+both the user-facing member and any hidden members generated by that user-facing member are all *requires-unsafe*, and `RequiresUnsafeAttribute` is applied to all of them.
+
+The `MemorySafetyRulesAttribute` definition is synthesized by the compiler if necessary per standard well-known member rules.
+The `RequiresUnsafeAttribute` definition is _not_ synthesized by the compiler, and a compilation error is reported if the expected attribute constructor cannot be resolved per standard well-known member rules.
 
 ```cs
 namespace System.Runtime.CompilerServices
@@ -236,11 +247,31 @@ namespace System.Runtime.CompilerServices
 #### Compat mode
 
 For compat purposes, and to reduce the number of false negatives that occur when enabling the new rules, we have a fallback rule for modules that have not been updated to the new rules. For such modules,
-a member is considered `unsafe` if it contains a pointer or function pointer type somewhere among its parameter types or return type (can be nested in a non-pointer type, e.g., `int*[]`).
+a member is considered *requires-unsafe* if it contains a pointer or function pointer type somewhere among its parameter types or return type (can be nested in a non-pointer type, e.g., `int*[]`).
 Note that this doesn't apply to pointers in constraint types (e.g., `where T : I<int*[]>`) as those wouldn't need unsafe context at the call sites previously either.
 
 This does not include substituted generic parameters (e.g., method `I<T>.M(T)` when substituted `T` for `int*[]`)
 as there is no type-safe way for the target member to use that pointer type for anything anyway.
+
+## Alternatives
+
+### Use `unsafe` to denote *requires-unsafe* members
+
+Instead of using `RequiresUnsafeAttribute` to denote *requires-unsafe* members, we could use the `unsafe` keyword on the member
+(and only use the attribute for metadata representation of *requires-unsafe* members).
+See [a previous version of this speclet](https://github.com/dotnet/csharplang/blob/61f06216967ed264a8f83c71bff482f3eb6ac113/proposals/unsafe-evolution.md)
+before [the alternative](https://github.com/dotnet/csharplang/blob/61f06216967ed264a8f83c71bff482f3eb6ac113/meetings/working-groups/unsafe-evolution/unsafe-alternative-syntax.md) was incorporated into it.
+
+Advantages of `unsafe`:
+- similar to other languages and hence easier to understand,
+- more discoverable than an attribute.
+
+Advantages of an attribute (or another keyword):
+- avoids breaking existing members marked as `unsafe`,
+- incremental adoption possible (member-by-member),
+- doesn't force marking the whole body as `unsafe` (even with `unsafe` keyword we could
+  [change](https://github.com/dotnet/csharplang/blob/61f06216967ed264a8f83c71bff482f3eb6ac113/proposals/unsafe-evolution.md#unsafe-context-defaults-in-members)
+  `unsafe` to not have an effect on bodies though).
 
 ## Open questions
 
@@ -252,25 +283,25 @@ anonymous and local functions do not keep the unsafe context of their containing
 
 ### Lambda/method group conversion to safe delegate types
 
-Is conversion of a lambda or method group marked `unsafe` to a non-unsafe delegate type permitted without warning or error in an `unsafe` context? If we don't do this, then it could be fairly painful
+Is conversion of a *requires-unsafe* lambda or method group to a non-*requires-unsafe* delegate type permitted without warning or error in an `unsafe` context? If we don't do this, then it could be fairly painful
 for various parts of the ecosystem, particularly any enumerables that are passed through LINQ queries.
 
 ### Delegate type `unsafe`ty
 
-We could remove the ability to make delegate types as `unsafe` entirely, and simply require that all conversions of `unsafe` lambdas or method groups to a delegate type occur inside an `unsafe` context.
+We could remove the ability to make delegate types as *requires-unsafe* entirely, and simply require that all conversions of *requires-unsafe* lambdas or method groups to a delegate type occur inside an `unsafe` context.
 This could simplify the model around `unsafe` in C#, but at the risk of forcing `unsafe` annotations in the wrong spot and having an area where the real area of `unsafe`ty isn't properly called out. There
 are a lot of corner cases here, particularly involving generics and conversions, so it may be better to simply leave the concept for later when we determine it's needed.
 
 > [!NOTE]
-> If we decide to disallow `unsafe` delegates, we need to add them to the list of declarations that warn for meaningless `unsafe`.
+> This is currently implemented (i.e., it's not possible to mark delegates as *requires-unsafe* and converting *requires-unsafe* methods/lambdas must happen in an `unsafe` context) because it seems like a good starting point.
+
+> [!NOTE]
+> If delegates indeed cannot be marked *requires-unsafe*, we should add them to the lists of declarations that produce a warning for the `unsafe` modifier and `RequiresUnsafe` attribute being meaningless.
 
 ### Lambda/method group natural types
 
-Today, the only real impact on semantics and codegen (besides additional metadata) is changing the *function_type* of a lambda or method group when `unsafe` is in the signature. If we were to avoid doing this, then
+Today, the only real impact on semantics and codegen (besides additional metadata) is changing the *function_type* of a lambda or method group when marked as `RequiresUnsafe`. If we were to avoid doing this, then
 there would be no real impact to either, which could give adopters more confidence that behavior has not subtly changed under the hood.
-
-> [!NOTE]
-> If we decide to keep the ability to have `unsafe` lambdas, we need to update this proposal to include a syntax change to allow lambdas to be declared `unsafe` in the first place.
 
 ### `stackalloc` as initialized
 
@@ -304,15 +335,29 @@ unsafe
 Console.WriteLine(result);
 ```
 
-### `unsafe` context defaults in members
+### `unsafe` on types
 
-We could consider not automatically making the entire body of an `unsafe` method an `unsafe` context. Rust did this in [RFC 2585](https://github.com/rust-lang/rfcs/blob/master/text/2585-unsafe-block-in-unsafe-fn.md),
-with the motivation that it helps reduce the scope of `unsafe` blocks to the locations in which `unsafe` is actually used. We could do the same thing in C#, either as a warning or an error, with similar
-motivations.
+We could consider not automatically making the entire lexical scope of an `unsafe` type to be an `unsafe` context and warn for an `unsafe` on a type as it would have no meaning
+apart from edge cases like the following which we might not care about because they have no real-world use-cases:
 
-### `unsafe` fields
+```cs
+class A : Attribute
+{
+    [RequiresUnsafe] public A() { }
+}
+[A] class C; // unavoidable error for using requires-unsafe A..ctor?
+[A] unsafe class C; // if unsafe still introduces an unsafe context, this makes the error go away
+```
 
-Today, no proposal is made around `unsafe` on a field. We may need to add it though, such that any read from or write to a field marked as `unsafe` must be in an `unsafe` context. This would
+### More meaningless `unsafe` warnings
+
+Should more declarations produce the meaningless `unsafe` warning?
+For example, fields without initializers (assuming we don't support [*requires-unsafe* fields](#requires-unsafe-fields)), methods with empty bodies (or `extern`), etc.
+We already have an IDE analyzer for unnecessary `unsafe` though.
+
+### *Requires-unsafe* fields
+
+Today, no proposal is made around `RequiresUnsafe` on a field. We may need to add it though, such that any read from or write to a field marked as *requires-unsafe* must be in an `unsafe` context. This would
 enable us to better annotate the concerns around code such as:
 
 ```cs
@@ -363,19 +408,29 @@ _ = &i;
 i++;
 ```
 
-### Value of MemorySafetyRulesAttribute
+### Value of `MemorySafetyRulesAttribute`
 
 What should be the "enabled"/"updated" memory safety rules version? `2`? `15`? `11`?
 See also https://github.com/dotnet/designs/blob/main/accepted/2025/memory-safety/sdk-memory-safety-enforcement.md.
 
 ### `extern` implicitly unsafe
 
-This is currently the only place where `RequiresUnsafeAttribute` is synthesized without an explicit `unsafe` keyword.
+This is currently the only place where `RequiresUnsafeAttribute` is implicitly applied by the compiler.
 Are we okay with this outlier?
 
 Also, CoreLib exposes many extern methods (FCalls) as safe today.
 Treating extern methods as implicitly unsafe will require wrapping the implicitly unsafe extern methods with a safe wrapper.
 We may run into situations where adding the extra wrapper is difficult due to runtime implementation details.
+
+### `RequiresUnsafe` on `partial` members
+
+It is required to have the `unsafe` modifier at both partial member parts by pre-existing C# rules.
+On the other hand, attributes may be specified only at one of those parts
+and even cannot be specified at both parts unless they have `AllowMultiple`, but then they are effectively present multiple times.
+We have [changed](#use-unsafe-to-denote-requires-unsafe-members) the way to denote *requires-unsafe* members via an attribute instead of the `unsafe` modifier
+but haven't discussed this aspect of the change.
+Should we allow the attribute to be specified multiple times (via `AllowMultiple` or via special compiler behavior for this attribute and `partial` members only),
+or even require it (via special compiler checks for this attribute only)?
 
 ## Answered questions
 
