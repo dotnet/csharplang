@@ -31,11 +31,17 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 - [Closed class hierarchies open questions](https://github.com/dotnet/csharplang/blob/8421c126a088c032c9ed671588f40e221ca53dea/proposals/closed-hierarchies.md#open-questions) (Rikki)
 
+## C# Language Design Notes for 2026
+
 ### Wed Feb 4, 2026
 
-- [Union patterns update](https://github.com/dotnet/csharplang/blob/main/meetings/working-groups/discriminated-unions/union-patterns-update.md) (Matt and Mads)
+[C# Language Design Meeting for February 4th, 2026](https://github.com/dotnet/csharplang/blob/main/meetings/2026/LDM-2026-02-04.md)
 
-## C# Language Design Notes for 2026
+- Discriminated unions patterns
+    - Null ambiguity in constructor selection
+    - Marking unions with an attribute instead of IUnion interface
+    - Factory method support
+    - Union member providers
 
 ### Mon Feb 2, 2026
 
