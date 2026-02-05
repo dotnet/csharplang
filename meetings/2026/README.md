@@ -25,7 +25,7 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ### Wed Feb 11, 2026
 
-Union patterns continued (revised proposal to come) (Mads and Matt)
+- Union patterns continued (revised proposal to come) (Mads and Matt)
 
 ### Mon Feb 9, 2026
 
