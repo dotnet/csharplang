@@ -25,6 +25,8 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ### Wed Feb 11, 2026
 
+Union patterns continued (revised proposal to come) (Mads and Matt)
+
 ### Mon Feb 9, 2026
 
 - [Closed class hierarchies open questions](https://github.com/dotnet/csharplang/blob/8421c126a088c032c9ed671588f40e221ca53dea/proposals/closed-hierarchies.md#open-questions) (Rikki)
