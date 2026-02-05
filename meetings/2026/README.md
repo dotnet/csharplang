@@ -35,11 +35,13 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 - [Union patterns update](https://github.com/dotnet/csharplang/blob/main/meetings/working-groups/discriminated-unions/union-patterns-update.md) (Matt and Mads)
 
+## C# Language Design Notes for 2026
+
 ### Mon Feb 2, 2026
 
-- [Extension indexers](https://github.com/dotnet/csharplang/blob/main/proposals/extension-indexers.md#open-issues) (Julien)
+[C# Language Design Meeting for February 2nd, 2026](https://github.com/dotnet/csharplang/blob/main/meetings/2026/LDM-2026-02-02.md)
 
-## C# Language Design Notes for 2026
+- Extension indexers
 
 ### Mon Jan 26, 2026
 
