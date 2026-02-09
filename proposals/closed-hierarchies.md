@@ -59,18 +59,25 @@ public class C2 : CO { ... }     // Ok, 'CO' is not closed
 
 ### Type parameter restriction
 
-If a generic class directly derives from a closed class, then all of its type parameters must be used in the base class specification:
+If a generic class `D` directly derives from a closed class `C`, then all of its type parameters must be "inferrable" from the base class specification. Informally, this rule is to ensure that for every generic instantiation of `C` there is at most one generic instantiation of `D` that derives from it. If that were not the case, it would not be possible to do an exhaustive switch over `C` with just one case per derived class.
+
+Formally, given the following declarations of `C` and `D`:
 
 ```csharp
-closed class C<T> { ... }
-class D1<U> : C<U> { ... }   // Ok, 'U' is used in base class
-class D2<V> : C<V[]> { ... } // Ok, 'V' is used in base class
-class D3<W> : C<int> { ... } // Error, 'W' is not used in base class
+class C<...> { ... }
+class D<X₁...Xᵥ> : C<T₁...Tₓ> { ... }
 ```
 
-This rule is to ensure that there is a single generic instantiation of the derived type that "exhausts" a given generic instantiation of the closed base type.
+And these two function declarations:
 
-*Note:* This rule may not be sufficient if we allow closed interfaces at some point, because a) classes can implement multiple generic instantiations of the same interface, and b) interface type parameters can be co- or contravariant. At such point we'd need to refine the rule to continue to ensure that there's only ever one generic instantiation of a given derived type per generic instantiation of a closed base type.
+```csharp
+D<X₁...Xᵥ> Make_D<X₁...Xᵥ>() => default!;
+C<T₁...Tₓ> Make_C<X₁...Xᵥ>() => Make_D();
+```
+
+We say that the type parameters of `D` are *inferrable* from `D`'s base class if and only if type inference succeeds for the call to `Make_D` in the body of `Make_C`.
+
+*Note:* For closed classes, this rule seems equivalent to demanding that each type parameter of `D` occurs in the base class specification. However, by expressing it in terms of generic type inference, it is more directly evident that it satisfies the motivation for the rule. Also if we were to add closed *interfaces* the rule would be more easily adaptable to accommodate that.
 
 ### Exhaustiveness in switches
 
@@ -95,7 +102,7 @@ _ = cc switch
 };
 ```
 
-*Note:* There may not exist valid derived classes for certain generic instantiations of a closed base class. An exhaustive switch only needs to specify cases for derived types that are actually possible. 
+For a given instantiation of a generic closed base class `C<...>`, there may not exist a valid generic instantiation of a given derived class `D<...>`. In this situation, no case for `D` needs to provided in order for a switch to be exhaustive.
 
 For example:
 
@@ -105,7 +112,7 @@ class D1<U> : C<U> { ... }
 class D2<V> : C<V[]> { ... }
 ```
 
-For `C<string>`, for instance, there is no corresponding instantiation of `D2<...>`, and no case for `D2<...>` needs to be given in a switch:
+For the generic instantiation `C<string>` there is no corresponding instantiation of `D2<...>`, and no case for `D2<...>` therefore needs to be given in a switch:
 
 ```csharp
 C<string> cs = ...;
@@ -115,6 +122,22 @@ _ = cs switch
     // No need for a 'D2<...>' case - no instantiation corresponds to 'C<string>'
 }
 ```
+
+Formally, given the following declarations of `C` and `D`:
+
+```csharp
+class C<...> { ... }
+class D<X₁...Xᵥ> : C<T₁...Tₓ> { ... }
+```
+
+A concrete generic instantiation `C<S₁...Sₓ>`, and these two function declarations:
+
+```csharp
+D<X₁...Xᵥ> Make_D<X₁...Xᵥ>() => default!;
+C<S₁...Sₓ> Make_Concrete_C() => Make_D();
+```
+
+A valid corresponding instantiation of `D<...>` exists and must be included in an exhaustive switch if and only if type inference succeeds and produces valid type arguments for the invocation of `Make_D` in the body of `Make_Concrete_C`. The type arguments for `D<...>` are those produced by the successful type inference.
 
 ### Lowering
 
