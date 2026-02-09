@@ -29,7 +29,7 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ### Mon Feb 9, 2026
 
-- [Closed class hierarchies open questions](https://github.com/dotnet/csharplang/blob/8421c126a088c032c9ed671588f40e221ca53dea/proposals/closed-hierarchies.md#open-questions) (Rikki)
+- [Closed class hierarchies open questions](https://github.com/dotnet/csharplang/blob/fab1ad040df56d5cfcca0b271b02a20f30e389a6/proposals/closed-hierarchies.md#open-questions) (Rikki)
 
 ## C# Language Design Notes for 2026
 
