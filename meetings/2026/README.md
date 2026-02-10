@@ -41,11 +41,19 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 - Union patterns continued (revised proposal to come) (Mads and Matt)
 
+## C# Language Design Notes for 2026
+
 ### Mon Feb 9, 2026
 
-- [Closed class hierarchies open questions](https://github.com/dotnet/csharplang/blob/fab1ad040df56d5cfcca0b271b02a20f30e389a6/proposals/closed-hierarchies.md#open-questions) (Rikki)
+[C# Language Design Meeting for February 9th, 2026](https://github.com/dotnet/csharplang/blob/main/meetings/2026/LDM-2026-02-09.md)
 
-## C# Language Design Notes for 2026
+- Closed hierarchies open questions
+    - Confirming API shape
+    - Blocking subtyping from other languages
+    - Multiple `CompilerFeatureRequired` attributes
+    - Same module restriction
+    - Permit explicit use of `abstract` modifier
+    - Subtype metadata
 
 ### Wed Feb 4, 2026
 
