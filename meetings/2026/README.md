@@ -39,7 +39,7 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ### Wed Feb 11, 2026
 
-- Union patterns continued (revised proposal to come) (Mads and Matt)
+- [Union patterns](https://github.com/dotnet/csharplang/blob/main/meetings/working-groups/discriminated-unions/union-patterns-update.md) continued (Mads and Matt)
 
 ## C# Language Design Notes for 2026
 
