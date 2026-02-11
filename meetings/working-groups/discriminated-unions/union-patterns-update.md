@@ -41,6 +41,7 @@ We don't anticipate allowing `[Union]` on type parameters, which therefore canno
 The current pattern looks for members on the union type itself. This has a few downsides:
 
 - Existing types may have members that would unintentionally be recognized as union members (e.g. copy constructor).
+- Such members may even clash in such a way that you couldn't have both, even if you had an attribute to distinguish them (e.g. `Value` property).
 - Types may not wish to expose additional union members as part of their public surface area.
 
 We propose to allow a union type to optionally delegate all union members to a nested `IUnionMembers` interface that the union type implements. Since constructors for a type cannot occur on another type, the interface would instead use static factory methods called `Create`:
