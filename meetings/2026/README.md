@@ -4,6 +4,8 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ## Schedule ASAP
 
+- [Extension indexers](https://github.com/dotnet/csharplang/blob/main/proposals/extension-indexers.md#confirm-whether-extension-indexer-access-comes-before-or-after-implicit-indexers) (Julien)
+
 ## Schedule when convenient
 
 - [Target-typed static member access](https://github.com/dotnet/csharplang/blob/afad49721a7b9923efbbc36ae6c455d85b994543/proposals/target-typed-static-member-access.md) (jnm2, CyrusNajmabadi)
