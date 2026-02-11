@@ -156,20 +156,57 @@ Can closed classes be generated into IL in a way that prevents other languages a
 We propose accomplishing this by adding `[CompilerFeatureRequired("ClosedClasses")]` to all constructors of closed classes. Since constructors of abstract types can generally only be used in a constructor initializer, this seems to effectively prevent languages which don't understand the feature, from allowing user to declare a subclass of a closed class.
 
 ```cs
-// Assembly 1, built with .NET 10 SDK
+// Authoring assembly, built with .NET 10 SDK
 closed class C1
 {
     public C1() { }
     public C1(int param) { }
 }
 
-// Assembly 2, built with .NET 8 SDK
+// Consuming assembly, built with .NET 8 SDK
 class C2 : C1
 {
     public C2() { } // error: 'C1.C1()' requires compiler feature "ClosedClasses"
     public C2() : base(42) { } // error: 'C1.C1(int)' requires compiler feature "ClosedClasses"
 }
 ```
+
+Metadata "view" of `C1`:
+```cs
+[Closed]
+class C1
+{
+    [CompilerFeatureRequired("ClosedClasses")]
+    public C1() { }
+    [CompilerFeatureRequired("ClosedClasses")]
+    public C1(int param) { }
+}
+```
+
+#### Use of multiple `[CompilerFeatureRequired]` attributes
+
+A [question came up](https://github.com/dotnet/roslyn/pull/82052#discussion_r2759549101) about a case where a closed class has required members:
+
+```cs
+closed class C1
+{
+    public C() { }
+    public required string P { get; set; }
+}
+
+// Metadata:
+class C1
+{
+    // Do we expect all of the following to be emitted?
+    // Or do we want to drop CompilerFeatureRequired("RequiredMembers"), for example, on the assumption that 'any compiler that supports closed classes should also support required members'?("RequiredMembers")?
+    [Obsolete("Types with required members are not supported in this version of your compiler")]
+    [CompilerFeatureRequired("RequiredMembers")]
+    [CompilerFeatureRequired("ClosedClasses")]
+    public C1() { }
+}
+```
+
+Do we want to emit all attributes in the above sample or just a subset of them?
 
 ### Same module restriction
 
