@@ -90,7 +90,7 @@ public static Pet Create(Cat value) { ... }
 
 Union constructors and union factory methods are referred to collectively as *union creation members*.
 
-The single parameter of a union creation member must be an by-value or `in` parameter.
+The single parameter of a union creation member must be a by-value or `in` parameter.
 
 A union type must have at least one union creation member, and therefore at least one case type.
 
@@ -357,7 +357,7 @@ var value = pet switch
 
 ### Union interfaces
 
-The following interfaces are recognized by the language in its implementation of union features.
+The following interfaces are used by the language in its implementation of union features.
 
 #### Union access interface
 
