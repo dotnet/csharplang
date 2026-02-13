@@ -492,7 +492,7 @@ public union Pet(Cat, Dog){ ... }
 Is lowered to:
 
 ``` c#
-public record struct Pet : IUnion, IUnion<Pet>
+[Union] public record struct Pet : IUnion, IUnion<Pet>
 {
     public Pet(Cat value) => Value = value;
     public Pet(Dog value) => Value = value;
@@ -517,6 +517,10 @@ public record struct Pet : IUnion, IUnion<Pet>
 
 ## Open questions
 [open]: #open-questions
+
+### What if types are missing
+
+What happens if `UnionAttribute`, `IUnion` or `IUnion<TUnion>` are missing? Error? Synthesize? Something else?
 
 ### Design of generic IUnion interface
 
