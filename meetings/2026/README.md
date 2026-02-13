@@ -39,11 +39,13 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ### Mon Feb 23, 2026
 
+## C# Language Design Notes for 2026
+
 ### Wed Feb 11, 2026
 
-- [Union patterns](https://github.com/dotnet/csharplang/blob/main/meetings/working-groups/discriminated-unions/union-patterns-update.md) continued (Mads and Matt)
+[C# Language Design Meeting for February 11th, 2026](https://github.com/dotnet/csharplang/blob/main/meetings/2026/LDM-2026-02-11.md)
 
-## C# Language Design Notes for 2026
+- Union patterns update
 
 ### Mon Feb 9, 2026
 
