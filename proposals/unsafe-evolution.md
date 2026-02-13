@@ -335,6 +335,15 @@ unsafe
 Console.WriteLine(result);
 ```
 
+### More `unsafe` contexts
+
+Before the change to use [an attribute instead of a modifier](#use-unsafe-to-denote-requires-unsafe-members) to denote *requires-unsafe* members,
+we had allowed `unsafe` modifier on property accessors (we hadn't allowed it on event accessors since there were *no* modifiers allowed previously).
+We since reverted that. Should we still allow it even though it wouldn't denote *requires-unsafe* members anymore, just an unsafe context?
+
+If we are allowing more `unsafe` contexts, should we relax more restrictions around `unsafe` and pointer parameters in iterators and async methods too?
+See [ref/unsafe in iterators/async](./csharp-13.0/ref-unsafe-in-iterators-async.md#alternatives) for more details.
+
 ### `unsafe` on types
 
 We could consider not automatically making the entire lexical scope of an `unsafe` type to be an `unsafe` context and warn for an `unsafe` on a type as it would have no meaning
