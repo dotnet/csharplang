@@ -32,7 +32,15 @@ The proposed unions in C# are unions of *types* and not "discriminated" or "tagg
 
 ### Union types
 
-Any class or struct type with a `[Union]` attribute is considered a *union type*. It is an error to apply the `[Union]` attribute to a type declaration that isn't a class or a struct. 
+Any class or struct type with a `System.Runtime.CompilerServices.UnionAttribute` attribute is considered a *union type*:
+
+```csharp
+namespace System.Runtime.CompilerServices
+{
+    [AttributeUsage(Class | Struct, AllowMultiple = false)]
+    public class UnionAttribute : Attribute;
+}
+```
 
 A union type must follow a certain pattern of public *union members*, which must either be declared on the union type itself or delegated to a "union member provider".
 
@@ -68,9 +76,21 @@ Union creation members are used to create new union values from a case type valu
 
 If the union-defining type is the union type itself, each constructor with a single parameter is a *union constructor*. The case types of the union are identified as the set of parameter types from these constructors.
 
+```csharp
+// Union constructor making `Dog` a case type
+public Pet(Dog value) { ... }
+```
+
 If the union-defining type is a union member provider, each static `Create` method with a single parameter and a return type that is identity-convertible to the union type itself is a *union factory method*. The case types of the union are identified as the set of parameter types from these factory methods.
 
+```csharp
+// Union factory method making `Cat` a case type
+public static Pet Create(Cat value) { ... }
+```
+
 Union constructors and union factory methods are referred to collectively as *union creation members*.
+
+The single parameter of a union creation member must be an by-value or `in` parameter.
 
 A union type must have at least one union creation member, and therefore at least one case type.
 
@@ -79,6 +99,11 @@ A union type must have at least one union creation member, and therefore at leas
 The `Value` property allows access to the value contained in a union, regardless of its case type.
 
 Every union-defining type must declare a `Value` property of type `object?` or `object`. The property must have a `get` accessor and may optionally have an `init` or `set` accessor, which can be of any accessibility and is not used by the compiler.
+
+```csharp
+// Union 'Value' property
+public object? Value { get; }
+```
 
 #### Non-boxing access members
 
@@ -89,15 +114,19 @@ This allows the compiler to implement pattern matching more efficiently when cas
 The non-boxing access members are:
 
 - A `HasValue` property of type `bool` with a public `get` accessor. It may optionally have an `init` or `set` accessor, which can be of any accessibility and is not used by the compiler. 
-- A `TryGetValue` method for each case type. The method returns `bool` and takes an out-parameter of a type that corresponds to the given case type in the following way:
+- A `TryGetValue` method for each case type. The method returns `bool` and takes a single out-parameter of a type that corresponds to the given case type in the following way:
     - If the case type is a nullable value type, the type of the parameter should be identity-convertible to the underlying type
     - Otherwise, the type should be identity-convertible to the case type.
     
-`HasValue` should return true if and only if the union's `Value` is not null.
+```csharp
+// Non-boxing access members
+public bool HasValue { get { ... } }
+public bool TryGetValue(out Dog value) { ... }
+```
 
-`TryGetValue` should return true if and only if the union's `Value` is of the given case type, and if so, deliver that value in the method's out parameter.
+`HasValue` is expected to return true if and only if the union's `Value` is not null.
 
-It is an error to have some but not all of the non-boxing access members.
+`TryGetValue` is expected to return true if and only if the union's `Value` is of the given case type, and if so, deliver that value in the method's out parameter.
 
 #### Well-formedness
 
@@ -152,8 +181,6 @@ public record struct IntOrBool
 ```
 
 *Note:* This is just an example of how the non-boxing access pattern might be implemented. The user code can store the content any way it likes. In particular, it does not prevent the implementation from boxing! The `non-boxing` in its name refers to allowing the compiler's pattern matching implementation to access each case type in a strongly typed way, as opposed to the `object?`-typed `Value` property.
-
-*Note:* This is an example of an implementation strategy that may give rise to "large" (bigger than a pointer) structs. This means they may be vulnerable to "tearing", where copying of values isn't atomic, and concurrent threads may observe corrupted values that are "torn" between before and after parts. This is an orthogonal concern that applies to all large structs, but worth keeping in mind for union scenarios. The unions generated by [Union declarations](#union-declarations) are immune to this issue, as they always generate pointer-length structs.
 
 `Result<T>` implements the basic pattern via a union member provider:
 
@@ -491,6 +518,17 @@ public record struct Pet : IUnion, IUnion<Pet>
 ## Open questions
 [open]: #open-questions
 
+### Design of generic IUnion interface
+
+Arguments have been made that `IUnion<TUnion>` should not inherit from `IUnion` or constrain its type parameter to `IUnion<TUnion>`. We should revisit.
+
+### Nullable value types as case types
+
+The rules above state that if a case type is a nullable value type, the parameter type used in a corresponding `TryGetValue` method should be the *underlying* type. 
+This is motivated by the fact that a `null` value would never be yielded through this method. On the consumption side, a nullable value type is not allowed as a type pattern, whereas a match against the underlying type should be able to map to a call of this method.
+
+We should confirm that we agree with this unwrapping.
+
 ### *The non-boxing union access pattern*
 
 Need to specify precise rules for finding suitable `HasValue` and `TryGetValue` APIs.
@@ -526,6 +564,8 @@ that only methods with a parameter type matching a case type are considered:
 It would be good to have an explicit answer. 
 
 ### Clarify rules around `default` values of struct union types
+
+*Note*: The "default" well-formedness rules mentioned below have been removed. We should confirm that this is what we want.
 
 [Nullability](#Nullability) section says:
 > For union types where none of the case types are nullable, the default state for `Value` is "not null" rather than "maybe null". 
