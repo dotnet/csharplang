@@ -199,7 +199,7 @@ The [conversions](https://github.com/dotnet/csharplang/blob/main/proposals/cshar
 
 Note the actual arguments within the `argument_list` of the `with_element` do not affect if the conversion exists or not.  Just the presence or absence of the `with_element` itself.  The intuition here is simply that if the collection expression is written without one (like `[x, y, z]`) it would have to be to be able to call the constructor without args.  While if it is has `[with(...), x, y, z]` it could then call the appropriate constructor.  This also means that types that can *not* invoked with a no-argument constructor *can* be used with a collection expression, but *only*  if that collection expression that contains a `with_element`.
 
-The actual determination of how a `with_element` will affect construction is given [below](#Construction).
+The actual determination of how a `with_element` will affect construction is given [below](#construction).
 
 ## Construction
 
@@ -385,7 +385,7 @@ The [*method arguments must match*](https://github.com/dotnet/csharplang/blob/ma
 
 ### `dynamic` arguments
 
-Should arguments with `dynamic` type be allowed? That might require using the runtime binder for overload resolution, which would make it difficult to limit the set of candidates, for instance for [collection builder cases](#construction-overloads-for-collection-builder-types).
+Should arguments with `dynamic` type be allowed? That might require using the runtime binder for overload resolution, which would make it difficult to limit the set of candidates, for instance for collection builder cases.
 
 **Resolution:** Disallowed. [LDM-2025-01-22](https://github.com/dotnet/csharplang/blob/main/meetings/2025/LDM-2025-01-22.md#conclusion-1)
 
@@ -551,7 +551,7 @@ Recomendation: Use signatures independent of a specific type.  And, for C# 14, o
 
 Arguments are supported for interface target types.  For both mutable and non-mutable interfaces the set of arguments will be curated.  
 
-The expected list (which still needs to be LDM ratified) is [Interface target type](#Interface-target-type)
+The expected list (which still needs to be LDM ratified) is [Interface target type](#interface-target-type)
 
 ### Empty argument lists
 
