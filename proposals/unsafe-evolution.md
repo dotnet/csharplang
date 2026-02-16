@@ -209,11 +209,10 @@ It is an error to apply the `MemorySafetyRulesAttribute` to any symbol explicitl
 
 The compiler ignores `RequiresUnsafeAttribute`-marked members from assemblies that are using the legacy memory safety rules (instead, the [compat mode](#compat-mode) is used there).
 
-The compiler will emit a warning about meaningless `RequiresUnsafe` if it is used under the legacy memory safety rules or applied to unsupported members:
-- types (except delegates),
-- enums,
-- fields,
-- destructors.
+The compiler will emit a warning if `RequiresUnsafe` is used under the legacy memory safety rules and an error if it is applied to unsupported symbol kinds
+(note that this excludes symbol kinds that should be banned already by `AttributeUsageAttribute` on the attribute's definition):
+- destructors,
+- static constructors.
 
 When a member under the new memory safety rules is `extern`, the compiler will implicitly apply the `RequiresUnsafeAttribute` to the member in metadata.
 When a user-facing *requires-unsafe* member generates hidden members, such as an auto-property's backing field or get/set methods,
@@ -237,7 +236,7 @@ namespace System.Runtime.CompilerServices
         public int Version { get; }
     }
 
-    [AttributeUsage(AttributeTargets.Field | AttributeTargets.Method | AttributeTargets.Property | AttributeTargets.Constructor, AllowMultiple = false, Inherited = true)]
+    [AttributeUsage(AttributeTargets.Delegate | AttributeTargets.Event | AttributeTargets.Method | AttributeTargets.Property | AttributeTargets.Constructor, AllowMultiple = false, Inherited = true)]
     public sealed class RequiresUnsafeAttribute : Attribute
     {
     }
@@ -296,7 +295,7 @@ are a lot of corner cases here, particularly involving generics and conversions,
 > This is currently implemented (i.e., it's not possible to mark delegates as *requires-unsafe* and converting *requires-unsafe* methods/lambdas must happen in an `unsafe` context) because it seems like a good starting point.
 
 > [!NOTE]
-> If delegates indeed cannot be marked *requires-unsafe*, we should add them to the lists of declarations that produce a warning for the `unsafe` modifier and `RequiresUnsafe` attribute being meaningless.
+> If delegates indeed cannot be marked *requires-unsafe*, we should add them to the list of declarations that produce a warning for meaningless `unsafe` modifier and remove them from `AttributeTargets` on the `RequiresUnsafeAttribute`.
 
 ### Lambda/method group natural types
 
