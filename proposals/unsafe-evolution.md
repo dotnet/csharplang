@@ -440,6 +440,59 @@ but haven't discussed this aspect of the change.
 Should we allow the attribute to be specified multiple times (via `AllowMultiple` or via special compiler behavior for this attribute and `partial` members only),
 or even require it (via special compiler checks for this attribute only)?
 
+### `new()` constraint
+
+Do we want to support `new()` with *requires-unsafe* (something we currently don't seem to support in the compiler for other features, like `Obsolete`)?
+
+#### `new()` constraint and `using`s
+
+How should it behave in aliases and static usings?
+- Should it be an error at the `using` declaration, suppressable via the `unsafe` keyword we already support there
+  (and we then wouldn't need the "meaningless `unsafe`" warning for), or
+- should it be an error normally at the use site like it would be if used directly without an alias or static using?
+
+```cs
+class C
+{
+    [RequiresUnsafe] public C() { }
+}
+
+class D<T> where T : new()
+{
+    public static void M() { _ = new T(); }
+}
+```
+
+```cs
+using X = D<C>;
+using unsafe X = D<C>;
+
+X.M();
+```
+
+```cs
+using static D<C>;
+using static unsafe D<C>;
+
+M();
+```
+
+Note that other constraints behave like the former option today:
+
+```cs
+using X = D<C>; // error here
+
+_ = new X(); // ok
+_ = new D<C>(); // error here
+
+class C
+{
+    public C(int x) { }
+}
+
+class D<T> where T : new();
+```
+
 ## Answered questions
 
 ### How breaking do we want to skew
