@@ -444,6 +444,20 @@ or even require it (via special compiler checks for this attribute only)?
 
 Do we want to support `new()` with *requires-unsafe* (something we currently don't seem to support in the compiler for other features, like `Obsolete`)?
 
+```cs
+M<C>(); // should be an error outside `unsafe` context since `M` calls the requires-unsafe `C..ctor`?
+
+void M<T>() where T : new()
+{
+    _ = new T();
+}
+
+class C
+{
+    [RequiresUnsafe] public C() { }
+}
+```
+
 #### `new()` constraint and `using`s
 
 How should it behave in aliases and static usings?
