@@ -536,6 +536,12 @@ base clause is not permitted. However, I can easily imagine a need to implement 
 I think that apart from the element-types-list the syntax should match regular `struct`/`record struct`
 declaration where the `struct` keyword is replaced with `union` keyword.
 
+### Union declaration members
+
+> Instance fields, auto-properties or field-like events are not permitted.
+
+This feels arbitrary and absolutely unnecessary.
+
 ### What if types for union declaration are missing
 
 What happens if `UnionAttribute`, `IUnion` or `IUnion<TUnion>` are missing? Error? Synthesize? Something else?
