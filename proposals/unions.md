@@ -518,7 +518,107 @@ Is lowered to:
 ## Open questions
 [open]: #open-questions
 
-### What if types are missing
+### Is union declaration a record?
+
+> A union declaration is lowered to a record struct
+
+I think this default behavior is unnecessary and, given that it is not configurable, going to significantly
+limit usage scenarios. Records generate a lot of code that is either unused or doesn't match specific requirements.
+For example, records are pretty much forbidden in compiler's code base because of that code bloat. I think that it would be better
+to change the default:
+ - By default, a union declaration declares a regular struct with just union-specific members.
+ - A user can declare a record union: ``` record union U(E1, ...) ... ``` 
+
+### Union declaration syntax
+
+It looks like the proposed syntax is incomplete or unnecessarily limiting. For example, it looks like
+base clause is not permitted. However, I can easily imagine a need to implement an interface, for example.
+I think that apart from the element-types-list the syntax should match regular `struct`/`record struct`
+declaration where the `struct` keyword is replaced with `union` keyword.
+
+### Union declaration members
+
+> Instance fields, auto-properties or field-like events are not permitted.
+
+This feels arbitrary and absolutely unnecessary.
+
+### Nullable value types as Union case types
+
+> The case types of the union are identified as the set of parameter types from these constructors.
+> The case types of the union are identified as the set of parameter types from these factory methods.
+
+At the same time:
+
+> A `TryGetValue` method for each case type. The method returns `bool` and takes a single out-parameter of a type that corresponds to the given case type in the following way:
+>    - If the case type is a nullable value type, the type of the parameter should be identity-convertible to the underlying type
+>    - Otherwise, the type should be identity-convertible to the case type.
+
+Is there an advantage to have a nullable value type among the case types especially that a type pattern cannot use
+nullable value type as the target type? It feels like we could simply say that, if constructor's/factory's parameter
+type is a nullable value type, then corresponding case type is the underlying type. Then we wouldn't need that extra clause
+for the `TryGetValue` method, all out parameters are case types.
+
+### Default nullable state of `Value` property
+
+> For union types where none of the case types are nullable, the default state for `Value` is "not null" rather than "maybe null". 
+
+With the new design, where `Value` property is not defined in some general interface, but 
+is an API that specifically belongs to the declared type, the rule quoted above feels like
+over-engineering. Moreover, the rule likely will force consumers to use nullable types in situations where
+otherwise nullable types wouldn't be used.
+
+For example, consider the following union declaration:
+``` c#
+union U1(int, bool, DateTime);
+```
+
+According to the quoted rule, the default state for `Value` is "not null". But that doesn't match behavior of the
+type, `default(U1).Value` is `null`. In order to realign the behavior, consumer is forced to make at least one 
+case type nullable. Something like: 
+``` c#
+union U1(int?, bool, DateTime);
+```
+
+But that is likely undesirable, consumer might not want to allow explicit creation with `int?` value.
+
+Proposal: Remove the quoted rule, nullable analysis should use annotations from the `Value` property
+          to infer its default nullability.
+
+### Union matching for Nullable of a union value type
+
+> When the incoming value of a pattern is of a union type, the union value's contents may be "unwrapped", depending on the pattern.
+
+Should we expand this rule to scenarios when incoming value of a pattern is of a `Nullable<union type>`?
+
+Consider the following scenario:
+``` C#
+    static bool Test1(StructUnion? u)
+    {
+        return u is 1;
+    }   
+
+    static bool Test2(ClassUnion? u)
+    {
+        return u is 1;
+    }   
+```
+
+The meaning of ```u is 1``` in Test1 and Test2 are very different. In Test1 it is not a union matching, in Test2 it is.
+Perhaps "union matching" should "dig" through `Nullable<T>` as pattern matching usually does in other situations.
+
+If we go with that, then the union matching `null` pattern against `Nullable<union type>` should work as against classes.
+I.e. the pattern is true when ```(!nullableValue.HasValue || nullableValue.Value.Value is null)```.
+
+### What to do about "bad" APIs?
+
+What should compiler do about union matching APIs that look like a match, but otherwise "bad"?
+For example, compiler finds TryGetValue/HasValue with matching signature, but it is "bad" because
+a required custom modifier or it requires an unknown feature, etc. Should compiler silently ignore the API or
+report an error?
+Similar, the API might be marked as Obsolete/Experimental. Should compiler report any diagnostics, silently use the API
+or silently not use the API?
+
+### What if types for union declaration are missing
 
 What happens if `UnionAttribute`, `IUnion` or `IUnion<TUnion>` are missing? Error? Synthesize? Something else?
 
@@ -526,7 +626,7 @@ What happens if `UnionAttribute`, `IUnion` or `IUnion<TUnion>` are missing? Erro
 
 Arguments have been made that `IUnion<TUnion>` should not inherit from `IUnion` or constrain its type parameter to `IUnion<TUnion>`. We should revisit.
 
-### Nullable value types as case types
+### Nullable value types as case types and their interaction with `TryGetValue`
 
 The rules above state that if a case type is a nullable value type, the parameter type used in a corresponding `TryGetValue` method should be the *underlying* type. 
 This is motivated by the fact that a `null` value would never be yielded through this method. On the consumption side, a nullable value type is not allowed as a type pattern, whereas a match against the underlying type should be able to map to a call of this method.
@@ -645,7 +745,7 @@ class Program
 
 ### Union conversions
 
-#### Where do they belong among other conversions priority-wise?
+#### [Resolved] Where do they belong among other conversions priority-wise?
 
 Union conversions feel like another form of a user-defined conversion. Therefore, current implementation
 classifies them right after a failed attempt to classify an implicit user-defined conversion, and, in case
@@ -687,7 +787,7 @@ Need to confirm this is the behavior that we like. Otherwise the conversion rule
 
 Approved by the working group.
 
-#### Ref-ness of constructor's parameter
+#### [Resolved] Ref-ness of constructor's parameter
 
 Currently language allows only by-value and `in` parameters for user-defined conversion operators.
 It feels like reasons for this restriction are also applicable to constructors suitable for union
@@ -706,7 +806,7 @@ Adjust definition of a `case type constructor` in `Union types` section above:
 Approved by the working group for now. However, we might consider "splitting" the set of case type constructors
 and the set of constructors suitable for union type conversions.
 
-#### Nullable Conversions
+#### [Resolved] Nullable Conversions
 
 [Nullable Conversions](https://github.com/dotnet/csharpstandard/blob/09d5f56455cab8868ee9798de8807a2e91fb431f/standard/conversions.md#1061-nullable-conversions) section explicitly lists conversions that can be used as underlying. Current specification doesn't propose
 any adjustments to that list. This result in an error for the following scenario:
@@ -739,7 +839,7 @@ The conversion is evaluated as the underlying union conversion from `S` to `T` f
 
 Approved.
 
-#### Lifted conversions
+#### [Resolved] Lifted conversions
 
 Do we want to adjust [Lifted conversions](https://github.com/dotnet/csharpstandard/blob/09d5f56455cab8868ee9798de8807a2e91fb431f/standard/conversions.md#1062-lifted-conversions)
 section to support lifted union conversions? Currently they are not allowed:
@@ -775,7 +875,7 @@ Some notes from the discussion:
 > It is not clear whether lifting should create an instance of a union type with `null`
 > value stored in it, or whether it should create a `null` value of `Nullable<Union>`.
 
-#### Block union conversion from an instance of a base type?
+#### [Resolved] Block union conversion from an instance of a base type?
 
 One might find the current behavior confusing:
 ``` c#
@@ -809,7 +909,7 @@ allow union conversions like that.
 
 Do nothing special for now. Generic scenarios cannot be fully protected anyway.
 
-#### Block union conversion from an instance of an interface type?
+#### [Resolved] Block union conversion from an instance of an interface type?
 
 One might find the current behavior confusing:
 ``` c#
@@ -886,7 +986,7 @@ Let’s state that explicitly.
 
 ### Classes as `Union` types
 
-#### Checking instance itself for `null`
+#### [Resolved] Checking instance itself for `null`
 
 If a union type is a class type, it's value might itself be null. What about null checks then?
 The `null` pattern has been co-opted to check the `Value` property, so how do you check that the union itself isn't null?
@@ -930,7 +1030,7 @@ Some options:
  - Let the `null` pattern (and implicit null check in other patterns) apply to both the union value and its `Value` property: `u is null ==> u == null || u.Value == null`.
  - Disallow classes from being union types!
 
-#### Deriving from a `Union` class
+#### [Resolved] Deriving from a `Union` class
 
 When a class uses a `Union`class as its base class, according to the current specification,
 it becomes a `Union`class itself. This happens because it automatically “inherits” implementation
@@ -975,7 +1075,7 @@ Some options:
    the declaration, but `Union` matching doesn’t work.    
  - Disallow classes from being union types.
 
-### The is-type operator
+### [Resolved] The is-type operator
 
 [The is-type operator](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/expressions.md#1214121-the-is-type-operator)
 is specified as a runtime type check. Syntactically it looks very much like a type pattern, but it isn’t. Therefore, the special `Union`matching
