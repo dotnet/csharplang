@@ -584,6 +584,30 @@ But that is likely undesirable, consumer might not want to allow explicit creati
 Proposal: Remove the quoted rule, nullable analysis should use annotations from the `Value` property
           to infer its default nullability.
 
+### Union matching for Nullable of a union value type
+
+> When the incoming value of a pattern is of a union type, the union value's contents may be "unwrapped", depending on the pattern.
+
+Should we expand this rule to scenarios when incoming value of a pattern is of a `Nullable<union type>`?
+
+Consider the following scenario:
+``` C#
+    static bool Test1(StructUnion? u)
+    {
+        return u is 1;
+    }   
+
+    static bool Test2(ClassUnion? u)
+    {
+        return u is 1;
+    }   
+```
+
+The meaning of ```u is 1``` in Test1 and Test2 are very different. In Test1 it is not a union matching, in Test2 it is.
+Perhaps "union matching" should "dig" through `Nullable<T>` as pattern matching usually does in other situations.
+
+If we go with that, then the union matching `null` pattern against `Nullable<union type>` should work as against classes.
+I.e. the pattern is true when ```(!nullableValue.HasValue || nullableValue.Value.Value is null)```.
 
 ### What if types for union declaration are missing
 
