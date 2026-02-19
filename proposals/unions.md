@@ -529,6 +529,13 @@ to change the default:
  - By default, a union declaration declares a regular struct with just union-specific members.
  - A user can declare a record union: ``` record union U(E1, ...) ... ``` 
 
+### Union declaration syntax
+
+It looks like the proposed syntax is incomplete or unnecessarily limiting. For example, it looks like
+base clause is not permitted. However, I can easily imagine a need to implement an interface, for example.
+I think that apart from the element-types-list the syntax should match regular `struct`/`record struct`
+declaration where the `struct` keyword is replaced with `union` keyword.
+
 ### What if types for union declaration are missing
 
 What happens if `UnionAttribute`, `IUnion` or `IUnion<TUnion>` are missing? Error? Synthesize? Something else?
