@@ -542,6 +542,22 @@ declaration where the `struct` keyword is replaced with `union` keyword.
 
 This feels arbitrary and absolutely unnecessary.
 
+### Nullable value types as Union case types
+
+> The case types of the union are identified as the set of parameter types from these constructors.
+> The case types of the union are identified as the set of parameter types from these factory methods.
+
+At the same time:
+
+> A `TryGetValue` method for each case type. The method returns `bool` and takes a single out-parameter of a type that corresponds to the given case type in the following way:
+>    - If the case type is a nullable value type, the type of the parameter should be identity-convertible to the underlying type
+>    - Otherwise, the type should be identity-convertible to the case type.
+
+Is there an advantage to have a nullable value type among the case types especially that a type pattern cannot use
+nullable value type as the target type? It feels like we could simply say that, if constructor's/factory's parameter
+type is a nullable value type, then corresponding case type is the underlying type. Then we wouldn't need that extra clause
+for the `TryGetValue` method, all out parameters are case types.
+
 ### What if types for union declaration are missing
 
 What happens if `UnionAttribute`, `IUnion` or `IUnion<TUnion>` are missing? Error? Synthesize? Something else?
