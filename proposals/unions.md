@@ -558,6 +558,33 @@ nullable value type as the target type? It feels like we could simply say that, 
 type is a nullable value type, then corresponding case type is the underlying type. Then we wouldn't need that extra clause
 for the `TryGetValue` method, all out parameters are case types.
 
+### Default nullable state of `Value` property
+
+> For union types where none of the case types are nullable, the default state for `Value` is "not null" rather than "maybe null". 
+
+With the new design, where `Value` property is not defined in some general interface, but 
+is an API that specifically belongs to the declared type, the rule quoted above feels like
+over-engineering. Moreover, the rule likely will force consumers to use nullable types in situations where
+otherwise nullable types wouldn't be used.
+
+For example, consider the following union declaration:
+``` c#
+union U1(int, bool, DateTime);
+```
+
+According to the quoted rule, the default state for `Value` is "not null". But that doesn't match behavior of the
+type, `default(U1).Value` is `null`. In order to realign the behavior, consumer is forced to make at least one 
+case type nullable. Something like: 
+``` c#
+union U1(int?, bool, DateTime);
+```
+
+But that is likely undesirable, consumer might not want to allow explicit creation with `int?` value.
+
+Proposal: Remove the quoted rule, nullable analysis should use annotations from the `Value` property
+          to infer its default nullability.
+
+
 ### What if types for union declaration are missing
 
 What happens if `UnionAttribute`, `IUnion` or `IUnion<TUnion>` are missing? Error? Synthesize? Something else?
