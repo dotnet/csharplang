@@ -626,7 +626,7 @@ What happens if `UnionAttribute`, `IUnion` or `IUnion<TUnion>` are missing? Erro
 
 Arguments have been made that `IUnion<TUnion>` should not inherit from `IUnion` or constrain its type parameter to `IUnion<TUnion>`. We should revisit.
 
-### Nullable value types as case types
+### Nullable value types as case types and their interaction with `TryGetValue`
 
 The rules above state that if a case type is a nullable value type, the parameter type used in a corresponding `TryGetValue` method should be the *underlying* type. 
 This is motivated by the fact that a `null` value would never be yielded through this method. On the consumption side, a nullable value type is not allowed as a type pattern, whereas a match against the underlying type should be able to map to a call of this method.
@@ -745,7 +745,7 @@ class Program
 
 ### Union conversions
 
-#### Where do they belong among other conversions priority-wise?
+#### [Resolved] Where do they belong among other conversions priority-wise?
 
 Union conversions feel like another form of a user-defined conversion. Therefore, current implementation
 classifies them right after a failed attempt to classify an implicit user-defined conversion, and, in case
@@ -787,7 +787,7 @@ Need to confirm this is the behavior that we like. Otherwise the conversion rule
 
 Approved by the working group.
 
-#### Ref-ness of constructor's parameter
+#### [Resolved] Ref-ness of constructor's parameter
 
 Currently language allows only by-value and `in` parameters for user-defined conversion operators.
 It feels like reasons for this restriction are also applicable to constructors suitable for union
@@ -806,7 +806,7 @@ Adjust definition of a `case type constructor` in `Union types` section above:
 Approved by the working group for now. However, we might consider "splitting" the set of case type constructors
 and the set of constructors suitable for union type conversions.
 
-#### Nullable Conversions
+#### [Resolved] Nullable Conversions
 
 [Nullable Conversions](https://github.com/dotnet/csharpstandard/blob/09d5f56455cab8868ee9798de8807a2e91fb431f/standard/conversions.md#1061-nullable-conversions) section explicitly lists conversions that can be used as underlying. Current specification doesn't propose
 any adjustments to that list. This result in an error for the following scenario:
@@ -839,7 +839,7 @@ The conversion is evaluated as the underlying union conversion from `S` to `T` f
 
 Approved.
 
-#### Lifted conversions
+#### [Resolved] Lifted conversions
 
 Do we want to adjust [Lifted conversions](https://github.com/dotnet/csharpstandard/blob/09d5f56455cab8868ee9798de8807a2e91fb431f/standard/conversions.md#1062-lifted-conversions)
 section to support lifted union conversions? Currently they are not allowed:
@@ -875,7 +875,7 @@ Some notes from the discussion:
 > It is not clear whether lifting should create an instance of a union type with `null`
 > value stored in it, or whether it should create a `null` value of `Nullable<Union>`.
 
-#### Block union conversion from an instance of a base type?
+#### [Resolved] Block union conversion from an instance of a base type?
 
 One might find the current behavior confusing:
 ``` c#
@@ -909,7 +909,7 @@ allow union conversions like that.
 
 Do nothing special for now. Generic scenarios cannot be fully protected anyway.
 
-#### Block union conversion from an instance of an interface type?
+#### [Resolved] Block union conversion from an instance of an interface type?
 
 One might find the current behavior confusing:
 ``` c#
@@ -986,7 +986,7 @@ Let’s state that explicitly.
 
 ### Classes as `Union` types
 
-#### Checking instance itself for `null`
+#### [Resolved] Checking instance itself for `null`
 
 If a union type is a class type, it's value might itself be null. What about null checks then?
 The `null` pattern has been co-opted to check the `Value` property, so how do you check that the union itself isn't null?
@@ -1030,7 +1030,7 @@ Some options:
  - Let the `null` pattern (and implicit null check in other patterns) apply to both the union value and its `Value` property: `u is null ==> u == null || u.Value == null`.
  - Disallow classes from being union types!
 
-#### Deriving from a `Union` class
+#### [Resolved] Deriving from a `Union` class
 
 When a class uses a `Union`class as its base class, according to the current specification,
 it becomes a `Union`class itself. This happens because it automatically “inherits” implementation
@@ -1075,7 +1075,7 @@ Some options:
    the declaration, but `Union` matching doesn’t work.    
  - Disallow classes from being union types.
 
-### The is-type operator
+### [Resolved] The is-type operator
 
 [The is-type operator](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/expressions.md#1214121-the-is-type-operator)
 is specified as a runtime type check. Syntactically it looks very much like a type pattern, but it isn’t. Therefore, the special `Union`matching
