@@ -518,7 +518,18 @@ Is lowered to:
 ## Open questions
 [open]: #open-questions
 
-### What if types are missing
+### Is union declaration a record?
+
+> A union declaration is lowered to a record struct
+
+I think this default behavior is unnecessary and, given that it is not configurable, going to significantly
+limit usage scenarios. Records generate a lot of code that is either unused or doesn't match specific requirements.
+For example, records are pretty much forbidden in compiler's code base because of that code bloat. I think that it would be better
+to change the default:
+ - By default, a union declaration declares a regular struct with just union-specific members.
+ - A user can declare a record union: ``` record union U(E1, ...) ... ``` 
+
+### What if types for union declaration are missing
 
 What happens if `UnionAttribute`, `IUnion` or `IUnion<TUnion>` are missing? Error? Synthesize? Something else?
 
