@@ -609,6 +609,15 @@ Perhaps "union matching" should "dig" through `Nullable<T>` as pattern matching 
 If we go with that, then the union matching `null` pattern against `Nullable<union type>` should work as against classes.
 I.e. the pattern is true when ```(!nullableValue.HasValue || nullableValue.Value.Value is null)```.
 
+### What to do about "bad" APIs?
+
+What should compiler do about union matching APIs that look like a match, but otherwise "bad"?
+For example, compiler finds TryGetValue/HasValue with matching signature, but it is "bad" because
+a required custom modifier or it requires an unknown feature, etc. Should compiler silently ignore the API or
+report an error?
+Similar, the API might be marked as Obsolete/Experimental. Should compiler report any diagnostics, silently use the API
+or silently not use the API?
+
 ### What if types for union declaration are missing
 
 What happens if `UnionAttribute`, `IUnion` or `IUnion<TUnion>` are missing? Error? Synthesize? Something else?
