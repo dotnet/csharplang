@@ -82,6 +82,10 @@ The synthesized `Equals(R?)` returns `true` if and only if each of the following
 - If there is a base record type, the value of `base.Equals(other)` (a non-virtual call to `public virtual bool Equals(Base? other)`); otherwise
 the value of `EqualityContract == other.EqualityContract`.
 
+`System.Collections.Generic.EqualityComparer<T>.Default.Equals(T? x, T? y)` is assumed to be well-behaved so that for comparison of any field `fieldN` of type `TN` the compiler may replace call to `System.Collections.Generic.EqualityComparer<TN>.Default.Equals(fieldN, other.fieldN)` with the behaviorally equivalent comparison routine from the following list:
+- If `TN` is `System.Boolean`, `System.Char`, `System.Byte`, `System.SByte`, `System.Int16`, `System.UInt16`, `System.Int32`, `System.UInt32`, `System.Int64` or `System.UInt64` BCL type use dedicated IL comparison instructions instead
+- If `TN` is a value type that implements `System.IEquatable<TN>` interface, call `fieldN.Equals(other.fieldN)` instead
+
 The record type includes synthesized `==` and `!=` operators equivalent to operators declared as follows:
 ```C#
 public static bool operator==(R? left, R? right)
