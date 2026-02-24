@@ -275,15 +275,16 @@ class Program
 
 #### Union matching
 
-When the incoming value of a pattern is of a union type, the union value's contents may be "unwrapped", depending on the pattern.
+When the incoming value of a pattern is of a union type or of a nullable of a union type, 
+the nullable value and the underlying union value's contents may be "unwrapped", depending on the pattern.
 
-For the unconditional `_` and `var` patterns, the pattern is applied to the union value itself. For example:
+For the unconditional `_` and `var` patterns, the pattern is applied to the incoming value itself. For example:
 
 ```csharp
 if (GetPet() is var pet) { ... } // 'pet' is the union value returned from `GetPet`
 ```
 
-However, all other patterns get implicitly applied to the union's `Value` property:
+However, all other patterns get implicitly applied to the underlying union's `Value` property:
 
 ``` c#
 if (GetPet() is Dog dog) { ... }   // 'Dog dog' is applied to 'GetPet().Value'
@@ -306,15 +307,33 @@ GetPet() switch
 
 *Note:* The reason for the different treatment of unconditional `var` pattern (as well as `_`, which is essentially a shorthand for `var _`) is an assumption that their use is qualitatively different from other patterns. `var` patterns are used simply to name the value being matched against, oftentimes in nested patterns, such as `PetOwner{ Pet: var pet }`. Here, the helpful semantics is for `pet` to retain the union type `Pet`, instead of the `Value` property being dereferenced to a useless `object?` type.
 
-If the union type is a class, then the `null` pattern will succeed regardless of whether the union value itself is `null` or its contained value is `null`:
+If the incoming value is a class type, then the `null` pattern will succeed regardless of whether the union value itself is `null` or its contained value is `null`:
 
 ```csharp
 if (result is null) { ... } // if (result == null || result.Value == null)
 ```
 
+Other union matching patterns will succeed only when the union value itself is not `null`.
+```csharp
+if (result is 1) { ... } // if (result != null && result.Value is 1)
+```
+
+Similarly, if the incoming value is a nullable values type (wrapping a struct union type), then the `null` pattern will succeed 
+regardless of whether the incoming value itself is `null` or its contained value is `null`:
+
+```csharp
+if (result is null) { ... } // if (result.HasValue == false || result.GetValueOrDefault().Value == null)
+```
+
+Other union matching patterns will succeed only when the the incoming value itself is not `null`.
+```csharp
+if (result is 1) { ... } // if (result.HasValue && result.GetValueOrDefault().Value is 1)
+```
+
+
 The compiler will prefer implementing pattern behavior by means of members prescribed by the non-boxing access pattern. While it is free to do any optimization within the bounds of the well-formedness rules, the following are the minimum set guaranteed to be applied:
 
-* For a pattern that implies checking for a specific type `T`, if a `TryGetValue(S value)` method is available, and there is an implicit conversion from `T` to `S`, then that method is used to obtain the value. The pattern is then applied to that value. If there is more than one such method, then any where the conversion from `T` to `S` is not a boxing conversion is preferred if available. If there is still more than one method, one is chosen in an implementation-defined manner.
+* For a pattern that implies checking for a specific type `T`, if a `TryGetValue(S value)` method is available, and there is an identity, or implicit reference/boxing conversion from `T` to `S`, then that method is used to obtain the value. The pattern is then applied to that value. If there is more than one such method, then any where the conversion from `T` to `S` is not a boxing conversion is preferred if available. If there is still more than one method, one is chosen in an implementation-defined manner.
 * Otherwise, for a pattern that implies checking for `null`, if a `HasValue` property is available, that property is used to check if the union value is null.
 * Otherwise, the pattern is applied to the result of accessing the `IUnion.Value` property on the incoming union.
 
@@ -547,7 +566,7 @@ But that is likely undesirable, consumer might not want to allow explicit creati
 Proposal: Remove the quoted rule, nullable analysis should use annotations from the `Value` property
           to infer its default nullability.
 
-### Union matching for Nullable of a union value type
+### [Resolved] Union matching for Nullable of a union value type
 
 > When the incoming value of a pattern is of a union type, the union value's contents may be "unwrapped", depending on the pattern.
 
@@ -571,6 +590,8 @@ Perhaps "union matching" should "dig" through `Nullable<T>` as pattern matching 
 
 If we go with that, then the union matching `null` pattern against `Nullable<union type>` should work as against classes.
 I.e. the pattern is true when ```(!nullableValue.HasValue || nullableValue.Value.Value is null)```.
+
+**Resolution:** The proposal is approved.
 
 ### What to do about "bad" APIs?
 
@@ -603,7 +624,7 @@ We should confirm that we agree with this unwrapping.
 Need to specify precise rules for finding suitable `HasValue` and `TryGetValue` APIs.
 Is inheritance involved? Is read/write `HasValue` an acceptable match? Etc.
 
-### `TryGetValue` matching conversions
+### [Resolved] `TryGetValue` matching conversions
 
 The Union Matching section says:
 > For a pattern that implies checking for a specific type `T`, if a `TryGetValue(S value)`
@@ -618,6 +639,8 @@ that only methods with a parameter type matching a case type are considered:
 > a `public bool TryGetValue(out T value)` method for each case type `T`.
 
 It would be good to have an explicit answer. 
+
+**Resolution:** Only implicit identity, or reference, or boxing conversions are considered 
 
 ### `TryGetValue` and nullable analysis
 
