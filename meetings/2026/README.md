@@ -4,6 +4,7 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ## Schedule ASAP
 
+
 ## Schedule when convenient
 
 - [Target-typed static member access](https://github.com/dotnet/csharplang/blob/afad49721a7b9923efbbc36ae6c455d85b994543/proposals/target-typed-static-member-access.md) (jnm2, CyrusNajmabadi)
@@ -35,13 +36,15 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ### Wed Feb 25, 2026
 
-### Mon Feb 23, 2026
+- [Extension indexers](https://github.com/dotnet/csharplang/blob/main/proposals/extension-indexers.md#confirm-whether-extension-indexer-access-comes-before-or-after-implicit-indexers) (Julien)
+
+## C# Language Design Notes for 2026
 
 ### Wed Feb 11, 2026
 
-- [Union patterns](https://github.com/dotnet/csharplang/blob/main/meetings/working-groups/discriminated-unions/union-patterns-update.md) continued (Mads and Matt)
+[C# Language Design Meeting for February 11th, 2026](https://github.com/dotnet/csharplang/blob/main/meetings/2026/LDM-2026-02-11.md)
 
-## C# Language Design Notes for 2026
+- Union patterns update
 
 ### Mon Feb 9, 2026
 
