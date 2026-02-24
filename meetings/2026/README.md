@@ -30,13 +30,12 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ### Mon Mar 9, 2026
 
+- [Extension indexers](https://github.com/dotnet/csharplang/blob/main/proposals/extension-indexers.md#confirm-whether-extension-indexer-access-comes-before-or-after-implicit-indexers) (Julien)
+
 ### Wed Mar 4, 2026
 
 ### Mon Mar 2, 2026
 
-### Wed Feb 25, 2026
-
-- [Extension indexers](https://github.com/dotnet/csharplang/blob/main/proposals/extension-indexers.md#confirm-whether-extension-indexer-access-comes-before-or-after-implicit-indexers) (Julien)
 
 ## C# Language Design Notes for 2026
 
