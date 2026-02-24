@@ -74,18 +74,41 @@ The different union members are described in the following.
 
 Union creation members are used to create new union values from a case type value.
 
-If the union-defining type is the union type itself, each constructor with a single parameter is a *union constructor*. The case types of the union are identified as the set of parameter types from these constructors.
+If the union-defining type is the union type itself, each constructor with a single parameter is a *union constructor*.
+The case types of the union are identified as the set of types built from parameter types of these constructors in the following way:
+ - If the parameter type is a nullable type (whether a value or a reference), the case type is the underlying type
+ - Otherwise, the case type is the parameter type.
 
 ```csharp
 // Union constructor making `Dog` a case type
 public Pet(Dog value) { ... }
 ```
+```csharp
+// Union constructor making `int` a case type
+public Union(int? value) { ... }
+```
+```csharp
+// Union constructor making `string` a case type
+public Union(string? value) { ... }
+```
 
-If the union-defining type is a union member provider, each static `Create` method with a single parameter and a return type that is identity-convertible to the union type itself is a *union factory method*. The case types of the union are identified as the set of parameter types from these factory methods.
+If the union-defining type is a union member provider, each static `Create` method with a single parameter and a return type 
+that is identity-convertible to the union type itself is a *union factory method*. 
+The case types of the union are identified as the set of types built from parameter types of these factory methods in the following way:
+ - If the parameter type is a nullable type (whether a value or a reference), the case type is the underlying type
+ - Otherwise, the case type is the parameter type.
 
 ```csharp
 // Union factory method making `Cat` a case type
 public static Pet Create(Cat value) { ... }
+```
+```csharp
+// Union factory method making `int` a case type
+public static Union Create(int? value) { ... }
+```
+```csharp
+// Union factory method making `string` a case type
+public static Union Create(string? value) { ... }
 ```
 
 Union constructors and union factory methods are referred to collectively as *union creation members*.
@@ -114,9 +137,7 @@ This allows the compiler to implement pattern matching more efficiently when cas
 The non-boxing access members are:
 
 - A `HasValue` property of type `bool` with a public `get` accessor. It may optionally have an `init` or `set` accessor, which can be of any accessibility and is not used by the compiler. 
-- A `TryGetValue` method for each case type. The method returns `bool` and takes a single out-parameter of a type that corresponds to the given case type in the following way:
-    - If the case type is a nullable value type, the type of the parameter should be identity-convertible to the underlying type
-    - Otherwise, the type should be identity-convertible to the case type.
+- A `TryGetValue` method for each case type. The method returns `bool` and takes a single out-parameter of a type that is identity-convertible to the case type.
     
 ```csharp
 // Non-boxing access members
@@ -207,14 +228,14 @@ The union behaviors are generally implemented by means of the basic union patter
 
 #### Union conversions
 
-A *union conversion* implicitly converts to a union type from each of its case types. Specifically, there's a union conversion to a union type `U` from a type or expression `E` if there's a standard implicit conversion from `E` to a type `C` and `C` is a case type of `U`.
-If union type `U` is a struct, there's a union conversion to type `U?` from a type or expression `E` if there's a standard implicit conversion from `E` to a type `C` and `C` is a case type of `U`.
+A *union conversion* implicitly converts to a union type from each of its case types. Specifically, there's a union conversion to a union type `U` from a type or expression `E` if there's a standard implicit conversion from `E` to a type `C` and `C` is a parameter type of a *union creation member* of `U`.
+If union type `U` is a struct, there's a union conversion to type `U?` from a type or expression `E` if there's a standard implicit conversion from `E` to a type `C` and `C` is a parameter type of a *union creation member* of `U`.
 
 A union conversion is not itself a standard implicit conversion. It may therefore not participate in a user-defined implicit conversion or another union conversion.
 
 There are no explicit union conversions beyond the implicit union conversions. Thus, even if there is an explicit conversion from `E` to a union's case type `C`, that doesn't mean there is an explicit conversion from `E` to that union type.
 
-A union conversion is executed by calling the union's creation member for the given case type:
+A union conversion is executed by calling the union's creation member:
 
 ``` c#
 Pet pet = dog;
@@ -358,7 +379,6 @@ var name = pet switch
 
 The null state of a union's `Value` property is tracked like any other property, with these modifications: 
 
-- For union types where none of the case types are nullable, the default state for `Value` is "not null" rather than "maybe null". 
 - When a union creation member is called (explicitly or through a union conversion), the new union's `Value` gets the null state of the incoming value.
 - When the non-boxing access pattern's `HasValue` or `TryGetValue(...)` are used to query the contents of a union type (explicitly or via pattern matching), it impacts `Value`'s nullability state in the same way as if `Value` had been checked directly: The null state of `Value` becomes "not null" on the `true` branch.
 
@@ -412,7 +432,7 @@ The intent is for union declarations to cover the vast majority of use cases qui
 
 #### Syntax
 
-A union declaration has a name and a list of case types.
+A union declaration has a name and a list of *union constructors* types.
 
 ``` antlr
 union_declaration
@@ -428,7 +448,7 @@ In addition to the restrictions on struct members ([§16.3](https://github.com/d
 * Explicitly declared public constructors with a single parameter are not permitted.
 * Explicitly declared constructors must use a `this(...)` initializer to (directly or indirectly) delegate to one of the generated constructors.
 
-Case types can be any type that converts to `object`, e.g., interfaces, type parameters, nullable types and other unions. It is fine for cases to overlap, and for unions to nest or be null.
+The *union constructors* types can be any type that converts to `object`, e.g., interfaces, type parameters, nullable types and other unions. It is fine for resulting cases to overlap, and for unions to nest or be null.
 
 Examples:
 
@@ -451,14 +471,6 @@ public record class None();
 public record class Some<T>(T value);
 public union Option<T>(None, Some<T>);
 
-// "Discriminated" union with freshly declared nested case types using the "case declarations" feature
-public union Result<TValue, TError>
-{
-    case Success(TValue value);
-    case Failure(TError error);
-}
-```
-
 #### Lowering
 
 A union declaration is lowered to a struct declaration with
@@ -466,7 +478,7 @@ A union declaration is lowered to a struct declaration with
 * the same attributes, modifiers, name, type parameters and constraints,
 * implicit implementations of `IUnion`,
 * a `public object? Value { get; }` auto-property,
-* a public constructor for each case type,
+* a public constructor for each *union constructor* type,
 * any members in the union declaration's body.
 
 It is an error for user-declared members to conflict with generated members.
@@ -524,7 +536,7 @@ This feels arbitrary and absolutely unnecessary.
 
 **Resolution:** The restriction is kept.
 
-### Nullable value types as Union case types
+### [Resolved] Nullable value types as Union case types
 
 > The case types of the union are identified as the set of parameter types from these constructors.
 > The case types of the union are identified as the set of parameter types from these factory methods.
@@ -540,7 +552,9 @@ nullable value type as the target type? It feels like we could simply say that, 
 type is a nullable value type, then corresponding case type is the underlying type. Then we wouldn't need that extra clause
 for the `TryGetValue` method, all out parameters are case types.
 
-### Default nullable state of `Value` property
+**Resolution:** The suggestion is approved
+
+### [Resolved] Default nullable state of `Value` property
 
 > For union types where none of the case types are nullable, the default state for `Value` is "not null" rather than "maybe null". 
 
@@ -565,6 +579,8 @@ But that is likely undesirable, consumer might not want to allow explicit creati
 
 Proposal: Remove the quoted rule, nullable analysis should use annotations from the `Value` property
           to infer its default nullability.
+
+**Resolution:** The proposal is approved
 
 ### [Resolved] Union matching for Nullable of a union value type
 
@@ -612,12 +628,14 @@ Arguments have been made that `IUnion<TUnion>` should not inherit from `IUnion` 
 
 **Resolution:** The `IUnion<TUnion>` interface is removed for now.
 
-### Nullable value types as case types and their interaction with `TryGetValue`
+### [Resolved] Nullable value types as case types and their interaction with `TryGetValue`
 
 The rules above state that if a case type is a nullable value type, the parameter type used in a corresponding `TryGetValue` method should be the *underlying* type. 
 This is motivated by the fact that a `null` value would never be yielded through this method. On the consumption side, a nullable value type is not allowed as a type pattern, whereas a match against the underlying type should be able to map to a call of this method.
 
 We should confirm that we agree with this unwrapping.
+
+**Resolution:** Agreed/confirmed
 
 ### *The non-boxing union access pattern*
 
@@ -656,6 +674,8 @@ that only methods with a parameter type matching a case type are considered:
 It would be good to have an explicit answer. 
 
 ### Clarify rules around `default` values of struct union types
+
+*Note*: The default nullability rule mentioned below has been removed.
 
 *Note*: The "default" well-formedness rules mentioned below have been removed. We should confirm that this is what we want.
 
@@ -709,6 +729,10 @@ class Program
 ```
 
 ### Should post-condition attributes affect default nullability of a Union instance?
+
+*Note*: The default nullability rule mentioned below has been removed. And we no longer infer default nullability 
+of `Value` property from union creation methods. Therefore, the question is obsolete/no longer applicable to the current design. 
+> For union types where none of the case types are nullable, the default state for `Value` is "not null" rather than "maybe null". 
 
 Is the warning expected in the following scenario
 ``` c#
