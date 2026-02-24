@@ -209,11 +209,10 @@ It is an error to apply the `MemorySafetyRulesAttribute` to any symbol explicitl
 
 The compiler ignores `RequiresUnsafeAttribute`-marked members from assemblies that are using the legacy memory safety rules (instead, the [compat mode](#compat-mode) is used there).
 
-The compiler will emit a warning about meaningless `RequiresUnsafe` if it is used under the legacy memory safety rules or applied to unsupported members:
-- types (except delegates),
-- enums,
-- fields,
-- destructors.
+The compiler will emit a warning if `RequiresUnsafe` is used under the legacy memory safety rules and an error if it is applied to unsupported symbol kinds
+(note that this excludes symbol kinds that should be banned already by `AttributeUsageAttribute` on the attribute's definition):
+- destructors,
+- static constructors.
 
 When a member under the new memory safety rules is `extern`, the compiler will implicitly apply the `RequiresUnsafeAttribute` to the member in metadata.
 When a user-facing *requires-unsafe* member generates hidden members, such as an auto-property's backing field or get/set methods,
@@ -237,7 +236,7 @@ namespace System.Runtime.CompilerServices
         public int Version { get; }
     }
 
-    [AttributeUsage(AttributeTargets.Field | AttributeTargets.Method | AttributeTargets.Property | AttributeTargets.Constructor, AllowMultiple = false, Inherited = true)]
+    [AttributeUsage(AttributeTargets.Delegate | AttributeTargets.Event | AttributeTargets.Method | AttributeTargets.Property | AttributeTargets.Constructor, AllowMultiple = false, Inherited = true)]
     public sealed class RequiresUnsafeAttribute : Attribute
     {
     }
@@ -296,7 +295,7 @@ are a lot of corner cases here, particularly involving generics and conversions,
 > This is currently implemented (i.e., it's not possible to mark delegates as *requires-unsafe* and converting *requires-unsafe* methods/lambdas must happen in an `unsafe` context) because it seems like a good starting point.
 
 > [!NOTE]
-> If delegates indeed cannot be marked *requires-unsafe*, we should add them to the lists of declarations that produce a warning for the `unsafe` modifier and `RequiresUnsafe` attribute being meaningless.
+> If delegates indeed cannot be marked *requires-unsafe*, we should add them to the list of declarations that produce a warning for meaningless `unsafe` modifier and remove them from `AttributeTargets` on the `RequiresUnsafeAttribute`.
 
 ### Lambda/method group natural types
 
@@ -440,6 +439,73 @@ We have [changed](#use-unsafe-to-denote-requires-unsafe-members) the way to deno
 but haven't discussed this aspect of the change.
 Should we allow the attribute to be specified multiple times (via `AllowMultiple` or via special compiler behavior for this attribute and `partial` members only),
 or even require it (via special compiler checks for this attribute only)?
+
+### `new()` constraint
+
+Do we want to support `new()` with *requires-unsafe* (something we currently don't seem to support in the compiler for other features, like `Obsolete`)?
+
+```cs
+M<C>(); // should be an error outside `unsafe` context since `M` calls the requires-unsafe `C..ctor`?
+
+void M<T>() where T : new()
+{
+    _ = new T();
+}
+
+class C
+{
+    [RequiresUnsafe] public C() { }
+}
+```
+
+#### `new()` constraint and `using`s
+
+How should it behave in aliases and static usings?
+- Should it be an error at the `using` declaration, suppressable via the `unsafe` keyword we already support there
+  (and we then wouldn't need the "meaningless `unsafe`" warning for), or
+- should it be an error normally at the use site like it would be if used directly without an alias or static using?
+
+```cs
+class C
+{
+    [RequiresUnsafe] public C() { }
+}
+
+class D<T> where T : new()
+{
+    public static void M() { _ = new T(); }
+}
+```
+
+```cs
+using X = D<C>;
+using unsafe X = D<C>;
+
+X.M();
+```
+
+```cs
+using static D<C>;
+using static unsafe D<C>;
+
+M();
+```
+
+Note that other constraints behave like the former option today:
+
+```cs
+using X = D<C>; // error here
+
+_ = new X(); // ok
+_ = new D<C>(); // error here
+
+class C
+{
+    public C(int x) { }
+}
+
+class D<T> where T : new();
+```
 
 ## Answered questions
 
