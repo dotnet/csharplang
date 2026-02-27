@@ -69,13 +69,13 @@ an attempt is made to process the construct as an extension indexer access.
 1. Attempt to bind using only the instance indexers declared (or inherited) on
     the receiver type. If an applicable candidate is found, overload resolution
     selects among those instance members as today and stops.
-2. If the set of candidate indexers is empty, an attempt is made to process the 
-    **element_access** as an extension indexer access.
-3. If both steps fail to identify any applicable indexers, 
+2. If the set of applicable indexers is empty, 
     an attempt is made to process the **element_access** as
     an implicit `System.Index`/`System.Range` indexer access
     (which relies on `Length`/`Count` plus `this[int]`/`Slice(int, int)`).
-
+3. If both steps fail to identify any applicable indexers, an attempt is made to process the 
+    **element_access** as an extension indexer access.
+   
 Note: the element access section handles the case where an argument has type `dynamic`,
 so it never gets processed as an indexer access.
 
@@ -104,7 +104,13 @@ Considering each scope in turn:
 - The indexers in those extension blocks comprise the candidate set.
 - Candidates that are not accessible are removed from the set.
 - Candidates that are not applicable (as defined above) are removed from the set.
-- If the resulting set of candidate indexers is empty, then we proceed to the next scope,
+- If the resulting set of candidate indexers is empty,
+  an attempt is made to process the **element_access** as
+  an implicit `System.Index`/`System.Range` indexer access
+  (which relies on `Length`/`Count` plus `this[int]`/`Slice(int, int)`) using extension members in the current scope.
+- If an applicable candidate is found for both parts (the `Length`/`Count` part and the `this[int]`/`Slice(int, int)` part),
+  then we consider there was an applicable extension implicit indexer and a compile-time error occurs.
+- If there was no applicable extension implicit indexer, then we proceed to the next scope,
   or fail to resolve an extension indexer access if we reached the last scope
   (we'll continue on to attempt to resolve as an implicit indexer in that case).
 - Otherwise, overload resolution is applied to the candidate set. 
@@ -399,3 +405,21 @@ but beyond that we need some concrete proposals in light of above decision to al
 
 We also have an existing fallback: `Length` is prioritized over `Count` property.
 Should an extension `Length` come before or after a non-extension `Count` property?
+
+Answer: the proposal is to look up scope by scope. Instance scope comes before extension scopes.  
+Within each scope, we look for a real indexer, then fall back to implicit indexer.
+
+### Should extension `Slice` method also contribute?
+
+```cs
+_ = c[1..^1];
+
+static class E
+{
+  extension(C c)
+  {
+    public int Length => 3;
+  }
+  public static C Slice(this C c, int i, int j) => ...;
+}
+```
