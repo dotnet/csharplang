@@ -135,12 +135,15 @@ Any construct that defers to element-access binding (null-conditional element ac
 index assignments in object initializers, or list and spread patterns) automatically
 participates in the extension indexer resolution described above.
 
-- There is an open question on the role that `Length` and `Count` extension
-    properties should play in types being considered *countable* for the purpose of
+- So a type with a suitable `Length` or  `Count` extension properties is considered *countable* for the purpose of
     those patterns.
-- The implicit `System.Index`/`System.Range` fallback still relies on instance
-    `Length`/`Count` members plus instance `this[int]`/`Slice(int, int)` and ignores
-    extension members.
+- The implicit `System.Index`/`System.Range` fallback indexers can also be extensions,
+   but the two parts (`Length`/`Count` and  `this[int]`/`Slice(int, int)`) must be found in the same scope.
+
+Note:  Since a list-pattern with a spread-pattern needs to bind a `Length`/`Count`, a real or implicit `this[Index]` and a real or implicit `this[Range]`, 
+  it may use the `Length` from one scope, the `this[int]` and corresponding `Length` from another scope
+  and the `Slice(int, int)` and `Length` from yet another scope.
+  The compiler assumes that the `Length`/`Count` properties are well-behaved and give the same result. 
 
 ### Expression trees
 
