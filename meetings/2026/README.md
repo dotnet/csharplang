@@ -7,8 +7,6 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ## Schedule when convenient
 
-- [Target-typed static member access](https://github.com/dotnet/csharplang/blob/afad49721a7b9923efbbc36ae6c455d85b994543/proposals/target-typed-static-member-access.md) (jnm2, CyrusNajmabadi)
-
 - Triage (working set)
 
 ## Recurring topics
@@ -28,13 +26,11 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ### Wed Mar 11, 2026
 
+- [Target-typed static member access](https://github.com/dotnet/csharplang/blob/afad49721a7b9923efbbc36ae6c455d85b994543/proposals/target-typed-static-member-access.md) (jnm2, CyrusNajmabadi)
+
 ### Mon Mar 9, 2026
 
 - [Extension indexers](https://github.com/dotnet/csharplang/blob/main/proposals/extension-indexers.md#confirm-whether-extension-indexer-access-comes-before-or-after-implicit-indexers) (Julien)
-
-### Wed Mar 4, 2026
-
-### Mon Mar 2, 2026
 
 
 ## C# Language Design Notes for 2026
