@@ -104,18 +104,16 @@ Considering each scope in turn:
 - The indexers in those extension blocks comprise the candidate set.
 - Candidates that are not accessible are removed from the set.
 - Candidates that are not applicable (as defined above) are removed from the set.
-- If the resulting set of candidate indexers is empty,
-  an attempt is made to process the **element_access** as
-  an implicit `System.Index`/`System.Range` indexer access
+- If the resulting set is not empty, overload resolution is applied to the candidate set. 
+  - If a single best indexer can be identified, then we have successfully processed the indexer access.
+  - Otherwise, the extension indexer access is ambiguous and a compile-time error occurs.
+- Otherwise, an attempt is made to process the **element_access** as an implicit `System.Index`/`System.Range` indexer access
   (which relies on `Length`/`Count` plus `this[int]`/`Slice(int, int)`) using extension members in the current scope.
-- If an applicable candidate is found for both parts (the `Length`/`Count` part and the `this[int]`/`Slice(int, int)` part),
-  then we consider there was an applicable extension implicit indexer and a compile-time error occurs.
-- If there was no applicable extension implicit indexer, then we proceed to the next scope,
-  or fail to resolve an extension indexer access if we reached the last scope
-  (we'll continue on to attempt to resolve as an implicit indexer in that case).
-- Otherwise, overload resolution is applied to the candidate set. 
-  If a single best indexer cannot be identified, the extension indexer access is ambiguous,
-  and a compile-time error occurs.
+  - If there is no applicable candidate for one or both parts, then we proceed to the next scope.
+  - If an applicable candidate is found for both parts (the `Length`/`Count` part and the `this[int]`/`Slice(int, int)` part),
+    then we consider there was an applicable extension implicit indexer and this is the last scope we will consider.
+    - If a single best member can be identified for each part, then we have successfully processed the implicit indexer access. 
+    - Otherwise, a compile-time error occurs.
 
 Using this single best indexer identified at the previous step, the indexer access 
 is then processed as a static method invocation.  
