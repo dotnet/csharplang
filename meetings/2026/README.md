@@ -26,7 +26,7 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ### Wed Mar 11, 2026
 
-- [Target-typed static member access](https://github.com/dotnet/csharplang/blob/afad49721a7b9923efbbc36ae6c455d85b994543/proposals/target-typed-static-member-access.md) (jnm2, CyrusNajmabadi)
+- [Target-typed static member access](https://github.com/dotnet/csharplang/blob/0af615603dc18137853643af6aa02eaea32c80cf/proposals/target-typed-static-member-access.md) (jnm2, CyrusNajmabadi)
 
 ### Mon Mar 9, 2026
 
