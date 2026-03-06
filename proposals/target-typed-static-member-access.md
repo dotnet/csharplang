@@ -8,7 +8,9 @@ Thanks to those who provided insight and input into this proposal, especially @C
 
 This feature enables a type name to be omitted from static member access when it is the same as the target type.
 
-This reduces construction and consumption verbosity for factory methods, nested derived types, enum values, constants, singletons, and other static members. In doing so, the way is also paved for discriminated unions to benefit from the same concise construction and consumption syntaxes.
+This reduces construction and consumption verbosity for factory methods, nested derived types, enum values, constants, singletons, and other static members.
+
+Besides making existing types easier to use, this feature also opens the door so that when designing discriminated unions, the option is available to lower to nested derived types without compromising ease of construction and consumption.
 
 ```cs
 type.GetMethod("Name", .Public | .Instance | .DeclaredOnly); // BindingFlags.Public | ...
@@ -38,7 +40,7 @@ class MyAttribute : Attribute;
 
 ## Motivation
 
-This feature removes painful boilerplate, matches with industry trends, supports discriminated unions (both today's manual ones, and future features), and responds to the community's steady interest in this feature in terms of discussions and upvotes.
+This feature removes painful boilerplate, matches with industry trends, and responds to the community's steady interest in this feature in terms of discussions and upvotes.
 
 Repeating a full type name before each `.` can be redundant. This happens often enough that it would make sense to put the choice in developers' hands to avoid the redundancy. Today, there's no scalable workaround for the verbosity in the following example:
 
@@ -66,19 +68,14 @@ public void M(Result<ImmutableArray<int>, string> result)
 }
 ```
 
-The implications are clear for discriminated unions. Creation and consumption of class-based discriminated unions will likely involve nested derived types. When creating or consuming nested derived types, you would be able to just type `.` and receive exactly the relevant list of types grouped together by the nesting—perfect for selecting a case for a discriminated union. It would be hard to stomach either reading or writing long type names before each `.`.
-
-This proposal furthers the language design team's interest in pursuing this space, separately from discriminated unions, but also in anticipation of discriminated unions. Quoting [LDM notes from Sept 2022](https://github.com/dotnet/csharplang/blob/main/meetings/2022/LDM-2022-09-26.md#discriminated-unions):
-
-> - [#2926](https://github.com/dotnet/csharplang/issues/2926) - Target-typed name lookup
->   - We don't want to gate this on DUs, but it will be highly complementary
-
 The industry has already started moving in the same direction. The Swift, Dart, and Zig languages have all added the `.xyz` syntax with the same meaning as this proposal for C#, and Rust has an RFC proposing the same dotted syntax:
 
 - Swift calls it [implicit member expressions](https://docs.swift.org/swift-book/documentation/the-swift-programming-language/expressions#Implicit-Member-Expression).
 - Dart calls it "dot shorthands" or [static access shorthand](https://github.com/dart-lang/language/blob/c31243942eacadcc1be8cf81016f758fe831b99c/working/3616%20-%20enum%20value%20shorthand/proposal-simple-lrhn.md).
 - Rust has an active RFC which calls it [path inference](https://github.com/rust-lang/rfcs/pull/3444).
 - Zig calls it [enum literals](https://ziglang.org/documentation/master/#Enum-Literals).
+
+This feature also puts more options on the table for the design of discriminated unions by improving the ergonomics of nested derived types. This ergonomic improvement is worth doing anyway for the sake of existing types, but it also evens the playing field among the various lowering options for discriminated unions.
 
 ## Detailed design
 
@@ -184,7 +181,7 @@ void M(string p) => ...
 
 ### Target-typing with invocations
 
-A core scenario for this proposal is calling factory methods. This enables the use of the feature with some of today's class and struct types. This also provides symmetry between production and consumption of values at a future point when there is a facility for `is .Some(42)` to light up without a type hierarchy, which is a future potential with discriminated unions.
+A core scenario for this proposal is calling factory methods. This enables the use of the feature with some of today's class and struct types.
 
 ```cs
 SomeResult = .Error("Message");
@@ -370,7 +367,7 @@ TODO: Flesh out. Introduce `binding`, which is either of `member_binding`, or `e
 
 ## Limitations
 
-One of the use cases this feature serves is production and consumption of values of nested derived types, for discriminated unions and other scenarios. But one consumption scenario that is left out of this improvement is `results.OfType<.Error>()`. It's not possible to target-type in this location because the `T` is not correlated with `results`. This problem would likely only be solvable in a general way with annotations that would need to ship with the `OfType` declaration.
+One of the use cases this feature serves is production and consumption of values of nested derived types. But one consumption scenario that is left out of this improvement is `results.OfType<.Error>()`. It's not possible to target-type in this location because the `T` is not correlated with `results`. This problem would likely only be solvable in a general way with annotations that would need to ship with the `OfType` declaration.
 
 A new operator could solve this, such as `results.SelectNonNull(r => r as .Error?)`.
 
@@ -395,10 +392,6 @@ with (expr)
 This doesn't seem to be a popular request among the language team members who have commented on it. If we go ahead with the proposed target-typing for `.Name` syntax, this seals the fate of the requested `with` statement syntax shown here.
 
 ## Alternatives
-
-### Alternative: doing nothing
-
-Generally speaking, production and consumption of discriminated union values will be fairly onerous as mentioned in the [Motivation](#motivation) section, e.g. having to write `is Option<ImmutableArray<Xyz>>.None` rather than `is .None`.
 
 #### Workaround: `using static`
 
