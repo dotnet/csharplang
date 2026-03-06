@@ -274,7 +274,9 @@ However, this means that the method `Option.Some<T>` does not exist. This would 
 
 There is a clear relationship between `Option<T>` and `Option`, `KeyValuePair<TKey, TValue>` and `KeyValuePair`, `Task<T>` and `Task`, `ImmutableArray<T>` and `ImmutableArray`, `Tensor<T>` and `Tensor`. The relationship is clear both from the naming convention and due to the static members on the factory type that return instances of the generic type.
 
-It would be a lost opportunity not to make use of this clear relationship in order to make consumption more consistent.
+This doesn't always involve generics, either. There is a community request for `Color color = .Red;` to refer to `Colors.Red`. This requires forming an association between the [`Color` struct](https://learn.microsoft.com/en-us/dotnet/api/system.windows.media.color) and the [`Colors` class](https://learn.microsoft.com/en-us/dotnet/api/system.windows.media.colors).
+
+It would be a lost opportunity not to make use of these clear relationships in order to make consumption more consistent.
 
 In addition, if a separate proposal were to make `IEnumerable<T>` the target type of spreads and foreach, the syntax `foreach (var x in .Range(1, 10))` or `[.. .Repeat(1, 10)]` would just fall out.
 
