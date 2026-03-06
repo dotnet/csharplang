@@ -160,7 +160,7 @@ Other target-typed expressions besides `.Xyz` will be able to benefit from this,
 Point p = origin + new(50, 100);
 ```
 
-This is done by adding three new conversions: _unary operator target-typing conversion_, _binary operator target-typing conversion_, and _binary cross-operand target-typing conversion_. All existing conversions are better than these new conversions.
+This is done by adding three new conversions: _unary operator target-typing conversion_, _binary operator target-typing conversion_, and _binary cross-operand target-typing conversion_.
 
 For a unary operator expression such as `~e`, we define a new implicit _unary operator target-typing conversion_ that permits an implicit conversion from the unary operator expression to any type `T` for which there is a conversion-from-expression from `e` to `T`.
 
@@ -188,7 +188,7 @@ SomeResult = .Error("Message");
 Option<int> M() => .Some(42);
 ```
 
-To enable target-typing for the invoked expression within an invocation expression, a new conversion is added, _invocation target-typing conversion_.  All existing conversions are better than this new conversion.
+To enable target-typing for the invoked expression within an invocation expression, a new conversion is added, _invocation target-typing conversion_.
 
 For an invocation expression such as `e(...)` where the invoked expression `e` is a _target-typed member binding expression_, we define a new implicit _invocation target-typing conversion_ that permits an implicit conversion from the invocation expression to any type `T` for which there is a _target-typed member binding conversion_ from `e` to `Tₑ`.
 
