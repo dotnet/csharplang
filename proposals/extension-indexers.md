@@ -69,13 +69,13 @@ an attempt is made to process the construct as an extension indexer access.
 1. Attempt to bind using only the instance indexers declared (or inherited) on
     the receiver type. If an applicable candidate is found, overload resolution
     selects among those instance members as today and stops.
-2. If the set of candidate indexers is empty, an attempt is made to process the 
-    **element_access** as an extension indexer access.
-3. If both steps fail to identify any applicable indexers, 
+2. If the set of applicable indexers is empty, 
     an attempt is made to process the **element_access** as
     an implicit `System.Index`/`System.Range` indexer access
     (which relies on `Length`/`Count` plus `this[int]`/`Slice(int, int)`).
-
+3. If both steps fail to identify any applicable indexers, an attempt is made to process the 
+    **element_access** as an extension indexer access.
+   
 Note: the element access section handles the case where an argument has type `dynamic`,
 so it never gets processed as an indexer access.
 
@@ -104,12 +104,16 @@ Considering each scope in turn:
 - The indexers in those extension blocks comprise the candidate set.
 - Candidates that are not accessible are removed from the set.
 - Candidates that are not applicable (as defined above) are removed from the set.
-- If the resulting set of candidate indexers is empty, then we proceed to the next scope,
-  or fail to resolve an extension indexer access if we reached the last scope
-  (we'll continue on to attempt to resolve as an implicit indexer in that case).
-- Otherwise, overload resolution is applied to the candidate set. 
-  If a single best indexer cannot be identified, the extension indexer access is ambiguous,
-  and a compile-time error occurs.
+- If the resulting set is not empty, overload resolution is applied to the candidate set. 
+  - If a single best indexer can be identified, then we have successfully processed the indexer access.
+  - Otherwise, the extension indexer access is ambiguous and a compile-time error occurs.
+- Otherwise, an attempt is made to process the **element_access** as an implicit `System.Index`/`System.Range` indexer access
+  (which relies on `Length`/`Count` plus `this[int]`/`Slice(int, int)`) using extension members in the current scope.
+  - If there is no applicable candidate for one or both parts, then we proceed to the next scope.
+  - If an applicable candidate is found for both parts (the `Length`/`Count` part and the `this[int]`/`Slice(int, int)` part),
+    then we consider there was an applicable extension implicit indexer and this is the last scope we will consider.
+    - If a single best member can be identified for each part, then we have successfully processed the implicit indexer access. 
+    - Otherwise, a compile-time error occurs.
 
 Using this single best indexer identified at the previous step, the indexer access 
 is then processed as a static method invocation.  
@@ -129,12 +133,15 @@ Any construct that defers to element-access binding (null-conditional element ac
 index assignments in object initializers, or list and spread patterns) automatically
 participates in the extension indexer resolution described above.
 
-- There is an open question on the role that `Length` and `Count` extension
-    properties should play in types being considered *countable* for the purpose of
+- So a type with a suitable `Length` or  `Count` extension properties is considered *countable* for the purpose of
     those patterns.
-- The implicit `System.Index`/`System.Range` fallback still relies on instance
-    `Length`/`Count` members plus instance `this[int]`/`Slice(int, int)` and ignores
-    extension members.
+- The implicit `System.Index`/`System.Range` fallback indexers can also be extensions,
+   but the two parts (`Length`/`Count` and  `this[int]`/`Slice(int, int)`) must be found in the same scope.
+
+Note:  Since a list-pattern with a spread-pattern needs to bind a `Length`/`Count`, a real or implicit `this[Index]` and a real or implicit `this[Range]`, 
+  it may use the `Length` from one scope, the `this[int]` and corresponding `Length` from another scope
+  and the `Slice(int, int)` and `Length` from yet another scope.
+  The compiler assumes that the `Length`/`Count` properties are well-behaved and give the same result. 
 
 ### Expression trees
 
@@ -399,3 +406,21 @@ but beyond that we need some concrete proposals in light of above decision to al
 
 We also have an existing fallback: `Length` is prioritized over `Count` property.
 Should an extension `Length` come before or after a non-extension `Count` property?
+
+Answer: the proposal is to look up scope by scope. Instance scope comes before extension scopes.  
+Within each scope, we look for a real indexer, then fall back to implicit indexer.
+
+### Should extension `Slice` method also contribute?
+
+```cs
+_ = c[1..^1];
+
+static class E
+{
+  extension(C c)
+  {
+    public int Length => 3;
+  }
+  public static C Slice(this C c, int i, int j) => ...;
+}
+```
