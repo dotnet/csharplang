@@ -233,6 +233,8 @@ void M(string p) { }
 void M(object p) { }
 ```
 
+Finally, extension members are included in the lookup.
+
 ### Factory containers
 
 #### Summary (factory containers)
@@ -491,6 +493,38 @@ We can follow the approach already taken for the similar ambiguity in collection
 Alternatively, target-typed static member access could be always disallowed within the first branch of a conditional expression unless surrounded by parens: `expr ? (.Name) : ...`. The downside is that this puts a usability burden onto users, since the compiler can work out the ambiguity by looking ahead for the `:` as with collection expressions.
 
 **Recommendation:** Allow `expr ? .Name :` by looking ahead for `:`, just as with collection expressions.
+
+### Allowing overload resolution to be informed by target-typed access
+
+In [Notes](#notes), it is currently specified that overload resolution is not influenced by `.Xyz` expressions. This is consistent with `new()`. One risk of allowing overload resolution to be influenced is that the following code would break if a new static member `CustomType.MinValue` was created:
+
+```cs
+M(.MinValue);
+
+void M(int p) { }
+void M(CustomType p) { }
+```
+
+This comes with one fairly significant downside in a common use case, which is that the following code fails:
+```cs
+// error CS0121: The call is ambiguous between the following methods or properties:
+// 'Dictionary<TKey, TValue>.Dictionary(int)' and 'Dictionary<TKey, TValue>.Dictionary(IEqualityComparer<TKey>)'
+Dictionary<string, int> d1 = new Dictionary<string, int>(.OrdinalIgnoreCase);
+
+// Same issue here
+Dictionary<string, int> d2 = [with(.OrdinalIgnoreCase), a: b, c: d];
+```
+
+Also consider more deeply nested expressions which allow target typed static member access, such as:
+```cs
+new Dictionary<string, int>(ignoreCase ? .OrdinalIgnoreCase : .Ordinal);
+```
+
+Is it worth making overload resolution smarter to allow this, perhaps by adding a tiebreaker when target-typed member access expressions resolve for exactly one overload?
+
+Alternatively, because this issue (while significant) does not crop up in many APIs, is this a good use case for OverloadResolutionPriorityAttribute on constructors and Create methods that fall into this issue?
+
+**Recommendation:** If the runtime is willing to use ORPA, keep target-typed member access free of interactions with overload resolution, just like target-typed new.
 
 ## Examples
 
