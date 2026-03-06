@@ -410,6 +410,27 @@ Should an extension `Length` come before or after a non-extension `Count` proper
 Answer: the proposal is to look up scope by scope. Instance scope comes before extension scopes.  
 Within each scope, we look for a real indexer, then fall back to implicit indexer.
 
+### Confirm proposed design for implicit indexers
+
+We look scope-by-scope, starting from instance scope and then proceeding to extension scopes.  
+Within a scope:
+1. we look for a real indexer,
+2. otherwise, if we have a single argument of the right type, then we look for an implicit indexer.
+
+### Confirm proposed design for list-patterns
+
+For a list-pattern with a spread, we will look for:
+1. a `Length`/`Count`
+2. a real or implicit `this[Index]`
+3. a real or implicit `this[Range]`
+
+We will look for each independently.
+But when we look for an implicit `this[Index]` or `this[Range]`, the two parts must come from the same scope:
+1. `Length`/`Count`
+2. `this[int]`/`Slice(int, int)`
+
+Note: the non-negative handling for `Length` patterns kicks in when a type can be used in a list-pattern (ie. it is countable and indexable).
+
 ### Should extension `Slice` method also contribute?
 
 ```cs
@@ -423,4 +444,11 @@ static class E
   }
   public static C Slice(this C c, int i, int j) => ...;
 }
+```
+
+### Should extension `Length` contribute to spread optimization?
+
+```cs
+C c = new C();
+int[] i = [0, .. c]; // Uses Length, if available, to allocate the right size
 ```
