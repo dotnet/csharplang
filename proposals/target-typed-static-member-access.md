@@ -361,13 +361,20 @@ While this shows the power of combining the core proposal with static extension 
 -    : primary_expression '?' '.' identifier type_argument_list?
 +    : primary_expression '?' member_binding
      ;
+
+ object_creation_expression
+-    : 'new' type '(' argument_list? ')' object_or_collection_initializer?
+-    | 'new' type object_or_collection_initializer
++    : 'new' (type | member_binding) '(' argument_list? ')' object_or_collection_initializer?
++    | 'new' (type | member_binding) object_or_collection_initializer
+     ;
 ```
 
+TODO: clarify that `member_access` is only valid as a `member_binding` if a conversion exists which binds it. No conversion exists which binds `.A.B`, `.A?.B`, `.A->B`, `.A().B`, and so on, so they are not valid expressions. Similar statement needed about `object_creation_expression` with `member_binding` for `new .A().B`.
+
+TODO: disambiguation rule for `A ? . B ? . C : D`
+
 TODO: patterns
-
-### Further spec simplification
-
-TODO: Flesh out. Introduce `binding`, which is either of `member_binding`, or `element_binding` (with `'['`)
 
 ## Limitations
 
