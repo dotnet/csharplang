@@ -251,6 +251,10 @@ Note that this doesn't apply to pointers in constraint types (e.g., `where T : I
 This does not include substituted generic parameters (e.g., method `I<T>.M(T)` when substituted `T` for `int*[]`)
 as there is no type-safe way for the target member to use that pointer type for anything anyway.
 
+### VB
+
+We do not need to add support to Visual Basic for `[RequiresUnsafe]` members since there are no `unsafe` contexts in VB today and no way to work with pointers there either.
+
 ## Alternatives
 
 ### Use `unsafe` to denote *requires-unsafe* members
@@ -328,14 +332,18 @@ unsafe
 Console.WriteLine(result);
 ```
 
-### More `unsafe` contexts
+### More `unsafe` contexts and relaxations
 
 Before the change to use [an attribute instead of a modifier](#use-unsafe-to-denote-requires-unsafe-members) to denote *requires-unsafe* members,
 we had allowed `unsafe` modifier on property accessors (we hadn't allowed it on event accessors since there were *no* modifiers allowed previously).
 We since reverted that. Should we still allow it even though it wouldn't denote *requires-unsafe* members anymore, just an unsafe context?
 
 If we are allowing more `unsafe` contexts, should we relax more restrictions around `unsafe` and pointer parameters in iterators and async methods too?
+Especially allowing `await UnsafeMethod()` would be useful because now users have to rewrite that to `Task t; unsafe { t = UnsafeMethod(); } await t;`.
 See [ref/unsafe in iterators/async](./csharp-13.0/ref-unsafe-in-iterators-async.md#alternatives) for more details.
+
+Should we also allow `&UnsafeMethod` in safe context? Today as the proposal stands, this requires `unsafe` context if the method is marked as `[RequiresUnsafe]`.
+But since we are just getting its address, which will need `unsafe` context when dereferenced/called, we could allow the address-of itself in a safe context.
 
 ### `unsafe` on types
 
@@ -500,6 +508,10 @@ class C
 
 class D<T> where T : new();
 ```
+
+### Should more constructs be `unsafe`?
+
+- `dynamic` (probably should match what BCL decides for reflection APIs)
 
 ## Answered questions
 
