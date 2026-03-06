@@ -160,7 +160,7 @@ Other target-typed expressions besides `.Xyz` will be able to benefit from this,
 Point p = origin + new(50, 100);
 ```
 
-This is done by adding three new conversions: _unary operator target-typing conversion_, _binary operator target-typing conversion_, and _binary cross-operand target-typing conversion_. All existing conversions are better than these new conversions.
+This is done by adding three new conversions: _unary operator target-typing conversion_, _binary operator target-typing conversion_, and _binary cross-operand target-typing conversion_.
 
 For a unary operator expression such as `~e`, we define a new implicit _unary operator target-typing conversion_ that permits an implicit conversion from the unary operator expression to any type `T` for which there is a conversion-from-expression from `e` to `T`.
 
@@ -188,7 +188,7 @@ SomeResult = .Error("Message");
 Option<int> M() => .Some(42);
 ```
 
-To enable target-typing for the invoked expression within an invocation expression, a new conversion is added, _invocation target-typing conversion_.  All existing conversions are better than this new conversion.
+To enable target-typing for the invoked expression within an invocation expression, a new conversion is added, _invocation target-typing conversion_.
 
 For an invocation expression such as `e(...)` where the invoked expression `e` is a _target-typed member binding expression_, we define a new implicit _invocation target-typing conversion_ that permits an implicit conversion from the invocation expression to any type `T` for which there is a _target-typed member binding conversion_ from `e` to `Tₑ`.
 
@@ -233,6 +233,8 @@ void M(string p) { }
 void M(object p) { }
 ```
 
+Finally, extension members are included in the lookup.
+
 ### Factory containers
 
 #### Summary (factory containers)
@@ -274,7 +276,9 @@ However, this means that the method `Option.Some<T>` does not exist. This would 
 
 There is a clear relationship between `Option<T>` and `Option`, `KeyValuePair<TKey, TValue>` and `KeyValuePair`, `Task<T>` and `Task`, `ImmutableArray<T>` and `ImmutableArray`, `Tensor<T>` and `Tensor`. The relationship is clear both from the naming convention and due to the static members on the factory type that return instances of the generic type.
 
-It would be a lost opportunity not to make use of this clear relationship in order to make consumption more consistent.
+This doesn't always involve generics, either. There is a community request for `Color color = .Red;` to refer to `Colors.Red`. This requires forming an association between the [`Color` struct](https://learn.microsoft.com/en-us/dotnet/api/system.windows.media.color) and the [`Colors` class](https://learn.microsoft.com/en-us/dotnet/api/system.windows.media.colors).
+
+It would be a lost opportunity not to make use of these clear relationships in order to make consumption more consistent.
 
 In addition, if a separate proposal were to make `IEnumerable<T>` the target type of spreads and foreach, the syntax `foreach (var x in .Range(1, 10))` or `[.. .Repeat(1, 10)]` would just fall out.
 
@@ -357,13 +361,20 @@ While this shows the power of combining the core proposal with static extension 
 -    : primary_expression '?' '.' identifier type_argument_list?
 +    : primary_expression '?' member_binding
      ;
+
+ object_creation_expression
+-    : 'new' type '(' argument_list? ')' object_or_collection_initializer?
+-    | 'new' type object_or_collection_initializer
++    : 'new' (type | member_binding) '(' argument_list? ')' object_or_collection_initializer?
++    | 'new' (type | member_binding) object_or_collection_initializer
+     ;
 ```
 
+TODO: clarify that `member_access` is only valid as a `member_binding` if a conversion exists which binds it. No conversion exists which binds `.A.B`, `.A?.B`, `.A->B`, `.A().B`, and so on, so they are not valid expressions. Similar statement needed about `object_creation_expression` with `member_binding` for `new .A().B`.
+
+TODO: disambiguation rule for `A ? . B ? . C : D`
+
 TODO: patterns
-
-### Further spec simplification
-
-TODO: Flesh out. Introduce `binding`, which is either of `member_binding`, or `element_binding` (with `'['`)
 
 ## Limitations
 
@@ -489,6 +500,38 @@ We can follow the approach already taken for the similar ambiguity in collection
 Alternatively, target-typed static member access could be always disallowed within the first branch of a conditional expression unless surrounded by parens: `expr ? (.Name) : ...`. The downside is that this puts a usability burden onto users, since the compiler can work out the ambiguity by looking ahead for the `:` as with collection expressions.
 
 **Recommendation:** Allow `expr ? .Name :` by looking ahead for `:`, just as with collection expressions.
+
+### Allowing overload resolution to be informed by target-typed access
+
+In [Notes](#notes), it is currently specified that overload resolution is not influenced by `.Xyz` expressions. This is consistent with `new()`. One risk of allowing overload resolution to be influenced is that the following code would break if a new static member `CustomType.MinValue` was created:
+
+```cs
+M(.MinValue);
+
+void M(int p) { }
+void M(CustomType p) { }
+```
+
+This comes with one fairly significant downside in a common use case, which is that the following code fails:
+```cs
+// error CS0121: The call is ambiguous between the following methods or properties:
+// 'Dictionary<TKey, TValue>.Dictionary(int)' and 'Dictionary<TKey, TValue>.Dictionary(IEqualityComparer<TKey>)'
+Dictionary<string, int> d1 = new Dictionary<string, int>(.OrdinalIgnoreCase);
+
+// Same issue here
+Dictionary<string, int> d2 = [with(.OrdinalIgnoreCase), a: b, c: d];
+```
+
+Also consider more deeply nested expressions which allow target typed static member access, such as:
+```cs
+new Dictionary<string, int>(ignoreCase ? .OrdinalIgnoreCase : .Ordinal);
+```
+
+Is it worth making overload resolution smarter to allow this, perhaps by adding a tiebreaker when target-typed member access expressions resolve for exactly one overload?
+
+Alternatively, because this issue (while significant) does not crop up in many APIs, is this a good use case for OverloadResolutionPriorityAttribute on constructors and Create methods that fall into this issue?
+
+**Recommendation:** If the runtime is willing to use ORPA, keep target-typed member access free of interactions with overload resolution, just like target-typed new.
 
 ## Examples
 
