@@ -53,6 +53,17 @@ Nevertheless, this is still a breaking change for particular segments of the C# 
 will be seamless. However, given that some large API surfaces like large parts of reflection may need to be marked `unsafe`, we do think it likely that there will need to be a decent on-ramp to
 the new rules to avoid entirely bifurcating the ecosystem.
 
+## Breaking changes
+
+The following breaking changes can be observed when updating to a compiler implementing this language feature.
+
+- Specifying `[RequiresUnsafe]` attribute on [unsupported symbol kinds](#attributes) is a compile-time error.
+- If the [updated memory safety rules](#attributes) are enabled (which might be the default or even the only option in a future .NET version):
+  - APIs marked with `[RequiresUnsafe]` or `extern` require an `unsafe` context when used.
+  - `stackalloc` under [certain conditions](#stack-allocation) requires an `unsafe` context.
+- Under a new warnlevel:
+  - Applying `[RequiresUnsafe]` warns if the updated memory safety rules are not enabled.
+
 ## Detailed Design
 
 Terminology: we call members *requires-unsafe* (previously known as *caller-unsafe*) if
