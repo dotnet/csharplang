@@ -465,4 +465,4 @@ C c = new C();
 int[] i = [0, .. c]; // Uses Length, if available, to allocate the right size
 ```
 
-Decision (LDM 2026-03-09): no, it's unlikely that an extension would be able to implement this in a performance way, so it would not help for optimization.
+Decision (LDM 2026-03-09): no, it's unlikely that an extension would be able to implement this in a performant way, so it would not help for optimization.
