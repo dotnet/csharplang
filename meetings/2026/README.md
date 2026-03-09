@@ -28,12 +28,17 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 - [Target-typed static member access](https://github.com/dotnet/csharplang/blob/c2465a0605180e9624ee5ea9d6e0eab7e93a7c5b/proposals/target-typed-static-member-access.md) (jnm2, CyrusNajmabadi)
 
-### Mon Mar 9, 2026
-
-- [Extension indexers](https://github.com/dotnet/csharplang/blob/main/proposals/extension-indexers.md#confirm-whether-extension-indexer-access-comes-before-or-after-implicit-indexers) (Julien)
-
 
 ## C# Language Design Notes for 2026
+
+### Mon Mar 9, 2026
+
+[C# Language Design Meeting for March 9th, 2026](https://github.com/dotnet/csharplang/blob/main/meetings/2026/LDM-2026-03-09.md)
+
+- Extension indexers
+    - Ordering for implicit indexers and list patterns
+    - Slice extensions for range access
+    - Spread optimization in collection expressions
 
 ### Wed Feb 11, 2026
 
