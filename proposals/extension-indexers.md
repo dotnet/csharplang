@@ -377,7 +377,7 @@ static class E
 
 Decision (LDM 2026-02-02): extensions should contribute everywhere, including countable properties and implicit indexer fallback.
 
-### Confirm whether extension indexer access comes before or after implicit indexers
+### ~~Confirm whether extension indexer access comes before or after implicit indexers~~
 
 ```csharp
 C c = new C();
@@ -410,16 +410,18 @@ We also have an existing fallback: `Length` is prioritized over `Count` property
 Should an extension `Length` come before or after a non-extension `Count` property?
 
 Answer: the proposal is to look up scope by scope. Instance scope comes before extension scopes.  
-Within each scope, we look for a real indexer, then fall back to implicit indexer.
+Within each scope, we prefer `Length` over `Count`.
 
-### Confirm proposed design for implicit indexers
+### ~~Confirm proposed design for implicit indexers~~
 
 We look scope-by-scope, starting from instance scope and then proceeding to extension scopes.  
 Within a scope:
 1. we look for a real indexer,
 2. otherwise, if we have a single argument of the right type, then we look for an implicit indexer.
 
-### Confirm proposed design for list-patterns
+Decision (LDM 2026-03-09): no, once we move into extension scopes, we're going to use all-the-way-through extension resolution.
+
+### ~~Confirm proposed design for list-patterns~~
 
 For a list-pattern with a spread, we will look for:
 1. a `Length`/`Count`
@@ -433,7 +435,15 @@ But when we look for an implicit `this[Index]` or `this[Range]`, the two parts m
 
 Note: the non-negative handling for `Length` patterns kicks in when a type can be used in a list-pattern (ie. it is countable and indexable).
 
-### Should extension `Slice` method also contribute?
+Decision (LDM 2026-03-09): no, we'll follow this lookup order instead:
+1. List patterns are resolved as if we look for Length/Count, Index indexer and Range indexer individually
+2. For Index and Range indexers, proceed as follows:
+    a. With instance lookup only, find the "real" index if possible
+    b. With instance lookup only, find the parts of the implicit indexer if possible
+    c. With full lookup (instance+extension), find the "real" index if possible
+    d. With full lookup (instance+extension), find the parts of the implicit indexer if possible (each in individual lookups)
+
+### ~~Should extension `Slice` method also contribute?~~
 
 ```cs
 _ = c[1..^1];
@@ -448,9 +458,13 @@ static class E
 }
 ```
 
-### Should extension `Length` contribute to spread optimization?
+Decision (LDM 2026-03-09): yes, we're treating classic and new extension methods exactly the same.
+
+### ~~Should extension `Length` contribute to spread optimization?~~
 
 ```cs
 C c = new C();
 int[] i = [0, .. c]; // Uses Length, if available, to allocate the right size
 ```
+
+Decision (LDM 2026-03-09): no, it's unlikely that an extension would be able to implement this in a performant way, so it would not help for optimization.
