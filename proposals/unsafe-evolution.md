@@ -18,6 +18,15 @@ void M()
         ref int intRef = Unsafe.AsRef(ptr); // Conversion of memory not managed by the runtime to a `ref`. This is unsafe.
     }
 }
+
+namespace System.Runtime.CompilerServices
+{
+    public static class Unsafe
+    {
+        [RequiresUnsafe] // APIs annotated with this attribute need an unsafe context.
+        public static ref T AsRef<T>(void* source) { /* ... */ }
+    }
+}
 ```
 
 ## Motivation
@@ -43,6 +52,17 @@ We are not going to use the `unsafe` modifier in signature to denote *requires-u
 Nevertheless, this is still a breaking change for particular segments of the C# user base. Our hope is that, for many of our users, this is effectively transparent, and updating to the new rules
 will be seamless. However, given that some large API surfaces like large parts of reflection may need to be marked `unsafe`, we do think it likely that there will need to be a decent on-ramp to
 the new rules to avoid entirely bifurcating the ecosystem.
+
+## Breaking changes
+
+The following breaking changes can be observed when updating to a compiler implementing this language feature.
+
+- Specifying `[RequiresUnsafe]` attribute on [unsupported symbol kinds](#attributes) is a compile-time error.
+- If the [updated memory safety rules](#attributes) are enabled (which might be the default or even the only option in a future .NET version):
+  - APIs marked with `[RequiresUnsafe]` or `extern` require an `unsafe` context when used.
+  - `stackalloc` under [certain conditions](#stack-allocation) requires an `unsafe` context.
+- Under a new warnlevel:
+  - Applying `[RequiresUnsafe]` warns if the updated memory safety rules are not enabled.
 
 ## Detailed Design
 
@@ -139,21 +159,9 @@ definition and not see any addition of `RequiresUnsafe` by a derived implementat
 
 ### Delegates and lambdas
 
-It is a memory safety error to convert a *requires-unsafe* member to a delegate type that is not *requires-unsafe*. The [_function type_](csharp-10.0/lambda-improvements.md#natural-function-type) definition
-is updated to include whether the _anonymous function_ has the `RequiresUnsafe` attribute, or the _method group_ is to a member that is *requires-unsafe*. If it is, a *requires-unsafe* anonymous function type is created, just as
-it would be if any parameter were a by-`ref`, optional, or `params`.
-
-It is a memory safety error to convert a delegate type that is *requires-unsafe* to `System.Delegate`/`System.Linq.Expressions.Expression`/`System.Linq.Expressions.Expression<T>`, or any interface those
-types implement or base type of those types. They also cannot be used as type parameters.
-
-A delegate type that is *requires-unsafe* can only be invoked in an `unsafe` context. A delegate type is *requires-unsafe* if and only if its `Invoke`, `BeginInvoke`, and `EndInvoke` methods are marked as `RequiresUnsafe`
-(note that *requires-unsafe* is not enough, i.e., `extern` or pointer-containing invoke methods don't count).
-
-> [!NOTE]
-> We don't actually attribute the delegate type itself, just the `Invoke`, `BeginInvoke`, and `EndInvoke` methods. Determining whether a delegate type is *requires-unsafe* is done by examining those 3 methods.
-> If all are marked as `RequiresUnsafe`, the delegate type is considered *requires-unsafe*. If only some are marked as `RequiresUnsafe`, then it is presumed that calling the others is safe and only calling the member that is
-> marked as `RequiresUnsafe` will cause a memory safety error. It will be a memory safety error to convert a *requires-unsafe* lambda or method group to a delegate type that does not have all of `Invoke`, `BeginInvoke`,
-> and `EndInvoke` marked as `RequiresUnsafe`.
+It is a memory safety error to convert a *requires-unsafe* member to a delegate type outside the `unsafe` context.
+Delegate types and [_function types_](csharp-10.0/lambda-improvements.md#natural-function-type) cannot be *requires-unsafe*.
+It is a compile-time error to apply `RequiresUnsafe` on a lambda symbol.
 
 ### `extern`
 
@@ -188,8 +196,7 @@ class C
 ```
 
 Since pointer types are now safe, an `unsafe` modifier on declarations without bodies does not have a meaning anymore. Hence `unsafe` on the following declarations will produce a warning:
-- `using static`,
-- `using` alias.
+- `delegate`.
 
 `RequiresUnsafe` on a member is _not_ applied to any nested anonymous or local functions inside the member. To mark an anonymous or local function as *requires-unsafe*, it must manually be marked as `RequiresUnsafe`. The same goes for
 anonymous and local functions declared inside of an `unsafe` block.
@@ -212,10 +219,11 @@ The compiler ignores `RequiresUnsafeAttribute`-marked members from assemblies th
 The compiler will emit a warning if `RequiresUnsafe` is used under the legacy memory safety rules and an error if it is applied to unsupported symbol kinds
 (note that this excludes symbol kinds that should be banned already by `AttributeUsageAttribute` on the attribute's definition):
 - destructors,
-- static constructors.
+- static constructors,
+- lambdas.
 
 When a member under the new memory safety rules is `extern`, the compiler will implicitly apply the `RequiresUnsafeAttribute` to the member in metadata.
-When a user-facing *requires-unsafe* member generates hidden members, such as an auto-property's backing field or get/set methods,
+When a user-facing *requires-unsafe* member generates hidden members, such as an auto-property's get/set methods,
 both the user-facing member and any hidden members generated by that user-facing member are all *requires-unsafe*, and `RequiresUnsafeAttribute` is applied to all of them.
 
 The `MemorySafetyRulesAttribute` definition is synthesized by the compiler if necessary per standard well-known member rules.
@@ -236,7 +244,7 @@ namespace System.Runtime.CompilerServices
         public int Version { get; }
     }
 
-    [AttributeUsage(AttributeTargets.Delegate | AttributeTargets.Event | AttributeTargets.Method | AttributeTargets.Property | AttributeTargets.Constructor, AllowMultiple = false, Inherited = true)]
+    [AttributeUsage(AttributeTargets.Event | AttributeTargets.Method | AttributeTargets.Property | AttributeTargets.Constructor, AllowMultiple = false, Inherited = true)]
     public sealed class RequiresUnsafeAttribute : Attribute
     {
     }
@@ -251,6 +259,10 @@ Note that this doesn't apply to pointers in constraint types (e.g., `where T : I
 
 This does not include substituted generic parameters (e.g., method `I<T>.M(T)` when substituted `T` for `int*[]`)
 as there is no type-safe way for the target member to use that pointer type for anything anyway.
+
+### VB
+
+We do not need to add support to Visual Basic for `[RequiresUnsafe]` members since there are no `unsafe` contexts in VB today and no way to work with pointers there either.
 
 ## Alternatives
 
@@ -277,27 +289,22 @@ Advantages of an attribute (or another keyword):
 ### Local functions/lambda safe contexts
 
 Right now `unsafe` on a method body is lexically scoped. Any nested local functions or lambdas inherit this, and their bodies are in a memory unsafe context. Is this behavior that we want to keep in
-the language? Note that if we do keep `unsafe` as the modifier used to expose that the caller must be unsafe, this could then have impacts on the signature of the method. As currently proposed, nested
-anonymous and local functions do not keep the unsafe context of their containing member.
-
-### Lambda/method group conversion to safe delegate types
-
-Is conversion of a *requires-unsafe* lambda or method group to a non-*requires-unsafe* delegate type permitted without warning or error in an `unsafe` context? If we don't do this, then it could be fairly painful
-for various parts of the ecosystem, particularly any enumerables that are passed through LINQ queries.
+the language?
 
 ### Delegate type `unsafe`ty
 
-We could remove the ability to make delegate types as *requires-unsafe* entirely, and simply require that all conversions of *requires-unsafe* lambdas or method groups to a delegate type occur inside an `unsafe` context.
-This could simplify the model around `unsafe` in C#, but at the risk of forcing `unsafe` annotations in the wrong spot and having an area where the real area of `unsafe`ty isn't properly called out. There
-are a lot of corner cases here, particularly involving generics and conversions, so it may be better to simply leave the concept for later when we determine it's needed.
+We could allow marking delegate types and lambdas (and function types) as *requires-unsafe*.
+This would require several additional rules (outside `unsafe` context):
+- disallow using *requires-unsafe* delegates as type arguments,
+- disallow converting those delegates to anything that's not *requires-unsafe* (`Delegate`,`Expression`, and `object`),
+Without this, there is a risk of forcing `unsafe` annotations in the wrong spot and having an area where the real area of `unsafe`ty isn't properly called out.
 
-> [!NOTE]
-> This is currently implemented (i.e., it's not possible to mark delegates as *requires-unsafe* and converting *requires-unsafe* methods/lambdas must happen in an `unsafe` context) because it seems like a good starting point.
+#### Lambda/method group conversion to safe delegate types
 
-> [!NOTE]
-> If delegates indeed cannot be marked *requires-unsafe*, we should add them to the list of declarations that produce a warning for meaningless `unsafe` modifier and remove them from `AttributeTargets` on the `RequiresUnsafeAttribute`.
+If we allow `unsafe` lambdas and delegates, should conversion of a *requires-unsafe* lambda or method group to a non-*requires-unsafe* delegate type permitted without warning or error in an `unsafe` context? If we don't do this, then it could be fairly painful
+for various parts of the ecosystem, particularly any enumerables that are passed through LINQ queries.
 
-### Lambda/method group natural types
+#### Lambda/method group natural types
 
 Today, the only real impact on semantics and codegen (besides additional metadata) is changing the *function_type* of a lambda or method group when marked as `RequiresUnsafe`. If we were to avoid doing this, then
 there would be no real impact to either, which could give adopters more confidence that behavior has not subtly changed under the hood.
@@ -334,14 +341,18 @@ unsafe
 Console.WriteLine(result);
 ```
 
-### More `unsafe` contexts
+### More `unsafe` contexts and relaxations
 
 Before the change to use [an attribute instead of a modifier](#use-unsafe-to-denote-requires-unsafe-members) to denote *requires-unsafe* members,
 we had allowed `unsafe` modifier on property accessors (we hadn't allowed it on event accessors since there were *no* modifiers allowed previously).
 We since reverted that. Should we still allow it even though it wouldn't denote *requires-unsafe* members anymore, just an unsafe context?
 
 If we are allowing more `unsafe` contexts, should we relax more restrictions around `unsafe` and pointer parameters in iterators and async methods too?
+Especially allowing `await UnsafeMethod()` would be useful because now users have to rewrite that to `Task t; unsafe { t = UnsafeMethod(); } await t;`.
 See [ref/unsafe in iterators/async](./csharp-13.0/ref-unsafe-in-iterators-async.md#alternatives) for more details.
+
+Should we also allow `&UnsafeMethod` in safe context? Today as the proposal stands, this requires `unsafe` context if the method is marked as `[RequiresUnsafe]`.
+But since we are just getting its address, which will need `unsafe` context when dereferenced/called, we could allow the address-of itself in a safe context.
 
 ### `unsafe` on types
 
@@ -390,6 +401,8 @@ void M(SafeWrapper w)
      w._p = stackalloc byte[10];
 }
 ```
+
+Should we also mark auto-property's backing field with `[RequiresUnsafe]`?
 
 ### Taking the address of an uninitialized variable
 
@@ -461,9 +474,11 @@ class C
 #### `new()` constraint and `using`s
 
 How should it behave in aliases and static usings?
-- Should it be an error at the `using` declaration, suppressable via the `unsafe` keyword we already support there
-  (and we then wouldn't need the "meaningless `unsafe`" warning for), or
+- Should it be an error at the `using` declaration, suppressable via the `unsafe` keyword we already support there, or
 - should it be an error normally at the use site like it would be if used directly without an alias or static using?
+
+> [!NOTE]
+> In the second case, we would need to add "meaningless `unsafe`" warning for using aliases and static usings.
 
 ```cs
 class C
@@ -506,6 +521,10 @@ class C
 
 class D<T> where T : new();
 ```
+
+### Should more constructs be `unsafe`?
+
+- `dynamic` (probably should match what BCL decides for reflection APIs)
 
 ## Answered questions
 
