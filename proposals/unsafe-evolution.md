@@ -196,8 +196,6 @@ class C
 ```
 
 Since pointer types are now safe, an `unsafe` modifier on declarations without bodies does not have a meaning anymore. Hence `unsafe` on the following declarations will produce a warning:
-- `using static`,
-- `using` alias,
 - `delegate`.
 
 `RequiresUnsafe` on a member is _not_ applied to any nested anonymous or local functions inside the member. To mark an anonymous or local function as *requires-unsafe*, it must manually be marked as `RequiresUnsafe`. The same goes for
@@ -476,9 +474,11 @@ class C
 #### `new()` constraint and `using`s
 
 How should it behave in aliases and static usings?
-- Should it be an error at the `using` declaration, suppressable via the `unsafe` keyword we already support there
-  (and we then wouldn't need the "meaningless `unsafe`" warning for), or
+- Should it be an error at the `using` declaration, suppressable via the `unsafe` keyword we already support there, or
 - should it be an error normally at the use site like it would be if used directly without an alias or static using?
+
+> [!NOTE]
+> In the second case, we would need to add "meaningless `unsafe`" warning for using aliases and static usings.
 
 ```cs
 class C
