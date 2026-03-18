@@ -16,13 +16,25 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ## Schedule
 
+### Wed Apr 29, 2026
+
+### Mon Apr 27, 2026
+
+### Wed Apr 22, 2026
+
+### Mon Apr 20, 2026
+
+### Wed Apr 15, 2026
+
+### Mon Apr 13, 2026
+
+### Wed Apr 8, 2026
+
+### Mon Apr 6, 2026
+
 ### Wed Apr 1, 2026
 
 ### Mon Mar 30, 2026
-
-### Wed Mar 18, 2026
-
-### Mon Mar 16, 2026
 
 ### Wed Mar 11, 2026
 
