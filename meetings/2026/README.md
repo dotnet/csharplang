@@ -7,6 +7,7 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ## Schedule when convenient
 
+- [Treat multiple `using var _` as discards](https://github.com/dotnet/csharplang/blob/f321238a81eeea149831648a01005c19404aca01/proposals/multiple-using-var-discards.md) (CyrusNajmabadi)
 - Triage (working set)
 
 ## Recurring topics
