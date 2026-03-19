@@ -48,6 +48,10 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ### Mon Mar 30, 2026
 
+(One hour only)
+
+- MVP Summit feedback (Mads)
+
 ### Wed Mar 11, 2026
 
 - [Target-typed static member access](https://github.com/dotnet/csharplang/blob/c2465a0605180e9624ee5ea9d6e0eab7e93a7c5b/proposals/target-typed-static-member-access.md) (jnm2, CyrusNajmabadi)
