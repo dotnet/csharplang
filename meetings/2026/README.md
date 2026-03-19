@@ -31,8 +31,6 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 - [Deconstruction in lambda parameters](https://github.com/dotnet/csharplang/blob/c4ec6fb60c2e174b1abb6c019f22bb15b9b13f6c/proposals/deconstruction-in-lambda-parameters.md) (CyrusNajmabadi, jnm2)
   - [Last conclusion](https://github.com/dotnet/csharplang/blob/main/meetings/2026/LDM-2026-01-12.md#deconstruction-in-lambda-parameters): take a closer look in LDM.
-- [Labeled `break` and `continue` Statements](https://github.com/dotnet/csharplang/blob/c4ec6fb60c2e174b1abb6c019f22bb15b9b13f6c/proposals/labeled-break-continue.md) (CyrusNajmabadi)
-  - [Last conclusion](https://github.com/dotnet/csharplang/blob/main/meetings/2026/LDM-2026-01-12.md#labeled-break-and-continue-statements): delve deeper in a full session.
 
 ### Mon Apr 13, 2026
 
@@ -40,7 +38,8 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 - [Target-typed static member access](https://github.com/dotnet/csharplang/blob/c2465a0605180e9624ee5ea9d6e0eab7e93a7c5b/proposals/target-typed-static-member-access.md) (jnm2, CyrusNajmabadi)
   - Continue discussing scope and open questions
-- [Treat multiple `using var _` as discards](https://github.com/dotnet/csharplang/blob/f321238a81eeea149831648a01005c19404aca01/proposals/multiple-using-var-discards.md) (CyrusNajmabadi)
+- [Labeled `break` and `continue` Statements](https://github.com/dotnet/csharplang/blob/c4ec6fb60c2e174b1abb6c019f22bb15b9b13f6c/proposals/labeled-break-continue.md) (CyrusNajmabadi)
+  - [Last conclusion](https://github.com/dotnet/csharplang/blob/main/meetings/2026/LDM-2026-01-12.md#labeled-break-and-continue-statements): delve deeper in a full session.
 
 ### Mon Apr 6, 2026
 
