@@ -1,5 +1,7 @@
 # Collection expression arguments
 
+[!INCLUDE[Specletdisclaimer](./speclet-disclaimer.md)]
+
 Champion issue: <https://github.com/dotnet/csharplang/issues/8887>
 
 ## Motivation
