@@ -1,5 +1,7 @@
 # Unions
 
+[!INCLUDE[Specletdisclaimer](./speclet-disclaimer.md)]
+
 Champion issue: https://github.com/dotnet/csharplang/issues/9662
 
 ## Summary
@@ -679,7 +681,7 @@ It would be good to have an explicit answer.
 
 *Note*: The "default" well-formedness rules mentioned below have been removed. We should confirm that this is what we want.
 
-[Nullability](#Nullability) section says:
+[Nullability](#nullability) section says:
 > For union types where none of the case types are nullable, the default state for `Value` is "not null" rather than "maybe null". 
 
 Given that, for the example below, current implementation considers `Value` of `s2` as "not null":
@@ -694,13 +696,13 @@ struct S2 : System.Runtime.CompilerServices.IUnion
 }
 ```
 
-At the same time, [Well-formedness](#Well-formedness) section says:
+At the same time, [Well-formedness](#well-formedness) section says:
 >* *Default value*: If a union type is a value type, it's default value has `null` as its `Value`.
 >* *Default constructor*: If a union type has a nullary (no-argument) constructor, the resulting union has `null` as its `Value`.
 
 An implementation like that will be in contradiction with nullable analysis behavior for the example above.
 
-Should the [Well-formedness](#Well-formedness) rules be adjusted, or should state of `Value` of `default` be "maybe null"?
+Should the [Well-formedness](#well-formedness) rules be adjusted, or should state of `Value` of `default` be "maybe null"?
 If the latter, should initialization ```S2 s2 = default;``` produce a nullability warning?
 
 ### Confirm that a type parameter is never a union type, even when constrained to one.
