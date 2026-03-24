@@ -8,7 +8,7 @@ We would like to be able to easily annotate some extern methods as "safe". The c
 
 The current way of doing this is defining a new method to wrap the extern method in an unsafe block. This could have significant metadata size implications for assemblies with lots of extern method definitions.
 
-There are two potential syntaxes for this:
+There are two potential syntaxes for the proposed modification:
 1. Keep the `RequiresUnsafe` attribute but add a `bool` parameter. `RequiresUnsafe(false)` would mean "safe" and would effectively reverse the default for extern methods. For all other methods, it would be equivalent to not having `RequiresUnsafe` at all.
 2. Go back to having an `unsafe` keyword at the method level for caller-unsafe code, and add a new `safe` keyword "caller-safe" extern methods.
 
