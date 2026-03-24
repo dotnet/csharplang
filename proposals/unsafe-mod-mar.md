@@ -6,6 +6,8 @@ The first is related to `extern` methods. Right now all extern methods are consi
 
 We would like to be able to easily annotate some extern methods as "safe". The current default of `RequiresUnsafe` behavior is still desired because it is not known from C# whether or not the implementation of the extern method is safe (in the sense defined by our safety model). It is up to the user to declare that the method is safe, in the same way that users can declare through unsafe blocks that methods are safe but may be implemented with unsafe code.
 
+The current way of doing this is defining a new method to wrap the extern method in an unsafe block. This could have significant metadata size implications for assemblies with lots of extern method definitions.
+
 There are two potential syntaxes for this:
 1. Keep the `RequiresUnsafe` attribute but add a `bool` parameter. `RequiresUnsafe(false)` would mean "safe" and would effectively reverse the default for extern methods. For all other methods, it would be equivalent to not having `RequiresUnsafe` at all.
 2. Go back to having an `unsafe` keyword at the method level for caller-unsafe code, and add a new `safe` keyword "caller-safe" extern methods.
