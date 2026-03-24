@@ -1,31 +1,65 @@
-# Upcoming meetings for 2025
+## C# Language Design Notes for 2025
 
-All schedule items must have a public issue or checked-in proposal that can be linked from the notes.
+### Wed December 17, 2025
 
-## Schedule ASAP
+[C# Language Design Meeting for December 17th, 2025](https://github.com/dotnet/csharplang/blob/main/meetings/2025/LDM-2025-12-17.md)
 
-## Schedule when convenient
+- Collection expression arguments parsing question
+- Null-conditionals evaluating to a pointer type
+- Triage
+    - Top-Level Members
+    - Using local declaration improvements
 
-- Triage (working set)
+### Wed Dec 10, 2025
 
-## Recurring topics
+[C# Language Design Meeting for December 10th, 2025](https://github.com/dotnet/csharplang/blob/main/meetings/2025/LDM-2025-12-10.md)
 
-- *Triage championed features and milestones*
-- *Design review*
+- Collection expression arguments
 
-## Schedule
+### Wed Nov 12, 2025
+
+[C# Language Design Meeting for November 12th, 2025](https://github.com/dotnet/csharplang/blob/main/meetings/2025/LDM-2025-11-12.md)
+
+- Unsafe evolution
+
+### Wed Nov 5, 2025
+
+[C# Language Design Meeting for November 5th, 2025](https://github.com/dotnet/csharplang/blob/main/meetings/2025/LDM-2025-11-05.md)
+
+- Unsafe evolution
+
+### Wed Oct 29, 2025
+
+[C# Language Design Meeting for October 29th, 2025](https://github.com/dotnet/csharplang/blob/main/meetings/2025/LDM-2025-10-29.md)
+
+- Unsafe evolution
+
+### Mon Oct 13, 2025
+
+[C# Language Design Meeting for October 13th, 2025](https://github.com/dotnet/csharplang/blob/main/meetings/2025/LDM-2025-10-13.md)
+
+- Collection expression safe-context bug fix
+- Immediately-enumerated collection expressions
 
 ### Wed Oct 1, 2025
 
+[C# Language Design Meeting for October 1st, 2025](https://github.com/dotnet/csharplang/blob/main/meetings/2025/LDM-2025-10-01.md)
+
+- Closed enums
+- Closed Hierarchies
+
 ### Mon Sep 29, 2025
+
+[C# Language Design Meeting for September 29th, 2025](https://github.com/dotnet/csharplang/blob/main/meetings/2025/LDM-2025-09-29.md)
+
+- Union Syntax Thunderdome Part 2
+- Enums vs Unions
 
 ### Wed Sep 24, 2025
 
-- Union syntax (Joseph, Matt and Mads)
-    - https://github.com/dotnet/csharplang/blob/main/meetings/working-groups/discriminated-unions/allows.md
-    - https://github.com/dotnet/csharplang/blob/main/meetings/working-groups/discriminated-unions/brace-syntax.md
+[C# Language Design Meeting for September 24th, 2025](https://github.com/dotnet/csharplang/blob/main/meetings/2025/LDM-2025-09-24.md)
 
-## C# Language Design Notes for 2025
+- Union Syntax Thunderdome Part 1
 
 ### Wed Sep 17, 2025
 

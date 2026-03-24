@@ -67,6 +67,14 @@ primary_no_array_creation_expression
   ;
 ```
 
+The grammar for `collection_element` is known to introduce a syntax ambiguity.  Specifically `.. expr` is both exactly the production-body for `spread_element`, and is also reachable through `expression_element -> expression -> ... -> range_expression`.  There is a simple overarching
+rule for `collection_elements`.  Specifically, if the element [lexically](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/lexical-structure.md) starts with `..` then it is *always* treated as a `spread_element`.  For example, `..x ? y : z;` is always treated as a `spread_element`
+(so `.. (x ? y : z)`) even though it can be legally parsed as an expression (like `(..x) ? y : z`).
+
+This is beneficial in two ways.  First, a compiler implementation needs only look at the very first token it sees to determine what to parse
+next (a `spread_element` or `expression_element`).  Second, correspondingly, a user can trivially understand what sort of element they have without
+having to mentally try to parse what follows to see if they should think of it as a spread or an expression.
+
 Collection literals are [target-typed](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-7.1/target-typed-default.md#motivation).
 
 ### Spec clarifications
@@ -1082,7 +1090,7 @@ class Program
 }
 ```
 
-The notion of *iteration type* is fundamental to [Params Collections](https://github.com/dotnet/csharplang/blob/main/proposals/params-collections.md#applicable-function-member) feature.
+The notion of *iteration type* is fundamental to [Params Collections](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-13.0/params-collections.md#applicable-function-member) feature.
 And this issue leads to a strange discrepancy between the two features. For Example:
 
 ``` C#
@@ -1271,7 +1279,7 @@ For a *struct* or *class type* that implements `System.Collections.IEnumerable` 
 - An accessible constructor that is applicable with no arguments.
 - An accessible `Add` instance or extension method that can be invoked with value of *iteration type* as the argument.
 
-For the purpose of [Params Collectons](https://github.com/dotnet/csharplang/blob/main/proposals/params-collections.md#method-parameters) feature,
+For the purpose of [Params Collections](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-13.0/params-collections.md#method-parameters) feature,
 such types are valid `params` types when these APIs are declared public and are instance (vs. extension) methods.
 
 #### Conclusion

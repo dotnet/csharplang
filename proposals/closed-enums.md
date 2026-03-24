@@ -1,5 +1,7 @@
 # Closed Enums
 
+Champion issue: https://github.com/dotnet/csharplang/issues/9011  
+
 ## Summary
 
 Allow an enum type to be declared closed: 
