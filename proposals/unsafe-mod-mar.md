@@ -1,5 +1,16 @@
 # Proposed modifications to unsafe spec
 
+## Intro
+
+As a reminder, we want to address all of the following goals in our design:
+
+1) clear, simple rules on which methods are caller unsafe vs. use unsafe
+2) users annotate their code based on the rules of unsafev2, not unsafev1
+3) annotation is easily auditable, meaning we can see whether a given project has aligned their code with unsafev2
+4) support for multitargeting with unsafev1-only TFMs
+
+## Proposal
+
 After working with the current unsafe model in dotnet/runtime, we've found two problems.
 
 The first is related to `extern` methods. Right now all extern methods are considered `RequiresUnsafe`. This means that the unsafety from the extern method propagates out to its callers. This is a problem because some extern methods do not propagate. For example, a correctly-written P/Invoke into a safe Rust function should be considered safe -- the Rust and C# rules are 'compatible' in the sense that all C# safety requirements are satisfied by the Rust safety rules. 
