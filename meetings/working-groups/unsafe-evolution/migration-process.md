@@ -3,8 +3,9 @@
 This document describes migration frameworks that are plausible each in the context of a design outcome for `unsafe` modifier in signatures.
 
 My overall conclusions:
-- broadly speaking the migration can be driven either by diagnostics (start with lots of errors and get them to zero) or marker-comments (start with lots of marker-comments and drive them to zero)
-- both approaches are possible, regardless of where we land on question of semantics of `unsafe` modifier in signatures. That can be achieved by running a fix-all that sets the code in a minimally or a maximally requires-unsafe state
+- broadly speaking the migration can be driven either by **diagnostics** (start with lots of errors and get them to zero) or **marker-comments** (start with lots of marker-comments and drive them to zero)
+- both approaches are possible, regardless of where we land on question of semantics of `unsafe` modifier in signatures. That can be achieved by running a fix-all that sets the code in a **minimally** or a **maximally requires-unsafe state**
+
 
 ## Assuming new semantics for `unsafe` modifier in signature
 
@@ -25,7 +26,6 @@ With  `unsafe` in signature meaning requires-unsafe, the migration process is pr
 5. Review all remaining `unsafe` signatures to confirm whether to encapsulate or propagate (diagnostic-driven approach of step 2 may not have flagged)
 6. Optional: Review all `unsafe` blocks to shrink them in accordance with new guidelines
 
-
 Here's what "encapsulate on a method signature" fix (A1 above) looks like:
 ```cs
 unsafe void* M() { ... body ... } // original
@@ -41,8 +41,8 @@ safe extern void M(); // updated: after encapsulate for extern method, using `sa
 
 ### Punt all
 
-Instead of staying in error state for the migration period, it may make sense to start by applying a punt-all fixer first.  
-It ensures the code is in minimally requires-unsafe state (no new errors).  
+Instead of starting in maximally requires-unsafe state and staying in error state for the migration period, it may make sense to start by applying a punt-all fixer first.  
+It ensures the code is in **minimally requires-unsafe** initial state (no new errors).  
 It applies push-down to all types with `unsafe` modifier and punt-encapsulate to all members with `unsafe` modifier.  
 The process above is modified to iterate over marker comments instead of diagnostics.
 
@@ -50,6 +50,8 @@ Pros/cons:
 +incremental migration with passing build, so code can be periodically checked in while migration is underway  
 +code reviewers get to see all the caller-safe vs. caller-unsafe decisions (diff from punt-all commit instead of from baseline), because every `unsafe` signature modifier initially gets a marker comment at least  
 +removes need for step 5 (single pass forces review of all `unsafe` modifiers in signatures)
++affords an opportunity to eliminate `unsafe` modifier and side-step the language/semantics question
++the follow-ups are on signatures (which need to be reviewed) as opposed to diagnostics which are on call-sites
 -one commit of churn and marker comments
 
 When the code starts in a minimally requires-unsafe state with marker comments, the migration process is:
@@ -61,16 +63,24 @@ When the code starts in a minimally requires-unsafe state with marker comments, 
   - Builds successfully between iterations
 4. Optional: Review all `unsafe` blocks and types to shrink them in accordance with new guidelines
 
+Note: a fix-all code action/fixer is an automatic code fixer that applies to the whole codebase. It does not mean "fix all my migration choices".
+
 ## Assuming spec'ed semantics for `unsafe` modifier in signature
 
 With `unsafe` in signatures keeping the meaning of unsafe-context, the code starts neither in minimally nor in maximally requires-unsafe state.
 A fix-all must be applies to put us in minimally or in maximally requires-unsafe state.  
 
-To put the code in minimally requires-unsafe state and ready to drive the migration process with marker comments, the fix-all applies the following changes:
+To put the code in **minimally requires-unsafe** state and ready to drive the migration process with marker comments, the fix-all applies the following changes:
 1. a marker comment is added to members with `unsafe` modifier or in `unsafe` type
 2. all `extern` methods are marked as not requires-unsafe (however language allows) and a marker comment
 Note: no need for push-down since `unsafe` modifier on type only affects unsafe-context (and those semantics remain).
 
-To put the code in maximally requires-unsafe state and ready to drive the migration process with diagnostics, the fix-all applies the following changes:
+To put the code in **maximally requires-unsafe** state and ready to drive the migration process with diagnostics, the fix-all applies the following changes:
 1. all members with `unsafe` modifier or in `unsafe` type are marked as requires-unsafe
 2. all `extern` methods are marked as requires-unsafe
+
+A **hybrid** approach is also possible for the fix-all. It aims to get the code closer to final form with a simple heuristic and relies on diagnostics and marker-comments to ensure proper follow-up.  
+This fix-all approach applies the following changes:  
+1. if the `unsafe` signature has pointers, then mark the method as requires-unsafe (that means the user will follow-up on resulting diagnostics)
+2. otherwise, convert `unsafe` signature to `unsafe` block and leave a marker comment to revisit
+
