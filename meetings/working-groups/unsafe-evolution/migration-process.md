@@ -3,8 +3,8 @@
 This document describes migration frameworks that are plausible each in the context of a design outcome for `unsafe` modifier in signatures.
 
 My overall conclusions:
-- broadly speaking the migration can be driven either by **diagnostics** (start with lots of errors and get them to zero) or **marker-comments** (start with lots of marker-comments and drive them to zero)
-- both approaches are possible, regardless of where we land on question of semantics of `unsafe` modifier in signatures. That can be achieved by running a fix-all that sets the code in a **minimally** or a **maximally requires-unsafe state**
+- broadly speaking the migration can be driven either by **diagnostics** (start with lots of errors and get them to zero) or **marker-comments** (start with lots of marker-comments and drive them to zero). A **hybrid** approach is also possible.
+- those approaches are possible regardless of where we land on question of semantics of `unsafe` modifier in signatures. That can be achieved by running a fix-all that sets the code in a **minimally** or a **maximally requires-unsafe state**
 
 
 ## Assuming new semantics for `unsafe` modifier in signature
@@ -39,6 +39,23 @@ safe extern void M(); // updated: after encapsulate for extern method, using `sa
 [RequiresUnsafe(false)] extern void M(); // updated: after encapsulate for extern method, using attribute (alternative language design option)
 ```
 
+Here's what "push down" fix (C above) looks like:
+```cs
+// original
+unsafe class C
+{
+  void M() { }
+  void M2() { }
+}
+
+// updated: after push-down
+class C
+{
+  unsafe void M() { }
+  unsafe void M2() { }
+}
+```
+
 ### Punt all
 
 Instead of starting in maximally requires-unsafe state and staying in error state for the migration period, it may make sense to start by applying a punt-all fixer first.  
@@ -52,7 +69,8 @@ Pros/cons:
 +removes need for step 5 (single pass forces review of all `unsafe` modifiers in signatures)
 +affords an opportunity to eliminate `unsafe` modifier and side-step the language/semantics question
 +the follow-ups are on signatures (which need to be reviewed) as opposed to diagnostics which are on call-sites
--one commit of churn and marker comments
+-one extra step to initial the migration process
+-one commit of (mechanical) churn and marker comments
 
 When the code starts in a minimally requires-unsafe state with marker comments, the migration process is:
 1. Enable new memory safety rules
