@@ -1,8 +1,10 @@
 # Migration process
 
+This document does not assume consensus on all aspects of Unsafe Evolution. Instead, it describes migration frameworks that are plausible each in the context of a design outcome for `unsafe` modifier in signatures.
+
 ## Assuming new semantics for `unsafe` modifier in signature
 
-Assuming that `unsafe` in signature means requires-unsafe, here's a strawman proposal:
+With  `unsafe` in signature meaning requires-unsafe, the migration process is primarily driven by diagnostics:
 
 1. Enable new memory safety rules
 2. Build is broken
@@ -22,7 +24,8 @@ Assuming that `unsafe` in signature means requires-unsafe, here's a strawman pro
 ## Punt all
 
 Instead of staying in error state for the migration period, it may make sense to start by applying a punt-all fixer first.  
-It would apply push-down to all types with `unsafe` modifier and punt-encapsulate to all members with `unsafe` modifier.
+It would apply push-down to all types with `unsafe` modifier and punt-encapsulate to all members with `unsafe` modifier.  
+The process above is modified to iterate over marker comments instead of diagnostics.
 
 Pros/cons:  
 +incremental migration with passing build  
@@ -32,14 +35,19 @@ Pros/cons:
 
 ## Assuming spec'ed semantics for `unsafe` modifier in signature
 
-If we assume the feature as spec'ed, we cannot rely on diagnostics to drive the migration. Here's a proposal based on marker comments:
+With `unsafe` in signatures keeping the meaning of unsafe-context, we cannot rely on diagnostics to drive the migration.  
+The process is driven by marker comments created at the initial step (punt-all).  
 
-1. punt-all fix-all: apply push-down to all types with `unsafe` modifier and punt-encapsulate to all members with `unsafe` modifier.
+1. punt-all fix-all: punt-encapsulate to all members with `unsafe` modifier.
+  Note: no need for push-down
 2. Enable new memory safety rules
 3. Builds sucessfully
 4. Deal with marker comments iteratively choosing between
   - A. encapsulate (remove marker comment)
   - B. propagate (mark as requires-unsafe and deal with diagnostics fallout)
   - Builds successfully between iterations
-5. Optional: Review all `unsafe` blocks to shrink them in accordance with new guidelines
+5. Optional: Review all `unsafe` blocks and types to shrink them in accordance with new guidelines
 
+## Semantics-preserving fix-all
+
+Several folks have mentioned this concept, however I was unable to arrive at a precise and workable definition.
