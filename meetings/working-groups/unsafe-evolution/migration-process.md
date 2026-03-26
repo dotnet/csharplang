@@ -39,7 +39,7 @@ Pros/cons:
 -one commit of churn and marker comments
 
 When the code starts in a minimally requires-unsafe state with marker comments, the migration process is:
-1.. Enable new memory safety rules
+1. Enable new memory safety rules
 2. Builds sucessfully
 3. Deal with marker comments iteratively choosing between
   - A. encapsulate (remove marker comment)
