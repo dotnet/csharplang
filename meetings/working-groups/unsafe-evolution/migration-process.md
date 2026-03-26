@@ -110,5 +110,6 @@ Some options to address this:
 2. `unsafe` in signature means requires-unsafe
 3. disallow `unsafe` in signature (avoids contextual magic)
 4. error unless certain methods aren't explicitly annotated one way or another
+5. the easiest way to enter the migration process (turn on the new rules) is to run the fix-all
 
 Note: how do you know when migration is complete? What is the gesture?
