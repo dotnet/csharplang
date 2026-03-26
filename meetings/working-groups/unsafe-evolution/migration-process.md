@@ -15,8 +15,9 @@ Assuming that `unsafe` in signature means requires-unsafe, here's a strawman pro
   - C. push-down: push unsafe down from type to members*
   - D. propagate: marks a member as caller-unsafe  
   - Note: One-click code actions/fixers could simplify the edits marked with asterisks, as long as they just insert top-level (ie. non-minimal) `unsafe` blocks. Minimal `unsafe` blocks would need authoring (human or AI).
-4. Review all remaining `unsafe` signatures to confirm whether to encapsulate or propagate (diagnostic-driven approach of step 2 may not have flagged)
-5. Optional: Review all `unsafe` blocks to shrink them in accordance with new guidelines
+4. Builds successfully
+5. Review all remaining `unsafe` signatures to confirm whether to encapsulate or propagate (diagnostic-driven approach of step 2 may not have flagged)
+6. Optional: Review all `unsafe` blocks to shrink them in accordance with new guidelines
 
 ## Punt all
 
@@ -26,7 +27,7 @@ It would apply push-down to all types with `unsafe` modifier and punt-encapsulat
 Pros/cons:  
 +incremental migration with passing build  
 +code reviewers get to see all the caller-safe vs. caller-unsafe decisions (diff from punt-all commit instead of from baseline), because every `unsafe` signature modifier initially gets a marker comment at least  
-+removes need for step 4 (single pass forces review of all `unsafe` modifiers in signatures)
++removes need for step 5 (single pass forces review of all `unsafe` modifiers in signatures)
 -one commit of churn and marker comments
 
 ## Assuming spec'ed semantics for `unsafe` modifier in signature
