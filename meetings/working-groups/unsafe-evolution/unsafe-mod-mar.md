@@ -8,7 +8,7 @@ As a reminder, we want to address all of the following goals in our design:
 2) users annotate their code based on the rules of unsafev2, not unsafev1
 3) annotation is easily auditable, meaning we can see whether a given project has aligned their code with unsafev2
 4) support for multitargeting with unsafev1-only TFMs
-
+This feature will introduce compilation errors in existing unsafe code when opted into. High-confidence AI-assisted automation of the migration process flow is a part of the feature design.
 ## Proposal
 
 After working with the current unsafe model in dotnet/runtime, we've found two problems.
