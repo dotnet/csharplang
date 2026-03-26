@@ -13,7 +13,7 @@ As a reminder, we want to address all of the following goals in our design:
 
 After working with the current unsafe model in dotnet/runtime, we've found two problems.
 
-The first is related to `extern` methods. Right now all extern methods are considered `RequiresUnsafe`. This means that the unsafety from the extern method propagates out to its callers. This is a problem because some extern methods do not propagate. For example, a correctly-written P/Invoke into a safe Rust function should be considered safe -- the Rust and C# rules are 'compatible' in the sense that all C# safety requirements are satisfied by the Rust safety rules. 
+The first is related to `extern` methods. Right now all extern methods are considered `RequiresUnsafe`. This means that the unsafety from the extern method propagates out to its callers. This is the correct default behavior, but this is a problem because some extern methods do not propagate. For example, a correctly-written P/Invoke into a safe Rust function should be considered safe -- the Rust and C# rules are 'compatible' in the sense that all C# safety requirements are satisfied by the Rust safety rules. 
 
 We would like to be able to easily annotate some extern methods as "safe". The current default of `RequiresUnsafe` behavior is still desired because it is not known from C# whether or not the implementation of the extern method is safe (in the sense defined by our safety model). It is up to the user to declare that the method is safe, in the same way that users can declare through unsafe blocks that methods are safe but may be implemented with unsafe code.
 
