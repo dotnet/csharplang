@@ -24,7 +24,9 @@ With  `unsafe` in signature meaning requires-unsafe, the migration process is pr
   - Note: One-click code actions/fixers could simplify the edits marked with asterisks, as long as they just insert top-level (ie. non-minimal) `unsafe` blocks. Minimal `unsafe` blocks would need authoring (human or AI).
 4. Builds successfully
 5. Review all remaining `unsafe` signatures to confirm whether to encapsulate or propagate (diagnostic-driven approach of step 2 may not have flagged)
+6. Review all signatures: some of the innocuous signatures may need to be declared requires-unsafe
 6. Optional: Review all `unsafe` blocks to shrink them in accordance with new guidelines
+
 
 Here's what "encapsulate on a method signature" fix (A1 above) looks like:
 ```cs
@@ -102,3 +104,11 @@ This fix-all approach applies the following changes:
 1. if the `unsafe` signature has pointers, then mark the method as requires-unsafe (that means the user will follow-up on resulting diagnostics)
 2. otherwise, convert `unsafe` signature to `unsafe` block and leave a marker comment to revisit
 
+Note: it is possible for someone to turn on the new rules and get no diagnostic. Without diagnostics, there is no forcing mechanism to run a fix-all. This is leaving the user in a worse state.
+Some options to address this:
+1. signatures with pointer as implicitly requires-unsafe
+2. `unsafe` in signature means requires-unsafe
+3. disallow `unsafe` in signature (avoids contextual magic)
+4. error unless certain methods aren't explicitly annotated one way or another
+
+Note: how do you know when migration is complete? What is the gesture?
