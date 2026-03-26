@@ -40,7 +40,7 @@ With `unsafe` in signatures keeping the meaning of unsafe-context, we cannot rel
 The process is driven by marker comments created at the initial step (punt-all).  
 
 1. punt-all fix-all: punt-encapsulate to all members with `unsafe` modifier.
-  Note: no need for push-down
+  Note: no need for push-down since `unsafe` modifier on type only affects unsafe-context (and those semantics remain).
 2. Enable new memory safety rules
 3. Builds sucessfully
 4. Deal with marker comments iteratively choosing between
@@ -48,3 +48,5 @@ The process is driven by marker comments created at the initial step (punt-all).
   - B. propagate (mark as requires-unsafe and deal with diagnostics fallout)
   - Builds successfully between iterations
 5. Optional: Review all `unsafe` blocks and types to shrink them in accordance with new guidelines
+
+Note: if we prefer a diagnostic-driven model, we can have the initial fix-all put us in maximally requires-unsafe state. It would mark all members with `unsafe` modifier or in `unsafe` type as requires-unsafe.  
