@@ -4,8 +4,6 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ## Schedule ASAP
 
-- [Unsafe evolution `extern`](https://github.com/dotnet/csharplang/pull/10051) and [`RequiresUnsafe(bool)`](https://github.com/dotnet/runtime/issues/125904) (jjonescz, runtime team)
-
 ## Schedule when convenient
 
 - [Anonymous using declarations](https://github.com/dotnet/csharplang/blob/665a9392e172e6f4f16347c502d9f80220a6e7a4/proposals/anonymous-using-declarations.md) (jnm2, 333fred, CyrusNajmabadi)
@@ -46,6 +44,8 @@ All schedule items must have a public issue or checked-in proposal that can be l
 ### Mon Apr 6, 2026
 
 ### Wed Apr 1, 2026
+
+- [Unsafe evolution `extern`](https://github.com/dotnet/csharplang/pull/10051) and [`RequiresUnsafe(bool)`](https://github.com/dotnet/runtime/issues/125904) (jjonescz, runtime team)
 
 ### Mon Mar 30, 2026
 
