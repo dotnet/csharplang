@@ -14,9 +14,9 @@ With  `unsafe` in signature meaning requires-unsafe, the migration process is pr
 2. Build is broken
 3. Deal with the diagnostics by iteratively choosing between:
   - A. encapsulate:
-    - convert some `unsafe` signatures to `unsafe` blocks to signify "safe" (applies to `unsafe` modifier in signature)*
-    - mark some externs as safe however the language allows (applies to `extern` methods)*
-    - add `unsafe` blocks*
+    - A1. convert some `unsafe` signatures to `unsafe` blocks to signify "safe" (applies to `unsafe` modifier in signature)*
+    - A2. mark some externs as safe however the language allows (applies to `extern` methods)*
+    - A3. add `unsafe` blocks*
   - B. punt-encapsulate: same options as above, but leave a marker comment to revisit*
   - C. push-down: push unsafe down from type to members*
   - D. propagate: marks a member as caller-unsafe  
@@ -24,6 +24,20 @@ With  `unsafe` in signature meaning requires-unsafe, the migration process is pr
 4. Builds successfully
 5. Review all remaining `unsafe` signatures to confirm whether to encapsulate or propagate (diagnostic-driven approach of step 2 may not have flagged)
 6. Optional: Review all `unsafe` blocks to shrink them in accordance with new guidelines
+
+
+Here's what "encapsulate on a method signature" fix (A1 above) looks like:
+```cs
+unsafe void* M() { ... body ... } // original
+void* M() { unsafe { ... body ... } } // updated: after encapsulate for method
+```
+
+Here's what "encapsulate on an extern method" fix (A2 above) looks like:
+```cs
+extern void M(); // original
+safe extern void M(); // updated: after encapsulate for extern method, using `safe` keyword
+[RequiresUnsafe(false)] extern void M(); // updated: after encapsulate for extern method, using attribute (alternative language design option)
+```
 
 ### Punt all
 
