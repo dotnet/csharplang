@@ -6,7 +6,7 @@ Two problems were encountered by the runtime team while adopting the new unsafe 
 1. `extern` is correctly treated as requires-unsafe, but the only way to signal that this unsafety is encapsulated is burdensome (requires wrapper method)
 2. concern over code churn during migration (adding `[RequiresUnsafe]`) for many methods that currently have an `unsafe` modifier
 
-They are described [here]([url](https://github.com/dotnet/csharplang/pull/10058)) in more details with some accompanying proposed changes to the language.
+They are described [here](https://github.com/dotnet/csharplang/pull/10058) in more details with some accompanying proposed changes to the language.
 
 For background, LDM previously landed on the following semantics:
 1. `unsafe` is used for unsafe contexts (ie. encapsulate unsafety) on blocks and signatures, 
