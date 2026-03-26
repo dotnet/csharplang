@@ -25,6 +25,7 @@ With  `unsafe` in signature meaning requires-unsafe, the migration process is pr
 
 Instead of staying in error state for the migration period, it may make sense to start by applying a punt-all fixer first.  
 It would apply push-down to all types with `unsafe` modifier and punt-encapsulate to all members with `unsafe` modifier.  
+This ensures no member is requires-unsafe initially (no new errors).  
 The process above is modified to iterate over marker comments instead of diagnostics.
 
 Pros/cons:  
@@ -47,7 +48,3 @@ The process is driven by marker comments created at the initial step (punt-all).
   - B. propagate (mark as requires-unsafe and deal with diagnostics fallout)
   - Builds successfully between iterations
 5. Optional: Review all `unsafe` blocks and types to shrink them in accordance with new guidelines
-
-## Semantics-preserving fix-all
-
-Several folks have mentioned this concept, however I was unable to arrive at a precise and workable definition.
