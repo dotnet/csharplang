@@ -81,7 +81,8 @@ When the code starts in a minimally requires-unsafe state with marker comments, 
   - A. encapsulate (remove marker comment)
   - B. propagate (mark as requires-unsafe and deal with diagnostics fallout)
   - Builds successfully between iterations
-4. Optional: Review all `unsafe` blocks and types to shrink them in accordance with new guidelines
+4. Review all signatures: some of the innocuous signatures may need to be declared requires-unsafe  
+5. Optional: Review all `unsafe` blocks and types to shrink them in accordance with new guidelines
 
 Note: a fix-all code action/fixer is an automatic code fixer that applies to the whole codebase. It does not mean "fix all my migration choices".
 
