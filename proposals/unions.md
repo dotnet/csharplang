@@ -472,6 +472,7 @@ public union OneOrMore<T>(T, IEnumerable<T>)
 public record class None();
 public record class Some<T>(T value);
 public union Option<T>(None, Some<T>);
+```
 
 #### Lowering
 
