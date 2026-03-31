@@ -109,7 +109,7 @@ Note: it is possible for someone to turn on the new rules and get no diagnostic.
 Some options to address this:
 1. signatures with pointer as implicitly requires-unsafe
 2. `unsafe` in signature means requires-unsafe
-3. disallow `unsafe` in signature (avoids contextual magic)
+3. disallow `unsafe` in signature (avoids contextual magic, but that presents further issue with how to declare safe `extern`)
 4. error unless certain methods aren't explicitly annotated one way or another
 5. the easiest way to enter the migration process (turn on the new rules) is to run the fix-all
 
