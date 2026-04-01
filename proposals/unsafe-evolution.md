@@ -8,10 +8,11 @@ We update the definition of `unsafe` in C# from referring to locations where poi
 are where memory unsafety occurs, and are responsible for the bulk of CVEs (Common Vulnerabilities and Exposures) categorized as memory safety issues.
 
 ```cs
+// Under the proposed rules:
 void M()
 {
     int i = 1;
-    int* ptr = &i; // Not unsafe
+    int* ptr = &i; // Allowed: creating a pointer is not itself unsafe
     unsafe
     {
         Console.WriteLine(*ptr); // Dereference of memory not managed by the runtime. This is unsafe.
