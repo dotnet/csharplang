@@ -43,6 +43,8 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ### Mon Apr 6, 2026
 
+- Unsafe evolution, continued (Andy)
+
 ### Wed Apr 1, 2026
 
 - [Unsafe evolution `extern`](https://github.com/dotnet/csharplang/pull/10051) and [`RequiresUnsafe(bool)`](https://github.com/dotnet/runtime/issues/125904) (jjonescz, runtime team)
