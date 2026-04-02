@@ -4,7 +4,7 @@
 
 Two problems were encountered by the runtime team while adopting the new unsafe memory rules:
 1. `extern` is correctly treated as requires-unsafe, but the only way to signal that this unsafety is encapsulated is burdensome (requires wrapper method)
-2. concern over code churn during migration (adding `[RequiresUnsafe]`) for many methods that currently have an `unsafe` modifier
+2. turning on the update memory safety rules and doing nothing else leaves the code in a worse state
 
 They are described [here](https://github.com/dotnet/csharplang/pull/10058) in more details with some accompanying proposed changes to the language.
 
@@ -20,4 +20,4 @@ Given the current semantics for the feature, the way to encapsulate unsafety is 
 
 The proposal is to only treat `extern` methods as implicitly requires-unsafe when they lack unsafe context. That means `unsafe extern` methods are not implicitly requires-unsafe.
 
-Note: neither proposals effectively addresses the second problem. If `unsafe` on a method were to signal requires-unsafe as opposed to unsafe-context, then `[RequiresUnsafe]` churn is merely replaced with `unsafe` block churn.
+Note: the second problem is explored in the migration process proposal.
