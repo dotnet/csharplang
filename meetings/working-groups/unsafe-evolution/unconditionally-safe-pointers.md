@@ -40,9 +40,9 @@ This is not saying that members-with-pointers are "caller-unsafe" in the meaning
 
 ## Drawbacks
 
-In the general case this is not a breaking change, because code calling members-with-pointers today usually needs pointers to do so, and therefore is already restricted to unsafe contexts. However, because today's enforcement is syntactic, it is possible to e.g. pass `null` to such a call in a safe context without error. 
+- In the general case this is not a breaking change, because code calling members-with-pointers today usually needs pointers to do so, and therefore is already restricted to unsafe contexts. However, because today's enforcement is syntactic, it is possible to e.g. pass `null` to such a call in a safe context without error. Such calls are likely rare, but this proposal would break them. The mitigating fix (which tools can suggest and automate) is to wrap the call in an unsafe context.
 
-Such calls are inadvisable and likely rare, but this proposal would break them. The mitigating fix (which tools can suggest and automate) is to wrap the call in an unsafe context.
+- The members-with-pointers part of the proposal doesn't make much sense in and of itself. It is motivated by preserving the accidental "caller-unsafe" protection today's rules provide as a bridge to the new rules.
 
 ## Open questions
 
