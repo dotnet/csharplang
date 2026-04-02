@@ -612,7 +612,7 @@ I.e. the pattern is true when ```(!nullableValue.HasValue || nullableValue.Value
 
 **Resolution:** The proposal is approved.
 
-### What to do about "bad" APIs?
+### [Resolved] What to do about "bad" APIs?
 
 What should compiler do about union matching APIs that look like a match, but otherwise "bad"?
 For example, compiler finds TryGetValue/HasValue with matching signature, but it is "bad" because
@@ -621,9 +621,13 @@ report an error?
 Similar, the API might be marked as Obsolete/Experimental. Should compiler report any diagnostics, silently use the API
 or silently not use the API?
 
-### What if types for union declaration are missing
+**Resolution:** The compiler should silently ignore such APIs without reporting errors or diagnostics, aligning with prior art for optimization scenarios.
+
+### [Resolved] What if types for union declaration are missing
 
 What happens if `UnionAttribute`, `IUnion` or `IUnion<TUnion>` are missing? Error? Synthesize? Something else?
+
+**Resolution:** The compiler should not synthesize these types and users should provide them explicitly, either by referencing assemblies or defining them locally. 
 
 ### [Resolved] Design of generic IUnion interface
 
@@ -706,7 +710,7 @@ An implementation like that will be in contradiction with nullable analysis beha
 Should the [Well-formedness](#well-formedness) rules be adjusted, or should state of `Value` of `default` be "maybe null"?
 If the latter, should initialization ```S2 s2 = default;``` produce a nullability warning?
 
-### Confirm that a type parameter is never a union type, even when constrained to one.
+### [Resolved] Confirm that a type parameter is never a union type, even when constrained to one.
 
 ``` C#
 class C1 : System.Runtime.CompilerServices.IUnion
@@ -730,6 +734,8 @@ class Program
     }   
 }
 ```
+
+**Resolution:** Confirmed
 
 ### Should post-condition attributes affect default nullability of a Union instance?
 
@@ -1124,7 +1130,7 @@ In case of a recursive union, the type pattern might give no warning, but it sti
 **Resolution:**
 Should work as a type pattern.
 
-### List pattern
+### [Resolved] List pattern
 
 List pattern always fails with `Union` matching:
 ``` c#
@@ -1154,6 +1160,8 @@ static class Extensions
     }
 }
 ```
+
+**Resolution:** No longer the case. Extension blocks can enable list pattern scenarios for union types by adding missing APIs for `object`.
 
 ### Other questions
 * Both the use of constructors in union conversions and the use of `TryGetValue(...)` in union pattern matching are specified to be lenient when multiple ones apply: They'll just pick one. This should not matter per the well-formedness rules, but are we comfortable with it?
