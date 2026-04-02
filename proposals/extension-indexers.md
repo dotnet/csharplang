@@ -471,7 +471,7 @@ Decision (LDM 2026-03-09): no, it's unlikely that an extension would be able to 
 
 ### Should implicit indexers come into play for array or string types?
 
-This is only possible with a malformed corlib (missing instance `Length`, `GetSubArray` or `GetSubstring`).
+I propose that implicit indexers not contribute to those scenarios, because they are only possible with a malformed corlib (missing instance `Length`, `GetSubArray` or `GetSubstring`).
 
 ### Should extension indexers come into play for array types?
 
