@@ -245,7 +245,7 @@ namespace System.Runtime.CompilerServices
         public int Version { get; }
     }
 
-    [AttributeUsage(AttributeTargets.Event | AttributeTargets.Method | AttributeTargets.Property | AttributeTargets.Constructor, AllowMultiple = false, Inherited = true)]
+    [AttributeUsage(AttributeTargets.Event | AttributeTargets.Method | AttributeTargets.Property | AttributeTargets.Constructor, AllowMultiple = false, Inherited = false)]
     public sealed class RequiresUnsafeAttribute : Attribute
     {
     }
