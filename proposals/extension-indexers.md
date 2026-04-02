@@ -475,6 +475,9 @@ I propose that implicit indexers not contribute to those scenarios, because they
 
 ### Should extension indexers come into play for array types?
 
+The current spec and baseline rules for [array access](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/expressions.md#128122-array-access) mean that extension indexers don't work on arrays.  
+Yet the declaration of such extension indexers is permitted.  
+
 ```cs
 C c = ...;
 int[] i = ...;
@@ -488,3 +491,6 @@ public static class E
     }
 }
 ```
+
+Note: there is no question for [pointer element access](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/unsafe-code.md#2464-pointer-element-access) since an extension parameter may not be a pointer type. 
+
