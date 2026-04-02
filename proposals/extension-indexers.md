@@ -468,3 +468,23 @@ int[] i = [0, .. c]; // Uses Length, if available, to allocate the right size
 ```
 
 Decision (LDM 2026-03-09): no, it's unlikely that an extension would be able to implement this in a performant way, so it would not help for optimization.
+
+### Should implicit indexers come into play for array or string types?
+
+This is only possible with a malformed corlib (missing instance `Length`, `GetSubArray` or `GetSubstring`).
+
+### Should extension indexers come into play for array types?
+
+```cs
+C c = ...;
+int[] i = ...;
+_ = i[c];
+
+public static class E
+{
+    extension(int[] i)
+    {
+        public int this[C c] => throw null;
+    }
+}
+```
