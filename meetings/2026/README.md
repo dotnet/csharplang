@@ -54,7 +54,6 @@ All schedule items must have a public issue or checked-in proposal that can be l
 - Unsafe evolution migration and explicit safety markers
     - Marking `extern` members as explicitly safe
     - Avoiding easy but incorrect unsafe evolution migration paths
-    - Scheduled topic: [`Unsafe evolution extern`](https://github.com/dotnet/csharplang/pull/10051) and [`RequiresUnsafe(bool)`](https://github.com/dotnet/runtime/issues/125904) (jjonescz, runtime team)
 
 ### Wed Mar 11, 2026
 
