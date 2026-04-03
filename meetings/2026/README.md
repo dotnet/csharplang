@@ -45,11 +45,16 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 - Unsafe evolution, continued (Andy)
 
+## C# Language Design Notes for 2026
+
 ### Wed Apr 1, 2026
 
-- [Unsafe evolution `extern`](https://github.com/dotnet/csharplang/pull/10051) and [`RequiresUnsafe(bool)`](https://github.com/dotnet/runtime/issues/125904) (jjonescz, runtime team)
+[C# Language Design Meeting for April 1st, 2026](https://github.com/dotnet/csharplang/blob/main/meetings/2026/LDM-2026-04-01.md)
 
-## C# Language Design Notes for 2026
+- Unsafe evolution migration and explicit safety markers
+    - Marking `extern` members as explicitly safe
+    - Avoiding easy but incorrect unsafe evolution migration paths
+    - Scheduled topic: [`Unsafe evolution extern`](https://github.com/dotnet/csharplang/pull/10051) and [`RequiresUnsafe(bool)`](https://github.com/dotnet/runtime/issues/125904) (jjonescz, runtime team)
 
 ### Wed Mar 11, 2026
 
