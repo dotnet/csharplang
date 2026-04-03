@@ -49,18 +49,17 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 - [Unsafe evolution `extern`](https://github.com/dotnet/csharplang/pull/10051) and [`RequiresUnsafe(bool)`](https://github.com/dotnet/runtime/issues/125904) (jjonescz, runtime team)
 
-### Mon Mar 30, 2026
-
-(One hour only)
-
-- MVP Summit feedback (Mads)
+## C# Language Design Notes for 2026
 
 ### Wed Mar 11, 2026
 
-- [Target-typed static member access](https://github.com/dotnet/csharplang/blob/c2465a0605180e9624ee5ea9d6e0eab7e93a7c5b/proposals/target-typed-static-member-access.md) (jnm2, CyrusNajmabadi)
+[C# Language Design Meeting for March 11th, 2026](https://github.com/dotnet/csharplang/blob/main/meetings/2026/LDM-2026-03-11.md)
 
-
-## C# Language Design Notes for 2026
+- Target-typed static member access
+    - Overview and smorgasbord of parts
+    - Factory containers
+    - Ambiguity with parenthesized expression
+    - Ambiguity with conditional expression
 
 ### Mon Mar 9, 2026
 
