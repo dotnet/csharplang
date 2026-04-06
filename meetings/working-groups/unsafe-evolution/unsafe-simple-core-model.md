@@ -131,6 +131,10 @@ With this feature, it will be more common to put `unsafe` on entire member bodie
 
 This could easily be added later based on user feedback.
 
+## Drawbacks
+
+- This still introduces a new additional meaning to `unsafe`, including in places where it is already valid. It is likely to lead to some amount of confusion, including among AI models.
+
 ## Open questions
 
 This proposal does not address:
