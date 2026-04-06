@@ -43,7 +43,7 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ### Mon Apr 6, 2026
 
-- Unsafe evolution, continued (Andy)
+- Unsafe evolution, continued - [Simple core model](https://github.com/dotnet/csharplang/blob/main/meetings/working-groups/unsafe-evolution/unsafe-simple-core-model.md) (Andy, Mads)
 
 ## C# Language Design Notes for 2026
 
