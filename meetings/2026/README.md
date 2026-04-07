@@ -41,11 +41,15 @@ All schedule items must have a public issue or checked-in proposal that can be l
 - [Labeled `break` and `continue` Statements](https://github.com/dotnet/csharplang/blob/c4ec6fb60c2e174b1abb6c019f22bb15b9b13f6c/proposals/labeled-break-continue.md) (CyrusNajmabadi)
   - [Last conclusion](https://github.com/dotnet/csharplang/blob/main/meetings/2026/LDM-2026-01-12.md#labeled-break-and-continue-statements): delve deeper in a full session.
 
+## C# Language Design Notes for 2026
+
 ### Mon Apr 6, 2026
 
-- Unsafe evolution, continued - [Simple core model](https://github.com/dotnet/csharplang/blob/main/meetings/working-groups/unsafe-evolution/unsafe-simple-core-model.md) (Andy, Mads)
+[C# Language Design Meeting for April 6th, 2026](https://github.com/dotnet/csharplang/blob/main/meetings/2026/LDM-2026-04-06.md)
 
-## C# Language Design Notes for 2026
+- Unsafe evolution, continued
+    - Simple core model
+    - `extern` members and explicit safety markers
 
 ### Wed Apr 1, 2026
 
