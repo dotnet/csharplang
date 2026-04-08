@@ -160,6 +160,8 @@ Other target-typed expressions besides `.Xyz` will be able to benefit from this,
 Point p = origin + new(50, 100);
 ```
 
+There is an [open question](#target-typing-existing-operand-expressions) on whether to lift this restriction and whether to allow other target-typed expressions besides `.Xyz`.
+
 This is done by adding three new conversions: _unary operator target-typing conversion_, _binary operator target-typing conversion_, and _binary cross-operand target-typing conversion_.
 
 For a unary operator expression such as `~e`, we define a new implicit _unary operator target-typing conversion_ that permits an implicit conversion from the unary operator expression to any type `T` for which there is a conversion-from-expression from `e` to `T`.
@@ -626,3 +628,17 @@ It's typical to see generated enum member names be the same as the original cons
 Instead, this could just mention the well-known constant names which are what you'd search anyway :
 
 `.FILE_GENERIC_READ | .FILE_GENERIC_WRITE`
+
+### Target-typing existing operand expressions
+
+[Target-typing with overloadable operators](#target-typing-with-overloadable-operators) currently allows other target-typed expressions besides `.Xyz` to benefit from the new target-typing, such as `null`, `default` and `[]`. One exception to this is the target-typed `new` expression. The spec explicitly states that target-typed `new` may not appear as an operand of a unary or binary operator. If desired, we could lift this restriction so that it is not the odd one out:
+
+```cs
+Point p = origin + new(50, 100);
+```
+
+Do we want to lift this restriction and enable `+ new()` alongside `+ default` and `+ []` and `+ .Instance` and so on? Do we want to keep this restriction in place so that `+ new()` remains the odd one out? Or, do we want to narrow this ability so that `+ .Instance` is the only target-typed operand expression form that is allowed and `+ default` and `+ []` are not allowed?
+
+(Note: `+` is being used for demonstration purposes, but this applies to every overloadable unary and binary operator.)
+
+Recommendation: This would be a nice-to-have, but is not critical to the target-typed static member access proposal. Choose the simpler implementation path for now and expand later if feedback supports it.
