@@ -404,7 +404,7 @@ This doesn't seem to be a popular request among the language team members who ha
 
 ## Alternatives
 
-#### Workaround: `using static`
+### Workaround: `using static`
 
 As a mitigation, `using static` directives can be applied as needed at the top of the file or globally. This allows syntax such as `GetMethod("Name", Public | Static)` today.
 
