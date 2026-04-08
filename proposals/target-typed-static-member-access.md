@@ -485,7 +485,7 @@ This specific sigil is a good fit with modern language sensibilities and audienc
 - Rust has an active RFC which calls it [path inference](https://github.com/rust-lang/rfcs/pull/3444).
 - Zig calls it [enum literals](https://ziglang.org/documentation/master/#Enum-Literals).
 
-## Open questions
+## Answered questions
 
 ### Ambiguity with parenthesized expression
 
@@ -497,6 +497,8 @@ Should `(A).B` continue to fail when `A` is a type, or be made to work the same 
 
 **Recommendation:** `(A).B` should continue to fail when `A` is a type. Even though blocking this syntax is an additional rule, the syntax is not beneficial.
 
+**Conclusion**: Recommendation taken ([LDM notes](https://github.com/dotnet/csharplang/blob/main/meetings/2026/LDM-2026-03-11.md#conclusion-1)).
+
 ### Ambiguity with conditional expression
 
 There is an ambiguity if target-typed static member access is used as the first branch of a conditional expression, where it would parse today as a null-safe dereference: `expr ? .Name : ...`
@@ -506,6 +508,10 @@ We can follow the approach already taken for the similar ambiguity in collection
 Alternatively, target-typed static member access could be always disallowed within the first branch of a conditional expression unless surrounded by parens: `expr ? (.Name) : ...`. The downside is that this puts a usability burden onto users, since the compiler can work out the ambiguity by looking ahead for the `:` as with collection expressions.
 
 **Recommendation:** Allow `expr ? .Name :` by looking ahead for `:`, just as with collection expressions.
+
+**Conclusion**: Recommendation taken ([LDM notes](https://github.com/dotnet/csharplang/blob/main/meetings/2026/LDM-2026-03-11.md#conclusion-2)).
+
+## Open questions
 
 ### Allowing overload resolution to be informed by target-typed access
 
