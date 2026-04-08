@@ -469,11 +469,13 @@ int[] i = [0, .. c]; // Uses Length, if available, to allocate the right size
 
 Decision (LDM 2026-03-09): no, it's unlikely that an extension would be able to implement this in a performant way, so it would not help for optimization.
 
-### Should implicit indexers come into play for array or string types?
+### ~~Should implicit indexers come into play for array or string types?~~
 
 I propose that implicit indexers not contribute to those scenarios, because they are only possible with a malformed corlib (missing instance `Length`, `GetSubArray` or `GetSubstring`).
 
-### Should extension indexers come into play for array or string types?
+Decision (LDM/Mads by email 2026-04-07): no extension indexers on strings or arrays.
+
+### ~~Should extension indexers come into play for array or string types?~~
 
 The current spec and baseline rules for [array access](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/expressions.md#128122-array-access) and [string access](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/expressions.md#128123-string-access) mean that extension indexers don't work on arrays or strings.  
 Yet the declaration of such extension indexers is permitted.  
@@ -505,3 +507,4 @@ public static class E
 ```
 Note: there is no question for [pointer element access](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/unsafe-code.md#2464-pointer-element-access) since an extension parameter may not be a pointer type. 
 
+Decision (LDM/Mads by email 2026-04-07): no extension indexers on strings or arrays.
