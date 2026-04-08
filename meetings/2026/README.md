@@ -6,6 +6,8 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ## Schedule when convenient
 
+- [Labeled `break` and `continue` Statements](https://github.com/dotnet/csharplang/blob/c4ec6fb60c2e174b1abb6c019f22bb15b9b13f6c/proposals/labeled-break-continue.md) (CyrusNajmabadi)
+  - [Last conclusion](https://github.com/dotnet/csharplang/blob/main/meetings/2026/LDM-2026-01-12.md#labeled-break-and-continue-statements): delve deeper in a full session.
 - [Anonymous using declarations](https://github.com/dotnet/csharplang/blob/665a9392e172e6f4f16347c502d9f80220a6e7a4/proposals/anonymous-using-declarations.md) (jnm2, 333fred, CyrusNajmabadi)
 - Triage (working set)
 
@@ -34,14 +36,16 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ### Mon Apr 13, 2026
 
+## C# Language Design Notes for 2026
+
 ### Wed Apr 8, 2026
 
-- [Target-typed static member access](https://github.com/dotnet/csharplang/blob/c2465a0605180e9624ee5ea9d6e0eab7e93a7c5b/proposals/target-typed-static-member-access.md) (jnm2, CyrusNajmabadi)
-  - Continue discussing scope and open questions
-- [Labeled `break` and `continue` Statements](https://github.com/dotnet/csharplang/blob/c4ec6fb60c2e174b1abb6c019f22bb15b9b13f6c/proposals/labeled-break-continue.md) (CyrusNajmabadi)
-  - [Last conclusion](https://github.com/dotnet/csharplang/blob/main/meetings/2026/LDM-2026-01-12.md#labeled-break-and-continue-statements): delve deeper in a full session.
+[C# Language Design Meeting for April 8th, 2026](https://github.com/dotnet/csharplang/blob/main/meetings/2026/LDM-2026-04-08.md)
 
-## C# Language Design Notes for 2026
+- Target-typed static member access
+    - Scope review and motivating examples
+    - Dot or no dot
+    - Initial rollout scope
 
 ### Mon Apr 6, 2026
 
