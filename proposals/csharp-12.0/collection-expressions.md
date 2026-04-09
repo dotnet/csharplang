@@ -353,10 +353,12 @@ The *safe-context* of a collection expression is:
 
 * If the target type is a *ref struct type* with a [*create method*](#create-methods), the safe-context of the collection expression is the [*safe-context of an invocation*](https://github.com/dotnet/csharpstandard/blob/draft-v7/standard/structs.md#164126-method-and-property-invocation) of the create method where the collection expression is the span argument to the method.
 
-* If the target type is a *ref struct type* that implements `System.Collections.IEnumerable` and does not have a *[create method](#create-methods)*, the collection expression is treated equivalently to an *object creation expression* with a *collection initializer* for ref safety purposes. The safe-context of the collection expression is the narrowest of:
+* If the target type is a *ref struct type* that implements `System.Collections.IEnumerable` and does not have a *[create method](#create-methods)*, the safe-context of the collection expression is the narrowest of:
   * the [*safe-context of an invocation*](https://github.com/dotnet/csharpstandard/blob/draft-v7/standard/structs.md#164126-method-and-property-invocation) of the applicable constructor, and
   * for each expression element, the safe-context that the element expression can contribute to the collection through the applicable `Add` method invocation, as determined by the [*method and property invocation*](https://github.com/dotnet/csharpstandard/blob/draft-v7/standard/structs.md#164126-method-and-property-invocation) rules applied to the `Add` call where the collection is the receiver, and
-  * for each spread element, the safe-context determined similarly for the `Add` method invocation where the argument is the iteration variable (with safe-context of *declaration-block*).
+  * for each spread element `..e`, the safe-context determined similarly for the `Add` method invocation where the argument is the iteration variable, whose safe-context is determined by the [*local variable safe context*](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/structs.md#164153-local-variable-safe-context) rules for an iteration variable of a `foreach` loop over `e`.
+
+  Additionally, the [*arg mixing*](https://github.com/dotnet/csharpstandard/blob/draft-v7/standard/structs.md#164127-values-known-to-refer-to-heap) rules are checked for the constructor invocation and for each `Add` invocation.
 
 * Otherwise the safe-context of the collection expression is the *caller-context*.
 
