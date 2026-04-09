@@ -79,6 +79,11 @@ unsafe in itself. [Pointer types][pointer-types-spec], [Fixed and moveable varia
 are all no longer considered `unsafe`, and exist in normal C# with no requirement to be used in an `unsafe` context. Similarly, declaring a [fixed size buffer][fixed-size-buffer-declarations] or
 an initialized [`stackalloc`][stack-allocation-spec] are also perfectly legal in safe C#. For all of these cases, it is only _accessing_ the memory that is unsafe.
 
+Importantly, these pointer relaxations apply **regardless of whether an assembly opts in** to the [updated memory safety rules](#metadata).
+Only operations that actually dereference or otherwise directly access pointed-to memory continue to require an `unsafe` context.
+This enables an incremental migration path: users can reshape existing code by moving `unsafe` inward when the member handles the risk internally,
+or outward when the caller must participate in the audit, before flipping the assembly-wide opt-in switch.
+
 Given the extensive rewrite of both the `unsafe` code section and other parts C# specification inherent in this change, it would be unwieldy and likely not useful to provide a line-by-line diff
 of the existing rules of the specification. Instead, we will provide an overview of the change to make in a given section, as well as specific new rules for what is allowed in `unsafe` contexts.
 
@@ -149,8 +154,8 @@ contract of `Span<T>` and `ReadOnlySpan<T>`, and so must be subject to extra scr
 
 #### `sizeof`
 
-For certain predefined types, `sizeof` has always been constant and safe ([§12.8.19][sizeof-const]) and that remains unchanged under the new rules.
-For other types, `sizeof` used to require unsafe context ([§24.6.9][sizeof-unsafe]) but it is now safe under the new memory safety rules.
+For certain predefined types, `sizeof` has always been constant and safe ([§12.8.19][sizeof-const]) and that remains unchanged.
+For other types, `sizeof` used to require unsafe context ([§24.6.9][sizeof-unsafe]) but is now safe regardless of opt-in to the updated memory safety rules.
 
 ### Overriding, inheritance, and implementation
 
