@@ -166,7 +166,7 @@ definition and not see any addition of `unsafe` by a derived implementation.
 
 It is a memory safety error to convert a *requires-unsafe* member to a delegate type outside the `unsafe` context.
 Delegate types and [_function types_](csharp-10.0/lambda-improvements.md#natural-function-type) cannot be *requires-unsafe*.
-It is a parse error to apply `unsafe` on a lambda symbol.
+It is a compile-time error to apply `unsafe` on a lambda symbol.
 
 ### `extern`
 
