@@ -66,15 +66,18 @@ The rules in [Indexer access](https://github.com/dotnet/csharpstandard/blob/draf
 are updated: if the normal processing of the indexer access finds no applicable indexer,
 an attempt is made to process the construct as an extension indexer access.
 
-1. Attempt to bind using only the instance indexers declared (or inherited) on
+1. Attempt to bind using the instance indexers declared (or inherited) on
     the receiver type. If an applicable candidate is found, overload resolution
     selects among those instance members as today and stops.
-2. If the set of candidate indexers is empty, an attempt is made to process the 
-    **element_access** as an extension indexer access.
-3. If both steps fail to identify any applicable indexers, 
-    an attempt is made to process the **element_access** as
-    an implicit `System.Index`/`System.Range` indexer access
-    (which relies on `Length`/`Count` plus `this[int]`/`Slice(int, int)`).
+2. Attempt to bind using the implicit instance indexers declared (or inherited) on
+    the receiver type. If an applicable candidate is found, overload resolution
+    selects among those instance members as today and stops.
+3. Attempt to bind as an extension indexer access. 
+    If this process finds an applicable candidate, overload resolution selects
+    among those extension members as described below and stops.
+4. Attempt to bind as an extension implicit indexer access. 
+    If this process finds an applicable candidate, overload resolution selects
+    among those extension members as described below and stops.
 
 Note: the element access section handles the case where an argument has type `dynamic`,
 so it never gets processed as an indexer access.
@@ -106,7 +109,7 @@ Considering each scope in turn:
 - Candidates that are not applicable (as defined above) are removed from the set.
 - If the resulting set of candidate indexers is empty, then we proceed to the next scope,
   or fail to resolve an extension indexer access if we reached the last scope
-  (we'll continue on to attempt to resolve as an implicit indexer in that case).
+  (we'll continue on to attempt to resolve as an extension implicit indexer in that case).
 - Otherwise, overload resolution is applied to the candidate set. 
   If a single best indexer cannot be identified, the extension indexer access is ambiguous,
   and a compile-time error occurs.
@@ -123,18 +126,18 @@ to obtain the current value.
 Either way, the invocation will use generic arguments inferred during the applicability check and
 the receiver as the first argument.
 
+#### Extension implicit indexer access
+
+An extension implicit `System.Index` (or `System.Range`) indexer access is applicable if:
+1. the **element_access** has a single argument that is of type `System.Index` (or `System.Range`), and
+2. an applicable `Length` or `Count` (instance or extension) property is found on the receiver type, and
+3. an applicable `this[int]` (or `Slice(int, int)`) (instance or extension) indexer is found on the receiver type.
+
 ### Other element-access forms
 
 Any construct that defers to element-access binding (null-conditional element access or assignments,
 index assignments in object initializers, or list and spread patterns) automatically
 participates in the extension indexer resolution described above.
-
-- There is an open question on the role that `Length` and `Count` extension
-    properties should play in types being considered *countable* for the purpose of
-    those patterns.
-- The implicit `System.Index`/`System.Range` fallback still relies on instance
-    `Length`/`Count` members plus instance `this[int]`/`Slice(int, int)` and ignores
-    extension members.
 
 ### Expression trees
 
@@ -368,7 +371,7 @@ static class E
 
 Decision (LDM 2026-02-02): extensions should contribute everywhere, including countable properties and implicit indexer fallback.
 
-### Confirm whether extension indexer access comes before or after implicit indexers
+### ~~Confirm whether extension indexer access comes before or after implicit indexers~~
 
 ```csharp
 C c = new C();
@@ -395,7 +398,14 @@ but now think they should come after to avoid unnecessary compat breaks.
 Update (LDM 2026-02-02): this needs further investigation. Yes, extensions should come after non-extension members,
 but beyond that we need some concrete proposals in light of above decision to allow extensions to contribute to implicit indexer fallback.
 
-### Count/Length: Is the name prioritized first, or non-extension vs extension?
+Decision (LDM 2026-03-09): the order is real instance indexers, then implicit instance indexers, then real extension indexers, then implicit extension indexers.
+See https://github.com/dotnet/csharplang/blob/main/meetings/2026/LDM-2026-03-09.md#extension-indexers
+
+### ~~Count/Length: Is the name prioritized first, or non-extension vs extension?~~
 
 We also have an existing fallback: `Length` is prioritized over `Count` property.
 Should an extension `Length` come before or after a non-extension `Count` property?
+
+Decision (LDM 2026-03-09): we'll look scope-by-scope (starting from instance scope and proceeding through extension scopes), and within each scope we'll look for `Length` first and then `Count`.
+See https://github.com/dotnet/csharplang/blob/main/meetings/2026/LDM-2026-03-09.md#extension-indexers
+
