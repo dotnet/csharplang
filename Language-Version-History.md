@@ -57,9 +57,9 @@ Features Added in C# Language Versions
 
 # C# 10.0 - .NET 6 and Visual Studio 2022 version 17.0
 
-- [Record structs](https://github.com/dotnet/csharplang/blob/master/proposals/csharp-10.0/record-structs.md) (`record struct Point(int X, int Y);`, `var newPoint = point with { X = 100 };`).
+- [Record structs](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-10.0/record-structs.md) (`record struct Point(int X, int Y);`, `var newPoint = point with { X = 100 };`).
 - [With expression](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-10.0/record-structs.md#allow-with-expression-on-structs) on structs and anonymous types.
-- [Global using directives](https://github.com/dotnet/csharplang/blob/master/proposals/csharp-10.0/GlobalUsingDirective.md): `global using` directives avoid repeating the same `using` directives across many files in your program.
+- [Global using directives](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-10.0/GlobalUsingDirective.md): `global using` directives avoid repeating the same `using` directives across many files in your program.
 - [Improved definite assignment](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-10.0/improved-definite-assignment.md): definite assignment and nullability analysis better handle common patterns such as `dictionary?.TryGetValue(key, out value) == true`.
 - [Constant interpolated strings](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-10.0/constant_interpolated_strings.md): interpolated strings composed of constants are themselves constants.
 - [Extended property patterns](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-10.0/extended-property-patterns.md): property patterns allow accessing nested members (`if (e is MethodCallExpression { Method.Name: "MethodName" })`).
@@ -75,31 +75,31 @@ Features Added in C# Language Versions
 - [CallerArgumentExpression](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-10.0/caller-argument-expression.md): this attribute allows capturing the expressions passed to a method as strings.
 
 # C# 9.0 - .NET 5 and Visual Studio 2019 version 16.8 
-- [Records](https://github.com/dotnet/csharplang/blob/master/proposals/csharp-9.0/records.md) and `with` expressions: succinctly declare reference types with value semantics (`record Point(int X, int Y);`, `var newPoint = point with { X = 100 };`).
-- [Init-only setters](https://github.com/dotnet/csharplang/blob/master/proposals/csharp-9.0/init.md): init-only properties can be set during object creation (`int Property { get; init; }`).
-- [Top-level statements](https://github.com/dotnet/csharplang/blob/master/proposals/csharp-9.0/top-level-statements.md): the entry point logic of a program can be written without declaring an explicit type or `Main` method.
-- [Pattern matching enhancements](https://github.com/dotnet/csharplang/blob/master/proposals/csharp-9.0/patterns3.md): relational patterns (`is < 30`), combinator patterns (`is >= 0 and <= 100`, `case 3 or 4:`, `is not null`), parenthesized patterns (`is int and (< 0 or > 100)`), type patterns (`case Type:`).
-- [Native sized integers](https://github.com/dotnet/csharplang/blob/master/proposals/csharp-9.0/native-integers.md): the numeric types `nint` and `nuint` match the platform memory size.
-- [Function pointers](https://github.com/dotnet/csharplang/blob/master/proposals/csharp-9.0/function-pointers.md): enable high-performance code leveraging IL instructions `ldftn` and `calli` (`delegate* <int, void> local;`)
-- [Suppress emitting `localsinit` flag](https://github.com/dotnet/csharplang/blob/master/proposals/csharp-9.0/skip-localsinit.md): attributing a method with `[SkipLocalsInit]` will suppress emitting the `localsinit` flag to reduce cost of zero-initialization.
-- [Target-typed new expressions](https://github.com/dotnet/csharplang/blob/master/proposals/csharp-9.0/target-typed-new.md): `Point p = new(42, 43);`.
-- [Static anonymous functions](https://github.com/dotnet/csharplang/blob/master/proposals/csharp-9.0/static-anonymous-functions.md): ensure that anonymous functions don't capture `this` or local variables (`static () => { ... };`).
-- [Target-typed conditional expressions](https://github.com/dotnet/csharplang/blob/master/proposals/csharp-9.0/target-typed-conditional-expression.md): conditional expressions which lack a natural type can be target-typed (`int? x = b ? 1 : null;`).
-- [Covariant return types](https://github.com/dotnet/csharplang/blob/master/proposals/csharp-9.0/covariant-returns.md): a method override on reference types can declare a more derived return type.
-- [Lambda discard parameters](https://github.com/dotnet/csharplang/blob/master/proposals/csharp-9.0/lambda-discard-parameters.md): multiple parameters `_` appearing in a lambda are allowed and are discards.
-- [Attributes on local functions](https://github.com/dotnet/csharplang/blob/master/proposals/csharp-9.0/local-function-attributes.md).
-- [Module initializers](https://github.com/dotnet/csharplang/blob/master/proposals/csharp-9.0/module-initializers.md): a method attributed with `[ModuleInitializer]` will be executed before any other code in the assembly.
-- [Extension `GetEnumerator`](https://github.com/dotnet/csharplang/blob/master/proposals/csharp-9.0/extension-getenumerator.md): an extension `GetEnumerator` method can be used in a `foreach`.
-- [Partial methods with returned values](https://github.com/dotnet/csharplang/blob/master/proposals/csharp-9.0/extending-partial-methods.md): partial methods can have any accessibility, return a type other than `void` and use `out` parameters, but must be implemented.
+- [Records](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-9.0/records.md) and `with` expressions: succinctly declare reference types with value semantics (`record Point(int X, int Y);`, `var newPoint = point with { X = 100 };`).
+- [Init-only setters](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-9.0/init.md): init-only properties can be set during object creation (`int Property { get; init; }`).
+- [Top-level statements](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-9.0/top-level-statements.md): the entry point logic of a program can be written without declaring an explicit type or `Main` method.
+- [Pattern matching enhancements](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-9.0/patterns3.md): relational patterns (`is < 30`), combinator patterns (`is >= 0 and <= 100`, `case 3 or 4:`, `is not null`), parenthesized patterns (`is int and (< 0 or > 100)`), type patterns (`case Type:`).
+- [Native sized integers](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-9.0/native-integers.md): the numeric types `nint` and `nuint` match the platform memory size.
+- [Function pointers](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-9.0/function-pointers.md): enable high-performance code leveraging IL instructions `ldftn` and `calli` (`delegate* <int, void> local;`)
+- [Suppress emitting `localsinit` flag](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-9.0/skip-localsinit.md): attributing a method with `[SkipLocalsInit]` will suppress emitting the `localsinit` flag to reduce cost of zero-initialization.
+- [Target-typed new expressions](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-9.0/target-typed-new.md): `Point p = new(42, 43);`.
+- [Static anonymous functions](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-9.0/static-anonymous-functions.md): ensure that anonymous functions don't capture `this` or local variables (`static () => { ... };`).
+- [Target-typed conditional expressions](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-9.0/target-typed-conditional-expression.md): conditional expressions which lack a natural type can be target-typed (`int? x = b ? 1 : null;`).
+- [Covariant return types](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-9.0/covariant-returns.md): a method override on reference types can declare a more derived return type.
+- [Lambda discard parameters](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-9.0/lambda-discard-parameters.md): multiple parameters `_` appearing in a lambda are allowed and are discards.
+- [Attributes on local functions](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-9.0/local-function-attributes.md).
+- [Module initializers](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-9.0/module-initializers.md): a method attributed with `[ModuleInitializer]` will be executed before any other code in the assembly.
+- [Extension `GetEnumerator`](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-9.0/extension-getenumerator.md): an extension `GetEnumerator` method can be used in a `foreach`.
+- [Partial methods with returned values](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-9.0/extending-partial-methods.md): partial methods can have any accessibility, return a type other than `void` and use `out` parameters, but must be implemented.
 - [Source Generators](https://devblogs.microsoft.com/dotnet/introducing-c-source-generators/)
 
 # C# 8.0 - .NET Core 3.0 and Visual Studio 2019 version 16.3 
-- [Nullable reference types](https://github.com/dotnet/csharplang/blob/master/proposals/csharp-8.0/nullable-reference-types-specification.md): express nullability intent on reference types with `?`, `notnull` constraint and annotations attributes in APIs, the compiler will use those to try and detect possible `null` values being dereferenced or passed to unsuitable APIs.
-- [Default interface members](https://github.com/dotnet/csharplang/blob/master/proposals/csharp-8.0/default-interface-methods.md): interfaces can now have members with default implementations, as well as static/private/protected/internal members except for state (ie. no fields).
-- [Recursive patterns](https://github.com/dotnet/csharplang/blob/master/proposals/csharp-8.0/patterns.md): positional and property patterns allow testing deeper into an object, and switch expressions allow for testing multiple patterns and producing corresponding results in a compact fashion.
-- [Async streams](https://github.com/dotnet/csharplang/blob/master/proposals/csharp-8.0/async-streams.md): `await foreach` and `await using` allow for asynchronous enumeration and disposal of `IAsyncEnumerable<T>` collections and `IAsyncDisposable` resources, and async-iterator methods allow convenient implementation of such asynchronous streams.
-- [Enhanced using](https://github.com/dotnet/csharplang/blob/master/proposals/csharp-8.0/using.md): a `using` declaration is added with an implicit scope and `using` statements and declarations allow disposal of `ref` structs using a pattern.
-- [Ranges and indexes](https://github.com/dotnet/csharplang/blob/master/proposals/csharp-8.0/ranges.md): the `i..j` syntax allows constructing `System.Range` instances, the `^k` syntax allows constructing `System.Index` instances, and those can be used to index/slice collections.
+- [Nullable reference types](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-8.0/nullable-reference-types-specification.md): express nullability intent on reference types with `?`, `notnull` constraint and annotations attributes in APIs, the compiler will use those to try and detect possible `null` values being dereferenced or passed to unsuitable APIs.
+- [Default interface members](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-8.0/default-interface-methods.md): interfaces can now have members with default implementations, as well as static/private/protected/internal members except for state (ie. no fields).
+- [Recursive patterns](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-8.0/patterns.md): positional and property patterns allow testing deeper into an object, and switch expressions allow for testing multiple patterns and producing corresponding results in a compact fashion.
+- [Async streams](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-8.0/async-streams.md): `await foreach` and `await using` allow for asynchronous enumeration and disposal of `IAsyncEnumerable<T>` collections and `IAsyncDisposable` resources, and async-iterator methods allow convenient implementation of such asynchronous streams.
+- [Enhanced using](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-8.0/using.md): a `using` declaration is added with an implicit scope and `using` statements and declarations allow disposal of `ref` structs using a pattern.
+- [Ranges and indexes](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-8.0/ranges.md): the `i..j` syntax allows constructing `System.Range` instances, the `^k` syntax allows constructing `System.Index` instances, and those can be used to index/slice collections.
 - [Null-coalescing assignment](https://github.com/dotnet/csharplang/issues/34): `??=` allows conditionally assigning when the value is null.
 - [Static local functions](https://github.com/dotnet/csharplang/issues/1565): local functions modified with `static` cannot capture `this` or local variables, and local function parameters now shadow locals in parent scopes.
 - [Unmanaged generic structs](https://github.com/dotnet/csharplang/issues/1744): generic struct types that only have unmanaged fields are now considered unmanaged (ie. they satisfy the `unmanaged` constraint).
@@ -110,46 +110,46 @@ Features Added in C# Language Versions
 - [Permit `t is null` on unconstrained type parameter](https://github.com/dotnet/csharplang/issues/1284)
 
 # C# 7.3 - Visual Studio 2017 version 15.7
-- `System.Enum`, `System.Delegate` and [`unmanaged`](https://github.com/dotnet/csharplang/blob/master/proposals/csharp-7.3/blittable.md) constraints.
-- [Ref local re-assignment](https://github.com/dotnet/csharplang/blob/master/proposals/csharp-7.3/ref-local-reassignment.md): Ref locals and ref parameters can now be reassigned with the ref assignment operator (`= ref`).
-- [Stackalloc initializers](https://github.com/dotnet/csharplang/blob/master/proposals/csharp-7.3/stackalloc-array-initializers.md): Stack-allocated arrays can now be initialized, e.g. `Span<int> x = stackalloc[] { 1, 2, 3 };`.
-- [Indexing movable fixed buffers](https://github.com/dotnet/csharplang/blob/master/proposals/csharp-7.3/indexing-movable-fixed-fields.md): Fixed buffers can be indexed into without first being pinned.
-- [Custom `fixed` statement](https://github.com/dotnet/csharplang/blob/master/proposals/csharp-7.3/pattern-based-fixed.md): Types that implement a suitable `GetPinnableReference` can be used in a `fixed` statement.
-- [Improved overload candidates](https://github.com/dotnet/csharplang/blob/master/proposals/csharp-7.3/improved-overload-candidates.md): Some overload resolution candidates can be ruled out early, thus reducing ambiguities.
-- [Expression variables in initializers and queries](https://github.com/dotnet/csharplang/blob/master/proposals/csharp-7.3/expression-variables-in-initializers.md): Expression variables like `out var` and pattern variables are allowed in field initializers, constructor initializers and LINQ queries.
--	[Tuple comparison](https://github.com/dotnet/csharplang/blob/master/proposals/csharp-7.3/tuple-equality.md): Tuples can now be compared with `==` and `!=`.
--	[Attributes on backing fields](https://github.com/dotnet/csharplang/blob/master/proposals/csharp-7.3/auto-prop-field-attrs.md): Allows `[field: …]` attributes on an auto-implemented property to target its backing field.
+- `System.Enum`, `System.Delegate` and [`unmanaged`](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-7.3/blittable.md) constraints.
+- [Ref local re-assignment](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-7.3/ref-local-reassignment.md): Ref locals and ref parameters can now be reassigned with the ref assignment operator (`= ref`).
+- [Stackalloc initializers](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-7.3/stackalloc-array-initializers.md): Stack-allocated arrays can now be initialized, e.g. `Span<int> x = stackalloc[] { 1, 2, 3 };`.
+- [Indexing movable fixed buffers](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-7.3/indexing-movable-fixed-fields.md): Fixed buffers can be indexed into without first being pinned.
+- [Custom `fixed` statement](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-7.3/pattern-based-fixed.md): Types that implement a suitable `GetPinnableReference` can be used in a `fixed` statement.
+- [Improved overload candidates](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-7.3/improved-overload-candidates.md): Some overload resolution candidates can be ruled out early, thus reducing ambiguities.
+- [Expression variables in initializers and queries](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-7.3/expression-variables-in-initializers.md): Expression variables like `out var` and pattern variables are allowed in field initializers, constructor initializers and LINQ queries.
+-	[Tuple comparison](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-7.3/tuple-equality.md): Tuples can now be compared with `==` and `!=`.
+-	[Attributes on backing fields](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-7.3/auto-prop-field-attrs.md): Allows `[field: …]` attributes on an auto-implemented property to target its backing field.
 
 # [C# 7.2](https://blogs.msdn.microsoft.com/dotnet/2017/11/15/welcome-to-c-7-2-and-span/) - Visual Studio 2017 version 15.5
-- [Span and ref-like types](https://github.com/dotnet/csharplang/blob/master/proposals/csharp-7.2/span-safety.md)
-- [In parameters and readonly references](https://github.com/dotnet/csharplang/blob/master/proposals/csharp-7.2/readonly-ref.md)
-- [Ref conditional](https://github.com/dotnet/csharplang/blob/master/proposals/csharp-7.2/conditional-ref.md)
-- [Non-trailing named arguments](https://github.com/dotnet/csharplang/blob/master/proposals/csharp-7.2/non-trailing-named-arguments.md)
-- [Private protected accessibility](https://github.com/dotnet/csharplang/blob/master/proposals/csharp-7.2/private-protected.md)
-- [Digit separator after base specifier](https://github.com/dotnet/csharplang/blob/master/proposals/csharp-7.2/leading-separator.md)
+- [Span and ref-like types](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-7.2/span-safety.md)
+- [In parameters and readonly references](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-7.2/readonly-ref.md)
+- [Ref conditional](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-7.2/conditional-ref.md)
+- [Non-trailing named arguments](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-7.2/non-trailing-named-arguments.md)
+- [Private protected accessibility](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-7.2/private-protected.md)
+- [Digit separator after base specifier](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-7.2/leading-separator.md)
 
 # [C# 7.1](https://blogs.msdn.microsoft.com/dotnet/2017/10/31/welcome-to-c-7-1/) - Visual Studio 2017 version 15.3
-- [Async main](https://github.com/dotnet/csharplang/blob/master/proposals/csharp-7.1/async-main.md)
-- [Default expressions](https://github.com/dotnet/csharplang/blob/master/proposals/csharp-7.1/target-typed-default.md)
-- [Reference assemblies](https://github.com/dotnet/roslyn/blob/master/docs/features/refout.md)
-- [Inferred tuple element names](https://github.com/dotnet/csharplang/blob/master/proposals/csharp-7.1/infer-tuple-names.md)
-- [Pattern-matching with generics](https://github.com/dotnet/csharplang/blob/master/proposals/csharp-7.1/generics-pattern-match.md)
+- [Async main](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-7.1/async-main.md)
+- [Default expressions](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-7.1/target-typed-default.md)
+- [Reference assemblies](https://github.com/dotnet/roslyn/blob/main/docs/features/refout.md)
+- [Inferred tuple element names](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-7.1/infer-tuple-names.md)
+- [Pattern-matching with generics](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-7.1/generics-pattern-match.md)
 
 # [C# 7.0](https://blogs.msdn.microsoft.com/dotnet/2017/03/09/new-features-in-c-7-0/) - Visual Studio 2017
-- [Out variables](https://github.com/dotnet/csharplang/blob/master/proposals/csharp-7.0/out-var.md)
+- [Out variables](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-7.0/out-var.md)
 - [Pattern matching](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-7.0/pattern-matching.md)
-- [Tuples](https://github.com/dotnet/roslyn/blob/master/docs/features/tuples.md)
-- [Deconstruction](https://github.com/dotnet/roslyn/blob/master/docs/features/deconstruction.md)
-- [Discards](https://github.com/dotnet/roslyn/blob/master/docs/features/discards.md)
-- [Local Functions](https://github.com/dotnet/csharplang/blob/master/proposals/csharp-7.0/local-functions.md)
-- [Binary Literals](https://github.com/dotnet/csharplang/blob/master/proposals/csharp-7.0/binary-literals.md)
-- [Digit Separators](https://github.com/dotnet/csharplang/blob/master/proposals/csharp-7.0/digit-separators.md)
+- [Tuples](https://github.com/dotnet/roslyn/blob/main/docs/features/tuples.md)
+- [Deconstruction](https://github.com/dotnet/roslyn/blob/main/docs/features/deconstruction.md)
+- [Discards](https://github.com/dotnet/roslyn/blob/main/docs/features/discards.md)
+- [Local Functions](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-7.0/local-functions.md)
+- [Binary Literals](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-7.0/binary-literals.md)
+- [Digit Separators](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-7.0/digit-separators.md)
 - [Ref returns and locals](https://docs.microsoft.com/dotnet/csharp/programming-guide/classes-and-structs/ref-returns)
-- [Generalized async return types](https://github.com/dotnet/roslyn/blob/master/docs/features/task-types.md)
+- [Generalized async return types](https://github.com/dotnet/roslyn/blob/main/docs/features/task-types.md)
 - [More expression-bodied members](https://docs.microsoft.com/dotnet/csharp/programming-guide/statements-expressions-operators/expression-bodied-members)
-- [Throw expressions](https://github.com/dotnet/csharplang/blob/master/proposals/csharp-7.0/throw-expression.md)
+- [Throw expressions](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-7.0/throw-expression.md)
 
-# [C# 6](https://github.com/dotnet/roslyn/blob/master/docs/wiki/New-Language-Features-in-C%23-6.md) - Visual Studio 2015
+# [C# 6](https://github.com/dotnet/roslyn/blob/main/docs/wiki/New-Language-Features-in-C%23-6.md) - Visual Studio 2015
 - [Draft Specification online](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/README.md)
 - Compiler-as-a-service (Roslyn)
 - [Import of static type members into namespace](https://docs.microsoft.com/dotnet/csharp/language-reference/keywords/using-static)
