@@ -35,11 +35,16 @@ All schedule items must have a public issue or checked-in proposal that can be l
 - [Deconstruction in lambda parameters](https://github.com/dotnet/csharplang/blob/c4ec6fb60c2e174b1abb6c019f22bb15b9b13f6c/proposals/deconstruction-in-lambda-parameters.md) (CyrusNajmabadi, jnm2)
   - [Last conclusion](https://github.com/dotnet/csharplang/blob/main/meetings/2026/LDM-2026-01-12.md#deconstruction-in-lambda-parameters): take a closer look in LDM.
 
+## C# Language Design Notes for 2026
+
 ### Mon Apr 13, 2026
 
-- Unsafe evolution, continued - [Simple core model](https://github.com/dotnet/csharplang/blob/main/meetings/working-groups/unsafe-evolution/unsafe-simple-core-model.md) (Andy, Mads)
+[C# Language Design Meeting for April 13th, 2026](https://github.com/dotnet/csharplang/blob/main/meetings/2026/LDM-2026-04-13.md)
 
-## C# Language Design Notes for 2026
+- Unsafe evolution, continued
+    - Safe markers for members with internal `unsafe` code
+    - Members with pointers in their signatures
+    - Choosing a temporary spelling for `safe`
 
 ### Wed Apr 8, 2026
 
