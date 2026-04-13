@@ -6,6 +6,8 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ## Schedule when convenient
 
+- [Final initializers](https://github.com/dotnet/csharplang/blob/5055b97eee8c10d12f822f6d4db9464329615947/proposals/final-initializers.md)
+  - [LDM in 2020](https://github.com/dotnet/csharplang/blob/main/meetings/2020/LDM-2020-04-27.md#primary-constructor-bodies-and-validators) approved the syntax. Next is discussing semantics.
 - [Labeled `break` and `continue` Statements](https://github.com/dotnet/csharplang/blob/c4ec6fb60c2e174b1abb6c019f22bb15b9b13f6c/proposals/labeled-break-continue.md) (CyrusNajmabadi)
   - [Last conclusion](https://github.com/dotnet/csharplang/blob/main/meetings/2026/LDM-2026-01-12.md#labeled-break-and-continue-statements): delve deeper in a full session.
 - [Anonymous using declarations](https://github.com/dotnet/csharplang/blob/665a9392e172e6f4f16347c502d9f80220a6e7a4/proposals/anonymous-using-declarations.md) (jnm2, 333fred, CyrusNajmabadi)
@@ -24,8 +26,7 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ### Wed Apr 22, 2026
 
-- [Final initializers](https://github.com/dotnet/csharplang/blob/5055b97eee8c10d12f822f6d4db9464329615947/proposals/final-initializers.md)
-  - [LDM in 2020](https://github.com/dotnet/csharplang/blob/main/meetings/2020/LDM-2020-04-27.md#primary-constructor-bodies-and-validators) approved the syntax. Next is discussing semantics.
+- Unsafe evolution, continued - [Simple core model](https://github.com/dotnet/csharplang/blob/main/meetings/working-groups/unsafe-evolution/unsafe-simple-core-model.md) (Andy, Mads)
 
 ### Mon Apr 20, 2026
 
