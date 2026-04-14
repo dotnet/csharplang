@@ -297,19 +297,8 @@ Advantages of an attribute (or another keyword):
 - doesn't force marking the whole body as `unsafe` (even with `unsafe` keyword we could
   [change](#unsafe-context-defaults-in-members)
   `unsafe` to not have an effect on bodies though),
-- allows suppressing *requires-unsafe* errors without needing to mark the member itself as *requires-unsafe*, e.g.:
-  ```cs
-  // if we have `unsafe` marking both requires-unsafe members and unsafe contexts:
-  class A : System.Attribute
-  {
-      unsafe public A() { } // requires-unsafe constructor
-  }
-  class C
-  {
-      [A] public void M() { } // the only way to allow use of A..ctor is to mark M as `unsafe` which marks it requires-unsafe (or marking C as `unsafe` which might be undesirable too)
-  }
-  class B() : A(); // similar problem with using A..ctor here
-  ```
+- allows suppressing all *requires-unsafe* errors without needing to mark the member itself as *requires-unsafe*
+  ([examples](#allow-suppressing-requires-unsafe-errors-in-edge-case-scenarios)).
 
 ## Open questions
 
@@ -398,6 +387,22 @@ class A : Attribute
 }
 [A] class C; // unavoidable error for using requires-unsafe A..ctor?
 [A] unsafe class C; // if unsafe still introduces an unsafe context, this makes the error go away
+```
+
+### Allow suppressing *requires-unsafe* errors in edge case scenarios
+
+Should we allow suppressing *requires-unsafe* errors without needing to mark the member itself as *requires-unsafe*?
+
+```cs
+class A : System.Attribute
+{
+    unsafe public A() { } // requires-unsafe constructor
+}
+class C
+{
+    [A] public void M() { } // the only way to allow use of A..ctor is to mark M as `unsafe` which marks it requires-unsafe (or marking C as `unsafe` which might be undesirable too)
+}
+class B() : A(); // similar problem with using A..ctor here
 ```
 
 ### More meaningless `unsafe` warnings
