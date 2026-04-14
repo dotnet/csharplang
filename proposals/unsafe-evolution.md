@@ -280,9 +280,9 @@ as there is no type-safe way for the target member to use that pointer type for 
 
 We do not need to add support to Visual Basic for *requires-unsafe* members since there are no `unsafe` contexts in VB today and no way to work with pointers there either.
 
-## Alternatives
+## Questions
 
-### Use `RequiresUnsafeAttribute` to denote *requires-unsafe* members
+### (answered) Use `RequiresUnsafeAttribute` to denote *requires-unsafe* members
 
 Instead of using the `unsafe` keyword on the member to denote *requires-unsafe* members, we could use an attribute (`RequiresUnsafeAttribute`) applied to the member
 (and not change the meaning of the `unsafe` modifier on members).
@@ -300,7 +300,10 @@ Advantages of an attribute (or another keyword):
 - allows suppressing all *requires-unsafe* errors without needing to mark the member itself as *requires-unsafe*
   ([examples](#allow-suppressing-requires-unsafe-errors-in-edge-case-scenarios)).
 
-## Open questions
+Discussions:
+- [LDM 2025-11-12](https://github.com/dotnet/csharplang/blob/main/meetings/2025/LDM-2025-11-12.md#unsafe-evolution): use keyword
+- [LDM 2026-01-26](https://github.com/dotnet/csharplang/blob/main/meetings/2026/LDM-2026-01-26.md#alternative-syntax-for-caller-unsafe): use attribute
+- [LDM 2026-04-06](https://github.com/dotnet/csharplang/blob/main/meetings/2026/LDM-2026-04-06.md#unsafe-evolution-continued): use keyword
 
 ### Local functions/lambda safe contexts
 
@@ -375,6 +378,9 @@ But since we are just getting its address, which will need `unsafe` context when
 
 Should we make [the unsafe context relaxations](#existing-unsafe-rules) unconditional on LangVersion?
 
+- [LDM 2026-04-06](https://github.com/dotnet/csharplang/blob/main/meetings/2026/LDM-2026-04-06.md#unsafe-evolution-continued): they are not conditional on memory safety rules version
+- TODO: what about LangVersion?
+
 ### `unsafe` on types
 
 We could consider not automatically making the entire lexical scope of an `unsafe` type to be an `unsafe` context and warn for an `unsafe` on a type as it would have no meaning
@@ -388,6 +394,9 @@ class A : Attribute
 [A] class C; // unavoidable error for using requires-unsafe A..ctor?
 [A] unsafe class C; // if unsafe still introduces an unsafe context, this makes the error go away
 ```
+
+- [LDM 2025-11-12](https://github.com/dotnet/csharplang/blob/main/meetings/2025/LDM-2025-11-12.md#unsafe-evolution): `unsafe` on a type will have no meaning
+- TODO: warning or error? also could revisit in light of more recent decisions
 
 ### Allow suppressing *requires-unsafe* errors in edge case scenarios
 
@@ -479,6 +488,11 @@ Also, CoreLib exposes many extern methods (FCalls) as safe today.
 Treating extern methods as implicitly unsafe will require wrapping the implicitly unsafe extern methods with a safe wrapper.
 We may run into situations where adding the extra wrapper is difficult due to runtime implementation details.
 
+- [LDM 2026-04-01](https://github.com/dotnet/csharplang/blob/main/meetings/2026/LDM-2026-04-01.md#unsafe-evolution-migration-and-explicit-safety-markers): `extern` members should be explicitly marked either safe or unsafe
+- [LDM 2026-04-06](https://github.com/dotnet/csharplang/blob/main/meetings/2026/LDM-2026-04-06.md#unsafe-evolution-continued): same decision reiterated
+- [LDM 2026-04-13](https://github.com/dotnet/csharplang/blob/main/meetings/2026/LDM-2026-04-13.md#choosing-a-temporary-spelling-for-safe): temporary decision to use `safe` keyword
+- TODO: confirm and incorporate into the speclet body
+
 ### `unsafe` context defaults in members
 
 We could consider not automatically making the entire body of an `unsafe` method an `unsafe` context. Rust did this in [RFC 2585](https://github.com/rust-lang/rfcs/blob/master/text/2585-unsafe-block-in-unsafe-fn.md),
@@ -557,9 +571,7 @@ class D<T> where T : new();
 
 - `dynamic` (probably should match what BCL decides for reflection APIs)
 
-## Answered questions
-
-### How breaking do we want to skew
+### (answered) How breaking do we want to skew
 
 <details>
 <summary>Question text</summary>
@@ -603,9 +615,20 @@ turning on nullable and warn as error. Should we do the same for source generato
 
 #### Conclusion
 
-Answered in https://github.com/dotnet/csharplang/blob/main/meetings/2025/LDM-2025-11-05.md#unsafe-evolution. We will report errors for memory safety issues when the new rules are turned on, and no exceptions
+Answered in [LDM 2025-11-05](https://github.com/dotnet/csharplang/blob/main/meetings/2025/LDM-2025-11-05.md#unsafe-evolution). We will report errors for memory safety issues when the new rules are turned on, and no exceptions
 for source generators will be made.
 
+### (answered) Errors or warnings?
+
+- [LDM 2025-11-05](https://github.com/dotnet/csharplang/blob/main/meetings/2025/LDM-2025-11-05.md#unsafe-evolution): errors
+
+### (answered) Source generator affordance
+
+- [LDM 2025-11-05](https://github.com/dotnet/csharplang/blob/main/meetings/2025/LDM-2025-11-05.md#unsafe-evolution): none
+
+### (answered) Require `safe` maker for members with `unsafe` blocks or pointers?
+
+- [LDM 2026-04-13](https://github.com/dotnet/csharplang/blob/main/meetings/2026/LDM-2026-04-13.md#unsafe-evolution-continued): no
 
 [unsafe-code]: https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/expressions.md#128-primary-expressions
 [sizeof-const]: https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/expressions.md#12819-the-sizeof-operator
