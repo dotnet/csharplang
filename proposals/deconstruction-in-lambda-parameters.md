@@ -122,6 +122,12 @@ Action<(int, int)> action = (int a, int b) => { }; // ❌ INVALID
 Action<(int, int)> action = ((int a, int b)) => { }; // Valid
 ```
 
+## Inference / Overload Resolution / Natural Typing
+
+Inference, overload resolution and natural typing, work intuitively work the same way they would today, for a typed deconstruction in a lambda parameter, as if the deconstruction were simply tuple typed parameters with an anonymous name.  In other words `((int a, int b)) => ...` is treated the same way in the language for the purposes of these features as `((int a, int b) 'x) => ...` where `'x` simply is anonymous parameter identifier.  As parameter identifier are not involved in these algorithms anyways, this approach falls out cleanly, without downside.  This is also the case for nested deconstructions.  So `((int x, (string y, bool b))) => ...` is equivalent to `((int x, (string y, bool b) 'a) 'b) => ...`
+
+For the purposes of clarity though, examples below are given for these features to show how it would work practically.
+
 ### Method type inference
 
 A deconstructed lambda parameter can be used to infer a tuple type (see [inferred tuple type](#inferred-tuple-type)) for a method type parameter:
