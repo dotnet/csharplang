@@ -60,7 +60,9 @@ The following breaking changes can be observed when updating to a compiler imple
 - If the [updated memory safety rules](#metadata) are enabled (which might be the default or even the only option in a future .NET version):
   - `unsafe` on a member now also marks it as *requires-unsafe*, meaning callers must be in an `unsafe` context and overrides cannot be `unsafe` if the base member is safe.
   - `extern` members require an `unsafe` context when used.
+- Under a new langversion:
   - `stackalloc` under [certain conditions](#stack-allocation) requires an `unsafe` context.
+  - Lambda inference might consider more candidates, resulting in overload resolution [ambiguities](https://github.com/dotnet/roslyn/blob/330ad108d2786a50ce6755b9cb27c17a74723eb5/docs/compilers/CSharp/Compiler%20Breaking%20Changes%20-%20DotNet%2011.md#pointer-types-no-longer-require-an-unsafe-context).
 - Under a new warnlevel:
   - `unsafe` modifier on some declarations (`delegate`) warns because it does not have any effect. 
 
