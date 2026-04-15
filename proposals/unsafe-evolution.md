@@ -398,6 +398,30 @@ class A : Attribute
 - [LDM 2025-11-12](https://github.com/dotnet/csharplang/blob/main/meetings/2025/LDM-2025-11-12.md#unsafe-evolution): `unsafe` on a type will have no meaning
 - TODO: warning or error? also could revisit in light of more recent decisions
 
+### `unsafe` on accessors
+
+We newly allow `unsafe` on property accessors but not on event accessors, in line with other pre-existing modifiers.
+This also means that `unsafe` on a property is just a shortcut for `unsafe` on its accessors (similar to [`unsafe` on a type](#unsafe-on-types)).
+But at the same time, `partial`s require the `unsafe` modifiers to match:
+
+```cs
+partial class C
+{
+    unsafe partial int P { get; set; } // effectively both `get` and `set` are `unsafe` here
+    unsafe partial int P { unsafe get => 0; set { } } // still an error: `unsafe` on `get` doesn't match
+}
+
+// similar to this pre-existing behavior:
+unsafe partial class D
+{
+    unsafe partial void M();
+}
+unsafe partial class D
+{
+    partial void M() { } // error about missing `unsafe`
+}
+```
+
 ### Allow suppressing *requires-unsafe* errors in edge case scenarios
 
 Should we allow suppressing *requires-unsafe* errors without needing to mark the member itself as *requires-unsafe*?
