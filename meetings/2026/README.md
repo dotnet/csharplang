@@ -4,6 +4,8 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ## Schedule ASAP
 
+- [Closed class generics question](https://github.com/dotnet/csharplang/blob/848d6284009f8c60160be80ecef9a72c4378b1b0/proposals/final-initializers.md#generics-and-exhaustiveness) (Rikki)
+
 ## Schedule when convenient
 
 - [Final initializers](https://github.com/dotnet/csharplang/blob/5055b97eee8c10d12f822f6d4db9464329615947/proposals/final-initializers.md)
