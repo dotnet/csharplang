@@ -39,7 +39,9 @@ Closed classes provide a way to indicate that a set of derived classes is comple
 
 ### Syntax
 
-Allow `closed` as a modifier on classes. A `closed` class is implicitly abstract whether or not the `abstract` modifier is specified. Thus, it cannot also have a `sealed` or `static` modifier. 
+Allow `closed` as a modifier on classes. A `closed` class is implicitly abstract. Thus, it cannot also have a `sealed` or `static` modifier. 
+
+It is an error to explicitly use an `abstract` modifier on a `closed` class.
 
 A class deriving from a closed class is *not* itself closed unless explicitly declared to be.
 
@@ -56,6 +58,8 @@ public class CO : CC { ... }     // Ok, same assembly
 public class C1 : CC { ... }     // Error, 'CC' is closed and in a different assembly
 public class C2 : CO { ... }     // Ok, 'CO' is not closed
 ```
+
+The same restriction applies to modules. A subtype of a `closed` type must be located within the same module as the base type.
 
 ### Type parameter restriction
 
@@ -120,27 +124,6 @@ _ = cs switch
 
 Closed classes are generated with a `Closed` attribute, to allow them to be recognized by a consuming compiler.
 
-## Drawbacks
-
-- It can be a breaking change to add a `closed` modifier to an existing class, or to add an additional derived class from a closed class. Before publishing a closed class, the author needs to consider the long term contract it implies with its consumers.
-- Unless we find a way to prevent it, "unauthorized" derived classes may be allowed by unwitting other compilers, leading to the risk that the set of cases is not in fact closed at runtime.
-
-## Alternatives
-
-- Instead of a new `closed` modifier, a closed class could be designated with a `[Closed]` attribute.
-- The scope of where descendants are allowed could be narrowed further to a file (although that would not have a lot of precedent in C#) or to inside the body of the closed class as nested classes.
-- The closed set of allowed descendants could be given as a list instead of implied by where declarations occur. This would allow inclusion of classes in other assemblies.
-
-## Optional features
-
-- Interfaces could also be allowed to be closed. The rules would be very similar.
-
-## Open questions
-
-### ClosedAttribute
-
-We propose using the following attribute to denote that a class is closed in metadata:
-
 ```cs
 namespace System.Runtime.CompilerServices
 {
@@ -149,11 +132,9 @@ namespace System.Runtime.CompilerServices
 }
 ```
 
-### Blocking subtyping from other languages/compilers
+#### Blocking subtyping from other languages/compilers
 
-Can closed classes be generated into IL in a way that prevents other languages and compilers from deriving from them even if they do not implement the feature?
-
-We propose accomplishing this by adding `[CompilerFeatureRequired("ClosedClasses")]` to all constructors of closed classes. Since constructors of abstract types can generally only be used in a constructor initializer, this seems to effectively prevent languages which don't understand the feature, from allowing user to declare a subclass of a closed class.
+Closed classes shall not be inherited from languages that do not support closed classes. This is accomplished by adding `[CompilerFeatureRequired("ClosedClasses")]` to all constructors of closed classes.
 
 ```cs
 // Authoring assembly, built with .NET 10 SDK
@@ -183,9 +164,11 @@ class C1
 }
 ```
 
-#### Use of multiple `[CompilerFeatureRequired]` attributes
+Note that unlike for the "required members" feature, an ObsoleteAttribute is not emitted in addition to the CompilerFeatureRequiredAttribute. Only the latter is emitted.
 
-A [question came up](https://github.com/dotnet/roslyn/pull/82052#discussion_r2759549101) about a case where a closed class has required members:
+#### Multiple CompilerFeatureRequiredAttributes
+
+In a scenario like the following, the compiler will emit a separate `CompilerFeatureRequired`, for every required feature that is relevant to the symbol:
 
 ```cs
 closed class C1
@@ -197,8 +180,6 @@ closed class C1
 // Metadata:
 class C1
 {
-    // Do we expect all of the following to be emitted?
-    // Or do we want to drop CompilerFeatureRequired("RequiredMembers"), for example, on the assumption that 'any compiler that supports closed classes should also support required members'?("RequiredMembers")?
     [Obsolete("Types with required members are not supported in this version of your compiler")]
     [CompilerFeatureRequired("RequiredMembers")]
     [CompilerFeatureRequired("ClosedClasses")]
@@ -206,31 +187,21 @@ class C1
 }
 ```
 
-Do we want to emit all attributes in the above sample or just a subset of them?
+## Drawbacks
 
-### Same module restriction
+- It can be a breaking change to add a `closed` modifier to an existing class, or to add an additional derived class from a closed class. Before publishing a closed class, the author needs to consider the long term contract it implies with its consumers.
+- Unless we find a way to prevent it, "unauthorized" derived classes may be allowed by unwitting other compilers, leading to the risk that the set of cases is not in fact closed at runtime.
 
-The proposal text mentions that there must be a "same assembly" restriction. We propose strengthening this restriction so that subtypes may only be declared in the same module. That is, declaring a closed class in a netmodule, and subtyping it in a different module, should not be permitted, because it breaks the ability to determine the exhaustive set of subtypes from the context of the original declaration in a similar way as cross-assembly subtyping.
+## Alternatives
 
-### Permit explicit use of abstract modifier
+- Instead of a new `closed` modifier, a closed class could be designated with a `[Closed]` attribute.
+- The scope of where descendants are allowed could be narrowed further to a file (although that would not have a lot of precedent in C#) or to inside the body of the closed class as nested classes.
+- The closed set of allowed descendants could be given as a list instead of implied by where declarations occur. This would allow inclusion of classes in other assemblies.
 
-The `closed` modifier also makes the class abstract. Should we permit both `closed` and `abstract` to be used on a declaration? Permitting it may give an impression that the `abstract` modifier is making a difference.
+## Optional features
 
-```cs
-closed abstract class C { } // equivalent to:
-closed class C { }
+- Interfaces could also be allowed to be closed. The rules would be very similar.
 
-// compare with:
-abstract interface I // error
-{
-    abstract void M(); // ok
-}
-internal class C { } // ok, explicitly specifying the default accessibility
-```
+## Open questions
 
-### TODO: Should subtypes be marked in metadata?
-Note: this is more of an engineering question, and, probably should not be brought to LDM until we have evidence this solves a perf problem, we have considered the tradeoffs, etc.
-
-It seems like when a closed type is referenced from metadata, there is a need to search its containing assembly for all possible subtypes of it, to check exhaustiveness of patterns in the consuming compilation. This might be expensive. Would there be a benefit in encoding on a closed type itself, the list of subtypes which have it as a base type?
-
-At first glance, something like `[ClosedSubtype(typeof(Subtype1), typeof(Subtype2), typeof(GenericSubtype1<>), ...)]` in metadata seems viable. Note that the compiler would still need to examine the base type of each subtype to look at the way a generic closed type is being constructed, for example, to handle cases such as `class GenericSubtype1<T> : ClosedType<IEnumerable<T>>`. In this case, the amount and identities of the subtypes will depend on the specific type arguments to `ClosedType<T>`.
+TBD
