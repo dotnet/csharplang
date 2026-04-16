@@ -32,12 +32,14 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ### Mon Apr 20, 2026
 
+## C# Language Design Notes for 2026
+
 ### Wed Apr 15, 2026
 
-- [Deconstruction in lambda parameters](https://github.com/dotnet/csharplang/blob/c4ec6fb60c2e174b1abb6c019f22bb15b9b13f6c/proposals/deconstruction-in-lambda-parameters.md) (CyrusNajmabadi, jnm2)
-  - [Last conclusion](https://github.com/dotnet/csharplang/blob/main/meetings/2026/LDM-2026-01-12.md#deconstruction-in-lambda-parameters): take a closer look in LDM.
+[C# Language Design Meeting for April 15th, 2026](https://github.com/dotnet/csharplang/blob/main/meetings/2026/LDM-2026-04-15.md)
 
-## C# Language Design Notes for 2026
+- Deconstruction in lambda parameters
+- Labeled `break` and `continue`
 
 ### Mon Apr 13, 2026
 
