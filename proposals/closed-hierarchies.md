@@ -204,4 +204,99 @@ class C1
 
 ## Open questions
 
-TBD
+### Generics and exhaustiveness
+
+Use of generic closed classes means that the number and set of subtypes can depend on the particular construction of the closed class.
+
+```cs
+closed class C<T>;
+class D1 : C<int>;
+class D2 : C<int>;
+class D3 : C<string>;
+class D4<T> : C<T>;
+class D5<T> : C<ImmutableArray<T>>;
+
+class Program
+{
+    public int M1(C<int> c)
+    {
+        return c switch // exhaustive
+        {
+            D1 => 1,
+            D2 => 2,
+            // D3 and D5 is not permitted
+            D4<int> => 4,
+        };
+    }
+
+    public int M2(C<string> c)
+    {
+        return c switch // exhaustive
+        {
+            // D1, D2, and D5 is not permitted
+            D3 => 3,
+            D4<string> => 4,
+        };
+    }
+
+    public int M3<T>(C<T> c)
+    {
+        return c switch // exhaustive. Note that D1, D2, D3 are all valid here.
+        {
+            D1 => 1,
+            D2 => 2,
+            D3 => 3,
+            D4<T> => 4,
+            D5<T> => 5,
+        };
+    }
+
+    public class E;
+
+    public int M4<T>(C<T> c) where T : E
+    {
+        return c switch // exhaustive. The language doesn't stop us today from using D1, D2, D3, but, they're not necessary.
+        {
+            D4<E> => 1,
+        };
+    }
+}
+```
+
+It feels like the following determinations should be made:
+
+1) Do we want to support generic closed classes?
+
+**Recommendation**: Leaning toward no to start with. Let's focus on getting support out for the important core scenarios, and leave space to add this in response to user feedback.
+
+2) If yes to (1), what rule should be used to determine the set of closed subtypes?
+
+**Recommendation**: Use the following rule.
+
+The set of subtype declarations `D` of a closed type `C` is determined in the following way:
+
+If `C` is not generic (`C` and its containing type(s) do not have any type parameters), then the set of subtypes includes all class declarations (i.e. original definitions) whose base type is `C`.  
+**Note:** the [finiteness rule](#type-parameter-restriction) indicates that the subtype of a non-generic closed type is never generic. So, this set will be complete.
+
+If `C` is a generic type (Note: this could perhaps be cleaned up/simplified):
+- Let `C₀` be the original definition of `C`.
+- Let `D₀` be the set of all subtype declarations in the same module as `C₀` whose base type is a construction of `C₀`.
+- For each subtype `S₀` in `D₀`, determine a subtype `S` which may be a member of the set of subtypes of `C`:
+  - If `S₀` is not generic, and `S₀`'s base type is `C`, then `S₀` is a member of `D`.
+  - If `S₀` is generic, then perform a [*generic subtype inference*](#generic-subtype-inference) from `S₀` to `C`. If the inference succeeds, then the resulting inferred type `S` is a member of `D`.
+
+#### Generic subtype inference
+
+In this scenario we have a constructed closed type `C`, and a "candidate subtype definition" `S₀`.  
+Let the base type of `S₀` be `Cₛ`. Let `T1, T2, ..., Tn` be the set of type parameters of `S₀`.
+Perform an inference like the following:
+
+```cs
+// - type parameter list has the same arity as `S₀`
+// - the finiteness rule says that every type parameter of `S₀` must be used in `Cₛ`
+void M<T1, T2, ..., Tn>(Cₛ s) { }
+
+// The following method type argument inference, if it succeeds,
+// results in a set of type arguments which can be substituted into `S₀` to yield the subtype `S` of `C`.
+M(new C());
+```
