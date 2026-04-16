@@ -422,6 +422,8 @@ unsafe partial class D
 }
 ```
 
+Are we okay with all of those decisions?
+
 ### Allow suppressing *requires-unsafe* errors in edge case scenarios
 
 Should we allow suppressing *requires-unsafe* errors without needing to mark the member itself as *requires-unsafe*?
