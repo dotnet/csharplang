@@ -414,6 +414,15 @@ class C
 class B() : A(); // similar problem with using A..ctor here
 ```
 
+Here's another scenario where we need to declare an unsafe context within signature: satisfying generic `new()` constraints.
+Consider `void M(C<D> c)` but `class C<T> where T : new()` and `class D { unsafe /*caller-unsafe*/ D() { } }`.
+Similarly `void M<T>() where T: C<D>` with above definitions for `C` and `D`.
+
+### Xml docs
+
+Passing an obligation to callers comes with a responsibility to make it clear what that obligation is.
+Should we formalize this beyond what can already be represented in xml docs?
+
 ### More meaningless `unsafe` warnings
 
 Should more declarations produce the meaningless `unsafe` warning?
