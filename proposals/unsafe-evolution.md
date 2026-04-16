@@ -129,6 +129,9 @@ The [fixed statement][fixed-statement] moves to [§13](https://github.com/dotnet
 Function pointers are not yet incorporated into the main C# specification, but they are similarly affected; everything but function pointer invocation is moved into the standard specification.
 A function pointer invocation expression must always occur in an `unsafe` context.
 
+Although the C# specification restricts the underlying type (_value_type_) of a [pointer types][pointer-types-spec] to be an unmanaged type,
+the Roslyn compiler already only warns in case of a pointer to a managed type and we should codify this behavior in the new specification.
+
 #### Fixed-size buffers
 
 The story for [fixed-size buffers][fixed-size-buffer-declarations] is similar to [pointers](#pointer-types). The definition of a fixed-size buffer is not itself dangerous, and moves to
