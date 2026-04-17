@@ -129,8 +129,7 @@ The [fixed statement][fixed-statement] moves to [§13](https://github.com/dotnet
 Function pointers are not yet incorporated into the main C# specification, but they are similarly affected; everything but function pointer invocation is moved into the standard specification.
 A function pointer invocation expression must always occur in an `unsafe` context.
 
-Although the C# specification restricts the underlying type (_value_type_) of a [pointer types][pointer-types-spec] to be an unmanaged type,
-the Roslyn compiler already only warns in case of a pointer to a managed type and we should codify this behavior in the new specification.
+C# 11 [allows pointers to managed types with a warning][csharp-11-unsafe-changes] which we relax by allowing that without a warning.
 
 #### Fixed-size buffers
 
@@ -154,6 +153,8 @@ contract of `Span<T>` and `ReadOnlySpan<T>`, and so must be subject to extra scr
 
 > [!NOTE]
 > This means that assigning a `stackalloc` to a pointer is _always_ safe, regardless of context.
+
+Note that a `stackalloc` of a managed type remains an error.
 
 #### `sizeof`
 
@@ -335,6 +336,11 @@ there would be no real impact to either, which could give adopters more confiden
 
 > [!NOTE]
 > If we decide to keep the ability to have `unsafe` lambdas, we need to update this proposal to include a syntax change to allow lambdas to be declared `unsafe` in the first place.
+
+### Pointers to managed types
+
+We are removing the warning for having a pointer to a managed type, is that fine?
+We think the problem is only when the user dereferences such pointer, which falls under normal unsafe evolution rules.
 
 ### `stackalloc` as initialized
 
@@ -522,7 +528,7 @@ class C
 #### `new()` constraint and `using`s
 
 How should it behave in aliases and static usings?
-- Should it be an error at the `using` declaration, suppressable via the `unsafe` keyword we already support there, or
+- Should it be an error at the `using` declaration, suppressible via the `unsafe` keyword we already support there, or
 - should it be an error normally at the use site like it would be if used directly without an alias or static using?
 
 > [!NOTE]
@@ -648,3 +654,4 @@ for source generators will be made.
 [fixed-statement]: https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/unsafe-code.md#247-the-fixed-statement
 [fixed-size-buffer-declarations]: https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/unsafe-code.md#2482-fixed-size-buffer-declarations
 [stack-allocation-spec]: https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/unsafe-code.md#249-stack-allocation
+[csharp-11-unsafe-changes]: https://github.com/dotnet/csharplang/blob/6a0a9b281aa0c36159117ece733d487af0ca23a1/proposals/csharp-11.0/low-level-struct-improvements.md#changes-in-unsafe-context
