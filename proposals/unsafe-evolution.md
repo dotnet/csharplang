@@ -129,8 +129,6 @@ The [fixed statement][fixed-statement] moves to [§13](https://github.com/dotnet
 Function pointers are not yet incorporated into the main C# specification, but they are similarly affected; everything but function pointer invocation is moved into the standard specification.
 A function pointer invocation expression must always occur in an `unsafe` context.
 
-C# 11 [allows pointers to managed types with a warning][csharp-11-unsafe-changes] which we relax by allowing that without a warning.
-
 #### Fixed-size buffers
 
 The story for [fixed-size buffers][fixed-size-buffer-declarations] is similar to [pointers](#pointer-types). The definition of a fixed-size buffer is not itself dangerous, and moves to
@@ -339,8 +337,10 @@ there would be no real impact to either, which could give adopters more confiden
 
 ### Pointers to managed types
 
-We are removing the warning for having a pointer to a managed type, is that fine?
+C# 11 [allows pointers to managed types with a warning][csharp-11-unsafe-changes].
+Should we relax that warning for address-of operations?
 We think the problem is only when the user dereferences such pointer, which falls under normal unsafe evolution rules.
+But what about `sizeof`?
 
 ### `stackalloc` as initialized
 
