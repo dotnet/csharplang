@@ -10,7 +10,21 @@ Support an expression of the form `await? e`, which awaits `e` if it is non-null
 ## Motivation
 [motivation]: #motivation
 
-This is a common coding pattern, and this feature would have nice synergy with the existing null-propagating and null-coalescing operators.
+This feature is not intended to encourage code that returns a `null` task from `async`-shaped methods — i.e. we are *not* trying to make patterns like `Task DoSomethingAsync() { return null; }` easier to consume. Returning a `null` task from such a method remains a bug.
+
+The feature exists to deal with the case where a task-returning expression happens to be null because some earlier step in the expression was null. For example:
+
+```csharp
+await GetX()?.DoSomethingAsync();
+```
+
+Here `DoSomethingAsync` itself always returns a non-null `Task`; the `Task` reference is null because `GetX()` returned null and the `?.` short-circuited. Today this expression compiles, evaluates to `null`, and then throws a `NullReferenceException` from `await`. The feature allows the `?` to carry through to the await:
+
+```csharp
+await? GetX()?.DoSomethingAsync();
+```
+
+which does nothing if `GetX()` was null, and otherwise awaits the task. This composes naturally with the existing null-propagating and null-coalescing operators.
 
 ## Detailed design
 [design]: #detailed-design
@@ -65,10 +79,7 @@ Additions in **bold**:
 > The task of an *await_expression* is required to be ***awaitable***. An expression `t` is awaitable if one of the following holds:
 >
 > - `t` is of compile-time type `dynamic`
-> - `t` has an accessible instance or extension method called `GetAwaiter` with no parameters and no type parameters, and a return type `A` for which all of the following hold:
->   - `A` implements the interface `System.Runtime.CompilerServices.INotifyCompletion` (hereafter known as `INotifyCompletion` for brevity)
->   - `A` has an accessible, readable instance property `IsCompleted` of type `bool`
->   - `A` has an accessible instance method `GetResult` with no parameters and no type parameters
+> - ...
 >
 > **For an *await_expression* of the form `await? t`, the awaitability check above is performed against the *underlying type* `U` of `t`, where `U = V` when `t`'s static type is `Nullable<V>`, and `U = S` (the static type of `t`) otherwise. The awaitable pattern — including extension-method `GetAwaiter` resolution — is applied to `U` in place of `t`'s static type.**
 
@@ -103,12 +114,7 @@ Additions in **bold**:
 > At run-time, the expression `await t` is evaluated as follows:
 >
 > - An awaiter `a` is obtained by evaluating the expression `(t).GetAwaiter()`.
-> - A `bool` `b` is obtained by evaluating the expression `(a).IsCompleted`.
-> - If `b` is `false` then evaluation depends on whether `a` implements the interface `System.Runtime.CompilerServices.ICriticalNotifyCompletion` (hereafter known as `ICriticalNotifyCompletion` for brevity). This check is done at binding time; i.e., at run-time if `a` has the compile-time type `dynamic`, and at compile-time otherwise. Let `r` denote the resumption delegate ([§14.15](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/classes.md#1415-async-functions)):
->   - If `a` does not implement `ICriticalNotifyCompletion`, then the expression `((a) as INotifyCompletion).OnCompleted(r)` is evaluated.
->   - If `a` does implement `ICriticalNotifyCompletion`, then the expression `((a) as ICriticalNotifyCompletion).UnsafeOnCompleted(r)` is evaluated.
->   - Evaluation is then suspended, and control is returned to the current caller of the async function.
-> - Either immediately after (if `b` was `true`), or upon later invocation of the resumption delegate (if `b` was `false`), the expression `(a).GetResult()` is evaluated. If it returns a value, that value is the result of the *await_expression*. Otherwise, the result is nothing.
+> - ...
 >
 > **At run-time, the expression `await? t` is evaluated as follows:**
 >
@@ -136,10 +142,10 @@ The following tables are non-normative. They illustrate how the two rules above 
 |---|---|---|
 | Reference-type awaitable (e.g. `Task`, `Task<X>`, user `class RefAwaitable`) | `(object)t == null` | `t` |
 | `Nullable<V>` where `V` is a value-type awaitable (e.g. `Nullable<ValueTask>`, `Nullable<ValueTask<X>>`, `Nullable<StructAwaitable<X>>`) | `!t.HasValue` | `t.Value` |
-| Non-nullable value-type awaitable (e.g. `ValueTask`, `ValueTask<X>`, user `struct StructAwaitable<X>`) | — | — **(compile-time error)** |
 | Type parameter `S` without a `struct` constraint whose underlying type is awaitable (includes `where S : class`, `where S : SomeBaseClass`, `where S : ISomething`, `where S : notnull`, unconstrained, …) | `(object)t == null` (trivially false at runtime for non-nullable value-type instantiations; the JIT is expected to elide it) | `t` |
-| Type parameter `S` known to be a non-nullable value type (e.g. `where S : struct`, `where S : unmanaged`) | — | — **(compile-time error)** |
 | `dynamic` | Runtime null-test on `t` | `t` |
+| Non-nullable value-type awaitable (e.g. `ValueTask`, `ValueTask<X>`, user `struct StructAwaitable<X>`) | compile-time error | |
+| Type parameter `S` known to be a non-nullable value type (e.g. `where S : struct`, `where S : unmanaged`) | compile-time error | |
 
 **Table B — how the result type of `await? t` is computed from `R = GetResult()`'s return type (result-type rule, §11.8.8.3):**
 
@@ -152,7 +158,15 @@ The following tables are non-normative. They illustrate how the two rules above 
 | Unconstrained type parameter | `R?` (default-able type-parameter annotation, C# 9+) |
 | `dynamic` | `dynamic` |
 
-The Task/ValueTask behaviors readers typically think about — `Task` → *nothing*; `Task<int>?` → `Nullable<int>`; `Task<Nullable<int>>?` → `Nullable<int>` via the already-nullable row; `Task<string>?` → `string?`; `Task<T>` where `T : struct` → `Nullable<T>`; unconstrained `Task<T>` → `T?`; `Nullable<ValueTask<int>>` → `Nullable<int>` — are all mechanical cross-products of the two tables above.
+The Task/ValueTask behaviors readers typically think about are all mechanical cross-products of the two tables above:
+
+- `Task` → *nothing*
+- `Task<int>?` → `Nullable<int>`
+- `Task<Nullable<int>>?` → `Nullable<int>` (via the already-nullable row of Table B)
+- `Task<string>?` → `string?`
+- `Task<T>` where `T : struct` → `Nullable<T>`
+- `Task<T>`, `T` unconstrained → `T?`
+- `Nullable<ValueTask<int>>` → `Nullable<int>`
 
 ### Interaction and edge cases
 
