@@ -49,7 +49,7 @@ The rest of this section specifies the grammar change, then the operand-nullabil
      ;
 ```
 
-The null-conditional form of *await_expression* (`'await' '?' unary_expression`, hereafter written `await? t`) is subject to the same placement restrictions as the existing form: it is only allowed in the body of an async function, and shall not occur inside a nested (non-async) anonymous function, inside the block of a *lock_statement*, in an anonymous function conversion to an expression tree type, or in an unsafe context.
+The null-conditional form of *await_expression* (`'await' '?' unary_expression`, hereafter written `await? t`) is subject to the same placement restrictions as the existing form. For example, it is only allowed in the body of an async function.
 
 ### Applicability: operand-nullability rule
 
