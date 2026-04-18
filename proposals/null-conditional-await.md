@@ -94,16 +94,14 @@ Additions in **bold**:
 > **For an *await_expression* of the form `await? t`, let `R` be the return type of `(u).GetAwaiter().GetResult()`, where `u` has the underlying type `U` determined per §11.8.8.2. The classification of `await? t` is determined from `R` as follows:**
 >
 > - **If `R` is `void`, `await? t` is classified as *nothing*, and may appear only where a *null_conditional_invocation_expression* ([§11.7.9](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/expressions.md#1179-null-conditional-invocation-expression)) is permitted: as a *statement_expression*, *anonymous_function_body*, or *method_body*.**
+> - **Otherwise, if `R` is a type parameter that is not known to be a reference type or a non-nullable value type, a compile-time error occurs. This mirrors the rule-1 restriction on the result type in §11.7.7.**
 > - **Otherwise, if `R` is a non-nullable value type (either a concrete struct type, or a type parameter with a `struct` constraint), `await? t` is classified as a value of type `Nullable<R>`.**
 > - **Otherwise, if `R` is already a nullable value type (i.e. `R = Nullable<V>` for some non-nullable value type `V`), `await? t` is classified as a value of type `R` (unchanged).**
-> - **Otherwise, if `R` is a reference type, or a type parameter known to be a reference type, `await? t` is classified as a value of type `R` with nullable-reference-type annotation `R?`.**
-> - **Otherwise, `R` is an unconstrained type parameter, and `await? t` is classified as a value of type `R?`, where `?` is the default-able type-parameter annotation introduced in C# 9.**
+> - **Otherwise, `R` is a reference type, or a type parameter known to be a reference type, and `await? t` is classified as a value of type `R` with nullable-reference-type annotation `R?`.**
 >
 > **Regardless of branch, `t` is evaluated only once.**
 
-> *Note*: The last bullet is a deliberate departure from the corresponding rule in §11.7.7, which predates C# 9 and produces a compile-time error when the result type of `P?.A` is an unconstrained type parameter. Modern C# permits `T?` on unconstrained type parameters as a default-able annotation, and `await?` follows suit. *end note*
-
-> *Note*: This classification rule is concerned solely with computing the *result type* from the awaiter's `R`. Constraints on the *operand* type `S` of `t` are handled by §11.8.8.5 above; in particular, any type-parameter operand that §11.8.8.5 admits receives a runtime null-check, exactly as the receiver of `P?.A` does. *end note*
+> *Note*: This classification rule is concerned solely with computing the *result type* from the awaiter's `R`. Constraints on the *operand* type `S` of `t` are handled by §11.8.8.5 above. In particular, `await?` is asymmetric in the same way that `P?.A` is: an unconstrained, interface-constrained, or `notnull`-constrained type parameter is permitted as an *operand* (with a runtime null-test), but the same type parameter appearing as the awaiter's *result type* `R` is a compile-time error. *end note*
 
 ### Run-time evaluation
 
@@ -155,8 +153,8 @@ The following tables are non-normative. They illustrate how the two rules above 
 | Non-nullable value type (including a type parameter `where T : struct`) | `Nullable<R>` |
 | `Nullable<V>` for some non-nullable value type `V` (e.g. `GetResult()` returns `Nullable<int>`) | `R` unchanged (e.g. `Nullable<int>`) |
 | Reference type (including a type parameter `where T : class`) | `R` with nullable-reference-type annotation `R?` |
-| Unconstrained type parameter | `R?` (default-able type-parameter annotation, C# 9+) |
 | `dynamic` | `dynamic` |
+| Type parameter not known to be a reference type or a non-nullable value type (unconstrained, interface-constrained, `notnull`-constrained, …) | compile-time error (mirrors §11.7.7 rule 1) |
 
 The Task/ValueTask behaviors readers typically think about are all mechanical cross-products of the two tables above:
 
@@ -166,7 +164,8 @@ The Task/ValueTask behaviors readers typically think about are all mechanical cr
 - `Task<Nullable<int>>?` → `Nullable<int>` (via the already-nullable row of Table B)
 - `Task<string>?` → `string?`
 - `Task<T>` where `T : struct` → `Nullable<T>`
-- `Task<T>`, `T` unconstrained → `T?`
+- `Task<T>` where `T : class` → `T?` (nullable reference)
+- `Task<T>`, `T` unconstrained → compile-time error (result type is a type parameter not known to be a reference type or a non-nullable value type)
 - `Nullable<ValueTask<int>>` → `Nullable<int>`
 
 ### Interaction and edge cases
