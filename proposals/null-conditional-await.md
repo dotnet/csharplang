@@ -161,6 +161,7 @@ The following tables are non-normative. They illustrate how the two rules above 
 The Task/ValueTask behaviors readers typically think about are all mechanical cross-products of the two tables above:
 
 - `Task` → *nothing*
+- `Nullable<ValueTask>` → *nothing*
 - `Task<int>?` → `Nullable<int>`
 - `Task<Nullable<int>>?` → `Nullable<int>` (via the already-nullable row of Table B)
 - `Task<string>?` → `string?`
