@@ -173,11 +173,11 @@ rules):**
 
 1. **Binary operator overload resolution
    ([§11.4.5](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/expressions.md#1145-binary-operator-overload-resolution))
-   is applied to `A op B` using `A`'s compile-time classification and `B`'s
-   compile-time type. If overload resolution does not produce a binding-time
-   error (as defined by the final paragraph of §11.4.5), `E` has the meaning
-   given by that overload resolution together with the relevant subsection of
-   §11.11, and this subclause has no further effect at this node.**
+   is applied to `A op B` using the compile-time types of `A` and `B`. If
+   overload resolution does not produce a binding-time error (as defined by
+   the final paragraph of §11.4.5), `E` has the meaning given by that
+   overload resolution together with the relevant subsection of §11.11, and
+   this subclause has no further effect at this node.**
 
 2. **Otherwise, `E` is a *chained relational comparison*, provided `A` is
    itself a *relational_expression* of the form `X op' Y` where `op'` is a
@@ -186,10 +186,10 @@ rules):**
 
 **When `A` has the required form, `E` is well-typed iff both:**
 
-- **(a) `A` is classified as `bool`. This is automatic when `A` was itself
-  bound as a chained relational comparison by step 2 (which always produces
-  `bool`), or when `op'` resolves to a predefined relational operator or
-  any user-defined relational operator returning `bool`.**
+- **(a) `A` is classified as a value of type `bool`. This is automatic when
+  `A` was itself bound as a chained relational comparison by step 2 (which
+  always produces `bool`), or when `op'` resolves to a predefined relational
+  operator or any user-defined relational operator returning `bool`.**
 
 - **(b) Binary operator overload resolution
   ([§11.4.5](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/expressions.md#1145-binary-operator-overload-resolution))
@@ -201,7 +201,7 @@ Otherwise a compile-time error occurs, with a diagnostic identifying which
 condition failed.**
 
 ***Note***: The rule is strictly local: it uses only `E`'s own `op`, `A`'s
-already-determined classification, and `B`. No node is re-bound; a node whose
+already-determined binding, and `B`. No node is re-bound; a node whose
 step 1 succeeded is never revisited because step 2 fires at a later node.
 Chains of any length follow directly from the recursive structure of
 *relational_expression*. **end note***
