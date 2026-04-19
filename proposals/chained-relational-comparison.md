@@ -341,72 +341,38 @@ common case.
 
 ## Design decisions
 
-This section captures sub-choices within the proposed design that might seem
-like natural extensions or simplifications, and explains why we deliberately
-chose otherwise.
-
 ### Why not include `==` and `!=`?
 
-It might seem natural to support `a == b == c` or `a < b == c < d` the way
-Python does. We deliberately do not, for three reasons.
-
-1. **Back-compat.** Expressions that mix equality and relational operators
-   are legal today and have a useful meaning. For example,
-   `a < b == c < d` parses as `(a < b) == (c < d)` under the existing
-   precedence rules of
-   [§11.4.2](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/expressions.md#1142-operator-precedence-and-associativity),
-   and reads as "both comparisons have the same truth value". This is a
-   reasonable pattern that real code uses today, and reinterpreting it as a
-   four-element chain would silently change its meaning.
-
-2. **Precedence.** Chained relational comparison works as a purely local
-   recursive rule on *relational_expression* because the four relational
-   operators share one precedence level with left-associativity. Equality
-   operators sit at a lower precedence level. Including them in the chain
-   would require either moving `==`/`!=` to share a precedence level with
-   `<`, `<=`, `>`, `>=` (a large and breaking change) or a much more
-   invasive spec rule that straddles two grammatical levels.
-
-3. **Readability.** A mixed `< == <` chain has inherently ambiguous intent
-   in a language where equality and relational sit at different precedence
-   levels: does `a < b == c` ask "is `a < b` the same truth value as
-   `b == c`" (the current C# meaning) or "is `a < b` AND `b == c`" (the
-   Python chained meaning)? Leaving this untouched preserves what C# readers
-   already expect.
-
-Users who want an equality chain can still write it directly:
-`a == b && b == c`, or `a == b && a == c`, both of which express the
-intent without ambiguity.
+Expressions mixing equality and relational operators are legal today and
+have a useful meaning. `a < b == c < d` parses as `(a < b) == (c < d)`
+under the precedence rules of
+[§11.4.2](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/expressions.md#1142-operator-precedence-and-associativity),
+asking whether two comparisons have the same truth value. That is a
+reasonable pattern found in real code, and it is clearly preferable to any
+`((a < b) == c) < d` form that a chain-style reinterpretation would
+produce. Users who want an equality chain can write it directly as
+`a == b && b == c`.
 
 ### Why not include `is` and `as`?
 
-`is` and `as` appear in the *relational_expression* production alongside the
-relational operators, but they are type-testing operators rather than value
-comparisons. An expression like `a < b is Foo < c` does not correspond to
-any sensible chained meaning. The *relational_op* production explicitly
-names only `<`, `<=`, `>`, `>=`, so the chain rule in §11.11.13 never
-triggers on `is` or `as`.
+`is` and `as` are type-testing operators, not value comparisons. The
+*relational_op* production names only `<`, `<=`, `>`, `>=`, so chain
+formation never triggers on `is` or `as`.
 
-### Why not emit a warning when classical binding "wins" over a chain?
+### Why not warn when classical binding wins?
 
-A program like the third-party NuGet chained-comparison package (and similar
-user-defined operator setups) makes `a < b < c` compile classically today,
-with semantics the author intentionally designed. Warning on any `a < b < c`
-that resolves via classical binding would produce false positives on all
-such code. The two-rule design is already careful to prefer classical
-binding whenever it succeeds; emitting a warning at that point would
-second-guess the programmer for writing code that has a clear classical
-meaning.
+Warning on any `a < b < c` that resolves classically would false-positive
+on existing code that intentionally uses user-defined operators to make the
+classical binding succeed, including the third-party NuGet
+chained-comparison package and similar patterns. The two-rule design
+already prefers classical binding whenever it succeeds; adding a warning
+at that point would second-guess the programmer.
 
-### Why not require explicit opt-in syntax, like `chain(a < b < c)`?
+### Why not require explicit opt-in syntax (e.g. `chain(a < b < c)`)?
 
 The goal of this proposal is to give the natural, mathematically-motivated
-syntax its natural meaning. A wrapper or alternate spelling would defeat
-that goal: users would still reasonably expect `a < b < c` to "just work",
-and new C# learners coming from Python, Julia, Raku, CoffeeScript, or a
-math background would continue to be surprised. The two-rule design
-delivers natural syntax without breaking any existing program, which we
-believe is a better trade than any opt-in alternative.
+syntax its natural meaning. Users reasonably expect `a < b < c` to just
+work, and any opt-in wrapper would defeat that purpose.
 
 ## Related discussions
 
