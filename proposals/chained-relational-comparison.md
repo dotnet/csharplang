@@ -140,8 +140,8 @@ is applied to select a specific operator implementation. ..."*:
 
 **A *relational_expression* whose top-level operator is a *relational_op*,
 and whose left operand is itself a *relational_expression* whose top-level
-operator is a *relational_op*, may be a *chained relational comparison*, bound
-per
+operator is a *relational_op* as well, may be a *chained relational
+comparison*, bound per
 [§11.11.13](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/expressions.md#111113-chained-relational-comparison).
 Because *relational_expression* is left-associative, the chain structure is
 implicit in the parse tree; the rule in §11.11.13 applies recursively at each
