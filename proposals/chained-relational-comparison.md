@@ -155,9 +155,9 @@ of any length.**
 
 #### Binding
 
-**Let `E` be an operation of the form `A op B`, where `A` is a
-*relational_expression*, `op` is a *relational_op*, and `B` is a
-*shift_expression*.**
+**Let `E` be an operation of the form `A op B`, where `op` is a
+*relational_op*, `A` is a *relational_expression* of the form `X op' Y`
+with `op'` a *relational_op*, and `B` is a *shift_expression*.**
 
 **Binary operator overload resolution
 ([§11.4.5](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/expressions.md#1145-binary-operator-overload-resolution))
@@ -165,9 +165,8 @@ is first applied to `A op B`. If overload resolution succeeds, `E` has the
 meaning determined by §11.4.5 together with the relevant subsection of
 §11.11, and this subclause has no further effect on `E`.**
 
-**Otherwise, if `A` is itself an operation of the form `X op' Y` where
-`op'` is a *relational_op*, `E` is a *chained relational comparison*, and
-the following shall hold; otherwise, a compile-time error occurs:**
+**Otherwise, `E` is a *chained relational comparison*, and the following
+shall hold:**
 
 - **`A` shall be classified as a value of type `bool`. This is automatic
   when `A` is itself a chained relational comparison (which is always
@@ -180,12 +179,9 @@ the following shall hold; otherwise, a compile-time error occurs:**
   applied to `Y op B` as an isolated binary operation shall select an
   operator whose result type is `bool`.**
 
-**When both conditions are satisfied, `E` is classified as a value of type
-`bool`.**
-
-**If `A` is not an operation of the form `X op' Y` with `op'` a
-*relational_op*, the binding-time error reported by overload resolution
-above is the result.**
+**If either of these requirements fails to be satisfied, a compile-time
+error occurs. When both are satisfied, `E` is classified as a value of
+type `bool`.**
 
 ***Note***: These rules apply at each *relational_expression* node using
 only the node's own operator, its left operand's existing classification,
