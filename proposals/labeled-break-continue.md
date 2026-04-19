@@ -167,85 +167,85 @@ and **bold** indicates text being added. Unchanged prose is quoted verbatim for 
 
 Insert the following paragraph immediately after the existing paragraph "*A label can be referenced from `goto` statements ([§12.10.4](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/statements.md#12104-the-goto-statement)) within the scope of the label.*":
 
-> **If the *statement* immediately nested within a *labeled_statement* is a *switch_statement* ([§12.8.3](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/statements.md#1283-the-switch-statement)) or an *iteration_statement* ([§12.9](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/statements.md#129-iteration-statements)), the nested statement is said to be *labeled with* the *identifier* of the *labeled_statement*. A *break_statement* ([§12.10.2](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/statements.md#12102-the-break-statement)) or *continue_statement* ([§12.10.3](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/statements.md#12103-the-continue-statement)) can specify such an *identifier* to reference the containing labeled statement.**
->
-> > ***Note**: Only the *statement* that is **immediately** nested within a *labeled_statement* is labeled with that identifier. For example, given `a: b: while (…) …`, only `b` labels the *iteration_statement*; `a` labels the inner *labeled_statement* `b: while (…) …`, which is not itself a *switch_statement* or *iteration_statement*. Consequently, `break a;` or `continue a;` appearing within the loop body does not target the `while` statement. **end note***
+**If the *statement* immediately nested within a *labeled_statement* is a *switch_statement* ([§12.8.3](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/statements.md#1283-the-switch-statement)) or an *iteration_statement* ([§12.9](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/statements.md#129-iteration-statements)), the nested statement is said to be *labeled with* the *identifier* of the *labeled_statement*. A *break_statement* ([§12.10.2](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/statements.md#12102-the-break-statement)) or *continue_statement* ([§12.10.3](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/statements.md#12103-the-continue-statement)) can specify such an *identifier* to reference the containing labeled statement.**
+
+> ***Note**: Only the *statement* that is **immediately** nested within a *labeled_statement* is labeled with that identifier. For example, given `a: b: while (…) …`, only `b` labels the *iteration_statement*; `a` labels the inner *labeled_statement* `b: while (…) …`, which is not itself a *switch_statement* or *iteration_statement*. Consequently, `break a;` or `continue a;` appearing within the loop body does not target the `while` statement. **end note***
 
 ### [§12.10.2 The break statement](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/statements.md#12102-the-break-statement)
 
-> ~~The `break` statement exits the nearest enclosing `switch`, `while`, `do`, `for`, or `foreach` statement.~~ **The `break` statement exits the nearest enclosing *switch_statement* ([§12.8.3](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/statements.md#1283-the-switch-statement)) or *iteration_statement* ([§12.9](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/statements.md#129-iteration-statements)), or, if an *identifier* is specified, the nearest enclosing *switch_statement* or *iteration_statement* labeled with that *identifier* (see [§12.5](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/statements.md#125-labeled-statements)).**
+~~The `break` statement exits the nearest enclosing `switch`, `while`, `do`, `for`, or `foreach` statement.~~ **The `break` statement exits the nearest enclosing *switch_statement* ([§12.8.3](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/statements.md#1283-the-switch-statement)) or *iteration_statement* ([§12.9](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/statements.md#129-iteration-statements)), or, if an *identifier* is specified, the nearest enclosing *switch_statement* or *iteration_statement* labeled with that *identifier* (see [§12.5](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/statements.md#125-labeled-statements)).**
+
+```ANTLR
+break_statement
+    : 'break' identifier? ';'
+    ;
+```
+
+The target of a `break` statement is the end point of the nearest enclosing ~~`switch`, `while`, `do`, `for`, or `foreach` statement~~ **statement determined as above**. ~~If a `break` statement is not enclosed by a `switch`, `while`, `do`, `for`, or `foreach` statement, a compile-time error occurs.~~ **If no such enclosing statement exists, a compile-time error occurs.**
+
+~~When multiple `switch`, `while`, `do`, `for`, or `foreach` statements are nested within each other, a `break` statement applies only to the innermost statement. To transfer control across multiple nesting levels, a `goto` statement ([§12.10.4](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/statements.md#12104-the-goto-statement)) shall be used.~~
+
+A `break` statement cannot exit a `finally` block ([§12.11](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/statements.md#1211-the-try-statement)). When a `break` statement occurs within a `finally` block, the target of the `break` statement shall be within the same `finally` block; otherwise a compile-time error occurs.
+
+A `break` statement is executed as follows:
+
+- If the `break` statement exits one or more `try` blocks with associated `finally` blocks, control is initially transferred to the `finally` block of the innermost `try` statement. When and if control reaches the end point of a `finally` block, control is transferred to the `finally` block of the next enclosing `try` statement. This process is repeated until the `finally` blocks of all intervening `try` statements have been executed.
+- Control is transferred to the target of the `break` statement.
+
+Because a `break` statement unconditionally transfers control elsewhere, the end point of a `break` statement is never reachable.
+
+> ***Example**: A labeled `break` resolves to the nearest enclosing *switch_statement* or *iteration_statement* with the matching label:*
 >
-> ```ANTLR
-> break_statement
->     : 'break' identifier? ';'
->     ;
+> ```csharp
+> outer: for (int i = 0; i < 10; i++)
+> {
+>     for (int j = 0; j < 10; j++)
+>     {
+>         if (i * j > 20)
+>             break outer; // exits the outer for-loop
+>     }
+> }
 > ```
 >
-> The target of a `break` statement is the end point of the nearest enclosing ~~`switch`, `while`, `do`, `for`, or `foreach` statement~~ **statement determined as above**. ~~If a `break` statement is not enclosed by a `switch`, `while`, `do`, `for`, or `foreach` statement, a compile-time error occurs.~~ **If no such enclosing statement exists, a compile-time error occurs.**
->
-> ~~When multiple `switch`, `while`, `do`, `for`, or `foreach` statements are nested within each other, a `break` statement applies only to the innermost statement. To transfer control across multiple nesting levels, a `goto` statement ([§12.10.4](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/statements.md#12104-the-goto-statement)) shall be used.~~
->
-> A `break` statement cannot exit a `finally` block ([§12.11](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/statements.md#1211-the-try-statement)). When a `break` statement occurs within a `finally` block, the target of the `break` statement shall be within the same `finally` block; otherwise a compile-time error occurs.
->
-> A `break` statement is executed as follows:
->
-> - If the `break` statement exits one or more `try` blocks with associated `finally` blocks, control is initially transferred to the `finally` block of the innermost `try` statement. When and if control reaches the end point of a `finally` block, control is transferred to the `finally` block of the next enclosing `try` statement. This process is repeated until the `finally` blocks of all intervening `try` statements have been executed.
-> - Control is transferred to the target of the `break` statement.
->
-> Because a `break` statement unconditionally transfers control elsewhere, the end point of a `break` statement is never reachable.
->
-> > ***Example**: A labeled `break` resolves to the nearest enclosing *switch_statement* or *iteration_statement* with the matching label:*
-> >
-> > ```csharp
-> > outer: for (int i = 0; i < 10; i++)
-> > {
-> >     for (int j = 0; j < 10; j++)
-> >     {
-> >         if (i * j > 20)
-> >             break outer; // exits the outer for-loop
-> >     }
-> > }
-> > ```
-> >
-> > ***end example***
+> ***end example***
 
 ### [§12.10.3 The continue statement](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/statements.md#12103-the-continue-statement)
 
-> ~~The `continue` statement starts a new iteration of the nearest enclosing `while`, `do`, `for`, or `foreach` statement.~~ **The `continue` statement starts a new iteration of the nearest enclosing *iteration_statement* ([§12.9](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/statements.md#129-iteration-statements)), or, if an *identifier* is specified, the nearest enclosing *iteration_statement* labeled with that *identifier* (see [§12.5](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/statements.md#125-labeled-statements)).**
+~~The `continue` statement starts a new iteration of the nearest enclosing `while`, `do`, `for`, or `foreach` statement.~~ **The `continue` statement starts a new iteration of the nearest enclosing *iteration_statement* ([§12.9](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/statements.md#129-iteration-statements)), or, if an *identifier* is specified, the nearest enclosing *iteration_statement* labeled with that *identifier* (see [§12.5](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/statements.md#125-labeled-statements)).**
+
+```ANTLR
+continue_statement
+    : 'continue' identifier? ';'
+    ;
+```
+
+The target of a `continue` statement is the end point of the embedded statement of the nearest enclosing ~~`while`, `do`, `for`, or `foreach` statement~~ **_iteration_statement_ determined as above**. ~~If a `continue` statement is not enclosed by a `while`, `do`, `for`, or `foreach` statement, a compile-time error occurs.~~ **If no such enclosing statement exists, a compile-time error occurs.**
+
+~~When multiple `while`, `do`, `for`, or `foreach` statements are nested within each other, a `continue` statement applies only to the innermost statement. To transfer control across multiple nesting levels, a `goto` statement ([§12.10.4](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/statements.md#12104-the-goto-statement)) shall be used.~~
+
+A `continue` statement cannot exit a `finally` block ([§12.11](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/statements.md#1211-the-try-statement)). When a `continue` statement occurs within a `finally` block, the target of the `continue` statement shall be within the same `finally` block; otherwise a compile-time error occurs.
+
+A `continue` statement is executed as follows:
+
+- If the `continue` statement exits one or more `try` blocks with associated `finally` blocks, control is initially transferred to the `finally` block of the innermost `try` statement. When and if control reaches the end point of a `finally` block, control is transferred to the `finally` block of the next enclosing `try` statement. This process is repeated until the `finally` blocks of all intervening `try` statements have been executed.
+- Control is transferred to the target of the `continue` statement.
+
+Because a `continue` statement unconditionally transfers control elsewhere, the end point of a `continue` statement is never reachable.
+
+> ***Example**: A labeled `continue` resolves to the nearest enclosing *iteration_statement* with the matching label:*
 >
-> ```ANTLR
-> continue_statement
->     : 'continue' identifier? ';'
->     ;
+> ```csharp
+> outer: for (int i = 0; i < 10; i++)
+> {
+>     for (int j = 0; j < 10; j++)
+>     {
+>         if (ShouldSkip(i, j))
+>             continue outer; // continues the outer for-loop
+>     }
+> }
 > ```
 >
-> The target of a `continue` statement is the end point of the embedded statement of the nearest enclosing ~~`while`, `do`, `for`, or `foreach` statement~~ **_iteration_statement_ determined as above**. ~~If a `continue` statement is not enclosed by a `while`, `do`, `for`, or `foreach` statement, a compile-time error occurs.~~ **If no such enclosing statement exists, a compile-time error occurs.**
->
-> ~~When multiple `while`, `do`, `for`, or `foreach` statements are nested within each other, a `continue` statement applies only to the innermost statement. To transfer control across multiple nesting levels, a `goto` statement ([§12.10.4](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/statements.md#12104-the-goto-statement)) shall be used.~~
->
-> A `continue` statement cannot exit a `finally` block ([§12.11](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/statements.md#1211-the-try-statement)). When a `continue` statement occurs within a `finally` block, the target of the `continue` statement shall be within the same `finally` block; otherwise a compile-time error occurs.
->
-> A `continue` statement is executed as follows:
->
-> - If the `continue` statement exits one or more `try` blocks with associated `finally` blocks, control is initially transferred to the `finally` block of the innermost `try` statement. When and if control reaches the end point of a `finally` block, control is transferred to the `finally` block of the next enclosing `try` statement. This process is repeated until the `finally` blocks of all intervening `try` statements have been executed.
-> - Control is transferred to the target of the `continue` statement.
->
-> Because a `continue` statement unconditionally transfers control elsewhere, the end point of a `continue` statement is never reachable.
->
-> > ***Example**: A labeled `continue` resolves to the nearest enclosing *iteration_statement* with the matching label:*
-> >
-> > ```csharp
-> > outer: for (int i = 0; i < 10; i++)
-> > {
-> >     for (int j = 0; j < 10; j++)
-> >     {
-> >         if (ShouldSkip(i, j))
-> >             continue outer; // continues the outer for-loop
-> >     }
-> > }
-> > ```
-> >
-> > ***end example***
+> ***end example***
 
 ## Drawbacks/Alternatives
 
