@@ -94,12 +94,10 @@ The following diff is applied to the grammar in
      ;
 ```
 
-*Note*: This change is purely editorial with respect to the language recognized:
-the set of accepted programs is identical before and after. The four individual
-operator alternatives are collapsed into a single production via the new
-`relational_op` rule solely to give the following sections a concise name for
-the four relational operators, avoiding the need to enumerate `<`, `<=`, `>`,
-`>=` at every point of reference.
+*Note*: This grammar refactor accepts exactly the same programs as before.
+The four operator alternatives are collapsed into a single `relational_op`
+production so that later sections can say "a *relational_op*" instead of
+spelling out `<`, `<=`, `>`, `>=` at every reference.
 
 ### [§11.11.1 General](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/expressions.md#11111-general)
 
