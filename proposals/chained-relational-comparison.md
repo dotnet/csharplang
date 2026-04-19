@@ -162,8 +162,7 @@ rules):**
 - **(b) Binary operator overload resolution
   ([§11.4.5](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/expressions.md#1145-binary-operator-overload-resolution))
   applied to `Y op B` as an isolated binary operation selects an operator
-  whose result type is `bool`. The operator so selected is the *link
-  operator* of `E`.**
+  whose result type is `bool`.**
 
 **When both (a) and (b) hold, `E` is classified as a value of type `bool`.
 Otherwise a compile-time error occurs, with a diagnostic identifying which
@@ -215,8 +214,8 @@ Evaluation of `E` proceeds:**
 2. **If `A` produced `false`, the result of `E` is `false` and `B` is not
    evaluated.**
 3. **Otherwise, `B` is evaluated and the result of `E` is the result of
-   applying the link operator of `E` to the already-evaluated value of `Y`
-   and the evaluated value of `B`.**
+   applying the operator selected in step 2(b) to the already-evaluated
+   value of `Y` and the evaluated value of `B`.**
 
 **Each *shift_expression* in a chained relational comparison is evaluated at
 most once. A middle operand that appears in two adjacent links, as the right
