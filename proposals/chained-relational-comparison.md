@@ -46,22 +46,57 @@ if (Min < tmp && tmp < Max) { … }
 Chained comparison addresses both concerns by construction: the middle operand
 is named once, evaluated once, and participates in both comparisons.
 
-Similar features exist in several mainstream languages, and support is
-particularly strong among languages oriented toward mathematical notation:
+Similar features exist in many languages, with particularly strong support
+among languages oriented toward mathematical notation and among the Lisp
+family (where comparison primitives are natively n-ary). The earliest
+designed instance of the feature dates back to [CPL](https://retrocomputing.stackexchange.com/questions/20216/what-was-the-first-programming-language-to-support-operator-chaining)
+in the 1960s, with the same single-evaluation-of-shared-operand semantics
+we specify here.
+
+Math-oriented and scientific languages:
 
 - **Mathematica / Wolfram Language**: [`Less`](https://reference.wolfram.com/language/ref/Less.html)
   is an n-ary function, so `a < b < c` natively yields `True` iff the
   operands are strictly increasing.
 - **Julia**: [Chaining comparisons](https://docs.julialang.org/en/v1/manual/mathematical-operations/#Chaining-comparisons).
 - **Python**: [Comparisons](https://docs.python.org/3/reference/expressions.html#comparisons) (`a < b <= c`).
+
+Lisp family (n-ary form):
+
+- **Common Lisp**: [`<`, `>`, `<=`, `>=`, `=`, `/=`](http://www.lispworks.com/reference/HyperSpec/Body/f_eq_sle.htm)
+  are variadic; `(< a b c d)` is true iff the arguments are monotonically
+  increasing. The same chain semantics are expressible natively, without
+  repeating any operand.
+- **Clojure**: [same n-ary semantics as Common Lisp](https://www.clojure.org/guides/comparators), with an implicit `and`-chain between adjacent pairs.
+- **Scheme / Racket**: R5RS/R6RS/R7RS specify the numeric predicates `<`,
+  `>`, `<=`, `>=`, `=` as n-ary monotonicity predicates.
+
+Other languages with native chaining:
+
 - **Raku / Perl 6**: [Chained comparisons](https://docs.raku.org/language/operators#Chained_comparisons).
 - **CoffeeScript**: [Chained comparisons](https://coffeescript.org/#comparisons).
-- **C++26 (proposed)**: [P0893: Chained comparisons](https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2018/p0893r1.html).
-- **Rust** explicitly reserved this syntactic space for a future chained-comparison feature: [RFC 558](https://rust-lang.github.io/rfcs/0558-require-parentheses-for-chained-comparisons.html) (accepted in 2015) banned the unparenthesised form `a < b < c` at compile time specifically to leave room for later adding Python-style chaining. [RFC issue #2083](https://github.com/rust-lang/rfcs/issues/2083) tracks the open "allow chaining of comparisons" proposal, and the third-party [`cmpchain`](https://docs.rs/cmpchain/latest/cmpchain/macro.chain.html) crate provides the feature via a macro today.
+- **Icon**: chained comparisons fall out of [Icon's goal-directed evaluation model](https://www2.cs.arizona.edu/icon/refernce/exprlist.htm),
+  where a succeeding comparison produces its right operand for use in the
+  next comparison. This model [historically inspired Python's implementation](https://stackoverflow.com/a/2650109) of the feature.
+- **BCPL** (1967) and its unimplemented predecessor **CPL** (1960s):
+  supported chained comparisons with the same single-evaluation-of-shared-operand
+  semantics; CPL's working paper is [considered the original designed specification](https://retrocomputing.stackexchange.com/questions/20216/what-was-the-first-programming-language-to-support-operator-chaining)
+  of the feature.
 
-There is even a third-party NuGet workaround (referenced in the linked
-discussion thread for this proposal) that uses operator-overload trickery to
-approximate the feature, which is evidence of real demand in the ecosystem.
+Other modern languages have also taken the feature seriously without
+shipping it. Rust's [RFC 558](https://rust-lang.github.io/rfcs/0558-require-parentheses-for-chained-comparisons.html)
+(accepted in 2015) explicitly banned the unparenthesised form `a < b < c`
+at compile time to reserve the syntax for a future chain feature;
+[RFC issue #2083](https://github.com/rust-lang/rfcs/issues/2083) tracks the
+ongoing "allow chaining of comparisons" proposal, and the third-party
+[`cmpchain`](https://docs.rs/cmpchain/latest/cmpchain/macro.chain.html)
+crate provides the feature today via a macro. The ISO C++ working group
+has [P0893: Chained comparisons](https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2018/p0893r1.html)
+on the C++26 roadmap.
+
+Within the C# ecosystem itself, a third-party NuGet workaround (referenced
+in the linked discussion thread for this proposal) uses operator-overload
+trickery to approximate the feature, which is evidence of real user demand.
 
 ## Detailed design
 
