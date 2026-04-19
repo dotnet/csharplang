@@ -169,17 +169,19 @@ Insert the following paragraph immediately after the existing paragraph "*A labe
 
 **If the *statement* immediately nested within a *labeled_statement* is a *switch_statement* ([§12.8.3](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/statements.md#1283-the-switch-statement)) or an *iteration_statement* ([§12.9](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/statements.md#129-iteration-statements)), the nested statement is said to be *labeled with* the *identifier* of the *labeled_statement*. A *break_statement* ([§12.10.2](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/statements.md#12102-the-break-statement)) or *continue_statement* ([§12.10.3](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/statements.md#12103-the-continue-statement)) can specify such an *identifier* to reference the containing labeled statement.**
 
-> ***Note**: Only the *statement* that is **immediately** nested within a *labeled_statement* is labeled with that identifier. For example, given `a: b: while (…) …`, only `b` labels the *iteration_statement*; `a` labels the inner *labeled_statement* `b: while (…) …`, which is not itself a *switch_statement* or *iteration_statement*. Consequently, `break a;` or `continue a;` appearing within the loop body does not target the `while` statement. **end note***
+***Note**: Only the *statement* that is **immediately** nested within a *labeled_statement* is labeled with that identifier. For example, given `a: b: while (…) …`, only `b` labels the *iteration_statement*; `a` labels the inner *labeled_statement* `b: while (…) …`, which is not itself a *switch_statement* or *iteration_statement*. Consequently, `break a;` or `continue a;` appearing within the loop body does not target the `while` statement. **end note***
 
 ### [§12.10.2 The break statement](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/statements.md#12102-the-break-statement)
-
-~~The `break` statement exits the nearest enclosing `switch`, `while`, `do`, `for`, or `foreach` statement.~~ **The `break` statement exits the nearest enclosing *switch_statement* ([§12.8.3](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/statements.md#1283-the-switch-statement)) or *iteration_statement* ([§12.9](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/statements.md#129-iteration-statements)), or, if an *identifier* is specified, the nearest enclosing *switch_statement* or *iteration_statement* labeled with that *identifier* (see [§12.5](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/statements.md#125-labeled-statements)).**
 
 ```ANTLR
 break_statement
     : 'break' identifier? ';'
     ;
 ```
+
+~~The `break` statement exits the nearest enclosing `switch`, `while`, `do`, `for`, or `foreach` statement.~~
+
+**The `break` statement exits the nearest enclosing *switch_statement* ([§12.8.3](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/statements.md#1283-the-switch-statement)) or *iteration_statement* ([§12.9](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/statements.md#129-iteration-statements)), or, if an *identifier* is specified, the nearest enclosing *switch_statement* or *iteration_statement* labeled with that *identifier* (see [§12.5](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/statements.md#125-labeled-statements)).**
 
 The target of a `break` statement is the end point of the nearest enclosing ~~`switch`, `while`, `do`, `for`, or `foreach` statement~~ **statement determined as above**. ~~If a `break` statement is not enclosed by a `switch`, `while`, `do`, `for`, or `foreach` statement, a compile-time error occurs.~~ **If no such enclosing statement exists, a compile-time error occurs.**
 
@@ -211,13 +213,15 @@ Because a `break` statement unconditionally transfers control elsewhere, the end
 
 ### [§12.10.3 The continue statement](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/statements.md#12103-the-continue-statement)
 
-~~The `continue` statement starts a new iteration of the nearest enclosing `while`, `do`, `for`, or `foreach` statement.~~ **The `continue` statement starts a new iteration of the nearest enclosing *iteration_statement* ([§12.9](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/statements.md#129-iteration-statements)), or, if an *identifier* is specified, the nearest enclosing *iteration_statement* labeled with that *identifier* (see [§12.5](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/statements.md#125-labeled-statements)).**
-
 ```ANTLR
 continue_statement
     : 'continue' identifier? ';'
     ;
 ```
+
+~~The `continue` statement starts a new iteration of the nearest enclosing `while`, `do`, `for`, or `foreach` statement.~~ 
+
+**The `continue` statement starts a new iteration of the nearest enclosing *iteration_statement* ([§12.9](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/statements.md#129-iteration-statements)), or, if an *identifier* is specified, the nearest enclosing *iteration_statement* labeled with that *identifier* (see [§12.5](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/statements.md#125-labeled-statements)).**
 
 The target of a `continue` statement is the end point of the embedded statement of the nearest enclosing ~~`while`, `do`, `for`, or `foreach` statement~~ **_iteration_statement_ determined as above**. ~~If a `continue` statement is not enclosed by a `while`, `do`, `for`, or `foreach` statement, a compile-time error occurs.~~ **If no such enclosing statement exists, a compile-time error occurs.**
 
