@@ -24,8 +24,7 @@ if (0 <= i && i < array.Length) { … }
 This is awkward in three distinct ways:
 
 **It does not match mathematical notation.** Students commonly learn to write
-`min ≤ x ≤ max`. C# is the only place the same inequality needs to be written
-as two separate comparisons joined by `&&`, with the pivot repeated.
+`min ≤ x ≤ max`.
 
 **It is a double-evaluation correctness trap.** The natural rewrite of
 `Min < ComputeVal() < Max` as `Min < ComputeVal() && ComputeVal() < Max`
