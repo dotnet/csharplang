@@ -127,11 +127,12 @@ The following diff is applied to the grammar in
 
 > *Note*: This refactoring recognizes the same set of programs as before. *end note*
 
-### [§11.11.1 General](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/expressions.md#11111-general)
+### §11.11.1 General
 
-Insert the following paragraph immediately after the existing paragraph that
-begins *"For an operation of the form `x «op» y`, where «op» is a comparison
-operator, overload resolution ([§11.4.5](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/expressions.md#1145-binary-operator-overload-resolution))
+In [§11.11.1](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/expressions.md#11111-general),
+insert the following paragraph immediately after the existing paragraph
+that begins *"For an operation of the form `x «op» y`, where «op» is a
+comparison operator, overload resolution ([§11.4.5](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/expressions.md#1145-binary-operator-overload-resolution))
 is applied to select a specific operator implementation. ..."*:
 
 **An operation of the form `A op B`, where `A` is a *relational_expression*,
@@ -142,7 +143,7 @@ in [§11.11.13](https://github.com/dotnet/csharpstandard/blob/standard-v6/standa
 Because *relational_expression* is left-associative, §11.11.13 applies at
 each such *relational_expression* node.**
 
-### §11.11.13 Chained relational comparisons (new subsection)
+### §11.11.13 Chained relational comparisons
 
 Add the following new subsection after [§11.11.12 The as operator](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/expressions.md#111112-the-as-operator):
 
