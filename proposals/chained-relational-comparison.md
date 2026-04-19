@@ -46,10 +46,14 @@ if (Min < tmp && tmp < Max) { … }
 Chained comparison addresses both concerns by construction: the middle operand
 is named once, evaluated once, and participates in both comparisons.
 
-Similar features exist in several mainstream languages:
+Similar features exist in several mainstream languages, and support is
+particularly strong among languages oriented toward mathematical notation:
 
-- **Python**: [Comparisons](https://docs.python.org/3/reference/expressions.html#comparisons) (`a < b <= c`).
+- **Mathematica / Wolfram Language**: [`Less`](https://reference.wolfram.com/language/ref/Less.html)
+  is an n-ary function, so `a < b < c` natively yields `True` iff the
+  operands are strictly increasing.
 - **Julia**: [Chaining comparisons](https://docs.julialang.org/en/v1/manual/mathematical-operations/#Chaining-comparisons).
+- **Python**: [Comparisons](https://docs.python.org/3/reference/expressions.html#comparisons) (`a < b <= c`).
 - **Raku / Perl 6**: [Chained comparisons](https://docs.raku.org/language/operators#Chained_comparisons).
 - **CoffeeScript**: [Chained comparisons](https://coffeescript.org/#comparisons).
 - **C++26 (proposed)**: [P0893: Chained comparisons](https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2018/p0893r1.html).
