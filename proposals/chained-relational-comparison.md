@@ -24,11 +24,10 @@ if (0 <= i && i < array.Length) { … }
 
 This is awkward in two distinct ways:
 
-**It does not match mathematical notation.** Students commonly learn to write
-`min ≤ x ≤ max`. The same form appears throughout physics, engineering,
-statistics, finance, and everyday prose about speed limits, age brackets,
-and operating ranges. It is a near-universal convention, and any reader
-who has seen a number line can read it at first glance.
+**It does not match mathematical notation.** Students learn to write
+`min ≤ x ≤ max` early on. The same form is a near-universal convention
+across many walks of life, and nearly any reader can reason about it at
+first glance.
 
 **It is a double-evaluation correctness trap.** The natural rewrite of
 `Min < ComputeVal() < Max` as `Min < ComputeVal() && ComputeVal() < Max`
