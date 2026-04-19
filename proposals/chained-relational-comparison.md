@@ -144,9 +144,7 @@ each such *relational_expression* node.**
 
 ### §11.11.13 Chained relational comparisons (new subsection)
 
-Add the following new subsection at the end of
-[§11.11](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/expressions.md#1111-relational-and-type-testing-operators),
-after [§11.11.12 The as operator](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/expressions.md#111112-the-as-operator):
+Add the following new subsection after [§11.11.12 The as operator](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/expressions.md#111112-the-as-operator):
 
 **For an expression `e₀ op₁ e₁ op₂ e₂ … opₙ eₙ` where each `opᵢ` is a
 *relational_op* and each `eᵢ` is a *shift_expression*, the
