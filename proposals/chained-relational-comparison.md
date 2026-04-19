@@ -51,40 +51,30 @@ is named once, evaluated once, and participates in both comparisons.
 
 Similar features exist in many languages, with particularly strong support
 among languages oriented toward mathematical notation and among the Lisp
-family (where comparison primitives are natively n-ary). The earliest
-designed instance of the feature dates back to [CPL](https://retrocomputing.stackexchange.com/questions/20216/what-was-the-first-programming-language-to-support-operator-chaining)
-in the 1960s, with the same single-evaluation-of-shared-operand semantics
-we specify here.
+family. The earliest designed instance of the feature dates back to
+[CPL](https://retrocomputing.stackexchange.com/questions/20216/what-was-the-first-programming-language-to-support-operator-chaining)
+in the 1960s.
 
 Math-oriented and scientific languages:
 
-- **Mathematica / Wolfram Language**: [`Less`](https://reference.wolfram.com/language/ref/Less.html)
-  is an n-ary function, so `a < b < c` natively yields `True` iff the
-  operands are strictly increasing.
-- **Julia**: [Chaining comparisons](https://docs.julialang.org/en/v1/manual/mathematical-operations/#Chaining-comparisons).
-- **Python**: [Comparisons](https://docs.python.org/3/reference/expressions.html#comparisons) (`a < b <= c`).
+- **Mathematica / Wolfram Language**: [native support](https://reference.wolfram.com/language/ref/Less.html).
+- **Julia**: [native support](https://docs.julialang.org/en/v1/manual/mathematical-operations/#Chaining-comparisons).
+- **Python**: [native support](https://docs.python.org/3/reference/expressions.html#comparisons).
 
-Lisp family (n-ary form):
+Lisp family (n-ary comparison over a chain of values):
 
-- **Common Lisp**: [`<`, `>`, `<=`, `>=`, `=`, `/=`](http://www.lispworks.com/reference/HyperSpec/Body/f_eq_sle.htm)
-  are variadic; `(< a b c d)` is true iff the arguments are monotonically
-  increasing. The same chain semantics are expressible natively, without
-  repeating any operand.
-- **Clojure**: [same n-ary semantics as Common Lisp](https://www.clojure.org/guides/comparators), with an implicit `and`-chain between adjacent pairs.
-- **Scheme / Racket**: R5RS/R6RS/R7RS specify the numeric predicates `<`,
-  `>`, `<=`, `>=`, `=` as n-ary monotonicity predicates.
+- **Common Lisp**: [native support](http://www.lispworks.com/reference/HyperSpec/Body/f_eq_sle.htm).
+- **Clojure**: [native support](https://www.clojure.org/guides/comparators).
+- **Scheme** and **Racket**: native support, specified in R5RS/R6RS/R7RS.
 
 Other languages with native chaining:
 
-- **Raku / Perl 6**: [Chained comparisons](https://docs.raku.org/language/operators#Chained_comparisons).
-- **CoffeeScript**: [Chained comparisons](https://coffeescript.org/#comparisons).
-- **Icon**: chained comparisons fall out of [Icon's goal-directed evaluation model](https://www2.cs.arizona.edu/icon/refernce/exprlist.htm),
-  where a succeeding comparison produces its right operand for use in the
-  next comparison. This model [historically inspired Python's implementation](https://stackoverflow.com/a/2650109) of the feature.
-- **BCPL** (1967) and its unimplemented predecessor **CPL** (1960s):
-  supported chained comparisons with the same single-evaluation-of-shared-operand
-  semantics; CPL's working paper is [considered the original designed specification](https://retrocomputing.stackexchange.com/questions/20216/what-was-the-first-programming-language-to-support-operator-chaining)
-  of the feature.
+- **Raku / Perl 6**: [native support](https://docs.raku.org/language/operators#Chained_comparisons).
+- **CoffeeScript**: [native support](https://coffeescript.org/#comparisons).
+- **Icon**: [native support](https://www2.cs.arizona.edu/icon/refernce/exprlist.htm),
+  which [historically inspired Python's implementation](https://stackoverflow.com/a/2650109) of the feature.
+- **BCPL** (1967) and its unimplemented predecessor **CPL** (1960s): the
+  [original designed instances of the feature](https://retrocomputing.stackexchange.com/questions/20216/what-was-the-first-programming-language-to-support-operator-chaining).
 
 Other modern languages have also taken the feature seriously without
 shipping it. Rust's [RFC 558](https://rust-lang.github.io/rfcs/0558-require-parentheses-for-chained-comparisons.html)
