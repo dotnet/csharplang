@@ -1,6 +1,7 @@
 # Chained relational comparison
 
 * Championed issue: <https://github.com/dotnet/csharplang/issues/8861>
+* Discussion: <https://github.com/dotnet/csharplang/discussions/8643>
 
 ## Summary
 
