@@ -31,7 +31,7 @@ as two separate comparisons joined by `&&`, with the pivot repeated.
 `Min < ComputeVal() < Max` as `Min < ComputeVal() && ComputeVal() < Max`
 evaluates `ComputeVal()` *twice*. That is wrong when the middle expression has
 side-effects, is non-deterministic, or is merely expensive. The typical
-workaround — binding the middle expression into a local — destroys the
+workaround (binding the middle expression into a local), destroys the
 expression-level naturalness of the condition:
 
 ```csharp
