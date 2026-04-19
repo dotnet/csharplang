@@ -86,14 +86,14 @@ begins *"For an operation of the form `x «op» y`, where «op» is a comparison
 operator, overload resolution ([§11.4.5](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/expressions.md#1145-binary-operator-overload-resolution))
 is applied to select a specific operator implementation. ..."*:
 
-> **A *relational_expression* whose top-level operator is one of `<`, `<=`,
-> `>`, or `>=`, and whose left operand is itself a *relational_expression*
-> whose top-level operator is one of `<`, `<=`, `>`, or `>=`, may be a
-> *chained relational comparison*, bound per
-> [§11.11.13](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/expressions.md#111113-chained-relational-comparison).
-> Because *relational_expression* is left-associative, the chain structure is
-> implicit in the parse tree; the rule in §11.11.13 applies recursively at
-> each such node.**
+**A *relational_expression* whose top-level operator is one of `<`, `<=`, `>`,
+or `>=`, and whose left operand is itself a *relational_expression* whose
+top-level operator is one of `<`, `<=`, `>`, or `>=`, may be a *chained
+relational comparison*, bound per
+[§11.11.13](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/expressions.md#111113-chained-relational-comparison).
+Because *relational_expression* is left-associative, the chain structure is
+implicit in the parse tree; the rule in §11.11.13 applies recursively at each
+such node.**
 
 ### §11.11.13 Chained relational comparison (new subsection)
 
@@ -101,129 +101,128 @@ Add the following new subsection at the end of
 [§11.11](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/expressions.md#1111-relational-and-type-testing-operators),
 after [§11.11.12 The as operator](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/expressions.md#111112-the-as-operator):
 
-> **#### 11.11.13 Chained relational comparison**
+**This subclause defines the binding and run-time evaluation of
+*relational_expression*s whose top-level operator is one of `<`, `<=`, `>`, or
+`>=` and whose left operand is itself such a *relational_expression*. Because
+*relational_expression* is left-associative, an expression of the surface form
+`e₀ op₁ e₁ op₂ e₂ … opₙ eₙ` (with each `opᵢ` drawn from `<`, `<=`, `>`, `>=`
+and each `eᵢ` a *shift_expression*) is parsed as
+`((…(e₀ op₁ e₁) op₂ e₂)… opₙ eₙ)`. The rules below apply at each such
+relational-operator node and therefore extend naturally to chains of any
+length.**
+
+#### Binding
+
+**Let `E` be a *relational_expression* of the form `A op B`, where
+`op ∈ {<, <=, >, >=}`, `A` is a *relational_expression*, and `B` is a
+*shift_expression*. Binding of `E` proceeds as follows, using only information
+local to this node (`A` has already been bound recursively by these same
+rules):**
+
+1. **Binary operator overload resolution
+   ([§11.4.5](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/expressions.md#1145-binary-operator-overload-resolution))
+   is applied to `A op B` using `A`'s compile-time classification and `B`'s
+   compile-time type. If overload resolution does not produce a binding-time
+   error (as defined by the final paragraph of §11.4.5), `E` has the meaning
+   given by that overload resolution together with the relevant subsection of
+   §11.11, and this subclause has no further effect at this node.**
+
+2. **Otherwise, `E` is a *chained relational comparison*, provided `A` is
+   itself a *relational_expression* of the form `X op' Y` with
+   `op' ∈ {<, <=, >, >=}`. If `A` has any other top-level form, the
+   binding-time error from step 1 is the result.**
+
+   **When `A` has the required form, `E` is well-typed iff both:**
+
+   - **(a) `A` is classified as `bool`. This is automatic when `A` was itself
+     bound as a chained relational comparison by step 2 (which always produces
+     `bool`), or when `op'` resolves to a predefined relational operator or
+     any user-defined relational operator returning `bool`.**
+
+   - **(b) Binary operator overload resolution
+     ([§11.4.5](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/expressions.md#1145-binary-operator-overload-resolution))
+     applied to `Y op B` as an isolated binary operation selects an operator
+     whose result type is `bool`. The operator so selected is the *link
+     operator* of `E`.**
+
+   **When both (a) and (b) hold, `E` is classified as a value of type `bool`.
+   Otherwise a compile-time error occurs, with a diagnostic identifying which
+   condition failed.**
+
+***Note**: The rule is strictly local: it uses only `E`'s own `op`, `A`'s
+already-determined classification, and `B`. No node is re-bound; a node whose
+step 1 succeeded is never revisited because step 2 fires at a later node.
+Chains of any length follow directly from the recursive structure of
+*relational_expression*. **end note***
+
+***Note**: Nullable forms of the standard value types (for example `int?`,
+`DateTime?`, a nullable user-defined comparable struct) participate in chained
+relational comparisons without any extra rule, because the lifted relational
+operators described in
+[§11.4.8](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/expressions.md#1148-lifted-operators)
+return `bool` (not `bool?`), producing `false` if either operand is `null`.
+Conditions (a) and (b) are therefore satisfied for such operands, and a `null`
+operand simply causes the affected link to be `false`, short-circuiting the
+remainder of the chain. **end note***
+
+***Note**: If any operand of `A op B` has compile-time type `dynamic`, the
+expression is dynamically bound per
+[§11.11.1](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/expressions.md#11111-general),
+which is not a binding-time error. Step 1 therefore succeeds and the
+expression is a classical left-associative tree with dynamic binding at each
+node, not a chained relational comparison. **end note***
+
+#### Run-time evaluation
+
+**By construction, a chained relational comparison `E = A op B` bound per
+step 2 has `A` of the form `X op' Y`, and `A`'s own evaluation already
+evaluates `Y` exactly once as the right operand of its top-level operator.
+Evaluation of `E` proceeds:**
+
+1. **`A` is evaluated, producing a `bool` value and the value of `Y`.**
+2. **If `A` produced `false`, the result of `E` is `false` and `B` is not
+   evaluated.**
+3. **Otherwise, `B` is evaluated and the result of `E` is the result of
+   applying the link operator of `E` to the already-evaluated value of `Y`
+   and the evaluated value of `B`.**
+
+**Each *shift_expression* in a chained relational comparison is evaluated at
+most once. In particular, the middle operand of any two adjacent links — the
+right operand of the inner link and the left operand of the outer link — is
+evaluated exactly once, and its evaluated value is used in both links.
+Evaluation order of operands is strictly left-to-right, and the chain
+short-circuits on the first link that produces `false`.**
+
+***Note**: By induction on the depth of `A`, a fully-chained
+`e₀ op₁ e₁ op₂ e₂ … opₙ eₙ` evaluates as if written
+`(e₀ op₁ e₁) && (e₁ op₂ e₂) && … && (eₙ₋₁ opₙ eₙ)`, with each `eᵢ` evaluated
+at most once. **end note***
+
+> ***Example**: Range checks and mathematical inequalities:*
 >
-> **This subclause defines the binding and run-time evaluation of
-> *relational_expression*s whose top-level operator is one of `<`, `<=`, `>`,
-> or `>=` and whose left operand is itself such a *relational_expression*.
-> Because *relational_expression* is left-associative, an expression of the
-> surface form `e₀ op₁ e₁ op₂ e₂ … opₙ eₙ` (with each `opᵢ` drawn from `<`,
-> `<=`, `>`, `>=` and each `eᵢ` a *shift_expression*) is parsed as
-> `((…(e₀ op₁ e₁) op₂ e₂)… opₙ eₙ)`. The rules below apply at each such
-> relational-operator node and therefore extend naturally to chains of any
-> length.**
+> ```csharp
+> if (0 <= i < array.Length)      // bounds check
+>     array[i] = ...;
 >
-> **##### Binding**
+> if (min <= ComputeValue() <= max)   // ComputeValue invoked once
+>     Accept();
 >
-> **Let `E` be a *relational_expression* of the form `A op B`, where
-> `op ∈ {<, <=, >, >=}`, `A` is a *relational_expression*, and `B` is a
-> *shift_expression*. Binding of `E` proceeds as follows, using only
-> information local to this node (`A` has already been bound recursively by
-> these same rules):**
+> bool isAscending = a < b < c < d;   // chains extend naturally
+> ```
 >
-> 1. **Binary operator overload resolution
->    ([§11.4.5](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/expressions.md#1145-binary-operator-overload-resolution))
->    is applied to `A op B` using `A`'s compile-time classification and `B`'s
->    compile-time type. If overload resolution does not produce a binding-time
->    error (as defined by the final paragraph of §11.4.5), `E` has the meaning
->    given by that overload resolution together with the relevant subsection
->    of §11.11, and this subclause has no further effect at this node.**
+> ***end example***
+
+> ***Example**: A chained relational comparison and its ordinary-`&&`
+> equivalent, for `int` operands:*
 >
-> 2. **Otherwise, `E` is a *chained relational comparison*, provided `A` is
->    itself a *relational_expression* of the form `X op' Y` with
->    `op' ∈ {<, <=, >, >=}`. If `A` has any other top-level form, the
->    binding-time error from step 1 is the result.**
+> ```csharp
+> // These two conditions produce identical results, but the chained form
+> // evaluates F() once instead of twice:
+> min <= F() <= max
+> min <= F() && F() <= max
+> ```
 >
->    **When `A` has the required form, `E` is well-typed iff both:**
->
->    - **(a) `A` is classified as `bool`. This is automatic when `A` was itself
->      bound as a chained relational comparison by step 2 (which always
->      produces `bool`), or when `op'` resolves to a predefined relational
->      operator or any user-defined relational operator returning `bool`.**
->
->    - **(b) Binary operator overload resolution
->      ([§11.4.5](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/expressions.md#1145-binary-operator-overload-resolution))
->      applied to `Y op B` as an isolated binary operation selects an operator
->      whose result type is `bool`. The operator so selected is the *link
->      operator* of `E`.**
->
->    **When both (a) and (b) hold, `E` is classified as a value of type `bool`.
->    Otherwise a compile-time error occurs, with a diagnostic identifying
->    which condition failed.**
->
-> ***Note**: The rule is strictly local: it uses only `E`'s own `op`, `A`'s
-> already-determined classification, and `B`. No node is re-bound; a node
-> whose step 1 succeeded is never revisited because step 2 fires at a later
-> node. Chains of any length follow directly from the recursive structure of
-> *relational_expression*. **end note***
->
-> ***Note**: Nullable forms of the standard value types (for example `int?`,
-> `DateTime?`, a nullable user-defined comparable struct) participate in
-> chained relational comparisons without any extra rule, because the lifted
-> relational operators described in
-> [§11.4.8](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/expressions.md#1148-lifted-operators)
-> return `bool` (not `bool?`), producing `false` if either operand is `null`.
-> Conditions (a) and (b) are therefore satisfied for such operands, and a
-> `null` operand simply causes the affected link to be `false`, short-circuiting
-> the remainder of the chain. **end note***
->
-> ***Note**: If any operand of `A op B` has compile-time type `dynamic`, the
-> expression is dynamically bound per [§11.11.1](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/expressions.md#11111-general),
-> which is not a binding-time error. Step 1 therefore succeeds and the
-> expression is a classical left-associative tree with dynamic binding at each
-> node, not a chained relational comparison. **end note***
->
-> **##### Run-time evaluation**
->
-> **By construction, a chained relational comparison `E = A op B` bound per
-> step 2 has `A` of the form `X op' Y`, and `A`'s own evaluation already
-> evaluates `Y` exactly once as the right operand of its top-level operator.
-> Evaluation of `E` proceeds:**
->
-> 1. **`A` is evaluated, producing a `bool` value and the value of `Y`.**
-> 2. **If `A` produced `false`, the result of `E` is `false` and `B` is not
->    evaluated.**
-> 3. **Otherwise, `B` is evaluated and the result of `E` is the result of
->    applying the link operator of `E` to the already-evaluated value of `Y`
->    and the evaluated value of `B`.**
->
-> **Each *shift_expression* in a chained relational comparison is evaluated at
-> most once. In particular, the middle operand of any two adjacent links —
-> the right operand of the inner link and the left operand of the outer link
-> — is evaluated exactly once, and its evaluated value is used in both links.
-> Evaluation order of operands is strictly left-to-right, and the chain
-> short-circuits on the first link that produces `false`.**
->
-> ***Note**: By induction on the depth of `A`, a fully-chained
-> `e₀ op₁ e₁ op₂ e₂ … opₙ eₙ` evaluates as if written
-> `(e₀ op₁ e₁) && (e₁ op₂ e₂) && … && (eₙ₋₁ opₙ eₙ)`, with each `eᵢ`
-> evaluated at most once. **end note***
->
-> > ***Example**: Range checks and mathematical inequalities:*
-> >
-> > ```csharp
-> > if (0 <= i < array.Length)      // bounds check
-> >     array[i] = ...;
-> >
-> > if (min <= ComputeValue() <= max)   // ComputeValue invoked once
-> >     Accept();
-> >
-> > bool isAscending = a < b < c < d;   // chains extend naturally
-> > ```
-> >
-> > ***end example***
-> >
-> > ***Example**: A chained relational comparison and its ordinary-`&&`
-> > equivalent, for `int` operands:*
-> >
-> > ```csharp
-> > // These two conditions produce identical results, but the chained form
-> > // evaluates F() once instead of twice:
-> > min <= F() <= max
-> > min <= F() && F() <= max
-> > ```
-> >
-> > ***end example***
+> ***end example***
 
 ### Interactions with other features
 
