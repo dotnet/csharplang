@@ -183,40 +183,45 @@ shall hold:**
 error occurs. When both are satisfied, `E` is classified as a value of
 type `bool`.**
 
-***Note***: These rules apply at each *relational_expression* node using
-only the node's own operator, its left operand's existing classification,
-and its right operand. A node whose overload resolution succeeded is not
-reconsidered. Chains of arbitrary length follow from the recursive
-structure of *relational_expression*. **end note***
+***Notes***:
 
-***Note***: Parentheses around the left-hand operand prevent the chain
-interpretation. Although parentheses normally affect only operator
-precedence, they also affect binding here: chained relational comparison
-requires `A` to be an operation of the form `X op' Y`, and when `A` is a
-*parenthesized_expression* this is not the case, regardless of what is
-written inside the parentheses. Therefore an expression written as
-`(a op₁ b) op₂ c` is not a chained relational comparison; it is bound only
-by binary operator overload resolution ([§11.4.5](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/expressions.md#1145-binary-operator-overload-resolution)),
-which for typical operand types fails because no applicable operator
-exists for `bool op₂ c`. **end note***
+- **These rules apply at each *relational_expression* node using only the
+  node's own operator, its left operand's existing classification, and
+  its right operand. A node whose overload resolution succeeded is not
+  reconsidered. Chains of arbitrary length follow from the recursive
+  structure of *relational_expression*.**
 
-***Note***: Nullable forms of the standard value types (for example `int?`,
-`DateTime?`, or a nullable user-defined comparable struct) participate in
-chained relational comparisons without any additional rule, because the
-lifted relational operators of
-[§11.4.8](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/expressions.md#1148-lifted-operators)
-return `bool` rather than `bool?`, producing `false` when either operand
-is `null`. The requirements above are therefore satisfied for such
-operands, and a `null` operand causes the corresponding comparison to
-produce `false`; subsequent operands and comparisons are then not
-evaluated. **end note***
+- **Parentheses around the left-hand operand prevent the chain
+  interpretation. Although parentheses normally affect only operator
+  precedence, they also affect binding here: chained relational
+  comparison requires `A` to be an operation of the form `X op' Y`, and
+  when `A` is a *parenthesized_expression* this is not the case,
+  regardless of what is written inside the parentheses. Therefore an
+  expression written as `(a op₁ b) op₂ c` is not a chained relational
+  comparison; it is bound only by binary operator overload resolution
+  ([§11.4.5](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/expressions.md#1145-binary-operator-overload-resolution)),
+  which for typical operand types fails because no applicable operator
+  exists for `bool op₂ c`.**
 
-***Note***: When any operand of `A op B` has compile-time type `dynamic`,
-the expression is dynamically bound ([§11.11.1](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/expressions.md#11111-general)).
-Dynamic binding does not produce a binding-time error, so overload
-resolution of `A op B` succeeds and this subclause does not apply. Each
-comparison is instead resolved at run time according to the rules of
-dynamic binding. **end note***
+- **Nullable forms of the standard value types (for example `int?`,
+  `DateTime?`, or a nullable user-defined comparable struct) participate
+  in chained relational comparisons without any additional rule, because
+  the lifted relational operators of
+  [§11.4.8](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/expressions.md#1148-lifted-operators)
+  return `bool` rather than `bool?`, producing `false` when either
+  operand is `null`. The requirements above are therefore satisfied for
+  such operands, and a `null` operand causes the corresponding comparison
+  to produce `false`; subsequent operands and comparisons are then not
+  evaluated.**
+
+- **When any operand of `A op B` has compile-time type `dynamic`, the
+  expression is dynamically bound ([§11.11.1](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/expressions.md#11111-general)).
+  Dynamic binding does not produce a binding-time error, so overload
+  resolution of `A op B` succeeds and this subclause does not apply.
+  Each comparison is instead resolved at run time according to the rules
+  of dynamic binding.**
+
+**end notes***
 
 #### Run-time evaluation
 
