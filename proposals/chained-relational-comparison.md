@@ -57,7 +57,9 @@ Similar features exist in several mainstream languages:
 - **Julia**: [Chaining comparisons](https://docs.julialang.org/en/v1/manual/mathematical-operations/#Chaining-comparisons).
 - **Raku / Perl 6**: [Chained comparisons](https://docs.raku.org/language/operators#Chained_comparisons).
 - **CoffeeScript**: [Chained comparisons](https://coffeescript.org/#comparisons).
+- **Mathematica / Wolfram Language**: [`Less`](https://reference.wolfram.com/language/ref/Less.html) accepts any number of arguments so that `a < b < c` evaluates to `True` iff the operands form a strictly increasing sequence.
 - **C++26 (proposed)**: [P0893 — Chained comparisons](https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2018/p0893r1.html).
+- **Rust** explicitly reserved this syntactic space for a future chained-comparison feature: [RFC 558](https://rust-lang.github.io/rfcs/0558-require-parentheses-for-chained-comparisons.html) (accepted in 2015) banned the unparenthesised form `a < b < c` at compile time specifically to leave room for later adding Python-style chaining. [RFC issue #2083](https://github.com/rust-lang/rfcs/issues/2083) tracks the open "allow chaining of comparisons" proposal, and the third-party [`cmpchain`](https://docs.rs/cmpchain/latest/cmpchain/macro.chain.html) crate provides the feature via a macro today.
 
 There is even a third-party NuGet workaround (referenced in the linked
 discussion thread for this proposal) that uses operator-overload trickery to
