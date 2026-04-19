@@ -6,10 +6,11 @@
 ## Summary
 
 Allow *relational_expression*s such as `a < b < c`, `min <= x <= max`, and
-`0 <= i < array.Length` to have the intuitive chained-comparison meaning — roughly
-`a < b && b < c`, `min <= x && x <= max`, `0 <= i && i < array.Length` —
-without requiring the middle operand to be spelled twice. This extends naturally
-to `<`, `<=`, `>`, `>=` combined in any order and at any length.
+`0 <= i < array.Length` to have the intuitive chained-comparison meaning,
+without requiring the middle operand to be spelled twice. The semantics are
+roughly those of `a < b && b < c`, `min <= x && x <= max`, and
+`0 <= i && i < array.Length`, respectively. This extends naturally to `<`,
+`<=`, `>`, `>=` combined in any order and at any length.
 
 ## Motivation
 
@@ -30,8 +31,8 @@ This is awkward in two distinct ways:
 `Min < ComputeVal() < Max` as `Min < ComputeVal() && ComputeVal() < Max`
 evaluates `ComputeVal()` *twice*. That is wrong when the middle expression has
 side-effects, is non-deterministic, or is merely expensive. The typical
-workaround (binding the middle expression into a local), destroys the
-expression-level naturalness of the condition:
+workaround is to bind the middle expression into a local, but this destroys
+the expression-level naturalness of the condition:
 
 ```csharp
 // What the user wants to write:
@@ -47,11 +48,11 @@ is named once, evaluated once, and participates in both comparisons.
 
 Similar features exist in several mainstream languages:
 
-- **Python**: [Comparisons — Python Language Reference](https://docs.python.org/3/reference/expressions.html#comparisons) (`a < b <= c`).
+- **Python**: [Comparisons](https://docs.python.org/3/reference/expressions.html#comparisons) (`a < b <= c`).
 - **Julia**: [Chaining comparisons](https://docs.julialang.org/en/v1/manual/mathematical-operations/#Chaining-comparisons).
 - **Raku / Perl 6**: [Chained comparisons](https://docs.raku.org/language/operators#Chained_comparisons).
 - **CoffeeScript**: [Chained comparisons](https://coffeescript.org/#comparisons).
-- **C++26 (proposed)**: [P0893 — Chained comparisons](https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2018/p0893r1.html).
+- **C++26 (proposed)**: [P0893: Chained comparisons](https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2018/p0893r1.html).
 - **Rust** explicitly reserved this syntactic space for a future chained-comparison feature: [RFC 558](https://rust-lang.github.io/rfcs/0558-require-parentheses-for-chained-comparisons.html) (accepted in 2015) banned the unparenthesised form `a < b < c` at compile time specifically to leave room for later adding Python-style chaining. [RFC issue #2083](https://github.com/rust-lang/rfcs/issues/2083) tracks the open "allow chaining of comparisons" proposal, and the third-party [`cmpchain`](https://docs.rs/cmpchain/latest/cmpchain/macro.chain.html) crate provides the feature via a macro today.
 
 There is even a third-party NuGet workaround (referenced in the linked
@@ -220,11 +221,11 @@ Evaluation of `E` proceeds:**
    and the evaluated value of `B`.**
 
 **Each *shift_expression* in a chained relational comparison is evaluated at
-most once. In particular, the middle operand of any two adjacent links — the
-right operand of the inner link and the left operand of the outer link — is
-evaluated exactly once, and its evaluated value is used in both links.
-Evaluation order of operands is strictly left-to-right, and the chain
-short-circuits on the first link that produces `false`.**
+most once. A middle operand that appears in two adjacent links, as the right
+operand of the inner link and the left operand of the outer link, is still
+evaluated only once; its evaluated value is used in both links. Evaluation
+order of operands is strictly left-to-right, and the chain short-circuits on
+the first link that produces `false`.**
 
 ***Note***: By induction on the depth of `A`, a fully-chained
 `e₀ op₁ e₁ op₂ e₂ … opₙ eₙ` evaluates as if written
@@ -283,7 +284,7 @@ spec text is required.
   `A < B < C > D > F`** (where the operands are themselves types, so the
   expression may instead be a declaration `A<B<C>D> F`): these are purely
   syntactic and are resolved by the existing generic-vs-expression
-  disambiguator in the C# grammar — the parse tree is unchanged by this
+  disambiguator in the C# grammar. The parse tree is unchanged by this
   proposal, and §11.11.13 applies only to parses that are already
   *relational_expression*s.
 
@@ -318,7 +319,7 @@ The feature is localized to one subsection of the spec and reuses
 small.
 
 A minor conceptual hazard is that `a < b < c` now has two possible bindings
-in principle — classical and chained — with the classical reading taking
+in principle, classical and chained, with the classical reading taking
 priority when it is legal. Readers who are accustomed to C#'s existing
 behaviour of `a < b < c` (which almost always produces a compile-time error
 today) will need to internalize that the expression now has a meaning in the
