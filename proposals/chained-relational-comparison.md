@@ -61,7 +61,7 @@ Math-oriented and scientific languages:
 - **Julia**: [native support](https://docs.julialang.org/en/v1/manual/mathematical-operations/#Chaining-comparisons).
 - **Python**: [native support](https://docs.python.org/3/reference/expressions.html#comparisons).
 
-Lisp family (n-ary comparison over a chain of values):
+Lisp family (variadic comparison operators):
 
 - **Common Lisp**: [native support](http://www.lispworks.com/reference/HyperSpec/Body/f_eq_sle.htm).
 - **Clojure**: [native support](https://www.clojure.org/guides/comparators).
