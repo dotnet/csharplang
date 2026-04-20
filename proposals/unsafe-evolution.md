@@ -455,6 +455,11 @@ Should more declarations produce the meaningless `unsafe` warning?
 For example, fields without initializers (assuming we don't support [`unsafe` fields](#unsafe-fields)), methods with empty bodies (or `extern`), etc.
 We already have an IDE analyzer for unnecessary `unsafe` though.
 
+When `[RequiresUnsafe]` was used directly by users to declare *requires-unsafe* members, it was disallowed on some member kinds via its `AttributeUsageAttribute`
+and we had a warning for applying it to sub-kinds that cannot be disallowed by that attribute (namely destructors, static constructors, lambdas).
+But `unsafe` has a meaning on all those members kinds (introducing `unsafe` context in their bodies), even though it doesn't have the effect of making them *requires-unsafe*.
+Should we warn about that?
+
 ### `unsafe` fields
 
 Today, no proposal is made around `unsafe` on a field. We may need to add it though, such that any read from or write to a field marked as `unsafe` must be in an `unsafe` context. This would
