@@ -646,6 +646,10 @@ We could limit this break by introducing a new keyword for when the caller of a 
 For nullable, we force generator authors to explicitly opt-in to nullable regardless of whether the entire project has opted into the feature by default, so that generator output isn't broken by the user
 turning on nullable and warn as error. Should we do the same for source generators?
 
+### XML doc comments
+
+Members marked `unsafe` should have comments indicating what is necessary for the caller to do to ensure the code is correct. To make it easier to see and easier to differentiate in documentation, a new XML doc tag would be helpful: `<safety />`. It would be expected that all pre/post-conditions would be placed in `<safety>` block. 
+
 </details>
 
 #### Conclusion
