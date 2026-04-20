@@ -140,8 +140,9 @@ is applied to select a specific operator implementation. ..."*:
 relational comparison* when `A` is itself an operation of the form `X op' Y`
 with `op'` a *relational_op*. Chained relational comparisons are specified
 in [§11.11.13](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/expressions.md#111113-chained-relational-comparisons).
-Because *relational_expression* is left-associative, §11.11.13 applies at
-each such *relational_expression* node.**
+Because *relational_expression* is left-associative,
+[§11.11.13](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/expressions.md#111113-chained-relational-comparisons)
+applies at each such *relational_expression* node.**
 
 ### §11.11.13 Chained relational comparisons
 
@@ -161,8 +162,11 @@ with `op'` a *relational_op*, and `B` is a *shift_expression*.**
 **Binary operator overload resolution
 ([§11.4.5](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/expressions.md#1145-binary-operator-overload-resolution))
 is first applied to `A op B`. If overload resolution succeeds, `E` has the
-meaning determined by §11.4.5 together with the relevant subsection of
-§11.11, and this subclause has no further effect on `E`.**
+meaning determined by
+[§11.4.5](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/expressions.md#1145-binary-operator-overload-resolution)
+together with the relevant subsection of
+[§11.11](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/expressions.md#1111-relational-and-type-testing-operators),
+and this subclause has no further effect on `E`.**
 
 **Otherwise, `E` is a *chained relational comparison*, and the following
 shall hold:**
@@ -182,24 +186,27 @@ shall hold:**
 error occurs. When both are satisfied, `E` is classified as a value of
 type `bool`.**
 
-**Conversions on the shared middle operand.** The isolated overload
+**Conversions on the shared middle operand. The isolated overload
 resolution of `Y op B` is applied against `Y`'s classification *as the
 right operand of `X op' Y`*: that is, the conversion (if any) that
-§11.4.5 applied to `Y` for the inner link is already part of `Y`'s
+[§11.4.5](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/expressions.md#1145-binary-operator-overload-resolution)
+applied to `Y` for the inner link is already part of `Y`'s
 compile-time classification at this point, and the resolution of
-`Y op B` begins from there. §11.4.5 as applied to `Y op B` may in turn
-select a conversion of its own on top of that classification, to bring
-`Y` to the operator's left-operand type. Each such conversion is
-applied at its own link's point of comparison; `Y` is still evaluated
-only once, and its single value flows through both links with the
-appropriate conversion applied at each.
+`Y op B` begins from there.
+[§11.4.5](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/expressions.md#1145-binary-operator-overload-resolution)
+as applied to `Y op B` may in turn select a conversion of its own on
+top of that classification, to bring `Y` to the operator's
+left-operand type. Each such conversion is applied at its own link's
+point of comparison; `Y` is still evaluated only once, and its single
+value flows through both links with the appropriate conversion applied
+at each.**
 
 > *Example*: In `int a = 0; short b = 42; long c = 100; a < b < c`, the
 > inner link `a < b` resolves to the predefined `int < int` operator,
 > applying the identity conversion to `a` and `short → int` to `b`. The
 > isolated resolution of `b < c` sees `b` with type `int` (the inner
 > link's classification of `b`) and resolves to `long < long`, applying
-> `int → long` to `b` and the identity conversion to `c`. At run time
+> `int → long` to `b` and the identity conversion to `c`. At run-time
 > `b` is evaluated once as a `short`; its value is converted to `int`
 > and compared against `a` by the first operator, then converted again
 > from `int` to `long` and compared against `c` by the second operator.
@@ -418,60 +425,34 @@ The goal of this proposal is to give the natural, mathematically-motivated
 syntax its natural meaning. Users reasonably expect `a < b < c` to just
 work, and any opt-in wrapper would defeat that purpose.
 
-### Why is the shared middle operand allowed to have different conversions at each link? (open for LDM)
-
-**Flagged for LDM to confirm.**
+### Why is the shared middle operand allowed to have different conversions at each link?
 
 The normative rule (see the *Conversions on the shared middle operand*
 paragraph in §11.11.13 above) lets each link's overload resolution pick
 its own conversion for `Y`, with both applied at run time at that link's
-point of comparison. The composition is left-to-right: `X op' Y` is
-resolved first and its conversion becomes part of `Y`'s classification
+point of comparison. The composition is strictly left-to-right: `X op' Y`
+is resolved first and its conversion becomes part of `Y`'s classification
 for the next step, which is what the isolated resolution of `Y op B`
-sees. The outer resolution does not "peek into" the inner resolution's
-conversion; it simply takes `Y`'s resulting classification as input and
-applies §11.4.5 from there.
+sees. The outer resolution does not reconsider the inner link's
+conversion beyond what is reflected in `Y`'s resulting type and value;
+it takes `Y`'s classification as input and applies
+[§11.4.5](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/expressions.md#1145-binary-operator-overload-resolution)
+from there. The practical effect is that natural mixed-width chains
+like `0 <= someInt <= someLong` (with `someInt : int`,
+`someLong : long`) "just work": `someInt` is evaluated once and
+converted to `long` only at the second link, matching the hand-written
+`int tmp = someInt; (0 <= tmp) && ((long)tmp <= someLong)`. The
+alternative (rejecting the chain when the outer link would require a
+non-identity conversion on `Y`) would force users to write an explicit
+cast such as `0 <= (long)someInt <= someLong`, which does not match the
+mental model of "evaluate `Y` once and compare it on both sides".
 
-The practical effect is that natural mixed-width chains "just work":
-
-```csharp
-int someInt   = 42;
-long someLong = 100;
-if (0 <= someInt <= someLong) { ... }   // chain accepted
-```
-
-with `someInt` evaluated once and converted to `long` only at the
-second link. Each *shift_expression* is still evaluated at most once,
-and the chain is equivalent in result to the hand-written
-`int tmp = someInt; (0 <= tmp) && ((long)tmp <= someLong)`.
-
-The alternative (rejecting the chain when the outer link would require
-a non-identity conversion on `Y`) would force users to write an
-explicit cast such as `0 <= (long)someInt <= someLong`, which is
-noisier and does not match the mental model of "evaluate `Y` once and
-compare it on both sides".
-
-LDM points to confirm or push back on:
-
-- Are there observable surprises from having `Y` viewed under two
-  different types along the chain? The left-to-right composition
-  prevents the outer link from *replacing* the inner's conversion, so
-  each link's individual behaviour is unchanged from what §11.4.5 would
-  produce in isolation; the only thing chain binding adds is that the
-  two resolutions share one run-time evaluation of `Y`.
-- Does the same reasoning extend cleanly to user-defined operators?
-  An inner link resolving to `operator <(T, U)` followed by an outer
-  link whose isolated resolution picks `operator <(V, W)` with
-  `U → V` implicit is accepted under this rule. In practice the cases
-  are rare and the conversions are precisely those §11.4.5 would have
-  selected on isolated `Y op B`, so the chain does not introduce any
-  new conversion behaviour beyond what the user would see if they hand-
-  wrote the `&&` form.
-- If LDM instead prefers the restrictive reading (identity conversion
-  only on the outer link's `Y`), the implementation would replace the
-  acceptance with the specific `ERR_NoChainedRelationalComparison`
-  diagnostic for any chain whose outer overload resolution would apply
-  a non-identity conversion to `Y`.
+This decision is flagged for LDM confirmation. Should LDM prefer the
+restrictive reading (identity conversion only on the outer link's `Y`),
+the implementation would replace the acceptance above with the specific
+`ERR_NoChainedRelationalComparison` diagnostic for any chain whose
+outer overload resolution would apply a non-identity conversion to
+`Y`; no other part of this proposal changes.
 
 ## Related discussions
 
