@@ -407,7 +407,7 @@ but now think they should come after to avoid unnecessary compat breaks.
 Update (LDM 2026-02-02): this needs further investigation. Yes, extensions should come after non-extension members,
 but beyond that we need some concrete proposals in light of above decision to allow extensions to contribute to implicit indexer fallback.
 
-### Count/Length: Is the name prioritized first, or non-extension vs extension?
+### ~~Count/Length: Is the name prioritized first, or non-extension vs extension?~~
 
 We also have an existing fallback: `Length` is prioritized over `Count` property.
 Should an extension `Length` come before or after a non-extension `Count` property?
