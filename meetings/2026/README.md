@@ -31,7 +31,7 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ### Mon Apr 20, 2026
 
-- [Closed class generics question](https://github.com/dotnet/csharplang/blob/03974b0deb3572569684aadcf146fe61a86fc09e/proposals/final-initializers.md#generics-and-exhaustiveness) (Rikki)
+- [Closed class generics question](https://github.com/dotnet/csharplang/blob/03974b0deb3572569684aadcf146fe61a86fc09e/proposals/closed-hierarchies.md) (Rikki)
 
 ## C# Language Design Notes for 2026
 
