@@ -249,7 +249,7 @@ static class BitExtensions
 ## Open issues
 
 <details>
-<summary>Temporary section of the document related to open issues, including discussion of unfinalized syntax and alternative designs</summary>
+<summary>Temporary section of the document related to open issues, including discussion of alternative designs</summary>
 
 ### ~~Dealing with `params`~~
 
