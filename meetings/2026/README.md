@@ -4,10 +4,13 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ## Schedule ASAP
 
-- [Unsafe evolution `extern`](https://github.com/dotnet/csharplang/pull/10051) and [`RequiresUnsafe(bool)`](https://github.com/dotnet/runtime/issues/125904) (jjonescz, runtime team)
 
 ## Schedule when convenient
 
+- [Final initializers](https://github.com/dotnet/csharplang/blob/5055b97eee8c10d12f822f6d4db9464329615947/proposals/final-initializers.md)
+  - [LDM in 2020](https://github.com/dotnet/csharplang/blob/main/meetings/2020/LDM-2020-04-27.md#primary-constructor-bodies-and-validators) approved the syntax. Next is discussing semantics.
+- [Labeled `break` and `continue` Statements](https://github.com/dotnet/csharplang/blob/c4ec6fb60c2e174b1abb6c019f22bb15b9b13f6c/proposals/labeled-break-continue.md) (CyrusNajmabadi)
+  - [Last conclusion](https://github.com/dotnet/csharplang/blob/main/meetings/2026/LDM-2026-01-12.md#labeled-break-and-continue-statements): delve deeper in a full session.
 - [Anonymous using declarations](https://github.com/dotnet/csharplang/blob/665a9392e172e6f4f16347c502d9f80220a6e7a4/proposals/anonymous-using-declarations.md) (jnm2, 333fred, CyrusNajmabadi)
 - Triage (working set)
 
@@ -18,47 +21,82 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ## Schedule
 
+### Wed May 27, 2026
+
+### Wed May 20, 2026
+
+### Mon May 18, 2026
+
+### Wed May 13, 2026
+
+### Mon May 11, 2026
+
+### Mon May 4, 2026
+
 ### Wed Apr 29, 2026
 
 ### Mon Apr 27, 2026
 
 ### Wed Apr 22, 2026
 
-- [Final initializers](https://github.com/dotnet/csharplang/blob/5055b97eee8c10d12f822f6d4db9464329615947/proposals/final-initializers.md)
-  - [LDM in 2020](https://github.com/dotnet/csharplang/blob/main/meetings/2020/LDM-2020-04-27.md#primary-constructor-bodies-and-validators) approved the syntax. Next is discussing semantics.
+- Unsafe evolution, continued - [Simple core model](https://github.com/dotnet/csharplang/blob/main/meetings/working-groups/unsafe-evolution/unsafe-simple-core-model.md) (Andy, Mads)
 
 ### Mon Apr 20, 2026
 
+- [Closed class generics question](https://github.com/dotnet/csharplang/blob/03974b0deb3572569684aadcf146fe61a86fc09e/proposals/closed-hierarchies.md) (Rikki)
+
+## C# Language Design Notes for 2026
+
 ### Wed Apr 15, 2026
 
-- [Deconstruction in lambda parameters](https://github.com/dotnet/csharplang/blob/c4ec6fb60c2e174b1abb6c019f22bb15b9b13f6c/proposals/deconstruction-in-lambda-parameters.md) (CyrusNajmabadi, jnm2)
-  - [Last conclusion](https://github.com/dotnet/csharplang/blob/main/meetings/2026/LDM-2026-01-12.md#deconstruction-in-lambda-parameters): take a closer look in LDM.
+[C# Language Design Meeting for April 15th, 2026](https://github.com/dotnet/csharplang/blob/main/meetings/2026/LDM-2026-04-15.md)
+
+- Deconstruction in lambda parameters
+- Labeled `break` and `continue`
 
 ### Mon Apr 13, 2026
 
+[C# Language Design Meeting for April 13th, 2026](https://github.com/dotnet/csharplang/blob/main/meetings/2026/LDM-2026-04-13.md)
+
+- Unsafe evolution, continued
+    - Safe markers for members with internal `unsafe` code
+    - Members with pointers in their signatures
+    - Choosing a temporary spelling for `safe`
+
 ### Wed Apr 8, 2026
 
-- [Target-typed static member access](https://github.com/dotnet/csharplang/blob/c2465a0605180e9624ee5ea9d6e0eab7e93a7c5b/proposals/target-typed-static-member-access.md) (jnm2, CyrusNajmabadi)
-  - Continue discussing scope and open questions
-- [Labeled `break` and `continue` Statements](https://github.com/dotnet/csharplang/blob/c4ec6fb60c2e174b1abb6c019f22bb15b9b13f6c/proposals/labeled-break-continue.md) (CyrusNajmabadi)
-  - [Last conclusion](https://github.com/dotnet/csharplang/blob/main/meetings/2026/LDM-2026-01-12.md#labeled-break-and-continue-statements): delve deeper in a full session.
+[C# Language Design Meeting for April 8th, 2026](https://github.com/dotnet/csharplang/blob/main/meetings/2026/LDM-2026-04-08.md)
+
+- Target-typed static member access
+    - Scope review and motivating examples
+    - Dot or no dot
+    - Initial rollout scope
 
 ### Mon Apr 6, 2026
 
+[C# Language Design Meeting for April 6th, 2026](https://github.com/dotnet/csharplang/blob/main/meetings/2026/LDM-2026-04-06.md)
+
+- Unsafe evolution, continued
+    - Simple core model
+    - `extern` members and explicit safety markers
+
 ### Wed Apr 1, 2026
 
-### Mon Mar 30, 2026
+[C# Language Design Meeting for April 1st, 2026](https://github.com/dotnet/csharplang/blob/main/meetings/2026/LDM-2026-04-01.md)
 
-(One hour only)
-
-- MVP Summit feedback (Mads)
+- Unsafe evolution migration and explicit safety markers
+    - Marking `extern` members as explicitly safe
+    - Avoiding easy but incorrect unsafe evolution migration paths
 
 ### Wed Mar 11, 2026
 
-- [Target-typed static member access](https://github.com/dotnet/csharplang/blob/c2465a0605180e9624ee5ea9d6e0eab7e93a7c5b/proposals/target-typed-static-member-access.md) (jnm2, CyrusNajmabadi)
+[C# Language Design Meeting for March 11th, 2026](https://github.com/dotnet/csharplang/blob/main/meetings/2026/LDM-2026-03-11.md)
 
-
-## C# Language Design Notes for 2026
+- Target-typed static member access
+    - Overview and smorgasbord of parts
+    - Factory containers
+    - Ambiguity with parenthesized expression
+    - Ambiguity with conditional expression
 
 ### Mon Mar 9, 2026
 

@@ -160,6 +160,8 @@ Other target-typed expressions besides `.Xyz` will be able to benefit from this,
 Point p = origin + new(50, 100);
 ```
 
+There is an [open question](#target-typing-existing-operand-expressions) on whether to lift this restriction and whether to allow other target-typed expressions besides `.Xyz`.
+
 This is done by adding three new conversions: _unary operator target-typing conversion_, _binary operator target-typing conversion_, and _binary cross-operand target-typing conversion_.
 
 For a unary operator expression such as `~e`, we define a new implicit _unary operator target-typing conversion_ that permits an implicit conversion from the unary operator expression to any type `T` for which there is a conversion-from-expression from `e` to `T`.
@@ -245,13 +247,7 @@ Target-typed static members will be found on separate factory container types, f
 - `SearchValues<char> separators = .Create(',', ';');` - Calls `Create(ReadOnlySpan<char>)` on the nongeneric `SearchValues` type
 - `Tensor<T> c = .Add(a, b);` - Calls `Add<T>` on the nongeneric `Tensor` type
 
-This will happen automatically when the factory member is on a nongeneric sibling type with the same name. There is also an opt-in model to enable the same lookup in classes where the name does not match. For example:
-
-- `IEnumerable<int> numbers = .Range(1, 10);` - Calls `Range` on the `Enumerable` type
-- `IEqualityComparer<string> comparer = .OrdinalIgnoreCase;` - Calls `OrdinalIgnoreCase` on the `StringComparer` type
-- `IEqualityComparer<T> comparer = .Default;` - Calls `Default` on `EqualityComparer<T>`
-
-For the above examples to work, the `IEnumerable<T>` interface definition would be decorated with an attribute referring to the `Enumerable` class, and the `IEqualityComparer<T>` interface definition would be decorated with an attribute referring to the `StringComparer` and `EqualityComparer<>` classes.
+This will happen automatically when the factory member is on a nongeneric sibling type with the same name.
 
 #### Motivation (factory containers)
 
@@ -276,11 +272,7 @@ However, this means that the method `Option.Some<T>` does not exist. This would 
 
 There is a clear relationship between `Option<T>` and `Option`, `KeyValuePair<TKey, TValue>` and `KeyValuePair`, `Task<T>` and `Task`, `ImmutableArray<T>` and `ImmutableArray`, `Tensor<T>` and `Tensor`. The relationship is clear both from the naming convention and due to the static members on the factory type that return instances of the generic type.
 
-This doesn't always involve generics, either. There is a community request for `Color color = .Red;` to refer to `Colors.Red`. This requires forming an association between the [`Color` struct](https://learn.microsoft.com/en-us/dotnet/api/system.windows.media.color) and the [`Colors` class](https://learn.microsoft.com/en-us/dotnet/api/system.windows.media.colors).
-
 It would be a lost opportunity not to make use of these clear relationships in order to make consumption more consistent.
-
-In addition, if a separate proposal were to make `IEnumerable<T>` the target type of spreads and foreach, the syntax `foreach (var x in .Range(1, 10))` or `[.. .Repeat(1, 10)]` would just fall out.
 
 #### Detailed design (factory containers)
 
@@ -288,11 +280,34 @@ As a guiding principle, the outcome for the call site can be thought of as equiv
 
 Member lookup for a _target-typed member binding expression_ would consider not just static members on the targeted type, but also _applicable factory members_, a subset of the static members of the target type's related _factory container types_.
 
-A type `F` serves as a _factory container type_ for another type `G` if `F` is explicitly referenced by a FactoryContainerAttribute on `G` as defined below, or implicitly if `F` has no type parameters of its own and `G` does have type parameters of its own, and they are both declared in the same module, and they are both declared in either the same containing type if any, or the same namespace if not.
+A type `F` serves as a _factory container type_ for another type `G` if `F` has no type parameters of its own and `G` does have type parameters of its own, and they are both declared in the same module, and they are both declared in either the same containing type if any, or the same namespace if not.
 
-A member of a _factory container type_ is an _applicable factory member_ if it is static and the result of evaluating the member has an identity conversion to the target type. If the _target-typed member binding expression_ is the expression of an invocation expression, then the result of evaluating the invocation is considered instead, and any inferred type arguments in the invocation that appear in the return type will be inferred outside-in to match the target type. For example, `Option<short> opt = .Some(42)` will infer `Option.Some<short>`.
+A member of a _factory container type_ is an _applicable factory member_ if it is static and the result of evaluating the member has an identity conversion to the target type. This filter is consistent with how static extension methods work when the receiver type only makes it applicable to a narrower set of type parameters than is supported by the receiver type's declaration. This also becomes important for the potential future expansion of [explicit factory container associations](#future-expansions-factory-containers).
 
-The filter of _applicable factory members_ means that `IEqualityComparer<string> comparer = .OrdinalIgnoreCase;` will work if `IEqualityComparer<T>` declares `[FactoryContainer(typeof(StringComparer))]`, but `IEqualityComparer<int> comparer = .OrdinalIgnoreCase;` will fail with an error that `.OrdinalIgnoreCase` cannot be found, rather than an error that it returns a comparer with an incompatible type.
+If the _target-typed member binding expression_ is the expression of an invocation expression, then the result of evaluating the invocation is considered instead, and any inferred type arguments in the invocation that appear in the return type will be inferred outside-in to match the target type. For example, `Option<short> opt = .Some(42)` will infer `Option.Some<short>`.
+
+#### Alternatives (factory containers)
+
+Static extension methods would be able to achieve the same end goal of writing `.Some(42)` for `Option<T>` or `.Range(1, 10)` for `IEnumerable<int>` or `.OrdinalCompareCase` for `IEqualityComparer<string>`. This would not fall foul of the [CA1000: Do not declare static members on generic types](https://learn.microsoft.com/en-us/dotnet/fundamentals/code-analysis/quality-rules/ca1000) rule, since the extension method itself is not declared on the generic type.
+
+While this shows the power of combining the core proposal with static extension methods, there are scaling problems with using static extension methods to provide the missing consistency in consumption syntax.
+
+1. This would not be automatic out of the box. It would become best practice to declare static extension methods on your own types to enable the nicer consumption pattern. This would not be done consistently, and users would run into the inconsistencies.
+1. The core libraries would likely not be willing to declare such static extension methods for the core types. In general, they prefer not to bloat metadata by declaring simple forwarders to other methods.
+
+#### Future expansions (factory containers)
+
+We're keeping an option in our back pocket ([LDM notes](https://github.com/dotnet/csharplang/blob/main/meetings/2026/LDM-2026-03-11.md#conclusion)) for factory containers to have an opt-in model to enable the same lookup in classes where the name does not match. For example:
+
+- `IEnumerable<int> numbers = .Range(1, 10);` - Calls `Range` on the `Enumerable` type
+- `IEqualityComparer<string> comparer = .OrdinalIgnoreCase;` - Calls `OrdinalIgnoreCase` on the `StringComparer` type
+- `IEqualityComparer<T> comparer = .Default;` - Calls `Default` on `EqualityComparer<T>`
+
+For the above examples to work, the `IEnumerable<T>` interface definition would be decorated with an attribute referring to the `Enumerable` class, and the `IEqualityComparer<T>` interface definition would be decorated with an attribute referring to the `StringComparer` and `EqualityComparer<>` classes.
+
+This doesn't always involve generics, either. There is a community request for `Color color = .Red;` to refer to `Colors.Red`. This requires forming an association between the [`Color` struct](https://learn.microsoft.com/en-us/dotnet/api/system.windows.media.color) and the [`Colors` class](https://learn.microsoft.com/en-us/dotnet/api/system.windows.media.colors).
+
+If the runtime placed on `IEnumerable<T>` a FactoryContainerAttribute pointing to `System.Linq.Enumerable` class, and a separate proposal were to make `IEnumerable<T>` the target type of spreads and foreach, the syntax `foreach (var x in .Range(1, 10))` or `[.. .Repeat(1, 10)]` would just fall out.
 
 This is the definition of the attribute that enables a type to use factory members in another type when constructed through target-typed static member access:
 
@@ -311,14 +326,7 @@ Errors will be produced in the following scenarios:
 - If the attribute is used in older language versions.
 - If the referenced type contains no members that could be _applicable factory members_ for any generic instantiation of the target type which are at least as accessible as the target type.
 
-#### Alternatives (factory containers)
-
-Static extension methods would be able to achieve the same end goal of writing `.Some(42)` for `Option<T>` or `.Range(1, 10)` for `IEnumerable<int>` or `.OrdinalCompareCase` for `IEqualityComparer<string>`. This would not fall foul of the [CA1000: Do not declare static members on generic types](https://learn.microsoft.com/en-us/dotnet/fundamentals/code-analysis/quality-rules/ca1000) rule, since the extension method itself is not declared on the generic type.
-
-While this shows the power of combining the core proposal with static extension methods, there are scaling problems with using static extension methods to provide the missing consistency in consumption syntax.
-
-1. This would not be automatic out of the box. It would become best practice to declare static extension methods on your own types to enable the nicer consumption pattern. This would not be done consistently, and users would run into the inconsistencies.
-1. The core libraries would likely not be willing to declare such static extension methods for the core types. In general, they prefer not to bloat metadata by declaring simple forwarders to other methods.
+The filter of _applicable factory members_ in the [detailed design section](#detailed-design-factory-containers) means that `IEqualityComparer<string> comparer = .OrdinalIgnoreCase;` will work if `IEqualityComparer<T>` declares `[FactoryContainer(typeof(StringComparer))]`, but `IEqualityComparer<int> comparer = .OrdinalIgnoreCase;` will fail with an error that `.OrdinalIgnoreCase` cannot be found, rather than an error that it returns a comparer with an incompatible type. This is consistent with how a static extension member would behave.
 
 ## Specification
 
@@ -404,7 +412,7 @@ This doesn't seem to be a popular request among the language team members who ha
 
 ## Alternatives
 
-#### Workaround: `using static`
+### Workaround: `using static`
 
 As a mitigation, `using static` directives can be applied as needed at the top of the file or globally. This allows syntax such as `GetMethod("Name", Public | Static)` today.
 
@@ -479,7 +487,7 @@ This specific sigil is a good fit with modern language sensibilities and audienc
 - Rust has an active RFC which calls it [path inference](https://github.com/rust-lang/rfcs/pull/3444).
 - Zig calls it [enum literals](https://ziglang.org/documentation/master/#Enum-Literals).
 
-## Open questions
+## Answered questions
 
 ### Ambiguity with parenthesized expression
 
@@ -491,6 +499,8 @@ Should `(A).B` continue to fail when `A` is a type, or be made to work the same 
 
 **Recommendation:** `(A).B` should continue to fail when `A` is a type. Even though blocking this syntax is an additional rule, the syntax is not beneficial.
 
+**Conclusion**: Recommendation taken ([LDM notes](https://github.com/dotnet/csharplang/blob/main/meetings/2026/LDM-2026-03-11.md#conclusion-1)).
+
 ### Ambiguity with conditional expression
 
 There is an ambiguity if target-typed static member access is used as the first branch of a conditional expression, where it would parse today as a null-safe dereference: `expr ? .Name : ...`
@@ -500,6 +510,10 @@ We can follow the approach already taken for the similar ambiguity in collection
 Alternatively, target-typed static member access could be always disallowed within the first branch of a conditional expression unless surrounded by parens: `expr ? (.Name) : ...`. The downside is that this puts a usability burden onto users, since the compiler can work out the ambiguity by looking ahead for the `:` as with collection expressions.
 
 **Recommendation:** Allow `expr ? .Name :` by looking ahead for `:`, just as with collection expressions.
+
+**Conclusion**: Recommendation taken ([LDM notes](https://github.com/dotnet/csharplang/blob/main/meetings/2026/LDM-2026-03-11.md#conclusion-2)).
+
+## Open questions
 
 ### Allowing overload resolution to be informed by target-typed access
 
@@ -614,3 +628,17 @@ It's typical to see generated enum member names be the same as the original cons
 Instead, this could just mention the well-known constant names which are what you'd search anyway :
 
 `.FILE_GENERIC_READ | .FILE_GENERIC_WRITE`
+
+### Target-typing existing operand expressions
+
+[Target-typing with overloadable operators](#target-typing-with-overloadable-operators) currently allows other target-typed expressions besides `.Xyz` to benefit from the new target-typing, such as `null`, `default` and `[]`. One exception to this is the target-typed `new` expression. The spec explicitly states that target-typed `new` may not appear as an operand of a unary or binary operator. If desired, we could lift this restriction so that it is not the odd one out:
+
+```cs
+Point p = origin + new(50, 100);
+```
+
+Do we want to lift this restriction and enable `+ new()` alongside `+ default` and `+ []` and `+ .Instance` and so on? Do we want to keep this restriction in place so that `+ new()` remains the odd one out? Or, do we want to narrow this ability so that `+ .Instance` is the only target-typed operand expression form that is allowed and `+ default` and `+ []` are not allowed?
+
+(Note: `+` is being used for demonstration purposes, but this applies to every overloadable unary and binary operator.)
+
+Recommendation: This would be a nice-to-have, but is not critical to the target-typed static member access proposal. Choose the simpler implementation path for now and expand later if feedback supports it.

@@ -10,7 +10,7 @@ Champion issue: https://github.com/dotnet/csharplang/issues/9662
 *Unions* is a set of interlinked features, that combine to provide C# support for union types:
 
 - *Union types*: Structs and classes that have a `[Union]` attribute are recognized as *union types*, and support the *union behaviors*.
-- *Case types*: Union types have a set of *case types*, which is given by parameters to constructors and factory methods.
+- *Case types*: Union types have a set of *case types* denoting the types that their content value can have.
 - *Union behaviors*: Union types support the following *union behaviors*:
     - *Union conversions*: There are implicit *union conversions* from each case type to a union type.
     - *Union matching*: Pattern matching against union values implicitly "unwraps" their contents, applying the pattern to the underlying value instead.
@@ -76,40 +76,35 @@ The different union members are described in the following.
 
 Union creation members are used to create new union values from a case type value.
 
-If the union-defining type is the union type itself, each constructor with a single parameter is a *union constructor*.
-The case types of the union are identified as the set of types built from parameter types of these constructors in the following way:
- - If the parameter type is a nullable type (whether a value or a reference), the case type is the underlying type
- - Otherwise, the case type is the parameter type.
+If the union-defining type is the union type itself, each constructor with a single parameter is a *union constructor*. The case types of the union are identified as the set of parameter types of these union constructors.
 
 ```csharp
 // Union constructor making `Dog` a case type
 public Pet(Dog value) { ... }
 ```
 ```csharp
-// Union constructor making `int` a case type
+// Union constructor making `int?` a case type
 public Union(int? value) { ... }
 ```
 ```csharp
-// Union constructor making `string` a case type
+// Union constructor making `string?` a case type
 public Union(string? value) { ... }
 ```
 
 If the union-defining type is a union member provider, each static `Create` method with a single parameter and a return type 
 that is identity-convertible to the union type itself is a *union factory method*. 
-The case types of the union are identified as the set of types built from parameter types of these factory methods in the following way:
- - If the parameter type is a nullable type (whether a value or a reference), the case type is the underlying type
- - Otherwise, the case type is the parameter type.
+The case types of the union are identified as the set of parameter types of these factory methods.
 
 ```csharp
 // Union factory method making `Cat` a case type
 public static Pet Create(Cat value) { ... }
 ```
 ```csharp
-// Union factory method making `int` a case type
+// Union factory method making `int?` a case type
 public static Union Create(int? value) { ... }
 ```
 ```csharp
-// Union factory method making `string` a case type
+// Union factory method making `string?` a case type
 public static Union Create(string? value) { ... }
 ```
 
@@ -139,7 +134,7 @@ This allows the compiler to implement pattern matching more efficiently when cas
 The non-boxing access members are:
 
 - A `HasValue` property of type `bool` with a public `get` accessor. It may optionally have an `init` or `set` accessor, which can be of any accessibility and is not used by the compiler. 
-- A `TryGetValue` method for each case type. The method returns `bool` and takes a single out-parameter of a type that is identity-convertible to the case type.
+- A `TryGetValue` method for each case type. The method returns `bool` and takes a single out-parameter of a type that is identity-convertible to either the case type or optionally the underlying value type, if the case type is a nullable value type.
     
 ```csharp
 // Non-boxing access members
@@ -149,7 +144,7 @@ public bool TryGetValue(out Dog value) { ... }
 
 `HasValue` is expected to return true if and only if the union's `Value` is not null.
 
-`TryGetValue` is expected to return true if and only if the union's `Value` is of the given case type, and if so, deliver that value in the method's out parameter.
+`TryGetValue` is expected to return true if and only if the union's `Value` is a non-null value of the given case type, and if so, deliver that value in the method's out parameter.
 
 #### Well-formedness
 
@@ -341,7 +336,7 @@ Other union matching patterns will succeed only when the union value itself is n
 if (result is 1) { ... } // if (result != null && result.Value is 1)
 ```
 
-Similarly, if the incoming value is a nullable values type (wrapping a struct union type), then the `null` pattern will succeed 
+Similarly, if the incoming value is a nullable value type (wrapping a struct union type), then the `null` pattern will succeed 
 regardless of whether the incoming value itself is `null` or its contained value is `null`:
 
 ```csharp
@@ -352,7 +347,6 @@ Other union matching patterns will succeed only when the the incoming value itse
 ```csharp
 if (result is 1) { ... } // if (result.HasValue && result.GetValueOrDefault().Value is 1)
 ```
-
 
 The compiler will prefer implementing pattern behavior by means of members prescribed by the non-boxing access pattern. While it is free to do any optimization within the bounds of the well-formedness rules, the following are the minimum set guaranteed to be applied:
 
@@ -381,7 +375,8 @@ var name = pet switch
 
 The null state of a union's `Value` property is tracked like any other property, with these modifications: 
 
-- When a union creation member is called (explicitly or through a union conversion), the new union's `Value` gets the null state of the incoming value.
+- The default null state of a union type's `Value` property is "maybe null" if the default null state of any of the case types is "maybe null". Otherwise, the default null state is "not null".
+- When a union creation member is called (explicitly or through a union conversion), the new union's `Value` property gets the null state of the incoming value.
 - When the non-boxing access pattern's `HasValue` or `TryGetValue(...)` are used to query the contents of a union type (explicitly or via pattern matching), it impacts `Value`'s nullability state in the same way as if `Value` had been checked directly: The null state of `Value` becomes "not null" on the `true` branch.
 
 Even when a union switch is otherwise exhaustive, if the null state of the incoming union's `Value` property is "maybe null", a warning will be given on unhandled null.
@@ -439,8 +434,11 @@ A union declaration has a name and a list of *union constructors* types.
 ``` antlr
 union_declaration
     : attributes? struct_modifier* 'partial'? 'union' identifier type_parameter_list?
-      '(' type (',' type)* ')'  struct_interfaces? type_parameter_constraints_clause* 
+      '(' case_types ')'  struct_interfaces? type_parameter_constraints_clause* 
       (`{` struct_member_declaration* `}` | ';')
+    ;
+case_types
+    : type (',' type)*
     ;
 ```
 
@@ -450,7 +448,7 @@ In addition to the restrictions on struct members ([§16.3](https://github.com/d
 * Explicitly declared public constructors with a single parameter are not permitted.
 * Explicitly declared constructors must use a `this(...)` initializer to (directly or indirectly) delegate to one of the generated constructors.
 
-The *union constructors* types can be any type that converts to `object`, e.g., interfaces, type parameters, nullable types and other unions. It is fine for resulting cases to overlap, and for unions to nest or be null.
+The *case_types* can be any type that converts to `object`, e.g., interfaces, type parameters, nullable types and other unions. It is fine for resulting cases to overlap, and for unions to nest or be null.
 
 Examples:
 
@@ -472,6 +470,7 @@ public union OneOrMore<T>(T, IEnumerable<T>)
 public record class None();
 public record class Some<T>(T value);
 public union Option<T>(None, Some<T>);
+```
 
 #### Lowering
 
@@ -480,7 +479,7 @@ A union declaration is lowered to a struct declaration with
 * the same attributes, modifiers, name, type parameters and constraints,
 * implicit implementations of `IUnion`,
 * a `public object? Value { get; }` auto-property,
-* a public constructor for each *union constructor* type,
+* a public constructor for each of the *case_types*,
 * any members in the union declaration's body.
 
 It is an error for user-declared members to conflict with generated members.
@@ -611,7 +610,7 @@ I.e. the pattern is true when ```(!nullableValue.HasValue || nullableValue.Value
 
 **Resolution:** The proposal is approved.
 
-### What to do about "bad" APIs?
+### [Resolved] What to do about "bad" APIs?
 
 What should compiler do about union matching APIs that look like a match, but otherwise "bad"?
 For example, compiler finds TryGetValue/HasValue with matching signature, but it is "bad" because
@@ -620,9 +619,13 @@ report an error?
 Similar, the API might be marked as Obsolete/Experimental. Should compiler report any diagnostics, silently use the API
 or silently not use the API?
 
-### What if types for union declaration are missing
+**Resolution:** The compiler should silently ignore such APIs without reporting errors or diagnostics, aligning with prior art for optimization scenarios.
+
+### [Resolved] What if types for union declaration are missing
 
 What happens if `UnionAttribute`, `IUnion` or `IUnion<TUnion>` are missing? Error? Synthesize? Something else?
+
+**Resolution:** The compiler should not synthesize these types and users should provide them explicitly, either by referencing assemblies or defining them locally. 
 
 ### [Resolved] Design of generic IUnion interface
 
@@ -705,7 +708,7 @@ An implementation like that will be in contradiction with nullable analysis beha
 Should the [Well-formedness](#well-formedness) rules be adjusted, or should state of `Value` of `default` be "maybe null"?
 If the latter, should initialization ```S2 s2 = default;``` produce a nullability warning?
 
-### Confirm that a type parameter is never a union type, even when constrained to one.
+### [Resolved] Confirm that a type parameter is never a union type, even when constrained to one.
 
 ``` C#
 class C1 : System.Runtime.CompilerServices.IUnion
@@ -729,6 +732,8 @@ class Program
     }   
 }
 ```
+
+**Resolution:** Confirmed
 
 ### Should post-condition attributes affect default nullability of a Union instance?
 
@@ -1123,7 +1128,7 @@ In case of a recursive union, the type pattern might give no warning, but it sti
 **Resolution:**
 Should work as a type pattern.
 
-### List pattern
+### [Resolved] List pattern
 
 List pattern always fails with `Union` matching:
 ``` c#
@@ -1153,6 +1158,8 @@ static class Extensions
     }
 }
 ```
+
+**Resolution:** No longer the case. Extension blocks can enable list pattern scenarios for union types by adding missing APIs for `object`.
 
 ### Other questions
 * Both the use of constructors in union conversions and the use of `TryGetValue(...)` in union pattern matching are specified to be lenient when multiple ones apply: They'll just pick one. This should not matter per the well-formedness rules, but are we comfortable with it?
