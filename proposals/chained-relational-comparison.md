@@ -194,15 +194,16 @@ applied at its own link's point of comparison; `Y` is still evaluated
 only once, and its single value flows through both links with the
 appropriate conversion applied at each.
 
-> *Example*: In `short a = 0; int b = 42; long c = 100; a < b < c`, the
+> *Example*: In `int a = 0; short b = 42; long c = 100; a < b < c`, the
 > inner link `a < b` resolves to the predefined `int < int` operator,
-> applying `short → int` to `a` and the identity conversion to `b`.
-> The isolated resolution of `b < c` sees `b` with type `int` (the
-> inner link's classification of `b`) and resolves to `long < long`,
-> applying `int → long` to `b` and the identity conversion to `c`. At
-> run time `b` is evaluated once; the resulting `int` value is compared
-> to `a`'s `int` value by the first operator, and converted to `long`
-> to be compared to `c` by the second operator. *end example*
+> applying the identity conversion to `a` and `short → int` to `b`. The
+> isolated resolution of `b < c` sees `b` with type `int` (the inner
+> link's classification of `b`) and resolves to `long < long`, applying
+> `int → long` to `b` and the identity conversion to `c`. At run time
+> `b` is evaluated once as a `short`; its value is converted to `int`
+> and compared against `a` by the first operator, then converted again
+> from `int` to `long` and compared against `c` by the second operator.
+> *end example*
 
 > *Notes*:
 >
