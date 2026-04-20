@@ -4,7 +4,6 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ## Schedule ASAP
 
-- [Closed class generics question](https://github.com/dotnet/csharplang/blob/03974b0deb3572569684aadcf146fe61a86fc09e/proposals/final-initializers.md#generics-and-exhaustiveness) (Rikki)
 
 ## Schedule when convenient
 
@@ -31,6 +30,8 @@ All schedule items must have a public issue or checked-in proposal that can be l
 - Unsafe evolution, continued - [Simple core model](https://github.com/dotnet/csharplang/blob/main/meetings/working-groups/unsafe-evolution/unsafe-simple-core-model.md) (Andy, Mads)
 
 ### Mon Apr 20, 2026
+
+- [Closed class generics question](https://github.com/dotnet/csharplang/blob/03974b0deb3572569684aadcf146fe61a86fc09e/proposals/final-initializers.md#generics-and-exhaustiveness) (Rikki)
 
 ## C# Language Design Notes for 2026
 
