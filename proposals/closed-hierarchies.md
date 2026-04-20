@@ -206,97 +206,153 @@ class C1
 
 ### Generics and exhaustiveness
 
-Use of generic closed classes means that the number and set of subtypes can depend on the particular construction of the closed class.
+At first glance, handling generic closed types seems manageable. One key task the language needs to define, in order to check exhaustiveness,
+is how to determine the "set of *possible subtypes*" of a generic type. For example:
 
 ```cs
 closed class C<T>;
 class D1 : C<int>;
-class D2 : C<int>;
-class D3 : C<string>;
-class D4<T> : C<T>;
-class D5<T> : C<ImmutableArray<T>>;
+class D2 : C<string>;
+class D3<T> : C<T>;
 
 class Program
 {
-    public int M1(C<int> c)
-    {
-        return c switch // exhaustive
+    static int Match1(C<int> c)
+        => c switch
+        {
+            D1 => 1,
+            D3<int> => 3
+        };
+
+    static int Match2(C<string> c)
+        => c switch
+        {
+            D2 => 2,
+            D3<string> => 3
+        };
+
+    static int Match3<X>(C<X> c)
+        => c switch
         {
             D1 => 1,
             D2 => 2,
-            // D3 and D5 is not permitted
-            D4<int> => 4,
+            D3<X> => 3
         };
-    }
-
-    public int M2(C<string> c)
-    {
-        return c switch // exhaustive
-        {
-            // D1, D2, and D5 is not permitted
-            D3 => 3,
-            D4<string> => 4,
-        };
-    }
-
-    public int M3<T>(C<T> c)
-    {
-        return c switch // exhaustive. Note that D1, D2, D3 are all valid here.
-        {
-            D1 => 1,
-            D2 => 2,
-            D3 => 3,
-            D4<T> => 4,
-            D5<T> => 5,
-        };
-    }
-
-    public class E;
-
-    public int M4<T>(C<T> c) where T : E
-    {
-        return c switch // exhaustive. The language doesn't stop us today from using D1, D2, D3, but, they're not necessary.
-        {
-            D4<E> => 1,
-        };
-    }
 }
 ```
 
-It feels like the following determinations should be made:
+So far, so good. When a concrete `C<int>` is used, for example, we can require matching just the types which could possibly have `C<int>` as a base type.
+Even when a generic `C<X>` is used, we can include all the subtypes whose base type could possibly *unify* with `C<X>`.
 
-1) Do we want to support generic closed classes?
-
-**Recommendation**: Leaning toward no to start with. Let's focus on getting support out for the important core scenarios, and leave space to add this in response to user feedback.
-
-2) If yes to (1), what rule should be used to determine the set of closed subtypes?
-
-**Recommendation**: Use the following rule.
-
-The set of subtype declarations `D` of a closed type `C` is determined in the following way:
-
-If `C` is not generic (`C` and its containing type(s) do not have any type parameters), then the set of subtypes includes all class declarations (i.e. original definitions) whose base type is `C`.  
-**Note:** the [finiteness rule](#type-parameter-restriction) indicates that the subtype of a non-generic closed type is never generic. So, this set will be complete.
-
-If `C` is a generic type (Note: this could perhaps be cleaned up/simplified):
-- Let `C₀` be the original definition of `C`.
-- Let `D₀` be the set of all subtype declarations in the same module as `C₀` whose base type is a construction of `C₀`.
-- For each subtype `S₀` in `D₀`, determine a subtype `S` which may be a member of the set of subtypes of `C`:
-  - If `S₀` is not generic, and `S₀`'s base type is `C`, then `S₀` is a member of `D`.
-  - If `S₀` is generic, then perform a [*generic subtype inference*](#generic-subtype-inference) from `S₀` to `C`. If the inference succeeds, then the resulting inferred type `S` is a member of `D`.
-
-#### Generic subtype inference
-
-In this scenario we have a constructed closed type `C`, and a "candidate subtype definition" `S₀`.  
-Let the base type of `S₀` be `Cₛ`. Let `T1, T2, ..., Tn` be the set of type parameters of `S₀`.
-Perform an inference like the following:
+However, it seems like when a more complex generic subtype is used, then, the user can get into a situation where it's not possible to name all the types needed in order to exhaust the base type.
+We previously introduced a [type parameter restriction](#type-parameter-restriction) to try and prevent similar kinds of situations.
 
 ```cs
-// - type parameter list has the same arity as `S₀`
-// - the finiteness rule says that every type parameter of `S₀` must be used in `Cₛ`
-void M<T1, T2, ..., Tn>(Cₛ s) { }
+closed class C<T>;
+class D1<U1> : C<U1>;
+class D2<U2> : C<ImmutableArray<U2>>;
+class D3<U3> : C<U3> where U3 : IEnumerable<int>;
 
-// The following method type argument inference, if it succeeds,
-// results in a set of type arguments which can be substituted into `S₀` to yield the subtype `S` of `C`.
-M(new C());
+class Program
+{
+    static int Match<X>(C<X> c)
+        => c switch
+        {
+            D1<X> => 1,
+            // We know that if 'X' is some 'ImmutableArray<?>', then, it's possible that 'c' is a 'D2'.
+            // But, we don't have the ability to speak that 'D2' in this context.
+
+            // Similarly, 'D3<X>' could flow in, but we can't refer to it, because 'X' doesn't meet constraints of 'U3'.
+            D3<X> => 3,
+        };
+}
+```
+
+It feels unclear whether this situation can be avoided, except by ensuring that all the type parameters on the subtype, are passed *directly* as type arguments to the base type, and for a base type parameter which has equivalent constraints.
+
+This still may be not be enough to ensure that "the subtype can always be used where the base type is used", though.
+
+Otherwise we can still get into even *further* cases where a subtype can't be used in the context of the base type usage, such as with accessibility:
+
+```cs
+class C;
+
+class Container
+{
+    protected class D1 : C;
+}
+
+class Program
+{
+    static int Match<X>(C c)
+        => c switch
+        {
+            // error CS0122: 'Container.D1' is inaccessible due to its protection level
+            Container.D1 => 1
+        };
+}
+```
+
+This seems to lead to the following questions:
+
+1) Do we want to further restrict the shape of generic subclasses of closed classes, in order to reduce the number of "inexhaustibility" situations?
+2) Given the inability to keep a "complete" guardrail, do we still want the [type parameter restriction](#type-parameter-restriction)?
+
+One other way of ensuring "the subtype can always be spoken", might be to require the subtype to be listed at the declaration with a `permits` clause or similar:
+```cs
+closed class C<T>
+    permits D1<T>, D2<T>, D3<T>;
+
+class D1<U1> : C<T>;
+
+// The below declarations are essentially invalid as the 'permits' clause contradicts the base clause, and, there isn't an ability for permits clause to introduce new type parameters or constraints.
+class D2<U2> : C<ImmutableArray<U2>>;
+class D3<U3> : C<U3> where U3 : IEnumerable<int>;
+```
+
+### Generic subtype inference
+
+Assuming that we will support generic closed classes, it feels like there is a need to specify how the language decides what the set of *possible subtypes* are of such types.
+
+The following is a starting point for such a rule:
+
+1) For a given closed type `C`, let `C₀` be its original definition.
+2) For each subtype declaration `S₀` whose base type has original definition `C₀`, determine if a construction `S` exists which has base type `C`.
+    - See also [§19.6.3 Uniqueness of implemented interfaces](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/interfaces.md#1963-uniqueness-of-implemented-interfaces) in the standard.
+    - Question: do we need to specify *how* we determine if the construction exists? It doesn't look like we did this for interfaces.
+
+### Interface convertibility of sealed classes
+
+[§10.3.5 Explicit reference conversions](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/conversions.md#1035-explicit-reference-conversions) implies that the following cast is valid when a type is not `sealed`, and invalid when it is `sealed`:
+
+```cs
+var c = new C();
+var i = (I)c; // error
+
+sealed class C { }
+interface I { }
+```
+
+It feels like we could possibly make the same determination about the implemented interfaces in a closed hierarchy:
+
+```cs
+var c = new C();
+var i = (I)c; // error
+
+closed class C { }
+sealed class D1 : C { }
+sealed class D2 : C { }
+interface I { }
+```
+
+The question is: should we attempt to make this determination and introduce errors in certain scenarios accordingly?
+
+If we did `closed interface`, a similar determination could perhaps be made that way also. In that case, the types which implement the interface would be known, regardless of the `sealed`-ness of the implementing types:
+
+```cs
+var c = new C();
+var i = (I)c; // error: `C` isn't one of the types that we statically know implements `I`, so there's no conversion.
+
+class C { }
+closed interface I { }
 ```
