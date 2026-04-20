@@ -182,6 +182,28 @@ shall hold:**
 error occurs. When both are satisfied, `E` is classified as a value of
 type `bool`.**
 
+**Conversions on the shared middle operand.** The isolated overload
+resolution of `Y op B` is applied against `Y`'s classification *as the
+right operand of `X op' Y`*: that is, the conversion (if any) that
+§11.4.5 applied to `Y` for the inner link is already part of `Y`'s
+compile-time classification at this point, and the resolution of
+`Y op B` begins from there. §11.4.5 as applied to `Y op B` may in turn
+select a conversion of its own on top of that classification, to bring
+`Y` to the operator's left-operand type. Each such conversion is
+applied at its own link's point of comparison; `Y` is still evaluated
+only once, and its single value flows through both links with the
+appropriate conversion applied at each.
+
+> *Example*: In `short a = 0; int b = 42; long c = 100; a < b < c`, the
+> inner link `a < b` resolves to the predefined `int < int` operator,
+> applying `short → int` to `a` and the identity conversion to `b`.
+> The isolated resolution of `b < c` sees `b` with type `int` (the
+> inner link's classification of `b`) and resolves to `long < long`,
+> applying `int → long` to `b` and the identity conversion to `c`. At
+> run time `b` is evaluated once; the resulting `int` value is compared
+> to `a`'s `int` value by the first operator, and converted to `long`
+> to be compared to `c` by the second operator. *end example*
+
 > *Notes*:
 >
 > - **These rules apply at each *relational_expression* node using only
@@ -228,7 +250,9 @@ evaluated as follows. `A` is first evaluated; because `A` is of the form
 `false`, `B` is not evaluated, and the result of `A op B` is `false`.
 Otherwise, `B` is evaluated, and the result of `A op B` is obtained by
 applying the operator resolved for `Y op B` above to the value of `Y`
-produced during `A`'s evaluation and the value of `B`.**
+produced during `A`'s evaluation and the value of `B`, with any
+conversions selected by that isolated overload resolution applied at
+this point.**
 
 **Each *shift_expression* in a chained relational comparison is evaluated
 at most once. When a *shift_expression* appears as the right operand of
@@ -358,89 +382,6 @@ case.
   `a op₁ b op₂ c ⇔ a op₁ b && b op₂ c`, there is no additional cognitive
   load in allowing `a < b > c`: each link is independently understandable.
 
-## Open questions
-
-### Asymmetric conversions on a shared middle operand
-
-**This question is deferred to LDM.**
-
-When a *shift_expression* appears as the right operand of one comparison
-and as the left operand of the next, ordinary binary operator overload
-resolution is run twice against that *shift_expression*'s compile-time
-type: once for `X op' Y` (where `Y` is the shared operand) and once,
-separately, for the isolated `Y op B`. The two resolutions need not
-agree on the conversion that should be applied to `Y`. Consider:
-
-```csharp
-short a = 0;
-int   b = 42;   // the shared middle operand
-long  c = 100;
-
-if (a < b < c) { ... }
-```
-
-Here the inner link `a < b` resolves to the predefined `int < int`
-operator, applying `short -> int` to `a` and the identity conversion
-to `b`. The outer link, resolved in isolation as `b < c`, is
-`int < long`, which per [§11.4.5](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/expressions.md#1145-binary-operator-overload-resolution)
-is `long < long` with an `int -> long` conversion applied to `b`.
-
-So the question is: does the chained comparison evaluate `b` once and
-apply both conversions (the inner identity and the outer widening) at
-their respective points of use, or is the chain rejected when the two
-links would not agree on how `Y` should be converted?
-
-**Option A (permissive, current implementation).** The chain is accepted.
-`b` is evaluated exactly once; its value is used, with each link's own
-conversion applied, at that link's point of comparison. For the example
-above this is equivalent to:
-
-```csharp
-int tmpB = b;
-bool r = (a < tmpB) && ((long)tmpB < c);
-```
-
-Each *shift_expression* is still evaluated at most once; the
-single-evaluation guarantee of the main text is preserved.
-
-**Option B (strict, tentative recommendation).** The chain is accepted
-only when the outer link's resolution requires no further conversion on
-`Y` beyond what the inner link already applied. That is, the value of
-`Y` produced during the inner link's evaluation must itself be
-assignment-compatible with the outer operator's left-operand type. If
-not, the chain is not a chained relational comparison and a compile-time
-error is produced (see `ERR_NoChainedRelationalComparison` in the Roslyn
-implementation).
-
-Under Option B, the example above would be rejected; the user would
-write `a < (long)b < c` or an explicit `&&`-chain instead. The
-constraint makes the semantic model simpler to reason about ("`b` has a
-single type throughout the chain") and removes any possibility of the
-two links disagreeing on the shape of `Y`.
-
-**Discussion points for LDM:**
-
-- How surprising is Option A's asymmetry? In practice the two
-  conversions nearly always compose as "one numeric widening applied at
-  most once per side", so the observable behaviour is likely what users
-  expect when they write such a chain.
-- How restrictive is Option B? The widening cases that Option B would
-  reject (e.g. `int < int < long`) are arguably rare in practice, and
-  the explicit `(long)` cast at the break point is both short and
-  self-documenting.
-- Is there a middle ground, for example allowing only implicit
-  identity/reference/nullable-wrapping conversions in the outer link
-  (but not numeric widening)? This gets complex to specify.
-- Either option must address the corresponding question for
-  user-defined operators: an inner link resolving to
-  `operator <(T, U)` followed by an outer link that would want
-  `operator <(V, W)` with `U -> V` a user-defined conversion is even
-  more surprising than the numeric case.
-
-The Roslyn implementation currently reflects Option A; tests in that
-branch pin the exact behaviour for the numeric-widening cases so that
-LDM can decide on the semantics and the implementation can follow.
-
 ## Design decisions
 
 ### Why not include `==` and `!=`?
@@ -475,6 +416,61 @@ programmer.
 The goal of this proposal is to give the natural, mathematically-motivated
 syntax its natural meaning. Users reasonably expect `a < b < c` to just
 work, and any opt-in wrapper would defeat that purpose.
+
+### Why is the shared middle operand allowed to have different conversions at each link? (open for LDM)
+
+**Flagged for LDM to confirm.**
+
+The normative rule (see the *Conversions on the shared middle operand*
+paragraph in §11.11.13 above) lets each link's overload resolution pick
+its own conversion for `Y`, with both applied at run time at that link's
+point of comparison. The composition is left-to-right: `X op' Y` is
+resolved first and its conversion becomes part of `Y`'s classification
+for the next step, which is what the isolated resolution of `Y op B`
+sees. The outer resolution does not "peek into" the inner resolution's
+conversion; it simply takes `Y`'s resulting classification as input and
+applies §11.4.5 from there.
+
+The practical effect is that natural mixed-width chains "just work":
+
+```csharp
+int someInt   = 42;
+long someLong = 100;
+if (0 <= someInt <= someLong) { ... }   // chain accepted
+```
+
+with `someInt` evaluated once and converted to `long` only at the
+second link. Each *shift_expression* is still evaluated at most once,
+and the chain is equivalent in result to the hand-written
+`int tmp = someInt; (0 <= tmp) && ((long)tmp <= someLong)`.
+
+The alternative (rejecting the chain when the outer link would require
+a non-identity conversion on `Y`) would force users to write an
+explicit cast such as `0 <= (long)someInt <= someLong`, which is
+noisier and does not match the mental model of "evaluate `Y` once and
+compare it on both sides".
+
+LDM points to confirm or push back on:
+
+- Are there observable surprises from having `Y` viewed under two
+  different types along the chain? The left-to-right composition
+  prevents the outer link from *replacing* the inner's conversion, so
+  each link's individual behaviour is unchanged from what §11.4.5 would
+  produce in isolation; the only thing chain binding adds is that the
+  two resolutions share one run-time evaluation of `Y`.
+- Does the same reasoning extend cleanly to user-defined operators?
+  An inner link resolving to `operator <(T, U)` followed by an outer
+  link whose isolated resolution picks `operator <(V, W)` with
+  `U → V` implicit is accepted under this rule. In practice the cases
+  are rare and the conversions are precisely those §11.4.5 would have
+  selected on isolated `Y op B`, so the chain does not introduce any
+  new conversion behaviour beyond what the user would see if they hand-
+  wrote the `&&` form.
+- If LDM instead prefers the restrictive reading (identity conversion
+  only on the outer link's `Y`), the implementation would replace the
+  acceptance with the specific `ERR_NoChainedRelationalComparison`
+  diagnostic for any chain whose outer overload resolution would apply
+  a non-identity conversion to `Y`.
 
 ## Related discussions
 
