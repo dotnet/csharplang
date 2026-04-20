@@ -248,6 +248,9 @@ static class BitExtensions
 
 ## Open issues
 
+<details>
+<summary>Temporary section of the document related to open issues, including discussion of unfinalized syntax and alternative designs</summary>
+
 ### ~~Dealing with `params`~~
 
 If you have an extension indexer with `params`, such as `int this[int i, params string[] s] { get; set; }`,
@@ -508,3 +511,6 @@ public static class E
 Note: there is no question for [pointer element access](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/unsafe-code.md#2464-pointer-element-access) since an extension parameter may not be a pointer type. 
 
 Decision (LDM/Mads by email 2026-04-07): no extension indexers on strings or arrays.
+
+</details>
+
