@@ -42,11 +42,17 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 - Unsafe evolution, continued - [Simple core model](https://github.com/dotnet/csharplang/blob/main/meetings/working-groups/unsafe-evolution/unsafe-simple-core-model.md) (Andy, Mads)
 
+## C# Language Design Notes for 2026
+
 ### Mon Apr 20, 2026
 
-- [Closed class generics question](https://github.com/dotnet/csharplang/blob/03974b0deb3572569684aadcf146fe61a86fc09e/proposals/closed-hierarchies.md) (Rikki)
+[C# Language Design Meeting for April 20th, 2026](https://github.com/dotnet/csharplang/blob/main/meetings/2026/LDM-2026-04-20.md)
 
-## C# Language Design Notes for 2026
+- Closed hierarchies continued
+    - Generics and exhaustiveness
+    - Accessibility and exhaustiveness
+    - Interface convertibility of sealed classes
+    - Concrete intermediate nodes
 
 ### Wed Apr 15, 2026
 
