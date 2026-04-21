@@ -154,6 +154,8 @@ contract of `Span<T>` and `ReadOnlySpan<T>`, and so must be subject to extra scr
 > [!NOTE]
 > This means that assigning a `stackalloc` to a pointer is _always_ safe, regardless of context.
 
+Note that a `stackalloc` of a managed type remains an error.
+
 #### `sizeof`
 
 For certain predefined types, `sizeof` has always been constant and safe ([§12.8.19][sizeof-const]) and that remains unchanged.
@@ -334,6 +336,13 @@ there would be no real impact to either, which could give adopters more confiden
 
 > [!NOTE]
 > If we decide to keep the ability to have `unsafe` lambdas, we need to update this proposal to include a syntax change to allow lambdas to be declared `unsafe` in the first place.
+
+### Pointers to managed types
+
+C# 11 [allows pointers to managed types with a warning][csharp-11-unsafe-changes].
+Should we relax that warning for address-of operations?
+We think the problem is only when the user dereferences such pointer, which falls under normal unsafe evolution rules.
+But what about `sizeof`?
 
 ### `stackalloc` as initialized
 
@@ -561,7 +570,7 @@ class C
 #### `new()` constraint and `using`s
 
 How should it behave in aliases and static usings?
-- Should it be an error at the `using` declaration, suppressable via the `unsafe` keyword we already support there, or
+- Should it be an error at the `using` declaration, suppressible via the `unsafe` keyword we already support there, or
 - should it be an error normally at the use site like it would be if used directly without an alias or static using?
 
 > [!NOTE]
@@ -691,3 +700,4 @@ for source generators will be made.
 [fixed-statement]: https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/unsafe-code.md#247-the-fixed-statement
 [fixed-size-buffer-declarations]: https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/unsafe-code.md#2482-fixed-size-buffer-declarations
 [stack-allocation-spec]: https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/unsafe-code.md#249-stack-allocation
+[csharp-11-unsafe-changes]: https://github.com/dotnet/csharplang/blob/6a0a9b281aa0c36159117ece733d487af0ca23a1/proposals/csharp-11.0/low-level-struct-improvements.md#changes-in-unsafe-context
