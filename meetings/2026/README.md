@@ -4,11 +4,6 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ## Schedule ASAP
 
-- Chained relational comparison: https://github.com/dotnet/csharplang/blob/main/proposals/chained-relational-comparison.md - cyrus
-- Labeled break/continue: https://github.com/dotnet/csharplang/blob/main/proposals/labeled-break-continue.md - cyrus
-- Null conditional 'await': https://github.com/dotnet/csharplang/blob/main/proposals/null-conditional-await.md - cyrus
-- Relaxed 'partial'/'ref' ordering: https://github.com/dotnet/csharplang/blob/main/proposals/relaxed-partial-ref-ordering.md - cyrus/rikki
-- Compound assignment in initializer: https://github.com/dotnet/csharplang/blob/main/proposals/compound-assignment-in-initializer-and-with.md - cyrus
 
 ## Schedule when convenient
 
@@ -42,6 +37,12 @@ All schedule items must have a public issue or checked-in proposal that can be l
 ### Wed Apr 29, 2026
 
 ### Mon Apr 27, 2026
+
+- Chained relational comparison: https://github.com/dotnet/csharplang/blob/main/proposals/chained-relational-comparison.md - cyrus
+- Labeled break/continue: https://github.com/dotnet/csharplang/blob/main/proposals/labeled-break-continue.md - cyrus
+- Null conditional 'await': https://github.com/dotnet/csharplang/blob/main/proposals/null-conditional-await.md - cyrus
+- Relaxed 'partial'/'ref' ordering: https://github.com/dotnet/csharplang/blob/main/proposals/relaxed-partial-ref-ordering.md - cyrus/rikki
+- Compound assignment in initializer: https://github.com/dotnet/csharplang/blob/main/proposals/compound-assignment-in-initializer-and-with.md - cyrus
 
 ### Wed Apr 22, 2026
 
