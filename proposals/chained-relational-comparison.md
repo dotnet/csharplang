@@ -93,8 +93,8 @@ trickery to approximate the feature, which is evidence of real user demand.
 ## Detailed design
 
 The following updates are presented as a diff against the corresponding
-sections of the C# 6 standard
-([expressions.md](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/expressions.md)).
+sections of the C# 7 standard
+([expressions.md](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/expressions.md)).
 Throughout this section, ~~strikethrough~~ indicates text being removed from
 the existing specification, and **bold** indicates text being added. Unchanged
 prose is quoted verbatim for context.
@@ -102,7 +102,7 @@ prose is quoted verbatim for context.
 ### Grammar
 
 The following diff is applied to the grammar in
-[§11.11.1](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/expressions.md#11111-general):
+[§12.12.1](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/expressions.md#12121-general):
 
 ```diff
 +relational_op
@@ -120,33 +120,33 @@ The following diff is applied to the grammar in
 -    | relational_expression '>=' shift_expression
 +    | relational_expression relational_op shift_expression
      | relational_expression 'is' type
-     | relational_expression 'is' type identifier
+     | relational_expression 'is' pattern
      | relational_expression 'as' type
      ;
 ```
 
 > *Note*: This refactoring recognizes the same set of programs as before. *end note*
 
-### §11.11.1 General
+### §12.12.1 General
 
-In [§11.11.1](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/expressions.md#11111-general),
+In [§12.12.1](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/expressions.md#12121-general),
 insert the following paragraph immediately after the existing paragraph
 that begins *"For an operation of the form `x «op» y`, where «op» is a
-comparison operator, overload resolution ([§11.4.5](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/expressions.md#1145-binary-operator-overload-resolution))
+comparison operator, overload resolution ([§12.4.5](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/expressions.md#1245-binary-operator-overload-resolution))
 is applied to select a specific operator implementation. ..."*:
 
 **An operation of the form `A op B`, where `A` is a *relational_expression*,
 `op` is a *relational_op*, and `B` is a *shift_expression*, is a *chained
 relational comparison* when `A` is itself an operation of the form `X op' Y`
 with `op'` a *relational_op*. Chained relational comparisons are specified
-in [§11.11.13](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/expressions.md#111113-chained-relational-comparisons).
+in [§12.12.14](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/expressions.md#121214-chained-relational-comparisons).
 Because *relational_expression* is left-associative,
-[§11.11.13](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/expressions.md#111113-chained-relational-comparisons)
+[§12.12.14](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/expressions.md#121214-chained-relational-comparisons)
 applies at each such *relational_expression* node.**
 
-### §11.11.13 Chained relational comparisons
+### §12.12.14 Chained relational comparisons
 
-Add the following new subsection after [§11.11.12 The as operator](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/expressions.md#111112-the-as-operator):
+Add the following new subsection after [§12.12.13 The as operator](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/expressions.md#121213-the-as-operator):
 
 **For an expression `e₀ op₁ e₁ op₂ e₂ … opₙ eₙ` where each `opᵢ` is a
 *relational_op* and each `eᵢ` is a *shift_expression*, the
@@ -160,12 +160,12 @@ of any length.**
 with `op'` a *relational_op*, and `B` is a *shift_expression*.**
 
 **Binary operator overload resolution
-([§11.4.5](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/expressions.md#1145-binary-operator-overload-resolution))
+([§12.4.5](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/expressions.md#1245-binary-operator-overload-resolution))
 is first applied to `A op B`. If overload resolution succeeds, `E` has the
 meaning determined by
-[§11.4.5](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/expressions.md#1145-binary-operator-overload-resolution)
+[§12.4.5](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/expressions.md#1245-binary-operator-overload-resolution)
 together with the relevant subsection of
-[§11.11](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/expressions.md#1111-relational-and-type-testing-operators),
+[§12.12](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/expressions.md#1212-relational-and-type-testing-operators),
 and this subclause has no further effect on `E`.**
 
 **Otherwise, `E` is a *chained relational comparison*, and the following
@@ -178,7 +178,7 @@ shall hold:**
   returning `bool`.**
 
 - **Binary operator overload resolution
-  ([§11.4.5](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/expressions.md#1145-binary-operator-overload-resolution))
+  ([§12.4.5](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/expressions.md#1245-binary-operator-overload-resolution))
   applied to `Y op B` as an isolated binary operation shall select an
   operator whose result type is `bool`.**
 
@@ -189,11 +189,11 @@ type `bool`.**
 **Conversions on the shared middle operand. The isolated overload
 resolution of `Y op B` is applied against `Y`'s classification *as the
 right operand of `X op' Y`*: that is, the conversion (if any) that
-[§11.4.5](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/expressions.md#1145-binary-operator-overload-resolution)
+[§12.4.5](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/expressions.md#1245-binary-operator-overload-resolution)
 applied to `Y` for the inner link is already part of `Y`'s
 compile-time classification at this point, and the resolution of
 `Y op B` begins from there.
-[§11.4.5](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/expressions.md#1145-binary-operator-overload-resolution)
+[§12.4.5](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/expressions.md#1245-binary-operator-overload-resolution)
 as applied to `Y op B` may in turn select a conversion of its own on
 top of that classification, to bring `Y` to the operator's
 left-operand type. Each such conversion is applied at its own link's
@@ -228,7 +228,7 @@ at each.**
 >   regardless of what is written inside the parentheses. Therefore an
 >   expression written as `(a op₁ b) op₂ c` is not a chained relational
 >   comparison; it is bound only by binary operator overload resolution
->   ([§11.4.5](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/expressions.md#1145-binary-operator-overload-resolution)),
+>   ([§12.4.5](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/expressions.md#1245-binary-operator-overload-resolution)),
 >   which for typical operand types fails because no applicable operator
 >   exists for `bool op₂ c`.**
 >
@@ -236,7 +236,7 @@ at each.**
 >   `DateTime?`, or a nullable user-defined comparable struct) participate
 >   in chained relational comparisons without any additional rule, because
 >   the lifted relational operators of
->   [§11.4.8](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/expressions.md#1148-lifted-operators)
+>   [§12.4.8](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/expressions.md#1248-lifted-operators)
 >   return `bool` rather than `bool?`, producing `false` when either
 >   operand is `null`. The requirements above are therefore satisfied for
 >   such operands, and a `null` operand causes the corresponding
@@ -244,7 +244,7 @@ at each.**
 >   are then not evaluated.**
 >
 > - **When any operand of `A op B` has compile-time type `dynamic`, the
->   expression is dynamically bound ([§11.11.1](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/expressions.md#11111-general)).
+>   expression is dynamically bound ([§12.12.1](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/expressions.md#12121-general)).
 >   Dynamic binding does not produce a binding-time error, so overload
 >   resolution of `A op B` succeeds and this subclause does not apply.
 >   Each comparison is instead resolved at run time according to the
@@ -310,12 +310,12 @@ spec text is required.
 - **Definite assignment** of operands follows the equivalent short-circuit
   `&&`-chain: each `eᵢ` is definitely assigned by its point of use, and the
   expression as a whole contributes the "always `bool`" rules from
-  [§9.4](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/variables.md#94-definite-assignment).
+  [§9.4](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/variables.md#94-definite-assignment).
 
 - **Constant expressions**: if every operand is a constant expression and
   every link is a predefined relational operator over constant-expression
   operand types, the whole chain is a constant expression, because each link
-  is constant-foldable per [§11.20](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/expressions.md#1120-constant-expressions)
+  is constant-foldable per [§12.23](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/expressions.md#1223-constant-expressions)
   and the short-circuit `&&` form preserves constant-ness.
 
 - **Null-coalescing (`??`), null-conditional (`?.`), and nullable reference
@@ -329,26 +329,26 @@ spec text is required.
   expression may instead be a declaration `A<B<C>D> F`): these are purely
   syntactic and are resolved by the existing generic-vs-expression
   disambiguator in the C# grammar. This proposal does not change the
-  grammar or parsing behaviour; §11.11.13 applies only to expressions that
+  grammar or parsing behaviour; §12.12.14 applies only to expressions that
   already parse as *relational_expression*s.
 
 ## Back-compat analysis
 
 This is a pure extension. At every *relational_expression* node, ordinary
-binary operator overload resolution per §11.4.5 is attempted first, exactly
-as it is today; the chained-comparison rules in §11.11.13 only apply when
+binary operator overload resolution per §12.4.5 is attempted first, exactly
+as it is today; the chained-comparison rules in §12.12.14 only apply when
 that overload resolution would otherwise have produced a binding-time
 error. Any expression that compiled before this feature continues to
 compile with the same meaning:
 
 - If an expression does not involve a *relational_op* both at an outer
-  *relational_expression* node and at its left operand, §11.11.13 does not
+  *relational_expression* node and at its left operand, §12.12.14 does not
   apply at all.
 
 - If an expression does have that shape but ordinary overload resolution
   succeeds at every node (for example, because a user has defined custom
   `operator <` overloads that give the left-associative reading a valid
-  result type), §11.11.13 does not apply. This preserves the semantics of
+  result type), §12.12.14 does not apply. This preserves the semantics of
   the widely-referenced NuGet package that emulates chained comparisons via
   operator-overload trickery, and of any similar ad-hoc patterns already in
   the wild.
@@ -362,12 +362,12 @@ compile with the same meaning:
 As with any language feature, the additional specification complexity must be
 weighed against the clarity and correctness improvements it offers users.
 The feature is localized to one subsection of the spec and reuses
-§11.4.5's existing machinery at every step, so the marginal complexity is
+§12.4.5's existing machinery at every step, so the marginal complexity is
 small.
 
 A minor conceptual hazard is that `a < b < c` now has two possible
-bindings in principle: the ordinary §11.4.5 binding, when it succeeds, and
-the chained-comparison binding of §11.11.13 when §11.4.5 would otherwise
+bindings in principle: the ordinary §12.4.5 binding, when it succeeds, and
+the chained-comparison binding of §12.12.14 when §12.4.5 would otherwise
 report a binding-time error. The ordinary binding takes priority wherever
 it is legal. Readers who are accustomed to C#'s existing behaviour of
 `a < b < c` (which almost always produces a compile-time error today) will
@@ -397,7 +397,7 @@ case.
 Expressions mixing equality and relational operators are legal today and
 have a useful meaning. `a < b == c < d` parses as `(a < b) == (c < d)`
 under the precedence rules of
-[§11.4.2](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/expressions.md#1142-operator-precedence-and-associativity),
+[§12.4.2](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/expressions.md#1242-operator-precedence-and-associativity),
 asking whether two comparisons have the same truth value. That is a
 reasonable pattern found in real code, and it is clearly preferable to any
 `((a < b) == c) < d` form that a chain-style reinterpretation would
@@ -412,10 +412,10 @@ formation never triggers on `is` or `as`.
 
 ### Why not warn when ordinary binding resolves a would-be chain?
 
-Warning on any `a < b < c` that binds via §11.4.5 would false-positive on
+Warning on any `a < b < c` that binds via §12.4.5 would false-positive on
 existing code that intentionally uses user-defined operators to make that
 binding succeed, including the third-party NuGet chained-comparison package
-and similar patterns. §11.4.5 already takes priority over §11.11.13
+and similar patterns. §12.4.5 already takes priority over §12.12.14
 whenever it succeeds; adding a warning at that point would second-guess the
 programmer.
 
@@ -428,7 +428,7 @@ work, and any opt-in wrapper would defeat that purpose.
 ### Why is the shared middle operand allowed to have different conversions at each link?
 
 The normative rule (see the *Conversions on the shared middle operand*
-paragraph in §11.11.13 above) lets each link's overload resolution pick
+paragraph in §12.12.14 above) lets each link's overload resolution pick
 its own conversion for `Y`, with both applied at run time at that link's
 point of comparison. The composition is strictly left-to-right: `X op' Y`
 is resolved first and its conversion becomes part of `Y`'s classification
@@ -436,7 +436,7 @@ for the next step, which is what the isolated resolution of `Y op B`
 sees. The outer resolution does not reconsider the inner link's
 conversion beyond what is reflected in `Y`'s resulting type and value;
 it takes `Y`'s classification as input and applies
-[§11.4.5](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/expressions.md#1145-binary-operator-overload-resolution)
+[§12.4.5](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/expressions.md#1245-binary-operator-overload-resolution)
 from there. The practical effect is that natural mixed-width chains
 like `0 <= someInt <= someLong` (with `someInt : int`,
 `someLong : long`) "just work": `someInt` is evaluated once and
