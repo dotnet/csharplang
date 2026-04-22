@@ -246,10 +246,6 @@ The single most compelling motivation for this feature is events, and events nat
 
 At the same time, `=` remains destructive: permitting a second `=` for the same target would make the first assignment dead code. The rule adopted here, *"at most one `=` per target, any number of *compound_assignment_operator* per target after it,"* keeps `=` as unambiguously initializing and lets compound operators compose on top.
 
-### Why include events in `with` expressions?
-
-A `with` expression produces a clone of the receiver, and the clone inherits the original's event subscriptions (via the clone method). Subscribing or unsubscribing handlers on the clone via `+=` / `-=` is a coherent operation on the clone alone, and the original receiver is unaffected. Although `with` has historically been associated with "non-destructive mutation" of data-shape members, there is no principled reason to disallow event targets here; the `with` expression simply delegates to the same event assignment rules as an object initializer.
-
 ### Why specify the semantics as a lowering to *statement_expression*?
 
 Phrasing a *member_initializer* as an equivalent *statement_expression* makes all of the necessary rules fall out of [§12.21](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/expressions.md#1221-assignment-operators) with no further writing. In particular, [§12.21.5](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/expressions.md#12215-event-assignment) already requires event assignment to appear in a *statement_expression* context; the lowering satisfies that requirement by construction, without special-casing events at the initializer level. Each of simple assignment, compound assignment, and event assignment is invoked by the same uniform rule: "the meaning of `x.target op value;`."
