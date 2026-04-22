@@ -44,11 +44,15 @@ All schedule items must have a public issue or checked-in proposal that can be l
 - Relaxed 'partial'/'ref' ordering: https://github.com/dotnet/csharplang/blob/main/proposals/relaxed-partial-ref-ordering.md - cyrus/rikki
 - Compound assignment in initializer: https://github.com/dotnet/csharplang/blob/main/proposals/compound-assignment-in-initializer-and-with.md - cyrus
 
+## C# Language Design Notes for 2026
+
 ### Wed Apr 22, 2026
 
-- Unsafe evolution, continued - [Simple core model](https://github.com/dotnet/csharplang/blob/main/meetings/working-groups/unsafe-evolution/unsafe-simple-core-model.md) (Andy, Mads)
+[C# Language Design Meeting for April 22nd, 2026](https://github.com/dotnet/csharplang/blob/main/meetings/2026/LDM-2026-04-22.md)
 
-## C# Language Design Notes for 2026
+- Unsafe evolution, continued
+    - Signature `unsafe` and unsafe contexts
+    - Transitional diagnostics for pointer-signature calls
 
 ### Mon Apr 20, 2026
 
