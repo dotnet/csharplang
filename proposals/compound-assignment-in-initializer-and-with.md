@@ -250,6 +250,20 @@ At the same time, `=` remains destructive: permitting a second `=` for the same 
 
 Phrasing a *member_initializer* as an equivalent *statement_expression* makes all of the necessary rules fall out of [§12.21](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/expressions.md#1221-assignment-operators) with no further writing. In particular, [§12.21.5](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/expressions.md#12215-event-assignment) already requires event assignment to appear in a *statement_expression* context; the lowering satisfies that requirement by construction, without special-casing events at the initializer level. Each of simple assignment, compound assignment, and event assignment is invoked by the same uniform rule: "the meaning of `x.target op value;`."
 
+## Open LDM questions
+
+### Does a *compound_assignment_operator* member initializer satisfy a `required` member?
+
+A `required` field or property must be assigned by every object creation that does not forward the requirement (`SetsRequiredMembersAttribute`). The existing rule is expressed in terms of `=` member initializers; this proposal introduces a second form of member initializer that targets the same member, so the question is whether the compound form also discharges the `required` obligation.
+
+The two plausible answers:
+
+- **No (strict).** Only `=` satisfies `required`. A compound *member_initializer* performs a read-modify-write on the target, so a program like `new Counter { Value += 5 }` implicitly relies on an existing value of `Value` and does not initialize it in a fresh sense. A consumer is still forced to write `Value = 0, Value += 5` (or just `Value = 5`) to satisfy the requirement, which is consistent with the "required means you must assign it" mental model.
+
+- **Yes (lenient).** Any *member_initializer* whose target is the required member is enough, including the compound form. The motivation is that the required member is demonstrably mentioned in the initializer and the author has acknowledged it; whether the author started from the default value and added or replaced the default outright is not a distinction the language otherwise draws.
+
+The proposal currently leaves this unspecified. Recommendation: answer "No" for consistency with the strict reading, but this should be confirmed at LDM.
+
 ## Related discussions
 
 - [Issue #9896: Champion "Compound assignment in object initializer and `with` expression"](https://github.com/dotnet/csharplang/issues/9896).
