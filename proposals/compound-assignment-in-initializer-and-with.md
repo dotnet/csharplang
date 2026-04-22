@@ -34,6 +34,32 @@ The following updates are presented as a diff against the corresponding sections
 
 Throughout this section, ~~strikethrough~~ indicates text being removed from the existing specification, and **bold** indicates text being added. Unchanged prose is quoted verbatim for context.
 
+### Assignment operators
+
+A new production *compound_assignment_operator* is introduced in [§12.21.1](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/expressions.md#12211-general) alongside the existing *assignment_operator*, and *assignment_operator* is rewired to reference it. This makes the compound subset of the assignment operators namable in the grammar, which other sections (notably [§12.8.16.3](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/expressions.md#128163-object-initializers) and the `with` expression below) can then reference by name.
+
+```diff
+ assignment_operator
+-    : '=' 'ref'? | '+=' | '-=' | '*=' | '/=' | '%=' | '&=' | '|=' | '^=' | '<<='
+-    | right_shift_assignment
++    : '=' 'ref'?
++    | compound_assignment_operator
+     ;
+
++compound_assignment_operator
++    : '+=' | '-=' | '*=' | '/=' | '%=' | '&=' | '|=' | '^=' | '<<='
++    | right_shift_assignment
++    ;
+```
+
+The refactoring recognizes the same set of programs as the previous *assignment_operator*.
+
+The prose of [§12.21.1](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/expressions.md#12211-general) is tightened to name the new production:
+
+~~The assignment operators other than the `=` and `= ref` operators~~ **The assignment operators given by *compound_assignment_operator*** are called the ***compound assignment operators***. These operators perform the indicated operation on the two operands, and then assign the resulting value to the variable, property, or indexer element given by the left operand. The compound assignment operators are described in [§12.21.4](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/expressions.md#12214-compound-assignment).
+
+The identical refactoring is applied to the *assignment_operator* production in the consolidated grammar at [grammar.md](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/grammar.md).
+
 ### Object initializer
 
 The following diff is applied to the grammar in [§12.8.16.3](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/expressions.md#128163-object-initializers):
@@ -62,12 +88,9 @@ The following diff is applied to the grammar in [§12.8.16.3](https://github.com
      : expression
      | object_or_collection_initializer
      ;
-
-+compound_assignment_operator
-+    : '+=' | '-=' | '*=' | '/=' | '%=' | '&=' | '|=' | '^=' | '<<='
-+    | right_shift_assignment
-+    ;
 ```
+
+where *compound_assignment_operator* is the production introduced in [§12.21.1](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/expressions.md#12211-general) above.
 
 *Note*: A nested *object_initializer* or *collection_initializer* is only reachable through the `=` branch of *member_initializer*. The *compound_assignment_operator* branch admits only *expression*, so forms such as `P += { 1, 2 }` are syntactically ill-formed. *end note*
 
@@ -140,7 +163,7 @@ The following diff is applied to the grammar of the [`with` expression](https://
      ;
 ```
 
-where *compound_assignment_operator* is the production defined in [§12.8.16.3](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/expressions.md#128163-object-initializers).
+where *compound_assignment_operator* is the production introduced in [§12.21.1](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/expressions.md#12211-general) above.
 
 The prose of the [`with` expression](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-9.0/records.md#with-expression) subsection is updated as follows.
 
@@ -219,7 +242,7 @@ As with any language feature, the additional specification complexity must be we
 
 ### Why allow multiple member initializers for the same target?
 
-The single most compelling motivation for this feature is events, and events naturally chain: subscribing two handlers to the same event in one initializer is useful and unsurprising. Forbidding this would make the common case (`Click += h1, Click += h2`) illegal in exactly the contexts where the feature is most valuable. The same reasoning extends to compound operators on properties (`Value = 10, Value += 5`), where each step has an observable effect.
+The single most compelling motivation for this feature is events, and events naturally chain: subscribing two handlers to the same event in one initializer is useful and unsurprising, or unsubscribing and resubscribing. Forbidding this would make the case (`Click -= h1, Click += h2`) illegal in exactly the contexts where the feature is most valuable. The same reasoning extends to compound operators on properties (`Value = 10, Value += 5`), where each step has an observable effect.
 
 At the same time, `=` remains destructive: permitting a second `=` for the same target would make the first assignment dead code. The rule adopted here, *"at most one `=` per target, any number of *compound_assignment_operator* per target after it,"* keeps `=` as unambiguously initializing and lets compound operators compose on top.
 
@@ -227,21 +250,13 @@ At the same time, `=` remains destructive: permitting a second `=` for the same 
 
 A `with` expression produces a clone of the receiver, and the clone inherits the original's event subscriptions (via the clone method). Subscribing or unsubscribing handlers on the clone via `+=` / `-=` is a coherent operation on the clone alone, and the original receiver is unaffected. Although `with` has historically been associated with "non-destructive mutation" of data-shape members, there is no principled reason to disallow event targets here; the `with` expression simply delegates to the same event assignment rules as an object initializer.
 
-### Why require `get` on a compound target?
-
-Compound assignment is defined by [§12.21.4](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/expressions.md#12214-compound-assignment) as a read-modify-write: the target must be both readable and writable. A compound *member_initializer* therefore requires a readable target, whereas a plain-`=` member initializer requires only a writable one. A ref-returning `get` produces a variable-classified access and is sufficient for both the read and the write, as it is in any other compound assignment.
-
 ### Why specify the semantics as a lowering to *statement_expression*?
 
 Phrasing a *member_initializer* as an equivalent *statement_expression* makes all of the necessary rules fall out of [§12.21](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/expressions.md#1221-assignment-operators) with no further writing. In particular, [§12.21.5](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/expressions.md#12215-event-assignment) already requires event assignment to appear in a *statement_expression* context; the lowering satisfies that requirement by construction, without special-casing events at the initializer level. Each of simple assignment, compound assignment, and event assignment is invoked by the same uniform rule: "the meaning of `x.target op value;`."
 
-### Other call sites for the new *compound_assignment_operator* production
+### Scope of the *compound_assignment_operator* refactor
 
-Introducing *compound_assignment_operator* raises the question of whether any existing text in the standard should be updated to name it. A survey of [standard-v7](https://github.com/dotnet/csharpstandard/tree/standard-v7/standard) turns up one candidate:
-
-- [§12.21.1](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/expressions.md#12211-general) currently says *"The assignment operators other than the `=` and `= ref` operators are called the ***compound assignment operators***."* With *compound_assignment_operator* in place, that sentence can be sharpened to *"The assignment operators given by *compound_assignment_operator* are called the ***compound assignment operators***."* This is purely editorial; it changes no semantics.
-
-Other occurrences of "compound assignment" in the standard (for example the write-only-property note in [§15.7.3](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/classes.md#1573-accessors), and the ref-valued and non-ref-valued property accessibility rules in [§15.7.5](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/classes.md#1575-accessibility)) are prose references to the concept and already link to [§12.21.4](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/expressions.md#12214-compound-assignment); they do not need grammar updates.
+*compound_assignment_operator* is introduced as a real standard-grammar production (in [§12.21.1](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/expressions.md#12211-general) and the consolidated grammar), not as a local production inside [§12.8.16.3](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/expressions.md#128163-object-initializers). A survey of [standard-v7](https://github.com/dotnet/csharpstandard/tree/standard-v7/standard) for other sites that would benefit from naming it turned up only one: [§12.21.1](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/expressions.md#12211-general)'s own definitional sentence for "compound assignment operators," which this proposal updates. Other occurrences of "compound assignment" in the standard (for example the write-only-property note in [§15.7.3](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/classes.md#1573-accessors), the ref-valued and non-ref-valued property accessibility rules in [§15.7.5](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/classes.md#1575-accessibility), the binary-operator-overloading note in [§12.4.3](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/expressions.md#1243-operator-overloading), and the delegate combination rules in [§19](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/delegates.md)) are prose references to the concept, already link to [§12.21.4](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/expressions.md#12214-compound-assignment), and do not gain anything from naming the grammar production.
 
 ## Related discussions
 
