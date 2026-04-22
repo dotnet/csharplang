@@ -49,10 +49,11 @@ A new production *compound_assignment_operator* is introduced in [§12.21.1](htt
 +compound_assignment_operator
 +    : '+=' | '-=' | '*=' | '/=' | '%=' | '&=' | '|=' | '^=' | '<<='
 +    | right_shift_assignment
++    | '??='
 +    ;
 ```
 
-The refactoring recognizes the same set of programs as the previous *assignment_operator*.
+The refactoring recognizes the same set of programs as the previous *assignment_operator*, plus `??=`, which was added to the language in [C# 8](csharp-8.0/null-coalescing-assignment.md) and is grouped here with the other compound assignment operators.
 
 The prose of [§12.21.1](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/expressions.md#12211-general) is tightened to name the new production:
 
