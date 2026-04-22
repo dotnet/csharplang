@@ -460,6 +460,10 @@ Similarly `void M<T>() where T: C<D>` with above definitions for `C` and `D`.
 Passing an obligation to callers comes with a responsibility to make it clear what that obligation is.
 Should we formalize this beyond what can already be represented in xml docs?
 
+Members marked `unsafe` should have comments indicating what is necessary for the caller to do to ensure the code is correct.
+To make it easier to see and easier to differentiate in documentation, a new XML doc tag would be helpful: `<safety />`.
+It would be expected that all pre/post-conditions would be placed in `<safety>` block. 
+
 ### More meaningless `unsafe` warnings
 
 Should more declarations produce the meaningless `unsafe` warning?
@@ -661,10 +665,6 @@ We could limit this break by introducing a new keyword for when the caller of a 
 
 For nullable, we force generator authors to explicitly opt-in to nullable regardless of whether the entire project has opted into the feature by default, so that generator output isn't broken by the user
 turning on nullable and warn as error. Should we do the same for source generators?
-
-### XML doc comments
-
-Members marked `unsafe` should have comments indicating what is necessary for the caller to do to ensure the code is correct. To make it easier to see and easier to differentiate in documentation, a new XML doc tag would be helpful: `<safety />`. It would be expected that all pre/post-conditions would be placed in `<safety>` block. 
 
 </details>
 
