@@ -158,12 +158,12 @@ The following diff is applied to the grammar of the [`with` expression](https://
      ;
 
  member_initializer
-     : identifier '=' expression
-+    | identifier compound_assignment_operator expression
+-    : identifier '=' expression
++    : identifier assignment_operator expression
      ;
 ```
 
-where *compound_assignment_operator* is the production introduced in [§12.21.1](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/expressions.md#12211-general) above.
+Because both the previous `=` form and every *compound_assignment_operator* form share the same right-hand side (an *expression*), the two alternatives collapse into a single *assignment_operator* production from [§12.21.1](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/expressions.md#12211-general). The `= ref` form of *assignment_operator* is not applicable to a `member_initializer` target (a field, property, or event access is not a reference variable, so [§12.21.3](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/expressions.md#12213-ref-assignment)'s left-operand requirement rejects it at binding time).
 
 The prose of the [`with` expression](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-9.0/records.md#with-expression) subsection is updated as follows.
 
