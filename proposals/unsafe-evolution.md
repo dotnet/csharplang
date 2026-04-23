@@ -211,7 +211,7 @@ and does *not* introduce an `unsafe` context (instead, only explicit `unsafe` re
 `unsafe` on the following declarations produces a warning because it does not have a meaning anymore:
 - `delegate`,
 - static constructor,
-- destructor
+- destructor,
 - type declaration (`class`, `struct`, etc.).
 
 `unsafe` on a member is _not_ applied to any nested anonymous or local functions inside the member.
