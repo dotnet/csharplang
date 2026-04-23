@@ -36,6 +36,8 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ### Wed Apr 29, 2026
 
+- Unsafe evolution, continued - [Simple core model](https://github.com/dotnet/csharplang/blob/main/meetings/working-groups/unsafe-evolution/unsafe-simple-core-model.md) (Andy, Mads)
+
 ### Mon Apr 27, 2026
 
 - Chained relational comparison: https://github.com/dotnet/csharplang/blob/main/proposals/chained-relational-comparison.md - cyrus
