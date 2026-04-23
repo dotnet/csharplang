@@ -34,7 +34,7 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ### Mon May 4, 2026
 
-### Wed Apr 29, 2026
+### Wed Apr 29, 2026 (1.5 hour only)
 
 - Unsafe evolution, continued - [Simple core model](https://github.com/dotnet/csharplang/blob/main/meetings/working-groups/unsafe-evolution/unsafe-simple-core-model.md) (Andy, Mads)
 
