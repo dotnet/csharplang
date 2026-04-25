@@ -166,9 +166,21 @@ This rule applies uniformly to every form of extension member declared inside an
 
 ## Back-compat analysis
 
+This is a pure extension. The new branch of the receiver eligibility test in [§12.8.9.3](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/expressions.md#12893-extension-method-invocations) and the corresponding update to [*Consumption*](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-14.0/extensions.md#consumption) admit only receiver expressions that have no type, which under the existing rules of those sections are already binding-time errors. No expression that compiles today changes meaning. Any program that compiled before this feature continues to compile, with identical resolution and semantics.
+
 ## Drawbacks
 
+The proposal expands the candidate set considered for member access on a typeless receiver. For users, this can convert what is today a clear "expression has no type" error into a less direct overload-resolution error when more than one in-scope extension is applicable. For implementations, applicability of each candidate may require target-typing the receiver expression against that candidate's first parameter type, which is the same machinery already used for typeless arguments in non-receiver positions but is invoked more often under this rule. Both costs are small relative to the ergonomic gain in the motivating cases, but they are not zero.
+
 ## Alternatives
+
+- **Do nothing.** Users continue to either spell out the target type with a cast (`var a = (ImmutableArray<int>)[1, 2, 3];`) or call the extension as a static method (`var a = Enumerable.ToImmutableArray([1, 2, 3]);`). Both work today, both are uglier than the dotted form, and neither helps the typeless-lambda or method-group cases.
+
+- **Postfix cast.** A separate proposal to allow a postfix cast spelling could let users write a less awkward variation on the cast form for the collection-expression case, but does not enable extension dispatch on typeless receivers in general and therefore does not address the lambda, method-group, or conditional-expression cases.
+
+- **Partial generic inference.** A separate proposal to allow partial generic inference (for example, omitting some type arguments while supplying others) could relieve the verbosity of the static-method form for the collection-expression case. As with postfix cast, it is narrower than this proposal and does not help typeless lambdas, method groups, or conditional expressions.
+
+- **Target-typed static member access ([dotnet/csharplang#9138](https://github.com/dotnet/csharplang/issues/9138)).** A separate ergonomic for invoking static or extension members of a known target type without naming the type. Different machinery, applicable only when the call site already supplies a target type, and orthogonal to the present proposal.
 
 ## Design decisions
 
