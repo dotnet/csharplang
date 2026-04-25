@@ -6,7 +6,7 @@ Allow extension members to be invoked on a receiver expression that has no type:
 
 ```cs
 // All errors today.
-ImmutableArray<int> a = [1, 2, 3].ToImmutableArray();
+var a = [1, 2, 3].ToImmutableArray();
 var memoized = SomeMethod.Memoize();
 var x = (cond ? null : GetInt()).SomeNullableExtension();
 ```
@@ -184,10 +184,55 @@ The proposal expands the candidate set considered for member access on a typeles
 
 ## Design decisions
 
+### Why apply the rule uniformly across all typeless receiver categories?
+
+Collection expressions are the headline driver for this feature, but the rule that admits them, namely *"the receiver has no type, so the existing identity / reference / boxing requirement does not apply"*, is not specific to collection expressions. The same rule, written once in [§12.8.9.3](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/expressions.md#12893-extension-method-invocations) and once in [*Consumption*](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-14.0/extensions.md#consumption), automatically admits null literals, default literals, target-typed `new()`, anonymous functions without a natural type, method groups without a natural type, conditional expressions without a common arm type, switch expressions without a common arm type, and tuple expressions with at least one typeless element. Carving the rule down to one or two categories would require additional spec text to enumerate the excluded forms, and would have to be revisited when the next typeless expression form is introduced. The uniform rule is the smaller, more durable spec.
+
+The categories that LDM might prefer to dial back are surfaced individually in [Which receiver categories are supported?](#which-receiver-categories-are-supported); the proposal's structure makes any per-category exclusion a single-clause edit.
+
+### Why reuse the existing extension resolution machinery rather than introduce a new path?
+
+The existing applicability check in [§12.6.4.2](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/expressions.md#12642-applicable-function-member), invoked from the third eligibility bullet of [§12.8.9.3](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/expressions.md#12893-extension-method-invocations), already produces the correct answer for typeless first arguments via the standard's existing expression-to-type implicit conversions ([§10.2.7](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/conversions.md#1027-null-literal-conversions), [§10.2.13](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/conversions.md#10213-implicit-tuple-conversions), [§10.2.15](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/conversions.md#10215-anonymous-function-conversions-and-method-group-conversions), [§10.2.16](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/conversions.md#10216-default-literal-conversions), [§10.2.17](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/conversions.md#10217-implicit-throw-conversions)). Once the fourth eligibility bullet's identity / reference / boxing narrowing is removed for the typeless case, the rest falls out at no cost. Inventing a separate resolution path for typeless receivers would duplicate inference, applicability, and overload resolution logic, and would risk drifting from the typed-receiver path in subtle ways. Reusing the existing machinery keeps the two paths convergent by construction.
+
+### Why frame the rule as "receiver as first argument"?
+
+The classic extension method invocation in [§12.8.9.3](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/expressions.md#12893-extension-method-invocations) already specifies eligibility in terms of the static-method form `C.identifier(expr, args)`, where `expr` is the first argument. The C# 14 [*Consumption*](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-14.0/extensions.md#consumption) rule similarly uses the actual receiver as one of the arguments to its full generic type inference. The "receiver as first argument" framing is therefore not an invention of this proposal; it is the existing model in both spec sources, and the proposal simply lifts the precondition that the first argument have a type.
+
 ## Open LDM questions
 
 ### Which receiver categories are supported?
 
+This proposal admits any receiver expression that has no type. Concretely, the set is:
+
+- The null literal (`null`).
+- The default literal (`default`).
+- A target-typed object creation (`new()` or `new(args)`).
+- An anonymous function (lambda or anonymous method) that does not have a natural type, including lambdas with at least one parameter whose type is omitted.
+- A method group that does not have a natural type per the [method group natural type improvements](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-13.0/method-group-natural-type-improvements.md).
+- A collection expression.
+- A conditional expression (`cond ? a : b`) whose arms do not have a common type.
+- A switch expression whose arms do not have a common type.
+- A tuple expression with at least one element that itself has no type.
+
+A throw expression (`throw ...`) was excluded from the set because evaluation of a throw expression terminates control flow before any extension member could be invoked, making the call unreachable. The exclusion is reconsiderable.
+
+LDM is asked to confirm or veto each category individually. The proposal's body is structured so that any subset can be carved out without changing the rule itself: a category-specific exclusion is a single clause added to the receiver eligibility text in [§12.8.9.3](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/expressions.md#12893-extension-method-invocations) and the corresponding compatibility sentence in [*Consumption*](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-14.0/extensions.md#consumption).
+
+Recommendation: admit all categories except throw expressions. Each individual category falls out of the new rule at no additional spec cost, and the dial-back-on-demand structure means LDM can revisit any of them later with minimal disruption.
+
 ## Related discussions
 
+- [Proposal: Collection expressions (champion #5354)](https://github.com/dotnet/csharplang/issues/5354). The C# 12 collection-expressions champion issue.
+- [Collection expressions: Extension methods](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-12.0/collection-expressions.md). Speclet text noting that a collection expression cannot be used directly as the first parameter for an extension method invocation today.
+- [Dictionary expressions: Extension methods](https://github.com/dotnet/csharplang/blob/main/proposals/dictionary-expressions.md). Same restriction for dictionary expressions; this proposal removes both in one rule.
+- [Collection Expressions Next (champion #7913)](https://github.com/dotnet/csharplang/issues/7913) and [discussion #8660](https://github.com/dotnet/csharplang/discussions/8660). Umbrella that lists "Extension methods on collections" as a backlog item.
+- [Extension members (champion #8697)](https://github.com/dotnet/csharplang/issues/8697) and [discussion #8696](https://github.com/dotnet/csharplang/discussions/8696). The C# 14 extension members work that this proposal updates.
+- [dotnet/csharplang#9688](https://github.com/dotnet/csharplang/issues/9688). Separate question about extension methods participating in collection-expression construction; different binding site, out of scope here.
+
 ## Design meetings
+
+This proposal has not yet been reviewed by LDM. Prior LDM and working-group discussions that inform the design:
+
+- [LDM 2023-07-12](https://github.com/dotnet/csharplang/blob/main/meetings/2023/LDM-2023-07-12.md). Identified *"allow extension methods on expressions with no natural type"* as a separate orthogonal track to the collection-expressions-only ergonomic; this proposal is that track.
+- [Collection literals working group, 2023-06-26](https://github.com/dotnet/csharplang/blob/main/meetings/working-groups/collection-literals/CL-2023-06-26.md). The `[complex, type, examples].AsImmutableArray()` motivating scenario, with the broader claim that null, lambda, and method-group receivers should also participate.
+- [Collection literals working group, 2024-01-23](https://github.com/dotnet/csharplang/blob/main/meetings/working-groups/collection-literals/CL-2024-01-23.md). Concrete `(x => true).ExtensionOnStringPredicate()` example and explicit framing of the feature as extension methods on target-typed constructs.
