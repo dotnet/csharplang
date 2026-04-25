@@ -110,6 +110,42 @@ The remaining prose of [§12.8.9.3](https://github.com/dotnet/csharpstandard/blo
 
 ### Extension member consumption
 
+The receiver-side compatibility test in [*Consumption*](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-14.0/extensions.md#consumption) is updated analogously: a candidate whose receiver type is `T` is no longer discarded merely because the receiver expression has no type. The same identity / reference / boxing restriction is preserved for receivers that do have a type.
+
+The prose in [*Consumption*](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-14.0/extensions.md#consumption) is updated as follows.
+
+> When an extension member lookup is attempted, all extension declarations within static classes that are `using`-imported contribute their members as candidates, regardless of receiver type. Only as part of resolution are candidates with incompatible receiver types discarded. **A candidate with receiver type `T` is compatible if either the receiver expression has a type and an implicit identity, reference, or boxing conversion exists from that type to `T`, or the receiver expression does not have a type.**
+>
+> A full generic type inference is attempted between the type of the arguments (including the actual receiver) and any type parameters (combining those in the extension declaration and in the extension member declaration).
+>
+> When explicit type arguments are provided, they are used to substitute the type parameters of the extension declaration and the extension member declaration.
+
+The added compatibility sentence preserves the identity / reference / boxing restriction that classic extension method invocation already imposes ([§12.8.9.3](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/expressions.md#12893-extension-method-invocations)), so a typed receiver continues to bind exactly as today. When the receiver expression does not have a type, the receiver-type compatibility check imposes no further constraint of its own; type inference and applicability proceed using the receiver expression directly, supported by the standard's existing expression-to-type implicit conversions ([§10.2.7](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/conversions.md#1027-null-literal-conversions) null literal, [§10.2.13](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/conversions.md#10213-implicit-tuple-conversions) tuple expression, [§10.2.15](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/conversions.md#10215-anonymous-function-conversions-and-method-group-conversions) anonymous function and method group, [§10.2.16](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/conversions.md#10216-default-literal-conversions) default literal, [§10.2.17](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/conversions.md#10217-implicit-throw-conversions) implicit throw), as for any other typeless argument.
+
+This rule applies uniformly to every form of extension member declared inside an `extension(T) { ... }` block: extension methods, extension properties, and extension indexers. The receiver expression form is unchanged in each case (`expr.M(args)` for a method, `expr.P` for a property, `expr[args]` for an indexer); the only change is which receiver expressions are admitted.
+
+> *Example*: Given the extension declaration
+>
+> ```csharp
+> public static class ListExtensions
+> {
+>     extension<T>(IReadOnlyList<T> list)
+>     {
+>         public T First => list[0];
+>     }
+> }
+> ```
+>
+> the expression
+>
+> ```csharp
+> var first = [1, 2, 3].First;
+> ```
+>
+> is processed as follows. The receiver `[1, 2, 3]` does not have a type, so the typeless branch of the compatibility test admits the candidate `First` declared on the extension type with receiver type `IReadOnlyList<T>`. Generic type inference yields `T` = `int`, and an implicit conversion from `[1, 2, 3]` to `IReadOnlyList<int>` exists. Resolution selects this candidate, and the result is a value of type `int`.
+>
+> *end example*
+
 ### Interactions with other features
 
 ## Back-compat analysis
