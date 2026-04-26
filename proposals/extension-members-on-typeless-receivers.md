@@ -180,8 +180,6 @@ The proposal expands the candidate set considered for member access on a typeles
 
 - **Partial generic inference.** A separate proposal to allow partial generic inference (for example, omitting some type arguments while supplying others) could relieve the verbosity of the static-method form for the collection-expression case. As with postfix cast, it is narrower than this proposal and does not help typeless lambdas, method groups, or conditional expressions.
 
-- **Target-typed static member access ([dotnet/csharplang#9138](https://github.com/dotnet/csharplang/issues/9138)).** A separate ergonomic for invoking static or extension members of a known target type without naming the type. Different machinery, applicable only when the call site already supplies a target type, and orthogonal to the present proposal.
-
 ## Design decisions
 
 ### Why apply the rule uniformly across all typeless receiver categories?
