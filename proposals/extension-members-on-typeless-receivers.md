@@ -74,7 +74,7 @@ The following updates are presented as a diff against [§12.8.9.3](https://githu
 
 Throughout this section, ~~strikethrough~~ indicates text being removed from the existing specification, and **bold** indicates text being added. Unchanged prose is quoted verbatim for context.
 
-Examples in this section assume the merged language formed by standard-v7 plus the relevant post-v7 feature specifications, notably the [C# 12 collection expressions](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-12.0/collection-expressions.md). The diffs themselves introduce no new conversion form; whichever implicit conversion the merged language defines from a typeless receiver to a parameter type is the one this proposal relies on.
+Examples in this section assume the merged language formed by standard-v7 plus the relevant post-v7 feature specifications, notably the [C# 12 collection expressions](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-12.0/collection-expressions.md).
 
 ### Extension method invocations
 
@@ -112,7 +112,7 @@ The remaining prose of [§12.8.9.3](https://github.com/dotnet/csharpstandard/blo
 > [1, 2, 3].ToImmutableArray()
 > ```
 >
-> is processed as follows. The receiver `[1, 2, 3]` is not a namespace, is not classified as a type, and is not a property access, indexer access, variable, or value with a type, so member access in [§12.8.7](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/expressions.md#1287-member-access) falls through to extension method invocation ([§12.8.9.3](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/expressions.md#12893-extension-method-invocations)). In [§12.8.9.3](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/expressions.md#12893-extension-method-invocations), the candidate `Enumerable.ToImmutableArray<T>` is eligible:
+> is processed as follows. The receiver `[1, 2, 3]` is not a namespace, is not classified as a type, and is not a property access, indexer access, variable, or value with a type, so member access in [§12.8.7](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/expressions.md#1287-member-access) falls through to extension method invocation ([§12.8.9.3](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/expressions.md#12893-extension-method-invocations)). The candidate `Enumerable.ToImmutableArray<T>` is eligible:
 >
 > - `Enumerable` is a non-generic, non-nested class.
 > - The name of the candidate is `ToImmutableArray`.
@@ -135,7 +135,7 @@ The prose in [*Consumption*](https://github.com/dotnet/csharplang/blob/main/prop
 >
 > When explicit type arguments are provided, they are used to substitute the type parameters of the extension declaration and the extension member declaration.
 
-The added compatibility sentence preserves the identity / reference / boxing restriction that classic extension method invocation already imposes ([§12.8.9.3](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/expressions.md#12893-extension-method-invocations)), so a typed receiver continues to bind under the existing rules, unchanged. When the receiver expression does not have a type, the receiver-type compatibility check imposes no further constraint of its own; type inference and applicability proceed using the receiver expression directly, supported by the standard's existing expression-to-type implicit conversions ([§10.2.7](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/conversions.md#1027-null-literal-conversions) null literal, [§10.2.13](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/conversions.md#10213-implicit-tuple-conversions) tuple expression, [§10.2.15](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/conversions.md#10215-anonymous-function-conversions-and-method-group-conversions) anonymous function and method group, [§10.2.16](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/conversions.md#10216-default-literal-conversions) default literal, [§10.2.17](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/conversions.md#10217-implicit-throw-conversions) implicit throw), as for any other typeless argument.
+The added compatibility sentence preserves the identity / reference / boxing restriction that classic extension method invocation already imposes ([§12.8.9.3](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/expressions.md#12893-extension-method-invocations)), so a typed receiver continues to bind under the existing rules, unchanged. When the receiver expression does not have a type, the receiver-type compatibility check imposes no further constraint of its own; type inference and applicability proceed using the receiver expression directly, via the same standard expression-to-type implicit conversions enumerated under [Extension method invocations](#extension-method-invocations) above, as for any other typeless argument.
 
 This rule applies uniformly to every form of extension member declared inside an `extension(T) { ... }` block: extension methods, extension properties, and extension indexers. The receiver expression form is unchanged in each case (`expr.M(args)` for a method, `expr.P` for a property, `expr[args]` for an indexer); the only change is which receiver expressions are admitted.
 
@@ -165,19 +165,19 @@ This rule applies uniformly to every form of extension member declared inside an
 
 - **Instance vs. extension precedence.** Unchanged. Instance member lookup ([§12.5](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/expressions.md#125-member-lookup)) requires a type and so does not run on a typeless receiver; extension resolution then runs without competition, just as it already does for any receiver that falls through via [§12.8.7](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/expressions.md#1287-member-access).
 
-- **Method group receivers.** A method group with a natural type per the [method group natural type improvements](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-13.0/method-group-natural-type-improvements.md) binds via the existing path. A method group without a natural type (the common case in practice, including most overloaded API surfaces such as `Console.WriteLine`, `Math.Max`, and `string.Format`) enters this proposal's rule. The single-signature case is unchanged.
+- **Method group receivers.** A method group with a natural type per the [method group natural type improvements](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-13.0/method-group-natural-type-improvements.md) binds via the existing path. A method group without a natural type (the common case for overloaded API surfaces) enters this proposal's rule. The single-signature case is unchanged.
 
 - **Type inference and target typing.** No new machinery. The receiver is target-typed against each candidate's first parameter type by the existing applicability check ([§12.6.4.2](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/expressions.md#12642-applicable-function-member)) and inference ([§12.6.3](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/expressions.md#1263-type-inference)); typeless tuples, conditionals, and switches use the standard's existing per-element rules. The proposal lifts only the receiver-typing precondition.
 
 - **Dynamic.** Extension method invocation already does not apply when *expr* or any *args* has compile-time type `dynamic` ([§12.8.9.3](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/expressions.md#12893-extension-method-invocations)). A typeless receiver does not have type `dynamic` either, so the existing exclusion is unchanged.
 
-- **Throw expressions.** A *throw_expression* has no type and would otherwise be admitted by the typeless branch, but is excluded because evaluation terminates control flow before any extension member could be invoked. See [Which receiver categories are supported?](#which-receiver-categories-are-supported).
+- **Throw expressions.** A *throw_expression* has no type but is excluded; see [Which receiver categories are supported?](#which-receiver-categories-are-supported).
 
 - **Ref expressions.** No interaction. Every ref-flavored expression has a type: a ref conditional `a ? ref b : ref c` requires identity-convertible arms; switch has no ref form; and ref-returning method calls, ref locals, ref properties, ref indexers, and ref fields are all typed.
 
 ## Back-compat analysis
 
-This is a pure extension. The new branch of the receiver eligibility test in [§12.8.9.3](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/expressions.md#12893-extension-method-invocations) and the corresponding update to [*Consumption*](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-14.0/extensions.md#consumption) admit only receiver expressions that have no type, which under the existing rules of those sections are already binding-time errors. No expression that compiles today changes meaning. Any program that compiled before this feature continues to compile, with identical resolution and semantics.
+This is a pure extension. The new branch of the receiver eligibility test in [§12.8.9.3](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/expressions.md#12893-extension-method-invocations) and the corresponding update to [*Consumption*](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-14.0/extensions.md#consumption) admit only receiver expressions that have no type, which under the existing rules of those sections are already binding-time errors. No expression that compiles today changes meaning.
 
 ## Alternatives
 
@@ -207,7 +207,7 @@ Collection expressions are the headline driver, but the rule that admits them, n
 
 LDM is asked to confirm or veto each category individually. A per-category exclusion is a single clause added to the receiver eligibility text in [§12.8.9.3](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/expressions.md#12893-extension-method-invocations) and the corresponding compatibility sentence in [*Consumption*](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-14.0/extensions.md#consumption), so dial-back-on-demand has minimal cost.
 
-Recommendation: admit all categories except throw expressions. The uniform rule is the smaller, more durable spec.
+Recommendation: admit all categories except throw expressions.
 
 ## Optional follow-on: null-conditional access on typeless receivers
 
@@ -353,6 +353,6 @@ Land the present (member-access) proposal first. Treat this section as a separat
 
 This proposal has not yet been reviewed by LDM. Prior LDM and working-group discussions that inform the design:
 
-- [LDM 2023-07-12](https://github.com/dotnet/csharplang/blob/main/meetings/2023/LDM-2023-07-12.md). Identified *"allow extension methods on expressions with no natural type"* as a separate orthogonal track to the collection-expressions-only ergonomic; this proposal is that track.
+- [LDM 2023-07-12](https://github.com/dotnet/csharplang/blob/main/meetings/2023/LDM-2023-07-12.md). Identified *"allow extension methods on expressions with no natural type"* as a separate orthogonal track to the collection-expressions-only ergonomic.
 - [Collection literals working group, 2023-06-26](https://github.com/dotnet/csharplang/blob/main/meetings/working-groups/collection-literals/CL-2023-06-26.md). The `[complex, type, examples].AsImmutableArray()` motivating scenario, with the broader claim that null, lambda, and method-group receivers should also participate.
 - [Collection literals working group, 2024-01-23](https://github.com/dotnet/csharplang/blob/main/meetings/working-groups/collection-literals/CL-2024-01-23.md). Concrete `(x => true).ExtensionOnStringPredicate()` example and explicit framing of the feature as extension methods on target-typed constructs.
