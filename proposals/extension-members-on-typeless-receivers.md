@@ -137,7 +137,7 @@ The prose in [*Consumption*](https://github.com/dotnet/csharplang/blob/main/prop
 
 The added compatibility sentence preserves the identity / reference / boxing restriction that classic extension method invocation already imposes ([§12.8.9.3](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/expressions.md#12893-extension-method-invocations)), so a typed receiver continues to bind under the existing rules, unchanged. When the receiver expression does not have a type, the receiver-type compatibility check imposes no further constraint of its own; type inference and applicability proceed using the receiver expression directly, via the same standard expression-to-type implicit conversions enumerated under [Extension method invocations](#extension-method-invocations) above, as for any other typeless argument.
 
-This rule applies uniformly to every form of extension member declared inside an `extension(T) { ... }` block: extension methods, extension properties, and extension indexers. The receiver expression form is unchanged in each case (`expr.M(args)` for a method, `expr.P` for a property, `expr[args]` for an indexer); the only change is which receiver expressions are admitted.
+This rule applies uniformly to every form of extension member declared inside an `extension(T) { ... }` block: extension methods, extension properties, and extension indexers. The receiver expression form is unchanged in each case (`expr.M(args)` for a method, `expr.P` for a property, `expr[args]` for an indexer); the only change is which receiver expressions are admitted. Methods and properties dispatch via member access ([§12.8.7](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/expressions.md#1287-member-access)), so the relaxation above is sufficient on its own. Indexers dispatch via element access ([§12.8.11](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/expressions.md#12811-element-access)), which keys on the receiver having a type at an earlier point in the algorithm; an additional entry-point change is required and is described in [Extension indexer access](#extension-indexer-access) below.
 
 > *Example*: Given the extension declaration
 >
@@ -161,6 +161,50 @@ This rule applies uniformly to every form of extension member declared inside an
 >
 > *end example*
 
+### Extension indexer access
+
+Extension indexers are introduced separately by the [extension-indexers proposal](https://github.com/dotnet/csharplang/blob/main/proposals/extension-indexers.md), which adds an extension fall-through to *Indexer access*: an *element_access* `E[A]` whose ordinary indexer-access processing finds no applicable candidate is processed as an *extension indexer access*. That fall-through inherits the element-access preconditions in [§12.8.11.1](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/expressions.md#128111-general) of the standard (*"the primary_no_array_creation_expression shall be a variable or value of a class, struct, or interface type"*), so a typeless `E` fails before any extension-indexer-access algorithm can run. The receiver-type compatibility relaxation in [Extension member consumption](#extension-member-consumption) above is sufficient once the lookup is invoked, but it does not by itself open the entry point.
+
+The following diff against the [*Indexer access*](https://github.com/dotnet/csharplang/blob/main/proposals/extension-indexers.md#indexer-access) section of the [extension-indexers proposal](https://github.com/dotnet/csharplang/blob/main/proposals/extension-indexers.md) opens the entry point. The present proposal layers on top of the extension-indexers proposal: typeless-receiver indexer access requires that proposal to ship.
+
+> The rules in [*Indexer access*](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/expressions.md#128124-indexer-access) are updated: if the normal processing of the indexer access finds no applicable indexer, **or if the receiver expression `E` does not have a type,** an attempt is made to process the construct as an extension indexer access.
+>
+> **If `E` does not have a type, the *element_access* is processed as an extension indexer access directly, without first considering the numbered steps below (which key on the receiver type and have no candidates without one).** Otherwise:
+>
+> 1. Attempt to bind using only the instance indexers declared (or inherited) on the receiver type. If an applicable candidate is found, overload resolution selects among those instance members as today and stops.
+> 2. If the set of applicable indexers is empty, an attempt is made to process the *element_access* as an implicit `System.Index`/`System.Range` indexer access (which relies on `Length`/`Count` plus `this[int]`/`Slice(int, int)`).
+> 3. If both steps fail to identify any applicable indexers, an attempt is made to process the *element_access* as an extension indexer access.
+
+The remainder of the *Extension indexer access* sub-section is unchanged. Its applicability rule already treats `E` as a regular argument in an expanded signature combining the extension parameter with the indexer's parameters, and the receiver-type compatibility test from C# 14 *Consumption* is updated by [Extension member consumption](#extension-member-consumption) above to permit a typeless receiver, so applicability over a typeless `E` proceeds via the same expression-to-type implicit conversions enumerated under [Extension method invocations](#extension-method-invocations) above, with no further changes.
+
+> *Example*: Given the extension declaration
+>
+> ```csharp
+> public static class TupleExtensions
+> {
+>     extension<T>((T, T, T) triple)
+>     {
+>         public T this[int i] => i switch
+>         {
+>             0 => triple.Item1,
+>             1 => triple.Item2,
+>             _ => triple.Item3,
+>         };
+>     }
+> }
+> ```
+>
+> the expression
+>
+> ```csharp
+> int a = 1, b = 2;
+> var picked = (a, b, default)[GetElementIndex()];
+> ```
+>
+> is processed as follows. The receiver `(a, b, default)` is a *tuple_expression* with a typeless element (`default`), so the tuple has no type itself. The new entry-point branch routes the *element_access* directly into extension indexer access. The candidate `TupleExtensions.this[int]` declared on receiver type `(T, T, T)` is applicable: type inference yields `T` = `int` from `a` and `b`, the standard's tuple conversion target-types `default` to `int`, and the indexer parameter is satisfied by `GetElementIndex()`. Overload resolution selects this candidate, and the result has type `int`.
+>
+> *end example*
+
 ### Interactions with other features
 
 - **Instance vs. extension precedence.** Unchanged. Instance member lookup ([§12.5](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/expressions.md#125-member-lookup)) requires a type and so does not run on a typeless receiver; extension resolution then runs without competition, just as it already does for any receiver that falls through via [§12.8.7](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/expressions.md#1287-member-access).
@@ -177,7 +221,7 @@ This rule applies uniformly to every form of extension member declared inside an
 
 ## Back-compat analysis
 
-This is a pure extension. The new branch of the receiver eligibility test in [§12.8.9.3](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/expressions.md#12893-extension-method-invocations) and the corresponding update to [*Consumption*](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-14.0/extensions.md#consumption) admit only receiver expressions that have no type, which under the existing rules of those sections are already binding-time errors. No expression that compiles today changes meaning.
+This is a pure extension. The new branch of the receiver eligibility test in [§12.8.9.3](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/expressions.md#12893-extension-method-invocations), the corresponding update to [*Consumption*](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-14.0/extensions.md#consumption), and the entry-point branch added to [*Indexer access*](https://github.com/dotnet/csharplang/blob/main/proposals/extension-indexers.md#indexer-access) admit only receiver expressions that have no type, which under the existing rules of those sections are already binding-time errors. No expression that compiles today changes meaning.
 
 ## Alternatives
 
@@ -203,9 +247,9 @@ This proposal admits any receiver expression that has no type. Concretely, the s
 
 A throw expression (`throw ...`) was excluded because evaluation terminates control flow before any extension member could be invoked, making the call unreachable. The exclusion is reconsiderable.
 
-Collection expressions are the headline driver, but the rule that admits them, namely *"the receiver has no type, so the existing identity / reference / boxing requirement does not apply"*, is not specific to collection expressions; the same rule, written once in [§12.8.9.3](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/expressions.md#12893-extension-method-invocations) and once in [*Consumption*](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-14.0/extensions.md#consumption), automatically admits every other category in the list above. Carving the rule down to one or two categories would require additional spec text to enumerate the excluded forms, and would have to be revisited each time a new typeless expression form is introduced.
+Collection expressions are the headline driver, but the rule that admits them, namely *"the receiver has no type, so the existing identity / reference / boxing requirement does not apply"*, is not specific to collection expressions; the same rule, written once in [§12.8.9.3](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/expressions.md#12893-extension-method-invocations), once in [*Consumption*](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-14.0/extensions.md#consumption), and once as the entry-point branch added to [*Indexer access*](https://github.com/dotnet/csharplang/blob/main/proposals/extension-indexers.md#indexer-access), automatically admits every other category in the list above. Carving the rule down to one or two categories would require additional spec text to enumerate the excluded forms, and would have to be revisited each time a new typeless expression form is introduced.
 
-LDM is asked to confirm or veto each category individually. A per-category exclusion is a single clause added to the receiver eligibility text in [§12.8.9.3](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/expressions.md#12893-extension-method-invocations) and the corresponding compatibility sentence in [*Consumption*](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-14.0/extensions.md#consumption), so dial-back-on-demand has minimal cost.
+LDM is asked to confirm or veto each category individually. A per-category exclusion is a single clause added to each of the three update sites — the receiver eligibility text in [§12.8.9.3](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/expressions.md#12893-extension-method-invocations), the compatibility sentence in [*Consumption*](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-14.0/extensions.md#consumption), and the entry-point branch in [*Indexer access*](https://github.com/dotnet/csharplang/blob/main/proposals/extension-indexers.md#indexer-access) — so dial-back-on-demand has minimal cost.
 
 Recommendation: admit all categories except throw expressions.
 
