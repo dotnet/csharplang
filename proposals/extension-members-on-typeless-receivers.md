@@ -325,7 +325,12 @@ The C# 12 [collection-expressions](https://github.com/dotnet/csharplang/blob/mai
 
 ### Relationship to immediately-enumerated-collection-expressions
 
-The two proposals are complementary, not redundant. The [immediately-enumerated-collection-expressions proposal](https://github.com/dotnet/csharplang/blob/main/proposals/immediately-enumerated-collection-expressions.md) bakes in `IEnumerable<T>` as the target type for typeless collection expressions specifically in `foreach` and spread positions, and requires no user-defined extension. This follow-on instead adds extension `GetEnumerator` lookup against the typeless source, requiring a user-defined extension but covering every typeless receiver form admitted by the present proposal (not just collection expressions) and subsuming the conditional and switch arm spread cases that the immediately-enumerated proposal explicitly defers. Either could ship without the other; if both ship, the immediately-enumerated conversion is checked first and this follow-on's fallback runs only when it doesn't apply, so the two paths compose cleanly.
+The two proposals are alternatives, not complements: each makes the headline `foreach (var v in [a, b, c])` and typeless-arm spread cases work, just by different machinery, and shipping both would be redundant.
+
+- The [immediately-enumerated-collection-expressions proposal](https://github.com/dotnet/csharplang/blob/main/proposals/immediately-enumerated-collection-expressions.md) is collection-expression-specific and language-level: it bakes in `IEnumerable<T>` as the iteration target for a typeless collection expression, requires no user-defined extension, and handles only collection-expression sources.
+- This follow-on is general across all typeless receivers admitted by the present proposal but requires an extension `GetEnumerator` to be in scope. A single declaration on `IEnumerable<T>` (in the BCL or in user code) covers every collection-expression case the immediately-enumerated proposal does, plus the typeless-arm spread cases that proposal explicitly defers, plus any other typeless source that target-types to `IEnumerable<T>`.
+
+LDM should pick one. If iteration over typeless collection expressions is the only motivating case, the immediately-enumerated proposal is the simpler, more targeted spec change. If the typeless-receivers theme should apply uniformly to iteration the way it applies to member access under the present proposal, this follow-on is the better fit and removes the need for the immediately-enumerated proposal once a suitable extension `GetEnumerator` ships.
 
 ### Backward compatibility
 
