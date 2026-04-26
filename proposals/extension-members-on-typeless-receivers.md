@@ -199,14 +199,6 @@ Collection expressions are the headline driver for this feature, but the rule th
 
 The categories that LDM might prefer to dial back are surfaced individually in [Which receiver categories are supported?](#which-receiver-categories-are-supported); the proposal's structure makes any per-category exclusion a single-clause edit.
 
-### Why reuse the existing extension resolution machinery rather than introduce a new path?
-
-The existing applicability check in [§12.6.4.2](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/expressions.md#12642-applicable-function-member), invoked from the third eligibility bullet of [§12.8.9.3](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/expressions.md#12893-extension-method-invocations), already produces the correct answer for typeless first arguments via the standard's existing expression-to-type implicit conversions ([§10.2.7](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/conversions.md#1027-null-literal-conversions), [§10.2.13](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/conversions.md#10213-implicit-tuple-conversions), [§10.2.15](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/conversions.md#10215-anonymous-function-conversions-and-method-group-conversions), [§10.2.16](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/conversions.md#10216-default-literal-conversions), [§10.2.17](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/conversions.md#10217-implicit-throw-conversions)). Once the fourth eligibility bullet's identity / reference / boxing narrowing is removed for the typeless case, the rest falls out at no cost. Inventing a separate resolution path for typeless receivers would duplicate inference, applicability, and overload resolution logic, and would risk drifting from the typed-receiver path in subtle ways. Reusing the existing machinery keeps the two paths convergent by construction.
-
-### Why frame the rule as "receiver as first argument"?
-
-The classic extension method invocation in [§12.8.9.3](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/expressions.md#12893-extension-method-invocations) already specifies eligibility in terms of the static-method form `C.identifier(expr, args)`, where `expr` is the first argument. The C# 14 [*Consumption*](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-14.0/extensions.md#consumption) rule similarly uses the actual receiver as one of the arguments to its full generic type inference. The "receiver as first argument" framing is therefore not an invention of this proposal; it is the existing model in both spec sources, and the proposal simply lifts the precondition that the first argument have a type.
-
 ## Open LDM questions
 
 ### Which receiver categories are supported?
@@ -285,10 +277,6 @@ The cannot-evaluate-to-null forms should be excluded by an explicit clause. The 
 - **Element access (`P?[i]`).** The same conceptual model applies (target-type `P` from the candidate's first parameter type), but extension indexers are a separate path in the existing spec and would need the analogous addition to [§12.8.12](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/expressions.md#12812-null-conditional-element-access). LDM should decide whether to land in lockstep with `?.` or as an additional follow-on.
 
 - **Null-conditional assignment (C# 14: `P?.X = v`, `P?.X += v`).** The rule composes naturally: `Tp` is the receiver type of the selected candidate property/event accessor, and `?.` short-circuits before the assignment is performed. Worth confirming explicitly so the C# 14 feature and this follow-on are known to compose.
-
-- **Non-null-conditional after-effects.** `(a ? null : x)?.M().N` where `M` is an extension on `int?`. Once the outer `?.` has assigned `Tp = int?`, the trailing `.N` binds against the result type of `M()`, identical to the typed-receiver case. No new rules needed.
-
-- **NRT and flow analysis.** Once the receiver acquires a type, the existing flow-analysis treatment of `?.` applies. For `null` and `default` literal receivers the analyzer can fold the result to "always null". For conditional and switch receivers it follows the standard analysis of those constructs.
 
 ### Backward compatibility
 
