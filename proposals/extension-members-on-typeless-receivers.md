@@ -286,6 +286,71 @@ Pure extension. Today every typeless `?.` is a binding-time error, so no code th
 
 Land the present (non-`?.`) proposal first. Treat this section as a separate decision: schedule it as a follow-on if and when the non-`?.` form ships and there is field evidence that conditional and switch receivers in `?.` position are a real ergonomic pain. The initial scope should be conditional and switch expressions; the `null`/`default` literal cases and element access can follow once that lands.
 
+## Optional follow-on: `foreach` and spread on typeless receivers via extension `GetEnumerator`
+
+This section is not part of the present proposal. It is offered for LDM to decide whether to schedule as a separate, follow-on feature, in the same spirit as the `?.` follow-on above.
+
+### Motivation
+
+The present proposal admits typeless receivers for `expr.M(args)` but leaves the iteration forms `foreach (var v in expr)` and `[.. expr]` untouched. With a single extension `GetEnumerator` on `IEnumerable<T>` in scope, the natural way to write the loop or the spread on a typeless source is the typeless form:
+
+```cs
+extension<T>(IEnumerable<T> source)
+{
+    public IEnumerator<T> GetEnumerator() { ... }
+}
+
+// Today: error - [a, b, c] has no type, so the foreach algorithm rejects it
+// before any extension GetEnumerator lookup runs.
+foreach (var v in [a, b, c]) { ... }
+
+// Today: error - same reason; the spread defers to foreach for iteration-type
+// determination, and foreach rejects the typeless source.
+List<int> sink = [x, y, .. cond ? [a, b] : [c, d]];
+```
+
+The natural symmetry argument is the same as for the present proposal's headline cases: `expr.M()` works on a typeless `expr` under this proposal, so `foreach (var v in expr)` (which is, modulo syntactic sugar, `expr.GetEnumerator()` plus a loop) and `[.. expr]` (which is `foreach` plus an `Add`) ought to work too whenever `GetEnumerator` is found by the same lookup.
+
+### The problem
+
+The C# 9 [extension `GetEnumerator`](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-9.0/extension-getenumerator.md) feature added an extension fallback to the `foreach` algorithm in [§13.9.5](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/statements.md#1395-the-foreach-statement), but every branch of that algorithm keys on *the type `X` of the expression*. With no type `X`, no branch fires, and the algorithm never reaches the C# 9 extension lookup. Spread elements inherit the same restriction: the C# 12 [collection-expressions speclet](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-12.0/collection-expressions.md) defines the spread's iteration type by deferring to the `foreach` algorithm, so as long as `foreach` rejects typeless sources, spread does too.
+
+The present proposal does not, on its own, fix either case. It modifies the receiver-eligibility text in [§12.8.9.3](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/expressions.md#12893-extension-method-invocations) and the C# 14 [*Consumption*](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-14.0/extensions.md#consumption) rule for member access, but `foreach` and spread reach extension `GetEnumerator` through their own algorithm, not through member access on the source expression.
+
+### Conceptual model
+
+Add a final fallback to the `foreach` algorithm: when the source expression has no type but is a typeless receiver form admitted by the present proposal, run extension method lookup for the identifier `GetEnumerator` against the typeless source using the present proposal's machinery. Each candidate's first parameter type is the prospective receiver target type; the typeless source is tried for implicit conversion against it via the same per-candidate target-typing the present proposal already performs. If overload resolution selects a unique best candidate, the *collection type* is that candidate's first parameter type, the source is target-typed to it, and the rest of the `foreach` algorithm proceeds against that type.
+
+Spread inherits the change for free. The collection-expressions speclet defines the iteration type of `..s` by reference to the `foreach` algorithm, so as soon as `foreach` admits the typeless fallback, `..` does too.
+
+### Spec change shape
+
+Add a final fallback bullet to [§13.9.5](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/statements.md#1395-the-foreach-statement), placed after the C# 9 extension-`GetEnumerator` fallback:
+
+> *Otherwise, if the expression does not have a type and is a typeless receiver form admitted by [extension members on typeless receivers](https://github.com/dotnet/csharplang/blob/main/proposals/extension-members-on-typeless-receivers.md):*
+>
+> Run extension method lookup for the identifier `GetEnumerator` with the typeless source expression treated as the first argument, per the rules of that proposal. If overload resolution selects no single best candidate, a compile-time error occurs. Otherwise, the *collection type* is the candidate's first parameter type `T`, the source expression is target-typed to `T`, and the algorithm continues with the chosen candidate as the `GetEnumerator` method.
+
+The C# 12 [collection-expressions](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-12.0/collection-expressions.md) speclet needs no direct change: the spread's iteration-type rule already defers to `foreach`, so any change to §13.9.5 is inherited at the spread site.
+
+### Pros and cons
+
+- **Pro: slots cleanly into the present proposal.** No new lookup machinery and no new conversions. The existing per-candidate target-typing the present proposal introduces is reused unchanged. The spec change is one paragraph in §13.9.5; spread follows by deferral.
+- **Pro: handles the typeless-arm spread case.** The case `[a, b, .. cond ? [c, d] : [e, f]]` is explicitly deferred to "future considerations" by the [immediately-enumerated-collection-expressions proposal](https://github.com/dotnet/csharplang/blob/main/proposals/immediately-enumerated-collection-expressions.md), which keys on the source expression already being a collection expression. The present follow-on subsumes that case whenever an applicable extension `GetEnumerator` is in scope, because the conditional source is admitted as a typeless receiver in its own right.
+- **Con: requires a user-supplied (or BCL-supplied) extension.** The fallback only finds something if there is an extension `GetEnumerator` whose first parameter the typeless source can be implicitly converted to. A single declaration on `IEnumerable<T>` (in the BCL or in user code) is enough to make the bare `foreach (var v in [1, 2, 3])` and the typeless-arm spread cases work, but in the absence of any such extension this follow-on does nothing on its own. By contrast, the [immediately-enumerated-collection-expressions proposal](https://github.com/dotnet/csharplang/blob/main/proposals/immediately-enumerated-collection-expressions.md) bakes `IEnumerable<T>` in at the language level for collection-expression sources specifically, so it works without any extension declaration.
+
+### Relationship to immediately-enumerated-collection-expressions
+
+The two proposals are complementary, not redundant. The [immediately-enumerated-collection-expressions proposal](https://github.com/dotnet/csharplang/blob/main/proposals/immediately-enumerated-collection-expressions.md) bakes in `IEnumerable<T>` as the target type for typeless collection expressions specifically in `foreach` and spread positions, and requires no user-defined extension. This follow-on instead adds extension `GetEnumerator` lookup against the typeless source, requiring a user-defined extension but covering every typeless receiver form admitted by the present proposal (not just collection expressions) and subsuming the conditional and switch arm spread cases that the immediately-enumerated proposal explicitly defers. Either could ship without the other; if both ship, the immediately-enumerated conversion is checked first and this follow-on's fallback runs only when it doesn't apply, so the two paths compose cleanly.
+
+### Backward compatibility
+
+Pure extension. Today every typeless `foreach` source and every typeless spread source is a binding-time error, so no code that compiles today changes meaning.
+
+### Recommendation to LDM
+
+Land the present (member-access) proposal first. Treat this section as a separate decision: schedule it as a follow-on if and when LDM wants the typeless-receivers theme to extend symmetrically to `foreach` and spread. The narrow scope (extension `GetEnumerator` only) is the cheapest spec change consistent with the present proposal's framing. A broader option that target-types typeless sources to types with *instance* `GetEnumerator` shapes is a different shape of feature, overlaps substantially with the immediately-enumerated proposal's core, and is best discussed there.
+
 ## Related discussions
 
 - [Proposal: Collection expressions (champion #5354)](https://github.com/dotnet/csharplang/issues/5354). The C# 12 collection-expressions champion issue.
