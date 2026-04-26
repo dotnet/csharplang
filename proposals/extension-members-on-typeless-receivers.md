@@ -268,7 +268,7 @@ Pure extension. Today every typeless `?.` is a binding-time error, so no code th
 
 ### Recommendation to LDM
 
-Land the present (non-`?.`) proposal first. Treat this section as a separate decision: schedule it as a follow-on if and when the non-`?.` form ships and there is field evidence that conditional and switch receivers in `?.` position are a real ergonomic pain. The initial scope should be conditional and switch expressions; the `null`/`default` literal cases and element access can follow once that lands.
+Land the present (non-`?.`) proposal first. Treat this section as a separate decision: schedule it as a follow-on if and when the non-`?.` form ships and there is field evidence that conditional and switch receivers in `?.` position are a real ergonomic pain.
 
 ## Optional follow-on: `foreach` and spread on typeless receivers via extension `GetEnumerator`
 
@@ -305,7 +305,7 @@ The present proposal does not, on its own, fix either case. It modifies the rece
 
 Add a final fallback to the `foreach` algorithm: when the source expression has no type but is a typeless receiver form admitted by the present proposal, run extension method lookup for the identifier `GetEnumerator` against the typeless source using the present proposal's machinery. Each candidate's first parameter type is the prospective receiver target type; the typeless source is tried for implicit conversion against it via the same per-candidate target-typing the present proposal already performs. If overload resolution selects a unique best candidate, the *collection type* is that candidate's first parameter type, the source is target-typed to it, and the rest of the `foreach` algorithm proceeds against that type.
 
-Spread inherits the change for free. The collection-expressions speclet defines the iteration type of `..s` by reference to the `foreach` algorithm, so as soon as `foreach` admits the typeless fallback, `..` does too.
+Spread inherits the change for free.
 
 ### Spec change shape
 
