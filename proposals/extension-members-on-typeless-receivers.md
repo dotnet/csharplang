@@ -218,6 +218,75 @@ LDM is asked to confirm or veto each category individually. The proposal's body 
 
 Recommendation: admit all categories except throw expressions. Each individual category falls out of the new rule at no additional spec cost, and the dial-back-on-demand structure means LDM can revisit any of them later with minimal disruption.
 
+## Optional follow-on: null-conditional access on typeless receivers
+
+This section is not part of the present proposal. It is offered for LDM to decide whether to schedule as a separate, follow-on feature. The "Interactions with other features" bullet on `?.` already gestures at this; the section below makes the design concrete enough to discuss.
+
+### Motivation
+
+The present proposal admits typeless receivers for `expr.M(args)` but leaves `expr?.M(args)` untouched. That is correct given the existing receiver-typing rules of [§12.8.8](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/expressions.md#1288-null-conditional-member-access), which require the receiver to be a nullable value type or a reference type. Yet there are realistic cases where the typeless receiver would, under the rules of this proposal, acquire a type that is in fact a nullable value type or a reference type, and `?.` is the natural way to write the call:
+
+```cs
+// ExtensionMethod is declared as `extension(int? x) { public void ExtensionMethod() { ... } }`
+(a ? null : this.SomeValueTypeProp)?.ExtensionMethod();
+```
+
+The receiver here has no type. If the same expression were used as a regular argument, as in `ExtensionMethod(a ? null : this.SomeValueTypeProp)`, overload resolution and the target-typed conditional rules would yield the receiver type `int?`. With that type in hand, `?.` is well-defined and means exactly what the user intends.
+
+### Conceptual model
+
+For `P?.A` where `P` does not have a type, the receiver type `Tp` is the type that `P` would acquire under the corresponding non-null-conditional access `P.A` per the rules of this proposal (i.e., the first parameter type of the candidate that overload resolution selects for `.A`).
+
+- If no candidate is selected, the access is a binding-time error, exactly as for `P.A`.
+- If `Tp` is a non-nullable value type, the access is a binding-time error. `?.` is not a meaningful operation against a non-null receiver.
+- Otherwise (`Tp` is a nullable value type, a reference type, or a type parameter not known to be a non-nullable value type), the meaning of `P?.A` is the same as that of the existing rules in [§12.8.8](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/expressions.md#1288-null-conditional-member-access), with `P` treated as if it had been written with type `Tp`.
+
+### Spec change shape
+
+Add a third top-level branch to [§12.8.8](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/expressions.md#1288-null-conditional-member-access), placed after the existing "Otherwise":
+
+> *Otherwise, if `P` does not have a type and is a typeless receiver form admitted by [extension members on typeless receivers](https://github.com/dotnet/csharplang/blob/main/proposals/extension-members-on-typeless-receivers.md):*
+>
+> Let `Tp` be the receiver type of the candidate selected by overload resolution for the corresponding non-null-conditional access `P.A` per the rules of that proposal. If no candidate is selected, a compile-time error occurs.
+>
+> - If `Tp` is a non-nullable value type, a compile-time error occurs.
+> - Otherwise, the meaning of `E` is determined by applying the rules of this section as if `P` were of type `Tp`, with every occurrence of `P` in those rules replaced by the conversion of the typeless `P` to `Tp`.
+
+[§12.8.10](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/expressions.md#12810-null-conditional-invocation-expression) inherits the new branch via composition and needs no direct change.
+
+The bullet on `?.` in [Interactions with other features](#interactions-with-other-features) above would be updated to point at this branch instead of describing the behavior as out of scope.
+
+### Which typeless receiver forms should be admitted?
+
+The receiver forms admitted by the present proposal divide cleanly into two groups for the purposes of `?.`:
+
+- **May evaluate to null.** Conditional expressions whose arms do not have a common type (e.g., `(a ? null : SomeIntMethod())`), switch expressions whose arms do not have a common type, the `null` literal, and the `default` literal target-typed to a nullable value type or reference type. Here `?.` does real work: the short-circuit can fire at runtime.
+- **Cannot evaluate to null.** Collection expressions, lambdas and anonymous methods, method groups, target-typed `new()`, and tuple expressions. Here `?.` is identity to `.`. The user gains nothing, and the form invites confusion (a reader might assume the receiver could be null).
+
+Recommendation: admit the may-evaluate-to-null forms only, and limit the initial scope further to **conditional and switch expressions**. The `null` and `default` literals are accepted by the spec change above as a side effect of the uniform rule, but the resulting calls always short-circuit and are dead code. They can be left in (the rule is uniform), excluded explicitly (a single clause carve-out), or admitted with a warning. LDM should decide.
+
+The cannot-evaluate-to-null forms should be excluded by an explicit clause. The carve-out is a single sentence in the new branch ("typeless receiver forms ... excluding *collection_expression*, *anonymous_function*, *method_group*, *object_creation_expression* with no type, and *tuple_expression*").
+
+### Edge cases worth flagging for LDM
+
+- **Multi-link chains.** `P?.A?.B` where `P` is typeless. The outer `?.` resolves under the new rule and produces a typed result; the inner `?.B` then binds against that type with no novelty. The new branch is entered only at the outermost typeless link.
+
+- **Element access (`P?[i]`).** The same conceptual model applies (target-type `P` from the candidate's first parameter type), but extension indexers are a separate path in the existing spec and would need the analogous addition to [§12.8.12](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/expressions.md#12812-null-conditional-element-access). LDM should decide whether to land in lockstep with `?.` or as an additional follow-on.
+
+- **Null-conditional assignment (C# 14: `P?.X = v`, `P?.X += v`).** The rule composes naturally: `Tp` is the receiver type of the selected candidate property/event accessor, and `?.` short-circuits before the assignment is performed. Worth confirming explicitly so the C# 14 feature and this follow-on are known to compose.
+
+- **Non-null-conditional after-effects.** `(a ? null : x)?.M().N` where `M` is an extension on `int?`. Once the outer `?.` has assigned `Tp = int?`, the trailing `.N` binds against the result type of `M()`, identical to the typed-receiver case. No new rules needed.
+
+- **NRT and flow analysis.** Once the receiver acquires a type, the existing flow-analysis treatment of `?.` applies. For `null` and `default` literal receivers the analyzer can fold the result to "always null". For conditional and switch receivers it follows the standard analysis of those constructs.
+
+### Backward compatibility
+
+Pure extension. Today every typeless `?.` is a binding-time error, so no code that compiles today changes meaning.
+
+### Recommendation to LDM
+
+Land the present (non-`?.`) proposal first. Treat this section as a separate decision: schedule it as a follow-on if and when the non-`?.` form ships and there is field evidence that conditional and switch receivers in `?.` position are a real ergonomic pain. The initial scope should be conditional and switch expressions; the `null`/`default` literal cases and element access can follow once that lands.
+
 ## Related discussions
 
 - [Proposal: Collection expressions (champion #5354)](https://github.com/dotnet/csharplang/issues/5354). The C# 12 collection-expressions champion issue.
