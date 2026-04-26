@@ -211,7 +211,7 @@ Recommendation: admit all categories except throw expressions. The uniform rule 
 
 ## Optional follow-on: null-conditional access on typeless receivers
 
-This section is not part of the present proposal. It is offered for LDM to decide whether to schedule as a separate, follow-on feature. The "Interactions with other features" bullet on `?.` already gestures at this; the section below makes the design concrete enough to discuss.
+This section is not part of the present proposal. It is offered for LDM to decide whether to schedule as a separate, follow-on feature.
 
 ### Motivation
 
@@ -245,8 +245,6 @@ Add a third top-level branch to [§12.8.8](https://github.com/dotnet/csharpstand
 
 [§12.8.10](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/expressions.md#12810-null-conditional-invocation-expression) inherits the new branch via composition and needs no direct change.
 
-The bullet on `?.` in [Interactions with other features](#interactions-with-other-features) above would be updated to point at this branch instead of describing the behavior as out of scope.
-
 ### Which typeless receiver forms should be admitted?
 
 The receiver forms admitted by the present proposal divide cleanly into two groups for the purposes of `?.`:
@@ -259,8 +257,6 @@ Recommendation: admit the may-evaluate-to-null forms only, and limit the initial
 The cannot-evaluate-to-null forms should be excluded by an explicit clause. The carve-out is a single sentence in the new branch ("typeless receiver forms ... excluding *collection_expression*, *anonymous_function*, *method_group*, *object_creation_expression* with no type, and *tuple_expression*").
 
 ### Edge cases worth flagging for LDM
-
-- **Multi-link chains.** `P?.A?.B` where `P` is typeless. The outer `?.` resolves under the new rule and produces a typed result; the inner `?.B` then binds against that type with no novelty. The new branch is entered only at the outermost typeless link.
 
 - **Element access (`P?[i]`).** The same conceptual model applies (target-type `P` from the candidate's first parameter type), but extension indexers are a separate path in the existing spec and would need the analogous addition to [§12.8.12](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/expressions.md#12812-null-conditional-element-access). LDM should decide whether to land in lockstep with `?.` or as an additional follow-on.
 
