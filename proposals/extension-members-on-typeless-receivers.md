@@ -40,6 +40,17 @@ var values = (ImmutableArray<Some<Complex*[], (Set, Of?, Types)>>)[x, y, z];
 var values = [x, y, z].ToImmutableArray();
 ```
 
+The same blocker affects LINQ query syntax. A query like `from x in source ...` is rewritten as a member-access invocation on `source` (`source.Where(...)`, `source.Select(...)`, and so on). For most sources, the methods that satisfy the rewrite are extension methods on `IEnumerable<T>`, but member lookup is gated on `source` having a type, so query syntax over a typeless source is rejected before extension lookup can run:
+
+```cs
+// Error: [1, 2, 3, 4] has no type, so the rewritten .Where(...).Select(...) chain fails to bind.
+var bigDoubled = from x in [1, 2, 3, 4]
+                 where x > 1
+                 select x * 2;
+```
+
+Under this proposal the same query binds to the existing LINQ extensions on `IEnumerable<T>`, with the source target-typed as it would be in the equivalent fluent chain `[1, 2, 3, 4].Where(x => x > 1).Select(x => x * 2)`.
+
 The same shape arises for other expressions that have no type. These are not the headline driver, but the rule we propose is uniform across all such expressions, so they fall out at no additional spec cost. LDM can dial individual categories back via the [open question](#which-receiver-categories-are-supported) below if any prove unwanted.
 
 ```cs
@@ -163,6 +174,8 @@ This rule applies uniformly to every form of extension member declared inside an
 - **Dynamic.** Extension method invocation already does not apply when *expr* or any *args* has compile-time type `dynamic` ([§12.8.9.3](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/expressions.md#12893-extension-method-invocations)). A receiver that has no type also does not have compile-time type `dynamic`, so the existing exclusion is unchanged.
 
 - **Throw expressions.** A *throw_expression* has no type ([§12.16](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/expressions.md#1216-the-throw-expression-operator)) and would otherwise be admitted by the typeless branch of the new rule. This proposal excludes throw expressions from the accepted receiver forms because evaluation of a throw expression terminates control flow before any extension member could be invoked, making the call unreachable. See [Which receiver categories are supported?](#which-receiver-categories-are-supported) for the full per-category list.
+
+- **Ref expressions.** A ref conditional `a ? ref b : ref c` requires both arms to be variables of identity-convertible types and therefore always has a type. Switch expressions have no ref form. Ref-returning method calls, ref locals, ref properties, ref indexers, and ref fields all have a static type. There is no ref-flavored expression in C# that can be typeless, so this proposal has no interaction with ref expressions.
 
 ## Back-compat analysis
 
