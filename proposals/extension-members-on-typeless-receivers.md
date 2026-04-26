@@ -185,14 +185,6 @@ This is a pure extension. The new branch of the receiver eligibility test in [§
 
 - **Partial generic inference.** A separate proposal to allow partial generic inference (for example, `((ImmutableArray<_>)[a, b, c])` where the element type is inferred) could relieve some of the verbosity of the explicit-cast form for the collection-expression case. It is narrower than this proposal and does not help typeless lambdas, method groups, or conditional expressions.
 
-## Design decisions
-
-### Why apply the rule uniformly across all typeless receiver categories?
-
-Collection expressions are the headline driver for this feature, but the rule that admits them, namely *"the receiver has no type, so the existing identity / reference / boxing requirement does not apply"*, is not specific to collection expressions. The same rule, written once in [§12.8.9.3](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/expressions.md#12893-extension-method-invocations) and once in [*Consumption*](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-14.0/extensions.md#consumption), automatically admits null literals, default literals, target-typed `new()`, anonymous functions without a natural type, method groups without a natural type, conditional expressions without a common arm type, switch expressions without a common arm type, and tuple expressions with at least one typeless element. Carving the rule down to one or two categories would require additional spec text to enumerate the excluded forms, and would have to be revisited when the next typeless expression form is introduced. The uniform rule is the smaller, more durable spec.
-
-The categories that LDM might prefer to dial back are surfaced individually in [Which receiver categories are supported?](#which-receiver-categories-are-supported); the proposal's structure makes any per-category exclusion a single-clause edit.
-
 ## Open LDM questions
 
 ### Which receiver categories are supported?
@@ -209,11 +201,13 @@ This proposal admits any receiver expression that has no type. Concretely, the s
 - A switch expression whose arms do not have a common type.
 - A tuple expression with at least one element that itself has no type.
 
-A throw expression (`throw ...`) was excluded from the set because evaluation of a throw expression terminates control flow before any extension member could be invoked, making the call unreachable. The exclusion is reconsiderable.
+A throw expression (`throw ...`) was excluded because evaluation terminates control flow before any extension member could be invoked, making the call unreachable. The exclusion is reconsiderable.
 
-LDM is asked to confirm or veto each category individually. The proposal's body is structured so that any subset can be carved out without changing the rule itself: a category-specific exclusion is a single clause added to the receiver eligibility text in [§12.8.9.3](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/expressions.md#12893-extension-method-invocations) and the corresponding compatibility sentence in [*Consumption*](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-14.0/extensions.md#consumption).
+Collection expressions are the headline driver, but the rule that admits them, namely *"the receiver has no type, so the existing identity / reference / boxing requirement does not apply"*, is not specific to collection expressions; the same rule, written once in [§12.8.9.3](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/expressions.md#12893-extension-method-invocations) and once in [*Consumption*](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-14.0/extensions.md#consumption), automatically admits every other category in the list above. Carving the rule down to one or two categories would require additional spec text to enumerate the excluded forms, and would have to be revisited each time a new typeless expression form is introduced.
 
-Recommendation: admit all categories except throw expressions. Each individual category falls out of the new rule at no additional spec cost, and the dial-back-on-demand structure means LDM can revisit any of them later with minimal disruption.
+LDM is asked to confirm or veto each category individually. A per-category exclusion is a single clause added to the receiver eligibility text in [§12.8.9.3](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/expressions.md#12893-extension-method-invocations) and the corresponding compatibility sentence in [*Consumption*](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-14.0/extensions.md#consumption), so dial-back-on-demand has minimal cost.
+
+Recommendation: admit all categories except throw expressions. The uniform rule is the smaller, more durable spec.
 
 ## Optional follow-on: null-conditional access on typeless receivers
 
