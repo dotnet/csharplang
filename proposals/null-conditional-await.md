@@ -64,6 +64,7 @@ A new subsection is added to [§12.9.8](https://github.com/dotnet/csharpstandard
 > `await? t` is well-typed iff:
 >
 > - The static type `S` of `t` is admissible as the operand `P` of a *null_conditional_member_access* `P?.A` per [§12.8.8](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/expressions.md#1288-null-conditional-member-access). The runtime null-test on `t` is the one §12.8.8 specifies for that `P`.
+> - When `GetResult()` returns non-void, its return type is admissible as the result type of `A` in `P?.A` per §12.8.8 (so, for example, an unconstrained type parameter result is a compile-time error here, just as `P?.A` would be).
 > - `t` (or `t.Value`, when `t : Nullable<V>`) satisfies the awaitable pattern of [§12.9.8.2](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/expressions.md#12982-awaitable-expressions).
 
 ### Awaitable expressions
