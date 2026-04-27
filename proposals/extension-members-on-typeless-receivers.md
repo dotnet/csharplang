@@ -1,5 +1,8 @@
 # Extension members on typeless receivers
 
+Champion issue: <https://github.com/dotnet/csharplang/issues/10146>
+Discussion: <https://github.com/dotnet/csharplang/discussions/10145>
+
 ## Summary
 
 Allow extension members to be invoked on a receiver expression that has no type:
