@@ -10,7 +10,9 @@ All schedule items must have a public issue or checked-in proposal that can be l
 - [Final initializers](https://github.com/dotnet/csharplang/blob/5055b97eee8c10d12f822f6d4db9464329615947/proposals/final-initializers.md)
   - [LDM in 2020](https://github.com/dotnet/csharplang/blob/main/meetings/2020/LDM-2020-04-27.md#primary-constructor-bodies-and-validators) approved the syntax. Next is discussing semantics.
 - [Labeled `break` and `continue` Statements](https://github.com/dotnet/csharplang/blob/c4ec6fb60c2e174b1abb6c019f22bb15b9b13f6c/proposals/labeled-break-continue.md) (CyrusNajmabadi)
-  - [Last conclusion](https://github.com/dotnet/csharplang/blob/main/meetings/2026/LDM-2026-01-12.md#labeled-break-and-continue-statements): delve deeper in a full session.
+- [Labeled `break` and `continue` Statements](https://github.com/dotnet/csharplang/blob/c4ec6fb60c2e174b1abb6c019f22bb15b9b13f6c/proposals/labeled-break-continue.md) (CyrusNajmabadi) Finalize specification.
+- [Final initializers](https://github.com/dotnet/csharplang/blob/5055b97eee8c10d12f822f6d4db9464329615947/proposals/final-initializers.md)
+- [LDM in 2020](https://github.com/dotnet/csharplang/blob/main/meetings/2020/LDM-2020-04-27.md#primary-constructor-bodies-and-validators) approved the syntax. Next is discussing semantics.
 - [Anonymous using declarations](https://github.com/dotnet/csharplang/blob/665a9392e172e6f4f16347c502d9f80220a6e7a4/proposals/anonymous-using-declarations.md) (jnm2, 333fred, CyrusNajmabadi)
 - [Partial extension members](https://github.com/dotnet/csharplang/pull/10126) (triage and open issues, Julien)
 - [Extension members on typeless receivers](https://github.com/dotnet/csharplang/blob/main/proposals/extension-members-on-typeless-receivers.md) (CyrusNajmabadi, jnm2)
