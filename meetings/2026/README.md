@@ -38,15 +38,18 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 - Unsafe evolution, continued - [Simple core model](https://github.com/dotnet/csharplang/blob/main/meetings/working-groups/unsafe-evolution/unsafe-simple-core-model.md) (Andy, Mads)
 
+## C# Language Design Notes for 2026
+
 ### Mon Apr 27, 2026
 
-- Chained relational comparison: https://github.com/dotnet/csharplang/blob/main/proposals/chained-relational-comparison.md - cyrus
-- Labeled break/continue: https://github.com/dotnet/csharplang/blob/main/proposals/labeled-break-continue.md - cyrus
-- Null conditional 'await': https://github.com/dotnet/csharplang/blob/main/proposals/null-conditional-await.md - cyrus
-- Relaxed 'partial'/'ref' ordering: https://github.com/dotnet/csharplang/blob/main/proposals/relaxed-partial-ref-ordering.md - cyrus/rikki
-- Compound assignment in initializer: https://github.com/dotnet/csharplang/blob/main/proposals/compound-assignment-in-initializer-and-with.md - cyrus
+[C# Language Design Meeting for April 27th, 2026](https://github.com/dotnet/csharplang/blob/main/meetings/2026/LDM-2026-04-27.md)
 
-## C# Language Design Notes for 2026
+- Relaxed partial ordering
+- Labeled break and continue
+- Null-conditional await
+- Chained relational comparisons
+- Compound assignment in initializers
+- Prioritization
 
 ### Wed Apr 22, 2026
 
