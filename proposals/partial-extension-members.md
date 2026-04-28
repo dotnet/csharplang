@@ -84,7 +84,7 @@ E.M(1, i2: 2); // error
 
 partial class E
 {
-    extension<T>(T t) { public partial T M(int i1);
+    extension<T>(T t) { public partial T M(int i1); }
     extension<T2>(T2 t2) { public partial T2 M(int i2) => t2; }
 }
 ```
