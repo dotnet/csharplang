@@ -13,6 +13,7 @@ All schedule items must have a public issue or checked-in proposal that can be l
   - [Last conclusion](https://github.com/dotnet/csharplang/blob/main/meetings/2026/LDM-2026-01-12.md#labeled-break-and-continue-statements): delve deeper in a full session.
 - [Anonymous using declarations](https://github.com/dotnet/csharplang/blob/665a9392e172e6f4f16347c502d9f80220a6e7a4/proposals/anonymous-using-declarations.md) (jnm2, 333fred, CyrusNajmabadi)
 - [Partial extension members](https://github.com/dotnet/csharplang/pull/10126) (triage and open issues, Julien)
+- [Extension members on typeless receivers](https://github.com/dotnet/csharplang/blob/main/proposals/extension-members-on-typeless-receivers.md) (CyrusNajmabadi, jnm2)
 - Triage (working set)
 
 ## Recurring topics
