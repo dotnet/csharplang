@@ -109,7 +109,7 @@ What should we do if the extension parameter has different attributes in the def
 ```cs
 extension([A] string s) { public partial void M(); }
 extension([B] string s) { public partial void M() { } }
- ```
+```
 
 Options:
 1. treat the definition part as canonical (drop `[B]` for this implementating part) and potentially warn
