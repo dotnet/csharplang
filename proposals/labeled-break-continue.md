@@ -296,6 +296,14 @@ This proposal consolidates and addresses the following community discussions:
 
 </details>
 
+## Open questions
+
+The current specification defines the semantics for `break identifier`/`continue identifier` as finding the innermost applicable loop/switch construct labeled with that identifier, and then dispatching to it with standard `break/continue` semantics.  An alternative formalization is to instead say that `break identifier/continue identifier` identifies a label using the same rules as 'goto'.  And if the label directly contains a loop/switch construct that encloses the break/continue, then that is the loop/switch that the break/continue applies to.
+
+Both formalization are effectively identical, allowing and disallowing the same set of programs.  The approach chose in this speclet was done for both conceptual and literal simplicity.  It does not have to cover scoping of labels.  Binding of identifiers as `goto` does it.  Or, having to definie outward-in binding logic for resolving the loop/switch and continue/break statement.  Instead, it simply expands the simple spec language that finds the appropriate enclosing loop/switch given the break/continue, allowing it to extend past the innermost, to something above that.  
+
+If LDM feels tying this tighter to goto+label semantics, it would not be difficult to adjust the spec to that.  Keeping this question open if the group feels the latter form is more natural than the form taken here. 
+
 ## Design meetings
 
 TBD
