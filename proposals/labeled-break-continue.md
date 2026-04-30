@@ -306,6 +306,22 @@ Both formalization are effectively identical, allowing and disallowing the same 
 
 If LDM feels tying this tighter to goto+label semantics, it would not be difficult to adjust the spec to that.  Keeping this question open if the group feels the latter form is more natural than the form taken here. 
 
+```
+void M()
+{
+  label:
+  Console.WriteLine();
+  
+  foreach (var x in ...)
+  {
+    break label;
+    // should this scenario fail because:
+    // 1. the identifier lookup fails, or
+    // 2. the label is rejected (not a valid label for a `break` since not attached to a loop construct) after being found?
+  }
+}
+```
+
 ### nested labels
 
 Should `a: b: while (true) continue a;` be supported? 
