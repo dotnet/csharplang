@@ -298,11 +298,19 @@ This proposal consolidates and addresses the following community discussions:
 
 ## Open questions
 
+### label semantics
+
 The current specification defines the semantics for `break identifier`/`continue identifier` as finding the innermost applicable loop/switch construct labeled with that identifier, and then dispatching to it with standard `break/continue` semantics.  An alternative formalization is to instead say that `break identifier/continue identifier` identifies a label using the same rules as 'goto'.  And if the label directly contains a loop/switch construct that encloses the break/continue, then that is the loop/switch that the break/continue applies to.
 
 Both formalization are effectively identical, allowing and disallowing the same set of programs.  The approach chose in this speclet was done for both conceptual and literal simplicity.  It does not have to cover scoping of labels, or the binding of identifiers as `goto` does it, or having to definie outward-in binding logic for resolving the loop/switch and continue/break statement.  Instead, it simply expands the simple spec language that finds the appropriate enclosing loop/switch given the break/continue, allowing it to extend past the innermost, to something above that.  
 
 If LDM feels tying this tighter to goto+label semantics, it would not be difficult to adjust the spec to that.  Keeping this question open if the group feels the latter form is more natural than the form taken here. 
+
+### nested labels
+
+Should `a: b: while (true) continue a;` be supported? 
+
+Recommendation: no. No users have asked for this. No compelling use cases have been presented for it. Many mainstream languages do not allow it, with no complaints from their communities. The lang (and impl) are simpler and clearer bring strict that only the direct containing labeled statement labels the loop/switch.
 
 ## Design meetings
 
