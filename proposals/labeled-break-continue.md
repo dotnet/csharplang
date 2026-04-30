@@ -153,7 +153,7 @@ the topic being reintroduced and rerequested continuously.  Similar features exi
 - **Zig**: [Labelled loops](https://zig.guide/language-basics/labelled-loops/)
 - **Dart**: [Loops](https://dart.dev/language/loops)
 
-In all these cases, the languages operate in the saem way as in this specification.  Namely, some constructs can have a
+In all these cases, the languages operate in the same way as in this specification.  Namely, some constructs can have a
 label, and it is possible to reference that label from their respective `continue` or `break` statements.  
 
 ## Detailed design
