@@ -306,6 +306,33 @@ Both formalization are effectively identical, allowing and disallowing the same 
 
 If LDM feels tying this tighter to goto+label semantics, it would not be difficult to adjust the spec to that.  Keeping this question open if the group feels the latter form is more natural than the form taken here. 
 
+```
+void M()
+{
+  label:
+  Console.WriteLine();
+  
+  foreach (var x in ...)
+  {
+    break label;
+    // should this scenario fail because:
+    // 1. the identifier lookup fails, or
+    // 2. the label is rejected (not a valid label for a `break` since not attached to a loop construct) after being found?
+  }
+}
+```
+
+Spec on [how labels are declared](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/basic-concepts.md#73-declarations):
+> Each block or switch_block creates a separate declaration space for labels. 
+> Names are introduced into this declaration space through labeled_statements, and the names are referenced through goto_statements. 
+> The label declaration space of a block includes any nested blocks. 
+> Thus, within a nested block it is not possible to declare a label with the same name as a label in an enclosing block.
+
+Spec on [labeled statements](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/statements.md#135-labeled-statements):
+> The scope of a label is the whole block in which the label is declared, including any nested blocks. 
+> It is a compile-time error for two labels with the same name to have overlapping scopes.  
+> A label can be referenced from goto statements (§13.10.4) within the scope of the label.
+
 ### nested labels
 
 Should `a: b: while (true) continue a;` be supported? 
