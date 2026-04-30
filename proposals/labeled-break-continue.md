@@ -310,7 +310,7 @@ If LDM feels tying this tighter to goto+label semantics, it would not be difficu
 
 Should `a: b: while (true) continue a;` be supported? 
 
-Recommendation: no. No users have asked for this. No compelling use cases have been presented for it. Many mainstream languages do not allow it, with no complaints from their communities. The lang (and impl) are simpler and clearer bring strict that only the direct containing labeled statement labels the loop/switch.
+Recommendation: no. No users have asked for this. No compelling use cases have been presented for it. Most mainstream languages do not allow it, with no complaints from their communities. The lang (and impl) are simpler and clearer bring strict that only the direct containing labeled statement labels the loop/switch.
 
 ## Design meetings
 
