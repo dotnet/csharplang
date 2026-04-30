@@ -322,6 +322,17 @@ void M()
 }
 ```
 
+Spec on [how labels are declared](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/basic-concepts.md#73-declarations):
+> Each block or switch_block creates a separate declaration space for labels. 
+> Names are introduced into this declaration space through labeled_statements, and the names are referenced through goto_statements. 
+> The label declaration space of a block includes any nested blocks. 
+> Thus, within a nested block it is not possible to declare a label with the same name as a label in an enclosing block.
+
+Spec on [labeled statements](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/statements.md#135-labeled-statements):
+> The scope of a label is the whole block in which the label is declared, including any nested blocks. 
+> It is a compile-time error for two labels with the same name to have overlapping scopes.  
+> A label can be referenced from goto statements (§13.10.4) within the scope of the label.
+
 ### nested labels
 
 Should `a: b: while (true) continue a;` be supported? 
