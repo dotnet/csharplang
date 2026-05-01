@@ -34,11 +34,17 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ### Mon May 11, 2026
 
-### Wed Apr 29, 2026 (1.5 hour only)
-
-- Unsafe evolution, continued - [Simple core model](https://github.com/dotnet/csharplang/blob/main/meetings/working-groups/unsafe-evolution/unsafe-simple-core-model.md) (Andy, Mads)
 
 ## C# Language Design Notes for 2026
+
+### Wed Apr 29, 2026
+
+[C# Language Design Meeting for April 29th, 2026](https://github.com/dotnet/csharplang/blob/main/meetings/2026/LDM-2026-04-29.md)
+
+- Unsafe evolution
+    - Finer-grained opt-in
+    - More gradual opt-in
+    - Members with pointers in their signature
 
 ### Mon Apr 27, 2026
 
