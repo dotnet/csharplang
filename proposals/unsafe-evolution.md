@@ -365,6 +365,13 @@ But what about `sizeof`?
 Today, [the spec](https://github.com/dotnet/csharpstandard/blob/draft-v9/standard/expressions.md#12822-stack-allocation) always considers `stackalloc` memory as uninitialized, and says that the contents
 are undefined unless manually cleared or assigned. Do we consider this a spec bug, or do we need to change what we consider `unsafe` for `stackalloc` purposes?
 
+### `AllowUnsafeBlocks`
+
+Meaning of `AllowUnsafeBlocks` is currently unchanged - it's required to be set to `true` in order to be able to use the `unsafe` keyword or `SkipLocalsInitAttribute`.
+Should we not require it for `SkipLocalsInitAttribute` under the updated rules since BCL can mark that attribute as *requires-unsafe*?
+Should we require it for the `safe` keyword ([used](#extern-implicitly-unsafe) for `extern` members) too?
+Should we require it for both `unsafe` blocks and `unsafe` member declarations or other combination of those?
+
 ### `unsafe` expressions
 
 Other languages with more comprehensive `unsafe` features have added `unsafe` as an expression, to enable improved user ergonomics and allow authors to more precisely limit where `unsafe` is used. Is this
