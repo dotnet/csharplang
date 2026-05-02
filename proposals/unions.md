@@ -350,7 +350,7 @@ if (result is 1) { ... } // if (result.HasValue && result.GetValueOrDefault().Va
 
 The compiler will prefer implementing pattern behavior by means of members prescribed by the non-boxing access pattern. While it is free to do any optimization within the bounds of the well-formedness rules, the following are the minimum set guaranteed to be applied:
 
-* For a pattern that implies checking for a specific type `T`, if a `TryGetValue(S value)` method is available, and there is an identity, or implicit reference/boxing conversion from `T` to `S`, then that method is used to obtain the value. The pattern is then applied to that value. If there is more than one such method, then any where the conversion from `T` to `S` is not a boxing conversion is preferred if available. If there is still more than one method, one is chosen in an implementation-defined manner.
+* For a pattern that implies checking for a specific type `T`, if a `TryGetValue(S value)` method is available, and there is an identity, or implicit reference/boxing conversion from `T` to `S`, or `S` is a `Nullable<T>`, then that method is used to obtain the value. The pattern is then applied to that value. If there is more than one such method, then any where the conversion from `T` to `S` is not a boxing conversion is preferred if available. If there is still more than one method, one is chosen in an implementation-defined manner.
 * Otherwise, for a pattern that implies checking for `null`, if a `HasValue` property is available, that property is used to check if the union value is null.
 * Otherwise, the pattern is applied to the result of accessing the `IUnion.Value` property on the incoming union.
 
