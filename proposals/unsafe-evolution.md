@@ -747,7 +747,10 @@ for source generators will be made.
 ### (answered) Compat mode for non-opted-in callers too?
 
 - [LDM 2026-04-22](https://github.com/dotnet/csharplang/blob/main/meetings/2026/LDM-2026-04-22.md#transitional-diagnostics-for-pointer-signature-calls): yes
+- [LDM 2026-04-29](https://github.com/dotnet/csharplang/blob/main/meetings/2026/LDM-2026-04-29.md#non-opted-in-caller-opted-in-callee): no change for opted-in callees
 - [LDM 2026-04-29](https://github.com/dotnet/csharplang/blob/main/meetings/2026/LDM-2026-04-29.md#severity-of-these-diagnostics): severity: errors
+
+Answer: non-opted-in members with pointers in signature are considered *requires-unsafe* to opted-in callers.
 
 ### (answered) Extend the compat mode?
 
