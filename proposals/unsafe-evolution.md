@@ -573,7 +573,23 @@ i++;
 ### Value of `MemorySafetyRulesAttribute`
 
 What should be the "enabled"/"updated" memory safety rules version? `2`? `15`? `11`?
-See also https://github.com/dotnet/designs/blob/main/accepted/2025/memory-safety/sdk-memory-safety-enforcement.md.
+See also [SDK Unsafe Adoption](https://github.com/dotnet/designs/blob/main/accepted/2025/memory-safety/sdk-memory-safety-enforcement.md)
+and [More gradual opt-in?](#answered-more-gradual-opt-in).
+
+### (answered) More gradual opt-in?
+
+Today, opting in gives you two things at once: enforcement of the unsafe rules in your own code, and a signal published to your consumers (via an assembly-level attribute) that your annotations are intentional.
+There may be users who want to start getting the enforcement diagnostics as they annotate, without being ready to publish that they have fully annotated their assembly.
+Should we have a "middle" opt-in level which would surface the unsafe diagnostics as warnings, and the full opt-in would promote them to errors?
+
+- [LDM 2026-04-29](https://github.com/dotnet/csharplang/blob/main/meetings/2026/LDM-2026-04-29.md#more-gradual-opt-in): yes, but it's not blocking for preview
+
+### (answered) Finer-grained opt-in
+
+Provide a fine-grained, region-based opt-in mechanism analogous to the one we built for nullable reference types, where users can use directives to enable the feature for specific regions of source code?
+See also [Opt in/out for code regions](#opt-inout-for-code-regions).
+
+- [LDM 2026-04-29](https://github.com/dotnet/csharplang/blob/main/meetings/2026/LDM-2026-04-29.md#finer-grained-opt-in): no
 
 ### `extern` implicitly unsafe
 
@@ -728,10 +744,18 @@ for source generators will be made.
 
 - [LDM 2026-04-13](https://github.com/dotnet/csharplang/blob/main/meetings/2026/LDM-2026-04-13.md#unsafe-evolution-continued): no
 
-### Compat mode for non-opted-in callers too?
+### (answered) Compat mode for non-opted-in callers too?
 
 - [LDM 2026-04-22](https://github.com/dotnet/csharplang/blob/main/meetings/2026/LDM-2026-04-22.md#transitional-diagnostics-for-pointer-signature-calls): yes
-- TODO: severity of the diagnostics; what other caller/callee opt-in combinations should they apply to
+- [LDM 2026-04-29](https://github.com/dotnet/csharplang/blob/main/meetings/2026/LDM-2026-04-29.md#severity-of-these-diagnostics): severity: errors
+
+### (answered) Extend the compat mode?
+
+Should we consider `nint` and `System.IntPtr` as pointers too?
+Should we consider `extern`/`DllImport` from non-opted-in callers as *requires-unsafe* too?
+Should we have a blanket warning when an opted-in assembly references a non-opted-in assembly?
+
+- [LDM 2026-04-29](https://github.com/dotnet/csharplang/blob/main/meetings/2026/LDM-2026-04-29.md#opted-in-caller-non-opted-in-callee): no extensions (analyzers could cover some less certain unsafety signals)
 
 [unsafe-code]: https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/expressions.md#128-primary-expressions
 [sizeof-const]: https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/expressions.md#12819-the-sizeof-operator
