@@ -279,7 +279,7 @@ class C1
 
 Should an exhaustiveness warning be reported for an empty switch, when the input is a closed type with no subtypes?
 
-Recommendation: Require handling the closed class itself in this case.
+Recommendation: Require handling the closed class itself in this case. Essentially, pattern matching should treat it the same as a non-closed class.
 
 ```cs
 closed class C;
@@ -351,3 +351,40 @@ class Program
         };
 }
 ```
+
+### Ruling out generic closed subtypes based on constraints
+
+"Ruling out" a subtype of a closed class, requires determining that the subtype's base type, could never possibly unify with the switch input type.
+
+Today, the CanUnify check does not consider constraints. In other words, a program like the following, requires explicitly matching the input closed type, because while the subtype cannot be used, we don't observe that it's impossible for the subtype to arise via generic substitution.
+
+```cs
+closed class C<T>;
+class D1<U1> : C<U1>;
+class D2<U2> : C<U2> where U2 : struct;
+
+class Program
+{
+    int M1<X>(C<X> c) where X : class
+    {
+        // warning: switch is not exhaustive. Pattern 'C<X>' is not handled.
+        return c switch
+        {
+            D1<X> => 1,
+        };
+    }
+
+    int M2<X>(C<X> c) where X : class
+    {
+        return c switch
+        {
+            D1<X> => 1,
+            C<X> => 2, // ok
+        };
+    }
+}
+```
+
+The question is: should we try to detect when "mutually exclusive" sets of constraints are present, and filter out subtypes accordingly? This would remove the warning reported in 'M1' in the above sample.
+
+Recommendation: No, don't introduce any new such detection. This will require writing "unnecessary" patterns which won't actually match in practice, in complex constraint scenarios like the above sample. However, the harm of such "unnecessary" patterns, seems less than the cost of implementing a precisely correct "mutually exclusive" check for constraints.
