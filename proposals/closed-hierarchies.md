@@ -274,3 +274,80 @@ class C1
 - Interfaces could also be allowed to be closed. The rules would be very similar.
 
 ## Open questions
+
+### Exhaustiveness when no subtypes exist
+
+Should an exhaustiveness warning be reported for an empty switch, when the input is a closed type with no subtypes?
+
+Recommendation: Require handling the closed class itself in this case.
+
+```cs
+closed class C;
+
+class Program
+{
+    int M1(C c)
+        // warning: switch is not exhaustive.
+        => c switch
+        {
+        };
+
+    int M2(C c)
+        => c switch
+        {
+            C => 1, // ok
+        };
+}
+```
+
+### Allow matching the base type after matching all subtypes
+
+Should it be permitted to match a closed base type in a switch, after all its subtypes have been exhausted?
+
+Recommendation: No, report an error in this scenario.
+
+```cs
+closed class C;
+class D1 : C;
+class D2 : C;
+
+class Program
+{
+    int M1(C c)
+        => c switch
+        {
+            D1 => 1,
+            D2 => 2,
+            C => 3, // error: switch arm is impossible to match.
+        };
+}
+```
+
+### Exhaustiveness of type parameters constrained to closed type
+
+Should it be permitted to exhaust a type parameter constrained to a closed class type, by matching the subtypes of the closed class?
+
+```cs
+closed class C;
+class D1 : C;
+class D2 : C;
+
+class Program
+{
+    int M1<X>(X x) where X : C
+        // warning: switch is not exhaustive. 'C' is not handled.
+        => x switch
+        {
+            D1 => 1,
+            D2 => 2,
+        };
+
+    int M2<X>(X x) where X : C
+        => x switch
+        {
+            D1 => 1,
+            D2 => 2,
+            C => 3, // ok
+        };
+}
+```
