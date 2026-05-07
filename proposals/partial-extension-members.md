@@ -64,7 +64,7 @@ Partial extension members can be declared in an `extension` block within a `part
 The definition and implementation parts can be declared in the same or different extension blocks (within an enclosing static partial class).  
 
 The member declarations must match according to the same rules as regular partial members,
-and the signatures of the containing extension blocks must also match according to the same rules as regular partial members (except for a lack of return type).
+and the signatures of the containing extension blocks must also match according to the same rules as regular partial members (treating the signature as a method signature with no return type).
 Note: two extension blocks having matching signatures implies that they have the same marker type name.
 
 Existing rules for partial methods still apply.
@@ -72,6 +72,9 @@ For instance:
 - There must be only one definition part and no more than one implementation part for a valid partial member.  
 - Partial methods without an accessibility modifier are erasable, meaning that if the implementation part is missing, the definition part is removed without error and the call-sites are also removed.  
 - Partial extension methods with an accessibility modifier are non-erasable, meaning that an error is produced if the implementation part is missing.  
+
+Matching definition and implementation parts are not required to have matching name for parameters, the extension parameter or type parameters on the method or the extension block. 
+The canonical names for callers are those from the definition part, both for method parameters and for the extension receiver parameter. 
 
 Callers can only call the partial extension member using the signature of the definition part:
 ```cs
@@ -82,10 +85,10 @@ E.M(t2: 1, 2); // error
 E.M(1, i2: 2); // error
 1.M(i2: 2); // error
 
-partial class E
+partial static class E
 {
-    extension<T>(T t) { public partial T M(int i1); }
-    extension<T2>(T2 t2) { public partial T2 M(int i2) => t2; }
+    extension<T>(T t) { public partial T M<U>(U i1); }
+    extension<T2>(T2 t2) { public partial T2 M<U2>(U2 i2) => t2; }
 }
 ```
 
@@ -122,7 +125,7 @@ For regular partial methods, doc comments on the implementation take priority, d
 I propose we do the same for partial extension members.
 
 Doc comments on the extension block get emitted for the marker type. If multiple extension blocks get merged, their doc comments get merged too.  
-I propose we do the same for extension members in partial types. 
+I propose we do the same for extension members in partial types: each marker type that is emitted will get its doc, combining the doc comments from any extension blocks that are emitted as that marker type.
 
 ### Dropping otherwise empty extension blocks
 
@@ -147,6 +150,8 @@ erasable partial extension methods are removed:
 ```cs
 extension(int i) { partial void Unused(); }
 ```
+
+Note: this choice (whether to skip emitting otherwise empty extension blocks) interacts with the two earlier questions (attributes and xml docs).  
 
 ## References
 - https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/classes.md#1569-partial-methods
