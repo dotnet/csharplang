@@ -116,6 +116,14 @@ Options:
 2. emit the member is a new marker type with the merged attributes (`[A, B]`) but otherwise ignoring specificities of the signature of the "implementing" extension block (such as parameter names)
 3. require that the attributes on the extension parameter match in all parts
 
+### Doc comments
+
+For regular partial methods, doc comments on the implementation take priority, doc comments on the definition are used as fallback.  
+I propose we do the same for partial extension members.
+
+Doc comments on the extension block get emitted for the marker type. If multiple extension blocks get merged, their doc comments get merged too.  
+I propose we do the same for extension members in partial types. 
+
 ### Dropping otherwise empty extension blocks
 
 We have considered, but not yet implemented, dropping empty extension blocks such as:
