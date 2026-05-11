@@ -31,7 +31,7 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ### Wed May 13, 2026
 
-- Unsafe [open questions](https://github.com/dotnet/csharplang/blob/b040782c7f7c55cc8119620bb1b3baaf25fc419a/proposals/unsafe-evolution.md#open-questions) (Fred, Andy)
+- Unsafe [open questions](https://github.com/dotnet/csharplang/blob/main/proposals/unsafe-evolution.md#questions) (Fred, Andy)
 
 ### Mon May 11, 2026
 
