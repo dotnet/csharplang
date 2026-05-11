@@ -61,7 +61,6 @@ The following breaking changes can be observed when updating to a compiler imple
   - `unsafe` on a member now also marks it as *requires-unsafe*, meaning callers must be in an `unsafe` context and overrides cannot be `unsafe` if the base member is safe.
   - `unsafe` on a member or a type does not automatically introduce an `unsafe` context, meaning explicit `unsafe` blocks must be used around `unsafe` operations in member bodies and initializers.
   - `extern` members require an `unsafe` context when used and an explicit `unsafe`/`safe` keyword on the declaration.
-- Under a new langversion:
   - `stackalloc` under [certain conditions](#stack-allocation) requires an `unsafe` context.
 - Under a new warnlevel:
   - `unsafe` modifier warns on type declarations, static constructors, and destructors, because it does not have any effect.
@@ -150,6 +149,8 @@ A _stackalloc_expression_ is unsafe if all of the following statements are true:
 
 In these contexts, the resulting stack space could have unknown memory contents, and it is being converted to a type that provides a safe wrapper around unmanaged memory access. This violates the
 contract of `Span<T>` and `ReadOnlySpan<T>`, and so must be subject to extra scrutiny by the author and reviewers of such code.
+
+Unlike other changes to `unsafe` rules which are relaxations, this is a tightening, and hence it applies only under opt-in to the updated memory safety rules to avoid a break.
 
 > [!NOTE]
 > This means that assigning a `stackalloc` to a pointer is _always_ safe, regardless of context.
@@ -364,6 +365,10 @@ But what about `sizeof`?
 
 Today, [the spec](https://github.com/dotnet/csharpstandard/blob/draft-v9/standard/expressions.md#12822-stack-allocation) always considers `stackalloc` memory as uninitialized, and says that the contents
 are undefined unless manually cleared or assigned. Do we consider this a spec bug, or do we need to change what we consider `unsafe` for `stackalloc` purposes?
+
+### `stackalloc` rule
+
+LDM should confirm the [`stackalloc` rule defined above](#stack-allocation) and whether it should apply regardless of opt-in like other pointer-related changes.
 
 ### `AllowUnsafeBlocks`
 
