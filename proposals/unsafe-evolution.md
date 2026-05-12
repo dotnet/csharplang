@@ -477,6 +477,7 @@ class X<T> where T : new();
 class D
 {
     public void M(X<A> x) { } // error: using `X` which uses requires-unsafe `A..ctor`
+    public void M(params A a) { } // error: requires-unsafe `A..ctor` in a `params` collection
 }
 ```
 
@@ -484,6 +485,11 @@ To suppress the *requires-unsafe* errors, we need to somehow introduce an `unsaf
 But the `unsafe` keyword does not introduce an `unsafe` context [anymore](#answered-unsafe-context-defaults-in-members).
 We could make `unsafe` introduce an `unsafe` context in the signature but forcing making a constructor *requires-unsafe* when wanting to call a base *requires-unsafe* constructor seems unfortunate.
 We could make *requires-unsafe* usages in signatures warnings which users could suppress in-place if they hit these rare edge cases.
+
+The `params` collection case could be resolved simply by allowing that since
+calling such method requires an `unsafe` context anyway because the unsafe `params` collection is constructed at the call site.
+Although that makes the declaration effectively *requires-unsafe*, so we could just require the `unsafe` annotation or at least warn about that fact.
+Note that the `params` collection case is an error today in line with how other similar features behave here (`Obsolete`, `UnmanagedCallersOnly`).
 
 There is a similar issue with types since `unsafe` on them [does not](#unsafe-on-types) introduce `unsafe` context either:
 
