@@ -550,6 +550,10 @@ it would be good to make `unsafe` on a field also not introduce an `unsafe` cont
 If *requires-unsafe* operations are used in the field's initializer, the user can always encapsulate them into a method,
 or we could introduce [`unsafe` expressions](#unsafe-expressions).
 
+### Explicit layout
+
+Should fields in structs marked as `[StructLayout(Explicit)]` be required to be marked as `unsafe`?
+
 ### Taking the address of an uninitialized variable
 
 Today, taking the address of a not definitely assigned variable can consider that variable definitely assigned, exposing uninitialized member. We have a couple of options to solving that:
