@@ -29,14 +29,21 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ### Mon May 18, 2026
 
-### Wed May 13, 2026
-
-- Unsafe [open questions](https://github.com/dotnet/csharplang/blob/main/proposals/unsafe-evolution.md#questions) (Fred, Andy)
-
 ### Mon May 11, 2026
 
 
 ## C# Language Design Notes for 2026
+
+### Wed May 13, 2026
+
+[C# Language Design Meeting for May 13th, 2026](https://github.com/dotnet/csharplang/blob/main/meetings/2026/LDM-2026-05-13.md)
+
+- Unsafe evolution, continued
+    - `safe` marker syntax
+    - `unsafe` on types
+    - `unsafe` fields
+    - Explicit and extended layout fields
+    - Implicit calls and constructor edge cases
 
 ### Wed Apr 29, 2026
 
