@@ -4,7 +4,6 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ## Schedule ASAP
 
-- [Closed class open questions, part 3](https://github.com/dotnet/csharplang/blob/3613750c73dd2229f814decb5b5911858f6859f2/proposals/closed-hierarchies.md) (Rikki)
 
 ## Schedule when convenient
 
@@ -29,8 +28,7 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ### Mon May 18, 2026
 
-### Mon May 11, 2026
-
+- [Closed class open questions, part 3](https://github.com/dotnet/csharplang/blob/3613750c73dd2229f814decb5b5911858f6859f2/proposals/closed-hierarchies.md) (Rikki)
 
 ## C# Language Design Notes for 2026
 
