@@ -552,7 +552,9 @@ or we could introduce [`unsafe` expressions](#unsafe-expressions).
 
 ### Explicit layout
 
-Should fields in structs marked as `[StructLayout(Explicit)]` be required to be marked as `unsafe`?
+Should fields in structs marked as `[StructLayout(Explicit)]` or `[ExtendedLayout]` be required to be marked as `unsafe`?
+
+Recommendation: yes.
 
 ### Taking the address of an uninitialized variable
 
