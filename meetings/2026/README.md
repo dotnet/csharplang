@@ -27,6 +27,8 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ### Wed May 20, 2026
 
+- Unions: More nuanced pattern matching? (Matt, Mads) (proposal links to come)
+
 ### Mon May 18, 2026
 
 - [Closed class open questions, part 3](https://github.com/dotnet/csharplang/blob/3613750c73dd2229f814decb5b5911858f6859f2/proposals/closed-hierarchies.md) (Rikki)
