@@ -13,6 +13,7 @@ All schedule items must have a public issue or checked-in proposal that can be l
 - [Anonymous using declarations](https://github.com/dotnet/csharplang/blob/665a9392e172e6f4f16347c502d9f80220a6e7a4/proposals/anonymous-using-declarations.md) (jnm2, 333fred, CyrusNajmabadi)
 - [Partial extension members](https://github.com/dotnet/csharplang/pull/10126) (triage and open issues, Julien)
 - [Extension members on typeless receivers](https://github.com/dotnet/csharplang/blob/main/proposals/extension-members-on-typeless-receivers.md) (CyrusNajmabadi, jnm2)
+- [Collection expression spread optimization question](https://github.com/dotnet/csharplang/issues/10178) (Rikki)
 - Triage (working set)
 
 ## Recurring topics
