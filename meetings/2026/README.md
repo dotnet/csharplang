@@ -23,8 +23,16 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ## Schedule
 
+### Wed Jul 1, 2026
+
+### Wed Jun 10, 2026
+
+### Mon Jun 8, 2026
+
 ### Wed May 27, 2026
 
+- Dictionary expressions: Open questions (Fred)
+ 
 ### Wed May 20, 2026
 
 - Unions: More nuanced pattern matching? (Matt, Mads) (proposal links to come)
