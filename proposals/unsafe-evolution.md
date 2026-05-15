@@ -74,6 +74,9 @@ Terminology: we call members *requires-unsafe* (previously known as *caller-unsa
 
 We introduce new `safe` contextual keyword. It can be applied to [`extern` members](#extern) and [fields in explicit layout](#fields).
 
+This new keyword is available under new LangVersion, but regardless of [opt-in](#metadata), under the premise that
+we are trying to make it so that anything you are required to do when you are opted in, you are allowed to do before you opt in.
+
 ### Existing `unsafe` rules
 
 The existing C# specification has a large section devoted to `unsafe`: [§24 Unsafe code][unsafe-code]. It is defined as conditionally normative, as it is not required for a valid C# compiler
@@ -218,7 +221,8 @@ and does *not* introduce an `unsafe` context (instead, only explicit `unsafe` re
 - destructor,
 - type declaration (`class`, `struct`, etc.).
 
-Only an `unsafe` constructor's initializer may call a *requires-unsafe* `base` or `this` constructor.
+`unsafe` on a constructor introduces an `unsafe` context inside its initializer,
+i.e., an `unsafe` constructor may call a *requires-unsafe* `base` or `this` constructor.
 
 Types with parameterless *requires-unsafe* constructors do not satisfy the `new()` constraint.
 Similarly and in addition, structs with parameterless *requires-unsafe* constructors do not satisfy the `struct` constraint.
@@ -569,6 +573,10 @@ Members marked `unsafe` should have comments indicating what is necessary for th
 To make it easier to see and easier to differentiate in documentation, a new XML doc tag would be helpful: `<safety />`.
 It would be expected that all pre/post-conditions would be placed in `<safety>` block. 
 
+To document reasoning of each `unsafe` block, we recommend the use of `// SAFETY` comments,
+similar to [Rust](https://std-dev-guide.rust-lang.org/policy/safety-comments.html).
+Should we also be checking these by the compiler (e.g., have some off-by-default warning), or leave that to an analyzer?
+
 ### More meaningless `unsafe` warnings
 
 Should more declarations produce the meaningless `unsafe` warning or error?
@@ -624,6 +632,10 @@ Recommendation: yes.
 ### `[Out]` and `[SkipLocalsInit]`
 
 Since for example VB doesn't guarantee that `[Out]` parameters are initialized, in combination with `[SkipLocalsInit]`, calling such parameters could be considered `unsafe` in C#.
+On the other hand, it feels like the callee's problem that it's not upholding its `[Out]` contract (similarly it could be unsafe in many other ways).
+
+If we decide those cases should be `unsafe`, we can exclude methods we know have [opted in](#metadata)
+(currently those are from C# which guarantees correct usage of `[Out]` but if other languages implement the new rules, they should guarantee that too).
 
 ### Taking the address of an uninitialized variable
 
