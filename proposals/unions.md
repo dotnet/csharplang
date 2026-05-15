@@ -257,11 +257,12 @@ The rationale behind this decision:
 
 In the following example an implicit user-defined conversion takes priority over a union conversion. 
 ``` c#
-struct S1 : System.Runtime.CompilerServices.IUnion
+[Union]
+struct S1
 {
     public S1(int x) => ...
     public S1(string x) => ...
-    object System.Runtime.CompilerServices.IUnion.Value => ...
+    public object Value => ...
     public static implicit operator S1(int x) => ...
 }
 
@@ -276,11 +277,12 @@ In the following example, when explicit cast is used in code, an explicit user-d
 takes priority over a union conversion. But, when there is no explicit cast in code, a union conversion
 is used because explicit user-defined conversion is not applicable.
 ``` c#
-struct S2 : System.Runtime.CompilerServices.IUnion
+[Union]
+struct S2
 {
     public S2(int x) => ...
     public S2(string x) => ...
-    object System.Runtime.CompilerServices.IUnion.Value => ...
+    public object Value => ...
     public static explicit operator S2(int x) => ...
 }
 
@@ -352,7 +354,7 @@ The compiler will prefer implementing pattern behavior by means of members presc
 
 * For a pattern that implies checking for a specific type `T`, if a `TryGetValue(S value)` method is available, and there is an identity, or implicit reference/boxing conversion from `T` to `S`, then that method is used to obtain the value. The pattern is then applied to that value. If there is more than one such method, then any where the conversion from `T` to `S` is not a boxing conversion is preferred if available. If there is still more than one method, one is chosen in an implementation-defined manner.
 * Otherwise, for a pattern that implies checking for `null`, if a `HasValue` property is available, that property is used to check if the union value is null.
-* Otherwise, the pattern is applied to the result of accessing the `IUnion.Value` property on the incoming union.
+* Otherwise, the pattern is applied to the result of accessing the `Value` property on the incoming union.
 
 [The is-type operator](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/expressions.md#1214121-the-is-type-operator) applied to a union type
 has the same meaning as a type pattern applied to the union type.
@@ -506,6 +508,51 @@ Is lowered to:
 
 ## Open questions
 [open]: #open-questions
+
+### Should compiler report an error for custom union declarations in source that are missing the minimal set of APIs?
+
+> The creation  and the `Value` property are mandatory, and are collectively referred to as the *basic union pattern*.
+
+> A union type must have at least one union creation member ...
+
+Does this mean compiler should report an error for custom union declarations in source that:
+- Do not have suitable Value property
+- Or do not have at least one union creation member 
+
+Or is this merely an information for a user that a well-formed union type should have the members? Otherwise, things
+might not work.
+
+### Should direct Value property matching follow Union rules?
+
+Is knowledge about case types applied to the pattern or not?
+```
+[System.Runtime.CompilerServices.Union]
+struct S1
+{
+    private readonly object _value;
+    public S1(int x) { _value = x; }
+    public S1(string? x) { _value = x; }
+    public object Value => _value;
+}
+
+class Program
+{
+    static int Test1(object u)
+    {
+        // Should we get:
+        // warning CS8509: The switch expression does not handle all possible values of its input type (it is not exhaustive).
+        //                 For example, the pattern 'S1{ Value: _ }' is not covered.
+        return u switch { S1 { Value: int } => 1, S1 { Value: string } => 2, not S1 => -100 };
+    }
+
+    static bool Test2(object u)
+    {
+        // Should we get:
+        // error CS8121: An expression of type 'S1' cannot be handled by a pattern of type 'long'.
+        return u is S1 { Value: long };
+    }
+}
+```
 
 ### [Resolved] Is union declaration a record?
 
@@ -678,7 +725,7 @@ that only methods with a parameter type matching a case type are considered:
 
 It would be good to have an explicit answer. 
 
-### Clarify rules around `default` values of struct union types
+### [Obsolete] Clarify rules around `default` values of struct union types
 
 *Note*: The default nullability rule mentioned below has been removed.
 
@@ -735,11 +782,9 @@ class Program
 
 **Resolution:** Confirmed
 
-### Should post-condition attributes affect default nullability of a Union instance?
+### [Resolved] Should post-condition attributes affect default nullability of a Union instance?
 
-*Note*: The default nullability rule mentioned below has been removed. And we no longer infer default nullability 
-of `Value` property from union creation methods. Therefore, the question is obsolete/no longer applicable to the current design. 
-> For union types where none of the case types are nullable, the default state for `Value` is "not null" rather than "maybe null". 
+> The default null state of a union type's `Value` property is "maybe null" if the default null state of any of the case types is "maybe null". Otherwise, the default null state is "not null".
 
 Is the warning expected in the following scenario
 ``` c#
@@ -761,6 +806,8 @@ class Program
     } 
 }
 ```
+
+**Resolution:** Stick to the current specification for now - only look at types
 
 ### Union conversions
 
