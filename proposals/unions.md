@@ -522,6 +522,38 @@ Does this mean compiler should report an error for custom union declarations in 
 Or is this merely an information for a user that a well-formed union type should have the members? Otherwise, things
 might not work.
 
+### Should direct Value property matching follow Union rules?
+
+Is knowledge about case types applied to the pattern or not?
+```
+[System.Runtime.CompilerServices.Union]
+struct S1
+{
+    private readonly object _value;
+    public S1(int x) { _value = x; }
+    public S1(string? x) { _value = x; }
+    public object Value => _value;
+}
+
+class Program
+{
+    static int Test1(object u)
+    {
+        // Should we get:
+        // warning CS8509: The switch expression does not handle all possible values of its input type (it is not exhaustive).
+        //                 For example, the pattern 'S1{ Value: _ }' is not covered.
+        return u switch { S1 { Value: int } => 1, S1 { Value: string } => 2, not S1 => -100 };
+    }
+
+    static bool Test2(object u)
+    {
+        // Should we get:
+        // error CS8121: An expression of type 'S1' cannot be handled by a pattern of type 'long'.
+        return u is S1 { Value: long };
+    }
+}
+```
+
 ### [Resolved] Is union declaration a record?
 
 > A union declaration is lowered to a record struct
