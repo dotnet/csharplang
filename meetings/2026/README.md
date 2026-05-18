@@ -38,11 +38,17 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 - Unions: More nuanced pattern matching? (Matt, Mads) (proposal links to come)
 
+## C# Language Design Notes for 2026
+
 ### Mon May 18, 2026
 
-- [Closed class open questions, part 3](https://github.com/dotnet/csharplang/blob/3613750c73dd2229f814decb5b5911858f6859f2/proposals/closed-hierarchies.md) (Rikki)
+[C# Language Design Meeting for May 18th, 2026](https://github.com/dotnet/csharplang/blob/main/meetings/2026/LDM-2026-05-18.md)
 
-## C# Language Design Notes for 2026
+- Closed hierarchies open questions
+    - Exhaustiveness when no subtypes exist
+    - Matching the base type after all subtypes
+    - Type parameters constrained to closed types
+    - Constraint-based ruling out of generic subtypes
 
 ### Wed May 13, 2026
 
