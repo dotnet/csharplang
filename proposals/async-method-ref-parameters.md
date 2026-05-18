@@ -169,12 +169,10 @@ For each ref parameter, a TypedReference local will be added to the async method
 
 Then, when initializing the async state machine fields corresponding to parameters:
 
-* If the parameter is a ref parameter, the state machine field type is `void*`. A pointer is taken to the ref parameter's corresponding TypedReference local, and the pointer is stored in the state machine field.
+* If the parameter is a ref parameter, the state machine field type is `void*`. A pointer is taken to the ref parameter's corresponding TypedReference local, and the pointer is stored in the state machine field. (While the C# compiler allows compiling `TypedReference*` fields, the runtime does not support them and fails with TypeLoadException.)
 * If the parameter is a ref-like parameter passed by value, the state machine field type is a pointer to the ref-like type. A pointer is taken to the ref-like parameter and stored in the state machine field.
 
-Taking these pointers prevents the runtime from collecting the locals before the end of the frame.
-
-The compiler must introduce a `try` block around the call to the async method builder's `Start` method, with a `finally` block which sets all state machine fields to null which correspond to a ref or ref-like parameter. This ensures memory safety in the event that a whitelisted System method builder is buggy or has been tampered with, such that the first call to `IAsyncStateMachine.MoveNext()` happens after the async method returns. In such a scenario, instead of invalid memory access, the async method will throw NullReferenceException at the point of accessing a ref or ref-like parameter.
+Taking these pointers prevents the runtime from collecting the locals before the end of the frame, as well as preventing tail calls in async void methods which end with the call to the builder's `Start` method.
 
 #### Using state machine fields
 
@@ -204,9 +202,9 @@ async Task ExampleAsyncMethod(ref int p1, SomeRefStruct p2, ref SomeRefStruct p3
 }
 ```
 
-The following C# code faithfully represents the lowering described above in full effect, though the details are different. For example, the emitted IL will not need `Unsafe.As` and will not need to cast the typedref to byte and back to the ref struct type. Nevertheless, the following sample is fully runnable on .NET 9+ and displays the intended behavior.
+The following C# code faithfully represents the lowering described above in full effect, though the details are different. For example, the emitted IL will not need `Unsafe.As` and will just use the ref struct type directly in `mkrefany` and `refanyvalue`. Nevertheless, the following sample is fully runnable on .NET 9+ and displays the intended behavior.
 
-(.NET 9 is only needed for the `Unsafe.As` method, which the compiler will not need, but which the C# version needs. The following code can also been used to demonstrate broad runtime support across all .NET runtimes, with some workarounds to gain the equivalent of `Unsafe.As` for a ref struct pre-.NET 9.)
+(.NET 9 is only needed for the `Unsafe.As` method, which the compiler will not need when emitting IL, but which the C# version needs for this sample. The following code can also been used to demonstrate broad runtime support across all .NET runtimes, with some workarounds to gain the equivalent of `Unsafe.As` for a ref struct pre-.NET 9.)
 
 ```cs
 using System;
@@ -236,6 +234,8 @@ class Program
     private static Task ExampleAsyncMethod(ref int p1, SomeRefStruct p2, ref SomeRefStruct p3)
     {
         TypedReference p1Ref = __makeref(p1);
+        // The following is required for the C# compilation, but in IL this will just be:
+        // = __makeref(p3)
         TypedReference p3Ref = __makeref(Unsafe.As<SomeRefStruct, byte>(ref p3));
 
         GeneratedStateMachine stateMachine = default;
@@ -247,19 +247,7 @@ class Program
             stateMachine.p3RefPtr = &p3Ref;
         }
         stateMachine.__state = -1;
-        try
-        {
-            stateMachine.t__builder.Start(ref stateMachine);
-        }
-        finally
-        {
-            unsafe
-            {
-                stateMachine.p1RefPtr = null;
-                stateMachine.p2Ptr = null;
-                stateMachine.p3RefPtr = null;
-            }
-        }
+        stateMachine.t__builder.Start(ref stateMachine);
         return stateMachine.t__builder.Task;
     }
 }
@@ -290,6 +278,8 @@ struct GeneratedStateMachine : IAsyncStateMachine
                 {
                     ref int p1 = ref __refvalue(*(TypedReference*)p1RefPtr, int);
                     SomeRefStruct p2 = *p2Ptr;
+                    // The following is required for the C# compilation, but the IL version will just be:
+                    // = ref __refvalue(*(TypedReference*)p3RefPtr, SomeRefStruct)
                     ref SomeRefStruct p3 = ref Unsafe.As<byte, SomeRefStruct>(ref __refvalue(*(TypedReference*)p3RefPtr, byte));
                     Console.WriteLine(p1);
                     Console.WriteLine(p2.RefField);
