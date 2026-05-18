@@ -2,7 +2,7 @@
 
 Champion issue: <https://github.com/dotnet/csharplang/issues/10187>
 
-Special thanks to community member [@IS4Code](https://github.com/IS4Code) from the for the initial proposal, and to runtime team member [@jakobbotsch](https://github.com/jakobbotsch) for consulting and guidance.
+Special thanks to community member [@IS4Code](https://github.com/IS4Code) for the initial proposal, and to runtime team member [@jakobbotsch](https://github.com/jakobbotsch) for consulting and guidance.
 
 ## Summary
 
@@ -139,7 +139,7 @@ By following the same rules as for ref and ref-like locals, the compiler will no
 
 For async methods whose return type is not a `Task` type or a `ValueTask` type, or which are not in a compilation that has the runtime-async feature enabled, or which have an async method builder explicitly specified, the compiler emits a state machine for the async method.
 
-Not all async method builders are compatible with ref and ref-like parameters. In order to be compatible, the async method builder's `Start` method must synchronously invoke `IAsyncStateMachine.MoveNext()` so that the start of the async method body runs _before_ the async method returns. Once the async method returns, and the ref and ref-like parameters which were passed to the async method can no longer be accessed by the start of the async method body during the first call to `MoveNext`.
+Not all async method builders are compatible with ref and ref-like parameters. In order to be compatible, the async method builder's `Start` method must synchronously invoke `IAsyncStateMachine.MoveNext()` so that the start of the async method body runs _before_ the async method returns. Once the async method returns, the ref and ref-like parameters which were passed to the async method can no longer be accessed by the start of the async method body during the first call to `MoveNext`.
 
 Because async method builders have no way to declare such compatibility, a whitelist is employed to identify known-safe async method builders. A builder which is not in this whitelist is known as a "custom async method builder." The namespace-qualified type name of a known-safe async method builder must be one of the following:
 
@@ -186,6 +186,8 @@ Then, at the point when the initial async code accesses a ref or ref-like parame
 (In the compiler's discretion, these locals may be inlined or elided. To avoid a copy, the non-ref local for a ref-like parameter could also be a ref local.)
 
 When ref and ref-like parameters are reassigned, the compiler will act as though a brand new local ref variable was being used rather than as though an existing variable was being reused. This behavior is consistent with the existing behavior when a ref or ref-like local is reassigned. Thus, reassignment will not write into state machine fields, but will rather dissociate the subsequent use of the parameter from the state machine fields.
+
+To prevent memory-unsafe pointer access in the case of a method builder that matches the namespace-qualified type name whitelist, but which is tampered with so that the first run of `MoveNext` happens after the builder's Start method returns (or the struct state machine is copied and saved prior to calling MoveNext), an additional state machine pointer field could be added which is initialized to point to the local which holds the state machine. Then before accessing the parameters in MoveNext, a check could be emitted to see if `ref this` is the same pointer address as what is in the pointer field. If not, an exception is thrown.
 
 #### State machine example code
 
