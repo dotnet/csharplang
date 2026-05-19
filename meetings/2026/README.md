@@ -15,6 +15,7 @@ All schedule items must have a public issue or checked-in proposal that can be l
 - [Extension members on typeless receivers](https://github.com/dotnet/csharplang/blob/main/proposals/extension-members-on-typeless-receivers.md) (CyrusNajmabadi, jnm2)
 - [Collection expression spread optimization question](https://github.com/dotnet/csharplang/issues/10178) (Rikki)
 - [Ref and ref-like parameters of async methods](https://github.com/dotnet/csharplang/blob/c623e9fb9e2c1a61da95cd8d2768117a1c358247/proposals/async-method-ref-parameters.md) (jnm2)
+- [Mixed object and collection initializers](https://github.com/dotnet/csharplang/blob/main/proposals/mixed-object-and-collection-initializers.md) (CyrusNajmabadi)
 - Triage (working set)
 
 ## Recurring topics
