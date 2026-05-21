@@ -34,12 +34,18 @@ All schedule items must have a public issue or checked-in proposal that can be l
 ### Wed May 27, 2026
 
 - Dictionary expressions: Open questions (Fred)
- 
-### Wed May 20, 2026
 
-- Unions: More nuanced pattern matching? (Matt, Mads) (proposal links to come)
 
 ## C# Language Design Notes for 2026
+
+### Wed May 20, 2026
+
+[C# Language Design Meeting for May 20th, 2026](https://github.com/dotnet/csharplang/blob/main/meetings/2026/LDM-2026-05-20.md)
+
+- Unions
+    - Union pattern matching target for custom unions
+    - Missing required APIs in custom union declarations
+    - Direct value property matching and union rules
 
 ### Mon May 18, 2026
 
