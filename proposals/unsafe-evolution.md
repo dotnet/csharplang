@@ -345,6 +345,19 @@ The `unsafe` context established by an `unsafe_expression` does not extend beyon
 
 Several syntactic positions do not admit `unsafe` blocks at all, yet may contain subexpressions that call *requires-unsafe* members. Without `unsafe` expressions, migrating such code requires extracting the unsafe sub-expression into a helper local function or a temporary variable, which obscures intent and increases verbosity.
 
+**`await` on a *requires-unsafe* method.** An `await` expression cannot appear inside an `unsafe` block. When the method being awaited becomes *requires-unsafe*, a temporary variable is required to hold the task before it can be awaited:
+
+```cs
+// Without unsafe expressions: must spill to a temporary
+Task t;
+unsafe { t = DoWork(); }
+await t;
+
+// With unsafe expressions: the unsafe context wraps only the call;
+// the await remains outside it and is fully legal
+await unsafe(DoWork());
+```
+
 **Catch filters.** The `when` filter of a `catch` clause is an expression, not a statement body. An `unsafe` block can only surround statements, so there is no place to put one around just the filter expression. Additionally, because the `try` body contains an `await` expression, an `unsafe` block cannot surround the entire `try`/`catch` statement either—`await` is not permitted inside an `unsafe` block. When a method used in a filter becomes *requires-unsafe*, the only alternative without `unsafe` expressions is a helper:
 
 ```cs
@@ -370,19 +383,6 @@ try
 catch (Exception e) when (unsafe(NowUnsafeCall(e)))
 {
 }
-```
-
-**`await` on a *requires-unsafe* method.** An `await` expression cannot appear inside an `unsafe` block. When the method being awaited becomes *requires-unsafe*, a temporary variable is required to hold the task before it can be awaited:
-
-```cs
-// Without unsafe expressions: must spill to a temporary
-Task t;
-unsafe { t = DoWork(); }
-await t;
-
-// With unsafe expressions: the unsafe context wraps only the call;
-// the await remains outside it and is fully legal
-await unsafe(DoWork());
 ```
 
 **Field initializers.** Under the updated rules, `unsafe` on a field does not introduce an `unsafe` context in its initializer. When a field's initializer calls a *requires-unsafe* member, an `unsafe` expression provides the context without requiring a helper method:
