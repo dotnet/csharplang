@@ -345,7 +345,7 @@ The `unsafe` context established by an `unsafe_expression` does not extend beyon
 
 Several syntactic positions do not admit `unsafe` blocks at all, yet may contain subexpressions that call *requires-unsafe* members. Without `unsafe` expressions, migrating such code requires extracting the unsafe sub-expression into a helper local function or a temporary variable, which obscures intent and increases verbosity.
 
-**Catch filters.** The `when` filter of a `catch` clause is an expression, not a statement body. An `unsafe` block can only surround statements, so there is no place to put one around just the filter expression. When a method used in a filter becomes *requires-unsafe*, the only alternative without `unsafe` expressions is a helper:
+**Catch filters.** The `when` filter of a `catch` clause is an expression, not a statement body. An `unsafe` block can only surround statements, so there is no place to put one around just the filter expression. Additionally, because the `try` body contains an `await` expression, an `unsafe` block cannot surround the entire `try`/`catch` statement either—`await` is not permitted inside an `unsafe` block. When a method used in a filter becomes *requires-unsafe*, the only alternative without `unsafe` expressions is a helper:
 
 ```cs
 // Without unsafe expressions: must spill to a local function
@@ -356,7 +356,7 @@ static bool FilterHelper(Exception e)
 
 try
 {
-    await DoWork();
+    await DoWork(); // 'await' here prevents wrapping the whole try/catch in 'unsafe'
 }
 catch (Exception e) when (FilterHelper(e))
 {
