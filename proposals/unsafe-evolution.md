@@ -321,7 +321,7 @@ We do not need to add support to Visual Basic for *requires-unsafe* members sinc
 
 ### `unsafe` expressions
 
-An `unsafe` expression introduces a minimal `unsafe` context for evaluating a single expression. It is useful in situations where an `unsafe` block would unnecessarily widen the `unsafe` scope, or where `unsafe` blocks cannot be used syntactically (such as in `catch` filters, field initializers, and the operand position of `await`).
+An `unsafe` expression introduces a minimal `unsafe` context for evaluating a single expression. It is useful in situations where an `unsafe` block would unnecessarily widen the `unsafe` scope, or where `unsafe` blocks cannot be used syntactically (such as in `catch` filters, field initializers, constructor initializers, and the operand position of `await`).
 
 #### Syntax
 
@@ -345,7 +345,7 @@ The `unsafe` context established by an `unsafe_expression` does not extend beyon
 
 Several syntactic positions do not admit `unsafe` blocks at all, yet may contain subexpressions that call *requires-unsafe* members. Without `unsafe` expressions, migrating such code requires extracting the unsafe sub-expression into a helper local function or a temporary variable, which obscures intent and increases verbosity.
 
-**Catch filters.** The `when` filter of a `catch` clause is an expression; there is no place to write an `unsafe` block inline. When a method used in a filter becomes *requires-unsafe*, the only alternative without `unsafe` expressions is a helper:
+**Catch filters.** The `when` filter of a `catch` clause is an expression, not a statement body. An `unsafe` block can only surround statements, so there is no place to put one around just the filter expression. When a method used in a filter becomes *requires-unsafe*, the only alternative without `unsafe` expressions is a helper:
 
 ```cs
 // Without unsafe expressions: must spill to a local function
@@ -397,6 +397,24 @@ static int _value = InitialValue();
 
 // With unsafe expressions: inline
 static int _value = unsafe(ReadFromPointer());
+```
+
+**Constructor initializers.** `this(...)` and `base(...)` initializer argument lists are expressions, not statement bodies. If one of those arguments calls a *requires-unsafe* member, there is again no place to insert an `unsafe` block, so the call must otherwise be moved to a helper:
+
+```cs
+class C(int x)
+{
+    C() : this(unsafe(GetUnsafeValue()))
+    {
+    }
+}
+
+class Derived : Base
+{
+    Derived() : base(unsafe(GetUnsafeValue()))
+    {
+    }
+}
 ```
 
 **Inline calls.** More generally, wrapping only the *requires-unsafe* sub-expression keeps the audit scope tight and avoids pulling surrounding safe code (such as argument evaluation or a containing method call) into the `unsafe` context:
@@ -504,50 +522,32 @@ Should we require it for both `unsafe` blocks and `unsafe` member declarations o
 
 ### (answered) `unsafe` expressions
 
-Other languages with more comprehensive `unsafe` features have added `unsafe` as an expression, to enable improved user ergonomics and allow authors to more precisely limit where `unsafe` is used.
-Several C# syntactic positions admit expressions but not statements, so an `unsafe` block simply cannot be written there. Without `unsafe` expressions, migrating code in these positions when a callee
-becomes *requires-unsafe* requires spilling the unsafe sub-expression to a separate local function or temporary variable. These workarounds obscure intent and increase verbosity.
-
-The canonical example is a `catch` filter. `when` clauses are expressions; there is no syntactic room for a block:
+Other languages with more comprehensive `unsafe` features have added `unsafe` as an expression, to enable improved user ergonomics and allow authors to more precisely limit where `unsafe` is used. Is this
+something that we want to have in C#? Consider an inline call to an `unsafe` member that handles the safety directly: right now, the author would either need to wrap the entire statement in an `unsafe`
+block, expanding the scope of the `unsafe` context, or they would need to break out the inner function call into an intermediate variable.
 
 ```cs
-// Without unsafe expressions: must spill to a local function
-static bool FilterHelper(Exception e)
+extern int Add(int i1, int i2); // Some fancy extern addition function
+
+// Code I want to write:
+Console.WriteLine(unsafe(Add(1, 2)));
+
+// Code I have to write option 1, unsafe context unnecessary includes the WriteLine call
+unsafe
 {
-    unsafe { return NowUnsafeCall(e); }
+    Console.WriteLine(Add(1, 2));
 }
 
-try
+// Code I have to write option 2, very verbose and harder to read:
+int result;
+unsafe
 {
-    await DoWork();
+    result = Add(1, 2);
 }
-catch (Exception e) when (FilterHelper(e))
-{
-}
+Console.WriteLine(result);
 ```
 
-A similar situation arises when the method being `await`ed becomes *requires-unsafe*. Because `await` cannot appear inside an `unsafe` block, the task must be captured in a temporary:
-
-```cs
-// Without unsafe expressions: must spill to a temporary
-Task t;
-unsafe { t = DoWork(); }
-await t;
-```
-
-With `unsafe` expressions (see [detailed design](#unsafe-expressions)), both cases become straightforward inline migrations:
-
-```cs
-try
-{
-    await unsafe(DoWork());
-}
-catch (Exception e) when (unsafe(NowUnsafeCall(e)))
-{
-}
-```
-
-Answer: yes, `unsafe` expressions are supported. See the [detailed design section](#unsafe-expressions) above.
+Answer: yes. See the [detailed design section](#unsafe-expressions).
 
 ### More `unsafe` contexts and relaxations
 
