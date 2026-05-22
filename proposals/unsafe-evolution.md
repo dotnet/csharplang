@@ -355,6 +355,7 @@ await t;
 
 // With unsafe expressions: the unsafe context wraps only the call;
 // the await remains outside it and is fully legal
+// SAFETY: Discharges obligations because reasons
 await unsafe(DoWork());
 ```
 
@@ -364,6 +365,7 @@ await unsafe(DoWork());
 // Without unsafe expressions: must spill to a local function
 static bool FilterHelper(Exception e)
 {
+    // SAFETY: Discharges obligations because reasons
     unsafe { return NowUnsafeCall(e); }
 }
 
@@ -371,7 +373,7 @@ try
 {
     await DoWork(); // 'await' here prevents wrapping the whole try/catch in 'unsafe'
 }
-catch (Exception e) when (FilterHelper(e))
+catch (Exception e) when (NowUnsafeCall(e))
 {
 }
 
@@ -380,6 +382,7 @@ try
 {
     await DoWork();
 }
+// SAFETY: Discharges obligations because reasons
 catch (Exception e) when (unsafe(NowUnsafeCall(e)))
 {
 }
@@ -391,11 +394,13 @@ catch (Exception e) when (unsafe(NowUnsafeCall(e)))
 // Without unsafe expressions: must spill to a helper method
 static int InitialValue()
 {
+    // SAFETY: Discharges obligations because reasons
     unsafe { return ReadFromPointer(); }
 }
 static int _value = InitialValue();
 
 // With unsafe expressions: inline
+// SAFETY: Discharges obligations because reasons
 static int _value = unsafe(ReadFromPointer());
 ```
 
@@ -423,10 +428,14 @@ class Derived : Base
 extern int Add(int i1, int i2); // Some fancy extern addition function
 
 // Code I want to write:
+
+// SAFETY: Discharges obligations because reasons
 Console.WriteLine(unsafe(Add(1, 2)));
 
 // Code I have to write without unsafe expressions, option 1
 // (unsafe context unnecessarily includes the WriteLine call):
+
+// SAFETY: Discharges obligations because reasons
 unsafe
 {
     Console.WriteLine(Add(1, 2));
@@ -435,6 +444,7 @@ unsafe
 // Code I have to write without unsafe expressions, option 2
 // (very verbose and harder to read):
 int result;
+// SAFETY: Discharges obligations because reasons
 unsafe
 {
     result = Add(1, 2);
