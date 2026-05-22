@@ -358,7 +358,7 @@ await t;
 await unsafe(DoWork());
 ```
 
-**Catch filters.** The `when` filter of a `catch` clause is an expression, not a statement body. An `unsafe` block can only surround statements, so there is no place to put one around just the filter expression. Additionally, because the `try` body contains an `await` expression, an `unsafe` block cannot surround the entire `try`/`catch` statement either—`await` is not permitted inside an `unsafe` block. When a method used in a filter becomes *requires-unsafe*, the only alternative without `unsafe` expressions is a helper:
+**Catch filters.** The `when` filter of a `catch` clause is an expression, not a statement body. An `unsafe` block can only surround statements, so there is no place to put one around just the filter expression. Additionally, if the `try` body contains an `await` expression, an `unsafe` block cannot surround the entire `try`/`catch` statement either—`await` is not permitted inside an `unsafe` block. When a method used in a filter becomes *requires-unsafe*, the only alternative without `unsafe` expressions is a helper:
 
 ```cs
 // Without unsafe expressions: must spill to a local function
