@@ -72,7 +72,10 @@ Terminology: we call members *requires-unsafe* (previously known as *caller-unsa
 
 ### Syntax
 
-We introduce new `safe` contextual keyword. It can be applied to [`extern` members](#extern) and [fields in explicit layout](#fields).
+This proposal introduces:
+
+- a new `safe` contextual keyword that can be applied to [`extern` members](#extern) and [fields in explicit layout](#fields),
+- and `unsafe` expressions (`unsafe(expression)`), detailed in [unsafe expressions](#unsafe-expressions).
 
 This new keyword is available under new LangVersion, but regardless of [opt-in](#metadata), under the premise that
 we are trying to make it so that anything you are required to do when you are opted in, you are allowed to do before you opt in.
@@ -337,7 +340,7 @@ It is subject to the same `AllowUnsafeBlocks` requirement as the `unsafe` keywor
 
 #### Semantics
 
-An `unsafe_expression` establishes an `unsafe` context for evaluating its *expression*. The type and value of the `unsafe_expression` are the type and value of the enclosed *expression*, and the expression is evaluated as if it occurred inside an `unsafe` block. Pointer dereferences, function pointer invocations, and calls to *requires-unsafe* members are all permitted within the enclosed expression.
+An `unsafe_expression` establishes an `unsafe` context for evaluating its *expression*. This means that pointer dereferences, function pointer invocations, and calls to *requires-unsafe* members are all permitted within the enclosed expression. The type and value of the `unsafe_expression` are the type and value of the enclosed *expression*.
 
 The `unsafe` context established by an `unsafe_expression` does not extend beyond its closing parenthesis.
 
