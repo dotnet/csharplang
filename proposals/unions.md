@@ -298,7 +298,7 @@ class Program
 When the incoming value of a pattern is of a union type or of a nullable of a union type, 
 the nullable value and the underlying union value's contents may be "unwrapped", depending on the pattern.
 
-For the unconditional `_` and `var` patterns, the pattern is applied to the incoming value itself. For example:
+For the unconditional `_`, `var` and `not` patterns, the pattern is applied to the incoming value itself. For example:
 
 ```csharp
 if (GetPet() is var pet) { ... } // 'pet' is the union value returned from `GetPet`
@@ -312,14 +312,19 @@ if (GetPet() is null) { ... }      // 'null' is applied to 'GetPet().Value'
 if (GetPet() is { } value) { ... } // '{ } value' is applied to 'GetPet().Value'
 ```
 
-For logical patterns, this rule is applied individually to the branches, bearing in mind that the left branch of an `and` pattern can affect the incoming type of the right branch:
+For logical patterns, this rule is applied individually to the branches, bearing in mind that the left branch of an `and` pattern can affect the incoming type and value of the right branch:
 
 ``` c#
 GetPet() switch
 {
-    var pet and not null   => ... // 'var pet' applies to the incoming 'Pet' and 'not null' to its 'Value'
-    not null and var value => ... // 'not null' applies to the 'Value' as does 'var value' because of the 
-                                  // left branch changing the incoming type to `object?`.
+    var pet and not null    => ... // 'var pet' applies to the incoming 'Pet' as does 'not' and 'null' to its 'Value'
+    not null and var value  => ... // 'not' applies to the incoming 'Pet', 'null' applies to the its 'Value'.
+                                   // 'var value' applies to the incoming 'Pet' because the left branch in this case
+                                   // (`not null`) does not change the incoming value for the right branch.
+    var pet and Dog         => ... // 'var pet' applies to the incoming 'Pet' and 'Dog' to its 'Value'
+    Dog and { Name: "Dog" } => ... // 'Dog' applies to the incoming 'Pet''s `Value` and it is changing the incoming value
+                                   // for the right branch to the `Dog` instance. Therefore, the property pattern on the right
+                                   // is applied to that `Dog` instance
 }
 ```
 
