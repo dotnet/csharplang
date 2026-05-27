@@ -118,9 +118,9 @@ Dictionary<string, int> nameToAge2 = ["mads": 21, .. existingDict]; // as would
 Dictionary<string, int> nameToAge3 = ["mads": 21, .. existingListOfKVPS];
 
 // Assigning to collection types:
-List<string, int> nameToAge1 = ["mads": 21, existingKvp];     // as would
-List<string, int> nameToAge2 = ["mads": 21, .. existingDict]; // as would
-List<string, int> nameToAge3 = ["mads": 21, .. existingListOfKVPS];
+List<KeyValuePair<string, int>> nameToAge1 = ["mads": 21, existingKvp];     // as would
+List<KeyValuePair<string, int>> nameToAge2 = ["mads": 21, .. existingDict]; // as would
+List<KeyValuePair<string, int>> nameToAge3 = ["mads": 21, .. existingListOfKVPS];
 ```
 
 ## Comparer support
