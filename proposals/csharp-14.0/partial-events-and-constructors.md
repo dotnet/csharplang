@@ -279,7 +279,7 @@ For more details, see https://github.com/dotnet/roslyn/issues/77254.
 ## Links
 --------->
 
-[partial-methods-ext]: https://github.com/dotnet/csharplang/blob/main/csharp-9.0/extending-partial-methods.md
+[partial-methods-ext]: https://github.com/dotnet/csharplang/blob/main/proposals/csharp-9.0/extending-partial-methods.md
 [partial-props]: ../csharp-13.0/partial-properties.md
 [partial-props-caller-info]: ../csharp-13.0/partial-properties.md#caller-info-attributes
 [partial-props-signatures]: ../csharp-13.0/partial-properties.md#matching-signatures
