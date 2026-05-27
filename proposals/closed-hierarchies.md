@@ -161,6 +161,92 @@ class Program
 }
 ```
 
+#### Subtype constraints do not affect exhaustiveness
+
+The language doesn't refine the determination of whether a subtype is possible based on constraints on type parameters in the base type and subtype definition.
+
+```cs
+closed class C<T>;
+class D1<U1> : C<U1>;
+class D2<U2> : C<U2> where U2 : struct;
+
+class Program
+{
+    int M1<X>(C<X> c) where X : class
+    {
+        // warning: switch is not exhaustive. Pattern 'C<X>' is not handled.
+        return c switch
+        {
+            D1<X> => 1,
+        };
+    }
+
+    int M2<X>(C<X> c) where X : class
+    {
+        return c switch
+        {
+            D1<X> => 1,
+            C<X> => 2, // ok
+        };
+    }
+}
+```
+
+For example, the above switch expressions, do not analyze the construction `D2<X>` *precisely* enough, to realize that all possible `X` violate constraints of `U2`. Therefore, it assumes that some `D2<X>` is possible, and asks user to handle it by exhausting the base type.
+
+#### Exhaustiveness when no subtypes exist
+
+When a closed class has no subtypes, an empty switch over it is not considered exhaustive.
+
+**Remarks**: This is assumed to be an "intermediate state" in normal code. The author will most likely make a change to declare a subtype in this scenario. This behavior amounts to a "quirk"--despite "all 0 subtypes being handled", the language still asks the user to handle the base type.
+
+```cs
+closed class C;
+
+class Program
+{
+    int M1(C c)
+        // warning: switch is not exhaustive.
+        => c switch
+        {
+        };
+
+    int M2(C c)
+        => c switch
+        {
+            C => 1, // ok
+        };
+}
+```
+
+#### Exhaustiveness of type parameters constrained to closed type
+
+A type parameter constrained to a closed class is treated similarly as a closed class for purposes of exhaustiveness checks.
+
+```cs
+closed class C;
+class D1 : C;
+class D2 : C;
+
+class Program
+{
+    int M1<X>(X x) where X : C
+        => x switch
+        {
+            D1 => 1,
+            D2 => 2,
+        };
+
+    int M2<X>(X x) where X : C
+        => x switch
+        {
+            D1 => 1,
+            D2 => 2,
+            C => 3, // error: 'C' is subsumed by the previous cases
+        };
+}
+```
+
 ### Determining subtypes of a closed class
 
 Exhaustiveness of switches over closed class types, is determined by checking if the switch is exhaustive over the *set of subtypes* of the input closed class type.
@@ -274,116 +360,4 @@ class C1
 
 ## Open questions
 
-### Exhaustiveness when no subtypes exist
-
-Should an exhaustiveness warning be reported for an empty switch, when the input is a closed type with no subtypes?
-
-Recommendation: Require handling the closed class itself in this case. Essentially, pattern matching should treat it the same as a non-closed class.
-
-```cs
-closed class C;
-
-class Program
-{
-    int M1(C c)
-        // warning: switch is not exhaustive.
-        => c switch
-        {
-        };
-
-    int M2(C c)
-        => c switch
-        {
-            C => 1, // ok
-        };
-}
-```
-
-### Allow matching the base type after matching all subtypes
-
-Should it be permitted to match a closed base type in a switch, after all its subtypes have been exhausted?
-
-Recommendation: No, report an error in this scenario.
-
-```cs
-closed class C;
-class D1 : C;
-class D2 : C;
-
-class Program
-{
-    int M1(C c)
-        => c switch
-        {
-            D1 => 1,
-            D2 => 2,
-            C => 3, // error: switch arm is impossible to match.
-        };
-}
-```
-
-### Exhaustiveness of type parameters constrained to closed type
-
-Should it be permitted to exhaust a type parameter constrained to a closed class type, by matching the subtypes of the closed class?
-
-```cs
-closed class C;
-class D1 : C;
-class D2 : C;
-
-class Program
-{
-    int M1<X>(X x) where X : C
-        // warning: switch is not exhaustive. 'C' is not handled.
-        => x switch
-        {
-            D1 => 1,
-            D2 => 2,
-        };
-
-    int M2<X>(X x) where X : C
-        => x switch
-        {
-            D1 => 1,
-            D2 => 2,
-            C => 3, // ok
-        };
-}
-```
-
-### Ruling out generic closed subtypes based on constraints
-
-"Ruling out" a subtype of a closed class, requires determining that the subtype's base type, could never possibly unify with the switch input type.
-
-Today, the CanUnify check does not consider constraints. In other words, a program like the following, requires explicitly matching the input closed type, because while the subtype cannot be used, we don't observe that it's impossible for the subtype to arise via generic substitution.
-
-```cs
-closed class C<T>;
-class D1<U1> : C<U1>;
-class D2<U2> : C<U2> where U2 : struct;
-
-class Program
-{
-    int M1<X>(C<X> c) where X : class
-    {
-        // warning: switch is not exhaustive. Pattern 'C<X>' is not handled.
-        return c switch
-        {
-            D1<X> => 1,
-        };
-    }
-
-    int M2<X>(C<X> c) where X : class
-    {
-        return c switch
-        {
-            D1<X> => 1,
-            C<X> => 2, // ok
-        };
-    }
-}
-```
-
-The question is: should we try to detect when "mutually exclusive" sets of constraints are present, and filter out subtypes accordingly? This would remove the warning reported in 'M1' in the above sample.
-
-Recommendation: No, don't introduce any new such detection. This will require writing "unnecessary" patterns which won't actually match in practice, in complex constraint scenarios like the above sample. However, the harm of such "unnecessary" patterns, seems less than the cost of implementing a precisely correct "mutually exclusive" check for constraints.
+N/A
