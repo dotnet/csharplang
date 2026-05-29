@@ -193,13 +193,13 @@ We determine whether the explicit reference conversion from `C` to `I` exists, b
 
 ### Lowering
 
-Closed classes are generated with a `Closed` attribute, to allow them to be recognized by a consuming compiler.
+Closed classes are generated with an `IsClosedType` attribute, to allow them to be recognized by a consuming compiler.
 
 ```cs
 namespace System.Runtime.CompilerServices
 {
     [AttributeUsage(AttributeTargets.Class, AllowMultiple = false, Inherited = false)]
-    public sealed class ClosedAttribute : Attribute { }
+    public sealed class IsClosedTypeAttribute : Attribute { }
 }
 ```
 
@@ -225,7 +225,7 @@ class C2 : C1
 
 Metadata "view" of `C1`:
 ```cs
-[Closed]
+[IsClosedType]
 class C1
 {
     [CompilerFeatureRequired("ClosedClasses")]
@@ -261,7 +261,6 @@ class C1
 ## Drawbacks
 
 - It can be a breaking change to add a `closed` modifier to an existing class, or to add an additional derived class from a closed class. Before publishing a closed class, the author needs to consider the long term contract it implies with its consumers.
-- Unless we find a way to prevent it, "unauthorized" derived classes may be allowed by unwitting other compilers, leading to the risk that the set of cases is not in fact closed at runtime.
 
 ## Alternatives
 

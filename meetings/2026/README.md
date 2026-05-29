@@ -4,7 +4,6 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ## Schedule ASAP
 
-- [Closed class open questions, part 3](https://github.com/dotnet/csharplang/blob/3613750c73dd2229f814decb5b5911858f6859f2/proposals/closed-hierarchies.md) (Rikki)
 
 ## Schedule when convenient
 
@@ -14,6 +13,9 @@ All schedule items must have a public issue or checked-in proposal that can be l
 - [Anonymous using declarations](https://github.com/dotnet/csharplang/blob/665a9392e172e6f4f16347c502d9f80220a6e7a4/proposals/anonymous-using-declarations.md) (jnm2, 333fred, CyrusNajmabadi)
 - [Partial extension members](https://github.com/dotnet/csharplang/pull/10126) (triage and open issues, Julien)
 - [Extension members on typeless receivers](https://github.com/dotnet/csharplang/blob/main/proposals/extension-members-on-typeless-receivers.md) (CyrusNajmabadi, jnm2)
+- [Collection expression spread optimization question](https://github.com/dotnet/csharplang/issues/10178) (Rikki)
+- [Ref and ref-like parameters of async methods](https://github.com/dotnet/csharplang/blob/c623e9fb9e2c1a61da95cd8d2768117a1c358247/proposals/async-method-ref-parameters.md) (jnm2)
+- [Mixed object and collection initializers](https://github.com/dotnet/csharplang/blob/main/proposals/mixed-object-and-collection-initializers.md) (CyrusNajmabadi)
 - Triage (working set)
 
 ## Recurring topics
@@ -23,20 +25,49 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ## Schedule
 
+### Wed Jul 1, 2026
+
+### Wed Jun 10, 2026
+
+### Mon Jun 8, 2026
+
 ### Wed May 27, 2026
 
-### Wed May 20, 2026
-
-### Mon May 18, 2026
-
-### Wed May 13, 2026
-
-- Unsafe [open questions](https://github.com/dotnet/csharplang/blob/main/proposals/unsafe-evolution.md#questions) (Fred, Andy)
-
-### Mon May 11, 2026
+- [Add `unsafe` expressions](https://github.com/dotnet/csharplang/pull/10196/changes#diff-e1203c6eb1ea0e7dec2493a692e486b92a598031bd7475fd525ad5bbaf56c973) (333fred)
+- [ Dictionary expressions: Open questions](https://github.com/dotnet/csharplang/blob/main/proposals/dictionary-expressions.md#open-questions) (333fred)
 
 
 ## C# Language Design Notes for 2026
+
+### Wed May 20, 2026
+
+[C# Language Design Meeting for May 20th, 2026](https://github.com/dotnet/csharplang/blob/main/meetings/2026/LDM-2026-05-20.md)
+
+- Unions
+    - Union pattern matching target for custom unions
+    - Missing required APIs in custom union declarations
+    - Direct value property matching and union rules
+
+### Mon May 18, 2026
+
+[C# Language Design Meeting for May 18th, 2026](https://github.com/dotnet/csharplang/blob/main/meetings/2026/LDM-2026-05-18.md)
+
+- Closed hierarchies open questions
+    - Exhaustiveness when no subtypes exist
+    - Matching the base type after all subtypes
+    - Type parameters constrained to closed types
+    - Constraint-based ruling out of generic subtypes
+
+### Wed May 13, 2026
+
+[C# Language Design Meeting for May 13th, 2026](https://github.com/dotnet/csharplang/blob/main/meetings/2026/LDM-2026-05-13.md)
+
+- Unsafe evolution, continued
+    - `safe` marker syntax
+    - `unsafe` on types
+    - `unsafe` fields
+    - Explicit and extended layout fields
+    - Implicit calls and constructor edge cases
 
 ### Wed Apr 29, 2026
 
