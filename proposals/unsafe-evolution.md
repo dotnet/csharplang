@@ -63,6 +63,8 @@ The following breaking changes can be observed when updating to a compiler imple
   - `extern` members require an `unsafe` context when used and an explicit `unsafe`/`safe` keyword on the declaration.
   - `stackalloc` under [certain conditions](#stack-allocation) requires an `unsafe` context.
   - `unsafe` modifier is an error on type declarations, static constructors, and destructors, because it does not have any effect.
+- Under a new langversion:
+  - Lambda inference might consider more candidates, resulting in overload resolution [ambiguities](https://github.com/dotnet/roslyn/blob/330ad108d2786a50ce6755b9cb27c17a74723eb5/docs/compilers/CSharp/Compiler%20Breaking%20Changes%20-%20DotNet%2011.md#pointer-types-no-longer-require-an-unsafe-context).
 
 ## Detailed Design
 
@@ -312,8 +314,6 @@ Such compat-mode *requires-unsafe* members require an `unsafe` context to be use
 That should avoid a "dip" where just updating LangVersion (but not updating memory-safety rules version) makes most pointer operations safe
 (including calling functions with pointers in signature that will likely be marked as *requires-unsafe* when opted into the updated rules),
 and hence making code less protected in this migration window.
-
-This also avoids a breaking change where lambda inference would consider more candidates, resulting in overload resolution [ambiguities](https://github.com/dotnet/roslyn/blob/330ad108d2786a50ce6755b9cb27c17a74723eb5/docs/compilers/CSharp/Compiler%20Breaking%20Changes%20-%20DotNet%2011.md#pointer-types-no-longer-require-an-unsafe-context).
 
 ### VB
 
