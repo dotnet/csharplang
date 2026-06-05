@@ -488,6 +488,13 @@ Synthesized types are free to employ any strategy they want to implement the req
 1. The value must return `true` when queried for `ICollection<T>.IsReadOnly`. This ensures consumers can appropriately tell that the collection is non-mutable, despite implementing the mutable views.
 1. The value must throw on any call to a mutation method (like `IDictionary<TKey, TValue>.Add`). This ensures safety, preventing a non-mutable collection from being accidentally mutated.
 
+If a `with()` element is provided in the collection expression, the argument may be an `IEqualityComparer<TKey>` value. This comparer must be used to control hashing and equality for the keys in the resulting collection. The candidate `with()` argument signatures for `IReadOnlyDictionary<TKey, TValue>` are:
+
+- `()` — no arguments, equivalent to omitting the `with()` element
+- `(IEqualityComparer<TKey>? comparer)` — use the provided comparer for key equality
+
+See [*collection expression arguments: Dictionary-Interface target type*](https://github.com/dotnet/csharplang/blob/main/proposals/collection-expression-arguments.md#dictionary-interface-target-type) for full details.
+
 This follows the originating intuition around the `IEnumerable<T> / IReadOnlyCollection<T> / IReadOnlyList<T>` interfaces and the allowed flexibility the compiler has in using an existing type or synthesized type when creating an instance of those in [*collection expressions*](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-12.0/collection-expressions.md#non-mutable-interface-translation). 
 
 
@@ -498,6 +505,15 @@ Given the target type `IDictionary<TKey, TValue>`:
 1. The value must be an instance of `Dictionary<TKey, TValue>`
 
 Translation mechanics will happen using the already defined rules that encompass the `Dictionary<TKey, TValue>` type (including handling of an initially provided [*comparer*](#Comparer-support)).
+
+If a `with()` element is provided in the collection expression, it is used to select and invoke the appropriate `Dictionary<TKey, TValue>` constructor. The candidate `with()` argument signatures for `IDictionary<TKey, TValue>` are the accessible constructors of `Dictionary<TKey, TValue>`:
+
+- `Dictionary<TKey, TValue>()`
+- `Dictionary<TKey, TValue>(int capacity)`
+- `Dictionary<TKey, TValue>(IEqualityComparer<TKey>? comparer)`
+- `Dictionary<TKey, TValue>(int capacity, IEqualityComparer<TKey>? comparer)`
+
+See [*collection expression arguments: Dictionary-Interface target type*](https://github.com/dotnet/csharplang/blob/main/proposals/collection-expression-arguments.md#dictionary-interface-target-type) for full details.
 
 This follows the originating intuition around the `IList<T> / ICollection<T>` interfaces and the concrete `List<T>` destination type in [*collection expressions*](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-12.0/collection-expressions.md#mutable-interface-translation). 
 
@@ -835,6 +851,23 @@ Note: real rules would be tbd.  The above is just a light sketch to motivate dis
 Resolution: We do not believe specialized syntax is worth it.  We prefer this space be fully subsumed by the [Collection Expression Arguments](https://github.com/dotnet/csharplang/blob/main/proposals/collection-expression-arguments.md) feature. [LDM-2025-04-23](https://github.com/dotnet/csharplang/blob/main/meetings/2025/LDM-2025-04-23.md#conclusion-2)
 
 ## Open Questions
+
+### For `IReadOnlyDictionary<K, V>`, what symbol should `with(comparer: ...)` bind to?
+
+For `IDictionary<K, V>`, argument binding naturally uses concrete `Dictionary<K, V>` constructor symbols.
+
+For `IReadOnlyDictionary<K, V>`, the candidate signature includes `(IEqualityComparer<K>? comparer)`, but there is intentionally no requirement to construct a concrete `Dictionary<K, V>`: implementations may synthesize a type or use another strategy per [Non-mutable interface translation](#non-mutable-interface-translation).
+
+The open question is: when the compiler exposes binding results through APIs (for example, semantic model / symbols / operation trees), what is the containing symbol for this comparer signature?
+
+Options include:
+
+1. Expose a concrete `Dictionary<K, V>` constructor symbol (for consistency with mutable dictionary interface targets).
+    * We could specify that a `Dictionary` is used for construction, but that the compiler can wrap/use `FrozenDictionary`?
+2. Expose a compiler-defined synthesized/virtual signature symbol for `IReadOnlyDictionary<K, V>` argument binding.
+3. Use another runtime-provided type.
+
+Choosing (1) risks implying a concrete backing type and subverts the abstraction that `IReadOnlyDictionary<K, V>` translation is not required to use `Dictionary<K, V>`.
 
 ### Support `KeyValuePair<,>` variance with `params`?
 
