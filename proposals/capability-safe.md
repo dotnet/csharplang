@@ -5,15 +5,14 @@ Champion issue: https://github.com/dotnet/csharplang/issues/10217
 ## Summary
 [summary]: #summary
 
-In a system with strict encapsulation, memory safety and no ambient authority, the object graph determines which references are available (directly or indirectly) to an object.
-Handing out an object reference therefore confers a capability, so **references** and **capabilities** become interchangeable terms.
 
-This follows the principle of least authority, where objects have no capabilities by default and are sandboxed by the design of the object graph.
+In a system with strict encapsulation, memory safety and no ambient authority, the object graph and design of the APIs for those objects determines which capabilities are available to an object.  
+This follows the principle of least authority, where objects have no capabilities by default and are sandboxed by the design of the object graph.  
 This contrasts with current C# programs where any misbehaving object has as much access as the process.
 
-This proposal allows types or static members to be declared **capability-safe**, a contract enforced by the runtime and the compiler.
-Capability-safe code is limited to a subset of C#.
-It may only perform operations through explicit object references it already has, such as parameters, fields reachable from `this` or objects returned by those references.
+This proposal allows types or static members to be declared **capability-safe**, a contract enforced by the runtime and the compiler.  
+Capability-safe code is limited to a subset of C#.  
+It may only perform operations through explicit object references it already has, such as parameters, fields reachable from `this` or objects returned by those references.  
 It cannot use escape hatches that might violate encapsulation or memory safety (pointers, native interop, reflection, `dynamic`) or static APIs not certified capability-safe.
 
 ### Illustration
@@ -132,8 +131,8 @@ Currently, any part of the program executes with the full authority of the proce
 This makes software composition dramatically riskier and increases the impact of supply-chain attacks, confused agents and compromised plugins.
 Mitigations are complex and add significant overhead.
 
-Object-capability design gives a useful discipline: authority should flow through explicit and unforgeable object references only.
-This allows granular flexibility, where parts of the program are entrusted only with limited and specific capabilities.  For instance, one object can have read-only access to a file while another object has write access to a directory.
+Object-capability discipline, where authority flows through explicit and unforgeable object references only, allows granular and flexible control. Parts of the program are entrusted only with limited and specific capabilities.  
+For instance, one object can have read-only access to a file while another object has write access to a directory.  
 This also allows auditing of exposure. If a portion of the object graph is never directly or indirectly handed a reference to a specific object-capability, then we know that capability cannot be reached.
 
 ## Limitations
