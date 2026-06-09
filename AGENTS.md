@@ -7,7 +7,7 @@ When editing C# language proposals, preserve the repository's existing proposal 
 When a proposal shows changes against the C# specification baseline in `dotnet/csharpstandard`:
 
 - State which csharpstandard section or file is being updated, preferably with a link to the relevant section.
-- For prose changes, quote enough unchanged text for context and mark changes inline:
+- For prose changes, quote enough unchanged text for context (use blockquote) and mark changes inline:
   - Use `**bold**` for additions.
   - Use `~~strikethrough~~` for deletions.
 - For ANTLR grammar productions, use a fenced markdown `diff` block with `+` and `-` lines. This is the preferred form for grammar changes.
