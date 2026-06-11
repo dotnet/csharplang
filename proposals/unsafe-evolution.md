@@ -264,7 +264,7 @@ The [compat mode](#compat-mode) also applies to fields.
 Marking a property or event as `unsafe` does not make its backing field *requires-unsafe*.
 
 In a type with `[StructLayout(LayoutKind.Explicit)]` or `[ExtendedLayout]`, all fields must be marked either `safe` or `unsafe`.
-If the field is "hidden" behind an auto-property or field-like event, the `safe`/`unsafe` requirement is moved to those members instead.
+If the field is "hidden" behind an auto-property or field-like event, the `safe`/`unsafe` requirement is moved to the auto-property or field-like event instead.
 
 #### Metadata
 
