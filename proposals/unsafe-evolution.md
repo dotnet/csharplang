@@ -263,7 +263,7 @@ The [compat mode](#compat-mode) also applies to fields.
 
 Marking a property or event as `unsafe` does not make its backing field *requires-unsafe*.
 
-In a type with `[StructLayout(LayoutKind.Explicit)]` or `[ExtendedLayout]`, all fields must be marked either `safe` or `unsafe`.
+In a type with `[StructLayout(LayoutKind.Explicit)]` or `[ExtendedLayout]`, all instance fields must be marked either `safe` or `unsafe`.
 If the field is "hidden" behind an auto-property or field-like event, the `safe`/`unsafe` requirement is moved to the auto-property or field-like event instead.
 
 #### Metadata
@@ -634,7 +634,7 @@ Recommendation: yes.
 
 ### Explicit layout and backing fields
 
-If compiler synthesizes a backing field for an auto-property or field-like event in an `Explicit`/`Extended` struct,
+If compiler synthesizes a backing field for an auto-property or field-like event in an `Explicit`/`Extended` type,
 should we require `safe`/`unsafe` on the property/event instead?
 Otherwise, the user would be forced to expand these auto-declarations into manual field plus wrapper member declarations.
 What about a primary constructor parameter which gets a backing field?
