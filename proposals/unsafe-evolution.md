@@ -60,7 +60,7 @@ The following breaking changes can be observed when updating to a compiler imple
 - If the [updated memory safety rules](#metadata) are enabled (which might be the default or even the only option in a future .NET version):
   - `unsafe` on a member now also marks it as *requires-unsafe*, meaning callers must be in an `unsafe` context and overrides cannot be `unsafe` if the base member is safe.
   - `unsafe` on a member or a type does not automatically introduce an `unsafe` context, meaning explicit `unsafe` blocks must be used around `unsafe` operations in member bodies and initializers.
-  - `extern` members require an `unsafe` context when used and an explicit `unsafe`/`safe` keyword on the declaration.
+  - [`extern` members](#extern) and [fields in explicit layout](#fields) require an explicit `unsafe`/`safe` keyword on the declaration.
   - `stackalloc` under [certain conditions](#stack-allocation) requires an `unsafe` context.
   - `unsafe` modifier is an error on type declarations, static constructors, and destructors, because it does not have any effect.
 - Under a new langversion:
@@ -231,7 +231,8 @@ Types with parameterless *requires-unsafe* constructors do not satisfy the `new(
 Similarly and in addition, structs with parameterless *requires-unsafe* constructors do not satisfy the `struct` constraint.
 
 `unsafe` on a member is _not_ applied to any nested anonymous or local functions inside the member.
-The same goes for anonymous and local functions declared inside of an `unsafe` block.
+The same goes for anonymous and local functions declared inside of an `unsafe` block
+(they are still in an `unsafe` context as always, but they don't become *requires-unsafe*).
 To mark a local function as *requires-unsafe*, it must manually be marked as `unsafe`.
 Lambdas cannot be marked *requires-unsafe* (the `unsafe` keyword is disallowed on them).
 
@@ -262,7 +263,8 @@ The [compat mode](#compat-mode) also applies to fields.
 
 Marking a property or event as `unsafe` does not make its backing field *requires-unsafe*.
 
-In a struct with `[StructLayout(LayoutKind.Explicit)]` or `[ExtendedLayout]`, all fields must be marked either `safe` or `unsafe`.
+In a type with `[StructLayout(LayoutKind.Explicit)]` or `[ExtendedLayout]`, all instance fields must be marked either `safe` or `unsafe`.
+If the field is "hidden" behind an auto-property or field-like event, the `safe`/`unsafe` requirement is moved to the auto-property or field-like event instead.
 
 #### Metadata
 
@@ -629,6 +631,14 @@ Should fields in structs marked as `[StructLayout(Explicit)]` or `[ExtendedLayou
 Recommendation: yes.
 
 - [LDM 2026-05-13](https://github.com/dotnet/csharplang/blob/main/meetings/2026/LDM-2026-05-13.md#explicit-and-extended-layout-fields): yes, require either `unsafe` or `safe`, just like for `extern`s.
+
+### Explicit layout and backing fields
+
+If compiler synthesizes a backing field for an auto-property or field-like event in an `Explicit`/`Extended` type,
+should we require `safe`/`unsafe` on the property/event instead?
+Otherwise, the user would be forced to expand these auto-declarations into manual field plus wrapper member declarations.
+What about a primary constructor parameter which gets a backing field?
+Both `safe` and `unsafe` modifier is currently disallowed on a parameter declaration.
 
 ### `[Out]` and `[SkipLocalsInit]`
 
