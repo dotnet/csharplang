@@ -136,7 +136,7 @@ Dictionary<string, int> caseInsensitiveMap = [with(StringComparer.OrdinalIgnoreC
 
 The `with()` element is not an `expression_element` and does not contribute a `KeyValuePair<,>` value to the dictionary contents.  Instead, the `with()` argument list is processed using the collection expression argument rules for constructors, *create methods*, and supported interface target types.
 
-For concrete dictionary types and collection builder types, the supported comparer types are determined by the constructors or create methods available for the target type.  For `IDictionary<TKey, TValue>` and `IReadOnlyDictionary<TKey, TValue>` interface targets, the collection expression argument rules define explicit `IEqualityComparer<TKey>` support; see [*collection expression arguments: Dictionary-Interface target type*](https://github.com/dotnet/csharplang/blob/main/proposals/collection-expression-arguments.md#dictionary-interface-target-type) for full details.
+For concrete dictionary types and collection builder types, the supported comparer types are determined by the constructors or create methods available for the target type.  For `IDictionary<TKey, TValue>` and `IReadOnlyDictionary<TKey, TValue>` interface targets, the collection expression argument rules define explicit `IEqualityComparer<TKey>` support. See [*collection expression arguments: Dictionary-Interface target type*](https://github.com/dotnet/csharplang/blob/main/proposals/collection-expression-arguments.md#dictionary-interface-target-type) for full details.
 
 ## Conversions
 
@@ -207,7 +207,9 @@ Collection arguments are *not* considered when determining *collection expressio
 > For the create method:
 >   - The method must have a single parameter of type System.ReadOnlySpan<E>, passed by value, and there is an identity conversion from E to the *iteration type* of the collection type. 
 >
->    - **The method may have additional parameters before the `System.ReadOnlySpan<E>` parameter. If the collection expression has a `with()` element, overload resolution is performed against the corresponding projection methods as described in [*collection expression arguments: CollectionBuilderAttribute methods*](https://github.com/dotnet/csharplang/blob/main/proposals/collection-expression-arguments.md#collectionbuilderattribute-methods). The selected create method is invoked with the `with()` arguments followed by the elements span.**
+>    - **The method may have additional parameters before the `System.ReadOnlySpan<E>` parameter.**
+>    - **If the collection expression has a `with()` element, overload resolution is performed against the corresponding projection methods as described in [*collection expression arguments: CollectionBuilderAttribute methods*](https://github.com/dotnet/csharplang/blob/main/proposals/collection-expression-arguments.md#collectionbuilderattribute-methods).**
+>    - **The selected create method is invoked with the `with()` arguments followed by the elements span.**
 
 *Dictionary type* authors who use `CollectionBuilderAttribute` should have the method that is pointed to have `overwrite` not `throw` semantics when encountering the same `.Key` multiple times in the span of `KeyValuePair<,>` they are processing.
 
