@@ -33,11 +33,16 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 - [ Dictionary expressions: Open questions](https://github.com/dotnet/csharplang/blob/main/proposals/dictionary-expressions.md#open-questions) (333fred)
 
+## C# Language Design Notes for 2026
+
 ### Wed May 27, 2026
 
-- [Add `unsafe` expressions](https://github.com/dotnet/csharplang/pull/10196/changes#diff-e1203c6eb1ea0e7dec2493a692e486b92a598031bd7475fd525ad5bbaf56c973) (333fred)
+[C# Language Design Meeting for May 27th, 2026](https://github.com/dotnet/csharplang/blob/main/meetings/2026/LDM-2026-05-27.md)
 
-## C# Language Design Notes for 2026
+- Unsafe evolution
+    - Unsafe expressions
+    - Await in unsafe blocks
+    - Safety comments
 
 ### Wed May 20, 2026
 
