@@ -77,7 +77,7 @@ This proposal introduces:
 - a new `safe` contextual keyword that can be applied to [`extern` members](#extern) and [fields in explicit layout](#fields),
 - and `unsafe` expressions (`unsafe(expression)`), detailed in [unsafe expressions](#unsafe-expressions).
 
-This new keyword is available under new LangVersion, but regardless of [opt-in](#metadata), under the premise that
+This new syntax is available under new LangVersion, but regardless of [opt-in](#metadata), under the premise that
 we are trying to make it so that anything you are required to do when you are opted in, you are allowed to do before you opt in.
 
 ### Existing `unsafe` rules
@@ -353,6 +353,7 @@ Several syntactic positions do not admit `unsafe` blocks at all, yet may contain
 ```cs
 // Without unsafe expressions: must spill to a temporary
 Task t;
+// SAFETY: Discharges obligations because reasons
 unsafe { t = DoWork(); }
 await t;
 
@@ -412,6 +413,7 @@ static int _value = unsafe(ReadFromPointer());
 ```cs
 class C(int x)
 {
+    // SAFETY: Discharges obligations because reasons
     C() : this(unsafe(GetUnsafeValue()))
     {
     }
@@ -419,6 +421,7 @@ class C(int x)
 
 class Derived : Base
 {
+    // SAFETY: Discharges obligations because reasons
     Derived() : base(unsafe(GetUnsafeValue()))
     {
     }
@@ -535,7 +538,7 @@ Should we require it for both `unsafe` blocks and `unsafe` member declarations o
 
 ### (answered) `unsafe` expressions
 
-Other languages with more comprehensive `unsafe` features have added `unsafe` as an expression, to enable improved user ergonomics and allow authors to more precisely limit where `unsafe` is used. Is this
+Other languages with more comprehensive `unsafe` features have added `unsafe` as an expression that improves user ergonomics and allow authors to more precisely limit where `unsafe` is used. Is this
 something that we want to have in C#? Consider an inline call to an `unsafe` member that handles the safety directly: right now, the author would either need to wrap the entire statement in an `unsafe`
 block, expanding the scope of the `unsafe` context, or they would need to break out the inner function call into an intermediate variable.
 
