@@ -433,14 +433,76 @@ p is Pet (Cat)          // true: applied to p
 p is Cat ("Fido")       // true; applied to p.Value
 ```
 
-##### constant_pattern
+##### Constant pattern
+
+See [Constant pattern](https://github.com/dotnet/csharpstandard/blob/6156604067898c974df203083b476dfb210a29ba/standard/patterns.md#1123-constant-pattern).
+```ANTLR
+constant_pattern
+    : constant_expression
+    ;
+```
+
+###### When *constant_expression* is ```null```.
+
+If the input value is a class union type, then the `null` *constant_pattern* will succeed regardless of whether the union value itself is `null` or its contained value is `null`:
+
+```csharp
+if (result is null) { ... } // if (result == null || result.Value == null)
+```
+
+``` c#
+union class StringOrInt(string, int?);  // not actual syntax
+StringOrInt? n1 = null;
+StringOrInt n2 = (int?)null;
+
+n1 is null           // true : n1 *is* null
+n2 is null           // true : n2.Value *is* null
+```
+
+Similarly, if the input value is a nullable value type (wrapping a struct union type), then the `null` pattern will succeed 
+regardless of whether the incoming value itself is `null` or its contained value is `null`:
+
+```csharp
+if (result is null) { ... } // if (result.HasValue == false || result.GetValueOrDefault().Value == null)
+```
+
+``` c#
+union StringOrInt(string, int?);
+StringOrInt? n1 = null;
+StringOrInt? n2 = (int?)null;
+
+n1 is null           // true : n1 *is* null
+n2 is null           // true : n2.Value *is* null
+```
+
+If the input value is a struct union type, then the `null` *constant_pattern* will succeed when union's contained value is `null`:
+
+```csharp
+if (result is null) { ... } // if (result.Value == null)
+```
+
+The output value of the `null` *constant_pattern* is its input value
+
+###### When *constant_expression* is not ```null```.
+
+*constant_pattern*s of this form will succeed only when the union instance itself is not `null` and
+its `Value` matches the *constant_expression*.
+```csharp
+if (result is 1) { ... } // if (result != null && result.Value is 1)
+```
+
+The output value of the *constant_pattern* then is union's `Value` narrowed to the type of the *constant_expression*.
+``` c#
+union StringOrInt(string, int);
+StringOrInt? s = 10;
+
+s is 10           // true : s.Value.Value is an int and the int has the value 10, output value is (int)s.Value.Value
+```
+
 ##### discard_pattern
 ##### relational_pattern
 ##### list_pattern
 ##### slice_pattern
-
-
-
 
 
 For the unconditional `_`, `var` and `not` patterns, the pattern is applied to the incoming value itself. For example:
