@@ -295,8 +295,153 @@ class Program
 
 #### Union matching
 
-When the incoming value of a pattern is of a union type or of a nullable of a union type, 
+When the input value of a pattern is of a union type or of a nullable of a union type, 
 the nullable value and the underlying union value's contents may be "unwrapped", depending on the pattern.
+
+##### Parenthesized pattern
+
+The underlying pattern is applied to an input value of the enclosing parenthesized pattern and
+the resulting output value is the output value of the enclosing parenthesized pattern.
+
+##### Var pattern
+
+See [Var pattern](https://github.com/dotnet/csharpstandard/blob/6156604067898c974df203083b476dfb210a29ba/standard/patterns.md#1124-var-pattern).
+
+Underlying union value is not unwrapped. This applies to all forms of the `var pattern`. 
+
+##### Type pattern
+
+See [Type pattern](https://github.com/dotnet/csharpstandard/blob/6156604067898c974df203083b476dfb210a29ba/standard/patterns.md#1128-type-pattern).
+```ANTLR
+type_pattern
+    : type
+    ;
+```
+
+Given a pattern input value *e* of a union type or of a nullable of a union type, test is done against both
+the union instance and the union's value. If either of the tests succeed, then the pattern succeeds. The union
+instance is always tested first and then the union value only if the union test failed. If the compiler can
+determine that one of the tests cannot succeed, it may remove that portion of the match from the emitted code.
+An output value of the pattern in this case is the input value of the first successful test, narrowed to the `type`.
+
+``` c#
+union Pet(Cat, Dog);
+Pet? p = new Cat(...);
+
+p is Pet                      // true, since p.Value is a Pet, output value is p.Value
+p is Cat                      // true, since p.Value.Value is a Cat, output value is (Cat)p.Value.Value
+```
+
+##### Declaration pattern
+
+See [Declaration pattern](https://github.com/dotnet/csharpstandard/blob/6156604067898c974df203083b476dfb210a29ba/standard/patterns.md#1122-declaration-pattern).
+```ANTLR
+declaration_pattern
+    : type simple_designation
+    ;
+simple_designation
+    : discard_designation
+    | single_variable_designation
+    ;
+discard_designation
+    : '_'
+    ;
+single_variable_designation
+    : identifier
+    ;
+```
+
+The *declaration_pattern* is equivalent to ```type and var simple_designation```.
+
+``` C#
+record Cat(...) : ICat;
+union Pet(Cat, Dog) : IPet;
+
+Pet p = new Cat(...);
+
+p is IPet ip      // true, since Pet implements IPet, ip is (IPet)p
+p is ICat c       // true, since p.Value is a Cat and Cat implements ICat, c is (ICat)p.Value
+```
+
+##### Property pattern
+
+See [Property pattern](https://github.com/dotnet/csharpstandard/blob/6156604067898c974df203083b476dfb210a29ba/standard/patterns.md#1126-property-pattern).
+```ANTLR
+property_pattern
+    : type? property_subpattern simple_designation?
+    ;
+property_subpattern
+    : '{' '}'
+    | '{' subpatterns ','? '}'
+    ;
+```
+
+If the *type* portion of the *property_pattern* is missing, underlying union value is not unwrapped and the matching is done
+only against the union instance.
+
+If the *type* portion of the *property_pattern* is present, the pattern is equivalent to
+```type and property_subpattern simple_designation?```.
+
+``` c#
+record Cat(string Name);
+union Pet(Cat, Dog);
+Pet p = new Cat(Name="Fido");
+
+p is { Name: "Fido" }                      // error: Pet has no 'Name'; applied to p
+p is { Value: Cat }                        // true; applied to p
+p is Pet { Value: Cat }                    // true; applied to p
+p is Cat { Name: "Fido" }                  // true; applied to p.Value
+p is {}                                    // true; applied to p and always true for struct union
+```
+
+##### Positional pattern
+
+See [Positional pattern](https://github.com/dotnet/csharpstandard/blob/6156604067898c974df203083b476dfb210a29ba/standard/patterns.md#1125-positional-pattern).
+```ANTLR
+positional_pattern
+    : type? '(' subpatterns? ')' property_subpattern? simple_designation?
+    ;
+subpatterns
+    : subpattern (',' subpattern)*
+    ;
+subpattern
+    : pattern
+    | subpattern_name ':' pattern
+    ;
+subpattern_name
+    : identifier
+    | subpattern_name '.' identifier
+    ;
+```
+
+If the *type* portion of the *positional_pattern* is missing, underlying union value is not unwrapped and the matching is done
+only against the union instance.
+
+If the *type* portion of the *positional_pattern* is present, the pattern is equivalent to
+```type and '(' subpatterns? ')' property_subpattern? simple_designation?```.
+
+``` c#
+record Cat(string Name);
+// a union type with its own deconstruct
+union Pet(Cat, Dog) { public void Deconstruct(out object value) { value = this.Value; }}}
+
+Pet p = new Cat(Name="Fido");
+
+p is ("Fido")           // false: applied to p
+p is (Cat)              // true: applied to p
+p is Pet (Cat)          // true: applied to p
+p is Cat ("Fido")       // true; applied to p.Value
+```
+
+##### constant_pattern
+##### discard_pattern
+##### relational_pattern
+##### list_pattern
+##### slice_pattern
+
+
+
+
 
 For the unconditional `_`, `var` and `not` patterns, the pattern is applied to the incoming value itself. For example:
 
