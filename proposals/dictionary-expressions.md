@@ -815,7 +815,7 @@ If we do special case comparers, the rules would say something intuitively akin 
 
 > If a comparer element is provided, then:
 > 1. If generating a `new()` type, the type must have a constructor callable with the single comparer argument.
-> 2. If generating a collection builder type, there must be a factory method referenced that can take the comparer and the elements.
+> 2. If generating a collection builder type, there must be a factory method referenced with suitable parameters for the comparer and elements span.
 > 3. If generating an interface, the only supported interfaces are `IDictionary<,>` and `IReadOnlyDictionary<,>`.  For the former, the comparer will be passed to the `new(IEqualityComparer<>)` constructor on `Dictionary<>`.  For the latter, the dictionary created by the compiler will be guaranteed to use the specified equality comparer to perform hashing and equality checks of the provided keys.
 
 Note: real rules would be tbd.  The above is just a light sketch to motivate discussion.
