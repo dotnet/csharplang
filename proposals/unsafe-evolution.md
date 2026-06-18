@@ -75,9 +75,12 @@ Terminology: we call members *requires-unsafe* (previously known as *caller-unsa
 
 ### Syntax
 
-We introduce new `safe` contextual keyword. It can be applied to [`extern` members](#extern) and [fields in explicit layout](#fields).
+This proposal introduces:
 
-This new keyword is available under new LangVersion, but regardless of [opt-in](#metadata), under the premise that
+- a new `safe` contextual keyword that can be applied to [`extern` members](#extern) and [fields in explicit layout](#fields),
+- and `unsafe` expressions (`unsafe(expression)`), detailed in [unsafe expressions](#unsafe-expressions).
+
+This new syntax is available under new LangVersion, but regardless of [opt-in](#metadata), under the premise that
 we are trying to make it so that anything you are required to do when you are opted in, you are allowed to do before you opt in.
 
 ### Existing `unsafe` rules
@@ -322,6 +325,142 @@ and hence making code less protected in this migration window.
 
 We do not need to add support to Visual Basic for *requires-unsafe* members since there are no `unsafe` contexts in VB today and no way to work with pointers there either.
 
+### `unsafe` expressions
+
+An `unsafe` expression introduces a minimal `unsafe` context for evaluating a single expression. It is useful in situations where an `unsafe` block would unnecessarily widen the `unsafe` scope, or where `unsafe` blocks cannot be used syntactically (such as in `catch` filters, field initializers, constructor initializers, and the operand position of `await`).
+
+#### Syntax
+
+An `unsafe_expression` is added as a *primary_no_array_creation_expression*:
+
+```antlr
+unsafe_expression
+    : 'unsafe' '(' expression ')'
+    ;
+```
+
+It is subject to the same `AllowUnsafeBlocks` requirement as the `unsafe` keyword elsewhere.
+
+#### Semantics
+
+An `unsafe_expression` establishes an `unsafe` context for evaluating its *expression*. This means that pointer dereferences, function pointer invocations, and calls to *requires-unsafe* members are all permitted within the enclosed expression. The type and value of the `unsafe_expression` are the type and value of the enclosed *expression*.
+
+The `unsafe` context established by an `unsafe_expression` does not extend beyond its closing parenthesis.
+
+#### Motivation and migration examples
+
+Several syntactic positions do not admit `unsafe` blocks at all, yet may contain subexpressions that call *requires-unsafe* members. Without `unsafe` expressions, migrating such code requires extracting the unsafe sub-expression into a helper local function or a temporary variable, which obscures intent and increases verbosity.
+
+**`await` on a *requires-unsafe* method.** An `await` expression cannot appear inside an `unsafe` block. When the method being awaited becomes *requires-unsafe*, a temporary variable is required to hold the task before it can be awaited:
+
+```cs
+// Without unsafe expressions: must spill to a temporary
+Task t;
+// SAFETY: Discharges obligations because reasons
+unsafe { t = DoWork(); }
+await t;
+
+// With unsafe expressions: the unsafe context wraps only the call;
+// the await remains outside it and is fully legal
+// SAFETY: Discharges obligations because reasons
+await unsafe(DoWork());
+```
+
+**Catch filters.** The `when` filter of a `catch` clause is an expression, not a statement body. An `unsafe` block can only surround statements, so there is no place to put one around just the filter expression. Additionally, if the `try` body contains an `await` expression, an `unsafe` block cannot surround the entire `try`/`catch` statement either—`await` is not permitted inside an `unsafe` block. When a method used in a filter becomes *requires-unsafe*, the only alternative without `unsafe` expressions is a helper:
+
+```cs
+// Without unsafe expressions: must spill to a local function
+static bool FilterHelper(Exception e)
+{
+    // SAFETY: Discharges obligations because reasons
+    unsafe { return NowUnsafeCall(e); }
+}
+
+try
+{
+    await DoWork(); // 'await' here prevents wrapping the whole try/catch in 'unsafe'
+}
+catch (Exception e) when (NowUnsafeCall(e))
+{
+}
+
+// With unsafe expressions: inline and minimal scope
+try
+{
+    await DoWork();
+}
+// SAFETY: Discharges obligations because reasons
+catch (Exception e) when (unsafe(NowUnsafeCall(e)))
+{
+}
+```
+
+**Field initializers.** Under the updated rules, `unsafe` on a field does not introduce an `unsafe` context in its initializer. When a field's initializer calls a *requires-unsafe* member, an `unsafe` expression provides the context without requiring a helper method:
+
+```cs
+// Without unsafe expressions: must spill to a helper method
+static int InitialValue()
+{
+    // SAFETY: Discharges obligations because reasons
+    unsafe { return ReadFromPointer(); }
+}
+static int _value = InitialValue();
+
+// With unsafe expressions: inline
+// SAFETY: Discharges obligations because reasons
+static int _value = unsafe(ReadFromPointer());
+```
+
+**Constructor initializers.** `this(...)` and `base(...)` initializer argument lists are expressions, not statement bodies. If one of those arguments calls a *requires-unsafe* member, there is again no place to insert an `unsafe` block, so the call must otherwise be moved to a helper:
+
+```cs
+class C(int x)
+{
+    // SAFETY: Discharges obligations because reasons
+    C() : this(unsafe(GetUnsafeValue()))
+    {
+    }
+}
+
+class Derived : Base
+{
+    // SAFETY: Discharges obligations because reasons
+    Derived() : base(unsafe(GetUnsafeValue()))
+    {
+    }
+}
+```
+
+**Inline calls.** More generally, wrapping only the *requires-unsafe* sub-expression keeps the audit scope tight and avoids pulling surrounding safe code (such as argument evaluation or a containing method call) into the `unsafe` context:
+
+```cs
+extern int Add(int i1, int i2); // Some fancy extern addition function
+
+// Code I want to write:
+
+// SAFETY: Discharges obligations because reasons
+Console.WriteLine(unsafe(Add(1, 2)));
+
+// Code I have to write without unsafe expressions, option 1
+// (unsafe context unnecessarily includes the WriteLine call):
+
+// SAFETY: Discharges obligations because reasons
+unsafe
+{
+    Console.WriteLine(Add(1, 2));
+}
+
+// Code I have to write without unsafe expressions, option 2
+// (very verbose and harder to read):
+int result;
+// SAFETY: Discharges obligations because reasons
+unsafe
+{
+    result = Add(1, 2);
+}
+Console.WriteLine(result);
+```
+
 ## Questions
 
 ### (answered) Use `RequiresUnsafeAttribute` to denote *requires-unsafe* members
@@ -400,9 +539,9 @@ Should we not require it for `SkipLocalsInitAttribute` under the updated rules s
 Should we require it for the `safe` keyword too?
 Should we require it for both `unsafe` blocks and `unsafe` member declarations or other combination of those?
 
-### `unsafe` expressions
+### (answered) `unsafe` expressions
 
-Other languages with more comprehensive `unsafe` features have added `unsafe` as an expression, to enable improved user ergonomics and allow authors to more precisely limit where `unsafe` is used. Is this
+Other languages with more comprehensive `unsafe` features have added `unsafe` as an expression that improves user ergonomics and allow authors to more precisely limit where `unsafe` is used. Is this
 something that we want to have in C#? Consider an inline call to an `unsafe` member that handles the safety directly: right now, the author would either need to wrap the entire statement in an `unsafe`
 block, expanding the scope of the `unsafe` context, or they would need to break out the inner function call into an intermediate variable.
 
@@ -426,6 +565,8 @@ unsafe
 }
 Console.WriteLine(result);
 ```
+
+Answer: yes. See the [detailed design section](#unsafe-expressions).
 
 ### More `unsafe` contexts and relaxations
 
