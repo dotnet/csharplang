@@ -125,45 +125,18 @@ List<KeyValuePair<string, int>> nameToAge3 = ["mads": 21, .. existingListOfKVPS]
 
 ## Comparer support
 
-A dictionary expression can also provide a custom *comparer* to control its behavior just by including such a value as the first `expression_element` in the expression. For example:
+A dictionary expression can provide a custom *comparer* through a [`with()` collection expression argument](https://github.com/dotnet/csharplang/blob/main/proposals/collection-expression-arguments.md). For example:
 
 ```c#
-Dictionary<string, int> caseInsensitiveMap = [StringComparer.CaseInsensitive, .. existingMap];
+Dictionary<string, int> caseInsensitiveMap = [with(StringComparer.OrdinalIgnoreCase), .. existingMap];
 
 // Or even:
-Dictionary<string, int> caseInsensitiveMap = [StringComparer.CaseInsensitive];
+Dictionary<string, int> caseInsensitiveMap = [with(StringComparer.OrdinalIgnoreCase)];
 ```
 
-While this approach does reuse `expression_element` both for specifying individual `KeyValuePair<,>` as well as a comparer for the dictionary, there is no ambiguity here as no type could satisfy both types.  
+The `with()` element is not an `expression_element` and does not contribute a `KeyValuePair<,>` value to the dictionary contents.  Instead, the `with()` argument list is processed using the collection expression argument rules for constructors, *create methods*, and supported interface target types.
 
-The motivation for this is due to the high number of cases of dictionaries found in real world code with custom comparers.  Support for any further customization is not provided.  This is in line with the lack of support for customization for normal collection expressions (like setting initial capacity). Other designs were explored which attempted to generalize this concept (for example, passing arbitrary arguments along).  These designs never landed on a satisfactory syntax.  And the concept of passing an arbitrary argument along doesn't supply a satisfactory answer on how that would control instantiating an `IDictionary<,>` or `IReadOnlyDictionary<,>`.
-
-### Question: Comparers for *collection types*
-
-Should support for the key comparer be available for normal *collection types*, not just *dictionary types*.  This would be useful for set-like types like `HashSet<>`.  For example:
-
-```c#
-HashSet<string> values = [StringComparer.CaseInsensitive, .. names];
-```
-
-### Question: Specialized comparer syntax.
-
-Should there be more distinctive syntax for the comparer?  Simply starting with a comparer could be difficult to tease out.  Having a syntax like so could make things clearer:
-
-```c#
-// `comparer: ...` to indicate the purpose of this value
-Dictionary<string, int> caseInsensitiveMap = [comparer: StringComparer.CaseInsensitive, .. existingMap];
-
-// Semicolon to more clearly delineate the comparer
-Dictionary<string, int> caseInsensitiveMap = [StringComparer.CaseInsensitive; .. existingMap];
-
-// Both?
-Dictionary<string, int> caseInsensitiveMap = [comparer : StringComparer.CaseInsensitive; .. existingMap];
-```
-
-### Question: Types of comparers supported.
-
-`IEqualityComparer<T>` is not the only comparer type used in collections.  `SortedDictionary<,>` and `SortedSet<,>` both use an `IComparer<T>` instead (as they have ordering, not hashing semantics).  It seems unfortunate to leave out `SortedDictionary<,>` if we are supporting the rest.  As such, perhaps the rules should just be that the special value in the collection be typed as some `IComparer<T>` or some `IEqualityComparer<T>`.  
+For concrete dictionary types and collection builder types, the supported comparer types are determined by the constructors or create methods available for the target type.  For `IDictionary<TKey, TValue>` and `IReadOnlyDictionary<TKey, TValue>` interface targets, the collection expression argument rules define explicit `IEqualityComparer<TKey>` support. See [*collection expression arguments: Dictionary-Interface target type*](https://github.com/dotnet/csharplang/blob/main/proposals/collection-expression-arguments.md#dictionary-interface-target-type) for full details.
 
 ## Conversions
 
@@ -234,7 +207,9 @@ Collection arguments are *not* considered when determining *collection expressio
 > For the create method:
 >   - The method must have a single parameter of type System.ReadOnlySpan<E>, passed by value, and there is an identity conversion from E to the *iteration type* of the collection type. 
 >
->    - **The method has two parameters, where the first is a [*comparer*](#Comparer-support) and the other follows the rules of the *single parameter* rule above. This method will be called if the collection expression's first element is an [*comparer*](#Comparer-support) that is convertible to that parameter type.**
+>    - **The method may have additional parameters before the `System.ReadOnlySpan<E>` parameter.**
+>    - **If the collection expression has a `with()` element, overload resolution is performed against the corresponding projection methods as described in [*collection expression arguments: CollectionBuilderAttribute methods*](https://github.com/dotnet/csharplang/blob/main/proposals/collection-expression-arguments.md#collectionbuilderattribute-methods).**
+>    - **The selected create method is invoked with the `with()` arguments followed by the elements span.**
 
 *Dictionary type* authors who use `CollectionBuilderAttribute` should have the method that is pointed to have `overwrite` not `throw` semantics when encountering the same `.Key` multiple times in the span of `KeyValuePair<,>` they are processing.
 
@@ -504,7 +479,7 @@ Given the target type `IDictionary<TKey, TValue>`:
 
 1. The value must be an instance of `Dictionary<TKey, TValue>`
 
-Translation mechanics will happen using the already defined rules that encompass the `Dictionary<TKey, TValue>` type (including handling of an initially provided [*comparer*](#Comparer-support)).
+Translation mechanics will happen using the already defined rules that encompass the `Dictionary<TKey, TValue>` type (including handling of any provided [`with()` collection expression arguments](https://github.com/dotnet/csharplang/blob/main/proposals/collection-expression-arguments.md)).
 
 If a `with()` element is provided in the collection expression, it is used to select and invoke the appropriate `Dictionary<TKey, TValue>` constructor. The candidate `with()` argument signatures for `IDictionary<TKey, TValue>` are the accessible constructors of `Dictionary<TKey, TValue>`:
 
@@ -842,7 +817,7 @@ If we do special case comparers, the rules would say something intuitively akin 
 
 > If a comparer element is provided, then:
 > 1. If generating a `new()` type, the type must have a constructor callable with the single comparer argument.
-> 2. If generating a collection builder type, there must be a factory method referenced that can take the comparer as the first argument, and the elements as the second.
+> 2. If generating a collection builder type, there must be a factory method referenced with suitable parameters for the comparer and elements span.
 > 3. If generating an interface, the only supported interfaces are `IDictionary<,>` and `IReadOnlyDictionary<,>`.  For the former, the comparer will be passed to the `new(IEqualityComparer<>)` constructor on `Dictionary<>`.  For the latter, the dictionary created by the compiler will be guaranteed to use the specified equality comparer to perform hashing and equality checks of the provided keys.
 
 Note: real rules would be tbd.  The above is just a light sketch to motivate discussion.
