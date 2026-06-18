@@ -298,6 +298,21 @@ class Program
 When the input value of a pattern is of a union type or of a nullable of a union type, 
 the nullable value and the underlying union value's contents may be "unwrapped", depending on the pattern.
 
+The compiler will prefer implementing pattern behavior by means of members prescribed by the non-boxing access pattern.
+While it is free to do any optimization within the bounds of the well-formedness rules,
+the following are the minimum set guaranteed to be applied:
+
+* For a pattern that implies checking for a specific type `T`, if a `TryGetValue(S value)` method is available,
+  and there is an identity, or implicit reference/boxing conversion from `T` to `S`, then that method is used
+  to obtain the value. The pattern is then applied to that value. If there is more than one such method,
+  then any where the conversion from `T` to `S` is not a boxing conversion is preferred if available.
+  If there is still more than one method, one is chosen in an implementation-defined manner.
+* Otherwise, for a pattern that implies checking for `null`, if a `HasValue` property is available, that property is used to check if the union value is null.
+* Otherwise, the pattern is applied to the result of accessing the `Value` property on the incoming union.
+
+[The is-type operator](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/expressions.md#1214121-the-is-type-operator) applied to a union type
+has the same meaning as a type pattern applied to the union type.
+
 ##### Parenthesized pattern
 
 ```ANTLR
@@ -420,6 +435,17 @@ p is Cat { Name: "Fido" }                  // true; applied to p.Value
 p is {}                                    // true; applied to p and always true for struct union
 ```
 
+Assuming that `Pet` is a class union and `I1` is an interface with a property `Name` of type string:
+``` c#
+Pet p = GetPet();
+
+// true when
+// - p implements I1 and its I1.Name is "Fido", or
+// - when p doesn't implement I1, p.Value implements I1 and its I1.Name is "Fido"
+// The output value for the patter is either (I1)p or (I1)p.Value 
+p is I1 { Name: "Fido" }
+```
+
 ##### Positional pattern
 
 See [Positional pattern](https://github.com/dotnet/csharpstandard/blob/6156604067898c974df203083b476dfb210a29ba/standard/patterns.md#1125-positional-pattern).
@@ -457,6 +483,17 @@ p is ("Fido")           // false: applied to p
 p is (Cat)              // true: applied to p
 p is Pet (Cat)          // true: applied to p
 p is Cat ("Fido")       // true; applied to p.Value
+```
+
+Assuming that `Pet` is a class union and `I1` is an interface with a suitable Deconstruct method:
+``` c#
+Pet p = GetPet();
+
+// true when
+// - p implements I1 and its deconstruction is ("Fido"), or
+// - when p doesn't implement I1, p.Value implements I1 and its deconstruction is ("Fido")
+// The output value for the patter is either (I1)p or (I1)p.Value 
+p is I1 ("Fido")
 ```
 
 ##### Constant pattern
@@ -600,7 +637,6 @@ The *output value* of an `or` pattern is its *input value*, the *narrowed type* 
 of the *narrowed type* for that *value source* of the subpatterns if such a common type exists.
 Note that union instance unwrapping is changing the *value source*. 
 
-TODO: Adjust/add examples
 ``` c#
 union Pet(Cat, Dog);
 
@@ -617,14 +653,33 @@ GetPet() switch
 }
 ```
 
-The compiler will prefer implementing pattern behavior by means of members prescribed by the non-boxing access pattern. While it is free to do any optimization within the bounds of the well-formedness rules, the following are the minimum set guaranteed to be applied:
+Assuming that `Pet` is a class union and `I1` is an interface with a property `Name` of type string:
+``` c#
+Pet p = GetPet();
 
-* For a pattern that implies checking for a specific type `T`, if a `TryGetValue(S value)` method is available, and there is an identity, or implicit reference/boxing conversion from `T` to `S`, then that method is used to obtain the value. The pattern is then applied to that value. If there is more than one such method, then any where the conversion from `T` to `S` is not a boxing conversion is preferred if available. If there is still more than one method, one is chosen in an implementation-defined manner.
-* Otherwise, for a pattern that implies checking for `null`, if a `HasValue` property is available, that property is used to check if the union value is null.
-* Otherwise, the pattern is applied to the result of accessing the `Value` property on the incoming union.
+// The left pattern is true when
+// - p implements I1, or
+// - when p doesn't implement I1 and p.Value implements I1
+// The output value for the left pattern is either (I1)p or (I1)p.Value,
+// which also serves as in input value for the right patter.
+// The right pattern is true when I1.Name is "Fido" for its input value.
+// The output value for the entire `and` pattern is either (I1)p or (I1)p.Value.
+p is I1 and { Name: "Fido" }
+```
 
-[The is-type operator](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/expressions.md#1214121-the-is-type-operator) applied to a union type
-has the same meaning as a type pattern applied to the union type.
+``` c#
+union StringOrInt(string, int);
+
+GetStringOrInt() switch
+{
+    1 or 2 => ...   // '1' applies to the incoming 'StringOrInt''s `Value`
+                    // '2' also applies to the incoming 'StringOrInt''s `Value
+                    // The output value for `or` pattern is the incoming 'StringOrInt' instance
+    3 or "a" => ... // '3' applies to the incoming 'StringOrInt''s `Value`
+                    // "a" also applies to the incoming 'StringOrInt''s `Value
+                    // The output value for `or` pattern is the incoming 'StringOrInt' instance
+}
+```
 
 #### Union exhaustiveness
 
