@@ -300,7 +300,12 @@ the nullable value and the underlying union value's contents may be "unwrapped",
 
 ##### Parenthesized pattern
 
-The underlying pattern is applied to an input value of the enclosing parenthesized pattern and
+```ANTLR
+parenthesized_pattern
+    : '(' pattern ')'
+    ;
+```
+The underlying *pattern* is applied to an input value of the enclosing parenthesized pattern and
 the resulting output value is the output value of the enclosing parenthesized pattern.
 
 ##### Var pattern
@@ -308,6 +313,9 @@ the resulting output value is the output value of the enclosing parenthesized pa
 See [Var pattern](https://github.com/dotnet/csharpstandard/blob/6156604067898c974df203083b476dfb210a29ba/standard/patterns.md#1124-var-pattern).
 
 Underlying union value is not unwrapped. This applies to all forms of the `var pattern`. 
+```csharp
+if (GetPet() is var pet) { ... } // 'pet' is the union value returned from `GetPet`
+```
 
 ##### Type pattern
 
@@ -499,29 +507,85 @@ StringOrInt? s = 10;
 s is 10           // true : s.Value.Value is an int and the int has the value 10, output value is (int)s.Value.Value
 ```
 
-##### discard_pattern
-##### relational_pattern
-##### list_pattern
-##### slice_pattern
+##### Discard pattern
 
+See [Discard pattern](https://github.com/dotnet/csharpstandard/blob/6156604067898c974df203083b476dfb210a29ba/standard/patterns.md#1127-discard-pattern).
 
-For the unconditional `_`, `var` and `not` patterns, the pattern is applied to the incoming value itself. For example:
+Underlying union value is not unwrapped.
 
+##### Relational pattern
+
+See [Relational pattern](https://raw.githubusercontent.com/dotnet/csharpstandard/6156604067898c974df203083b476dfb210a29ba/standard/patterns.md).
+```ANTLR
+relational_pattern
+    : '<'  relational_expression
+    | '<=' relational_expression
+    | '>'  relational_expression
+    | '>=' relational_expression
+    ;
+```
+
+A *relational_pattern* will succeed only when the union instance itself is not `null` and
+its `Value` matches the pattern.
 ```csharp
-if (GetPet() is var pet) { ... } // 'pet' is the union value returned from `GetPet`
+if (result is > 1) { ... } // if (result != null && result.Value is > 1)
 ```
 
-However, all other patterns get implicitly applied to the underlying union's `Value` property:
-
+The output value of the *relational_pattern* then is union's `Value` narrowed to the type of the *relational_expression*.
 ``` c#
-if (GetPet() is Dog dog) { ... }   // 'Dog dog' is applied to 'GetPet().Value'
-if (GetPet() is null) { ... }      // 'null' is applied to 'GetPet().Value'
-if (GetPet() is { } value) { ... } // '{ } value' is applied to 'GetPet().Value'
+union StringOrInt(string, int);
+StringOrInt? s = 10;
+
+s is > 9           // true : s.Value.Value is an int and the int has the value > 9, output value is (int)s.Value.Value
 ```
 
-For logical patterns, this rule is applied individually to the branches, bearing in mind that the left branch of an `and` pattern can affect the incoming type and value of the right branch:
+##### List pattern
 
+See [List pattern](https://github.com/dotnet/csharpstandard/blob/6156604067898c974df203083b476dfb210a29ba/standard/patterns.md#list-pattern-new-clause-list-pattern).
+
+Underlying union value is not unwrapped.
+
+##### Logical pattern
+
+See [Logical pattern](https://github.com/dotnet/csharpstandard/blob/6156604067898c974df203083b476dfb210a29ba/standard/patterns.md#11210-logical-pattern).
+```ANTLR
+logical_pattern
+    : disjunctive_pattern
+    ;
+
+disjunctive_pattern
+    : disjunctive_pattern 'or' conjunctive_pattern
+    | conjunctive_pattern
+    ;
+
+conjunctive_pattern
+    : conjunctive_pattern 'and' negated_pattern
+    | negated_pattern
+    ;
+
+negated_pattern
+    : 'not' negated_pattern
+    | primary_pattern
+    ;
+```
+
+For a *negated_pattern* the *negated_pattern* is applied to the same input value and then the result is negated.
+The output value of a *negated_pattern* is its input value.
+
+In an `and` pattern, the *input value* of the left pattern is the *input value* of the the `and`.
+The *input value* of the right pattern is the *output value* of the left pattern of the `and`.
+The *output value* of an `and` pattern is the *output value* of its right pattern.
+
+In an `or` pattern, the *input value* of the left pattern is the *input value* of the the `or`.
+The *input value* of the right pattern is the *input value* of the the `or`.
+The *output value* of an `or` pattern is its *input value*, the *narrowed type* is the common type
+of the *narrowed type* for that *value source* of the subpatterns if such a common type exists.
+Note that union instance unwrapping is changing the *value source*. 
+
+TODO: Adjust/add examples
 ``` c#
+union Pet(Cat, Dog);
+
 GetPet() switch
 {
     var pet and not null    => ... // 'var pet' applies to the incoming 'Pet' as does 'not' and 'null' to its 'Value'
@@ -533,33 +597,6 @@ GetPet() switch
                                    // for the right branch to the `Dog` instance. Therefore, the property pattern on the right
                                    // is applied to that `Dog` instance
 }
-```
-
-*Note:* This rule means that `GetPet() is Pet pet` will likely not succeed, as `Pet` is applied to the _contents_, not to the `Pet` union itself.
-
-*Note:* The reason for the different treatment of unconditional `var` pattern (as well as `_`, which is essentially a shorthand for `var _`) is an assumption that their use is qualitatively different from other patterns. `var` patterns are used simply to name the value being matched against, oftentimes in nested patterns, such as `PetOwner{ Pet: var pet }`. Here, the helpful semantics is for `pet` to retain the union type `Pet`, instead of the `Value` property being dereferenced to a useless `object?` type.
-
-If the incoming value is a class type, then the `null` pattern will succeed regardless of whether the union value itself is `null` or its contained value is `null`:
-
-```csharp
-if (result is null) { ... } // if (result == null || result.Value == null)
-```
-
-Other union matching patterns will succeed only when the union value itself is not `null`.
-```csharp
-if (result is 1) { ... } // if (result != null && result.Value is 1)
-```
-
-Similarly, if the incoming value is a nullable value type (wrapping a struct union type), then the `null` pattern will succeed 
-regardless of whether the incoming value itself is `null` or its contained value is `null`:
-
-```csharp
-if (result is null) { ... } // if (result.HasValue == false || result.GetValueOrDefault().Value == null)
-```
-
-Other union matching patterns will succeed only when the the incoming value itself is not `null`.
-```csharp
-if (result is 1) { ... } // if (result.HasValue && result.GetValueOrDefault().Value is 1)
 ```
 
 The compiler will prefer implementing pattern behavior by means of members prescribed by the non-boxing access pattern. While it is free to do any optimization within the bounds of the well-formedness rules, the following are the minimum set guaranteed to be applied:
