@@ -328,9 +328,27 @@ type_pattern
 
 Given a pattern input value *e* of a union type or of a nullable of a union type, test is done against both
 the union instance and the union's value. If either of the tests succeed, then the pattern succeeds. The union
-instance is always tested first and then the union value only if the union test failed. If the compiler can
-determine that one of the tests cannot succeed, it may remove that portion of the match from the emitted code.
-An output value of the pattern in this case is the input value of the first successful test, narrowed to the `type`.
+instance is always tested first and then the union value only if the union test failed.
+
+Union `Value` is *pattern compatible* with *type* when there is a t least one *element type* that
+is *pattern compatible* with *type*.
+
+If the union type itself is *pattern compatible* with *type* and union `Value` is *pattern compatible* with *type*,
+*type_pattern* is equivalent to ```type or { Value: type }```, assuming that this form doesn't
+use any special treatment for unions.
+The output value of the *type_pattern* in this case is the union type instance narrowed to *type* if it successfully matched against the *type*.
+Otherwise, it is union's `Value` narrowed to the `type`. 
+
+If the union type itself is not *pattern compatible* with *type* and union `Value` is *pattern compatible* with *type*,
+*type_pattern* is equivalent to ```{ Value: type }```, assuming that this form doesn't use any special treatment for unions.
+The output value of the *type_pattern* in this case is union's `Value` narrowed to the `type`. 
+
+If the union type itself is *pattern compatible* with *type* and union `Value` is not *pattern compatible* with *type*,
+*type_pattern* is equivalent to ```type```, assuming that this form doesn't use any special treatment for unions.
+The output value of the *type_pattern* in this case is the union type instance narrowed to *type*. 
+
+If the union type itself is not *pattern compatible* with *type* and union `Value` is not *pattern compatible* with *type*,
+*type_pattern* is not applicable to the input value and a compilation error is reported. 
 
 ``` c#
 union Pet(Cat, Dog);
