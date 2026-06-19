@@ -4,6 +4,7 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ## Schedule ASAP
 
+- [Revisiting accessibility restriction on closed classes](https://github.com/dotnet/csharplang/issues/10237) (Rikki, Eirik)
 
 ## Schedule when convenient
 
