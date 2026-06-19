@@ -566,7 +566,7 @@ unsafe
 Console.WriteLine(result);
 ```
 
-Answer: yes. See the [detailed design section](#unsafe-expressions).
+Answer: [yes](https://github.com/dotnet/csharplang/blob/main/meetings/2026/LDM-2026-05-27.md#unsafe-expressions). See the [detailed design section](#unsafe-expressions).
 
 ### More `unsafe` contexts and relaxations
 
@@ -576,6 +576,8 @@ See [ref/unsafe in iterators/async](./csharp-13.0/ref-unsafe-in-iterators-async.
 
 Should we also allow `&UnsafeMethod` in safe context? Today as the proposal stands, this requires `unsafe` context if the method is marked as `unsafe`.
 But since we are just getting its address, which will need `unsafe` context when dereferenced/called, we could allow the address-of itself in a safe context.
+
+- [LDM 2026-05-27](https://github.com/dotnet/csharplang/blob/main/meetings/2026/LDM-2026-05-27.md#await-in-unsafe-blocks): `await` in `unsafe` needs a concrete proposal
 
 ### Unsafe relaxations gated on LangVersion
 
@@ -720,6 +722,8 @@ It would be expected that all pre/post-conditions would be placed in `<safety>` 
 To document reasoning of each `unsafe` block, we recommend the use of `// SAFETY` comments,
 similar to [Rust](https://std-dev-guide.rust-lang.org/policy/safety-comments.html).
 Should we also be checking these by the compiler (e.g., have some off-by-default warning), or leave that to an analyzer?
+
+- [LDM 2026-05-27](https://github.com/dotnet/csharplang/blob/main/meetings/2026/LDM-2026-05-27.md#safety-comments): no concrete decision
 
 ### More meaningless `unsafe` warnings
 
