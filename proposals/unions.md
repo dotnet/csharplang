@@ -426,7 +426,7 @@ If the *type* portion of the *property_pattern* is present, the pattern is equiv
 ``` c#
 record Cat(string Name);
 union Pet(Cat, Dog);
-Pet p = new Cat(Name="Fido");
+Pet p = new Cat(Name: "Fido");
 
 p is { Name: "Fido" }                      // error: Pet has no 'Name'; applied to p
 p is { Value: Cat }                        // true; applied to p
@@ -442,7 +442,7 @@ Pet p = GetPet();
 // true when
 // - p implements I1 and its I1.Name is "Fido", or
 // - when p doesn't implement I1, p.Value implements I1 and its I1.Name is "Fido"
-// The output value for the patter is either (I1)p or (I1)p.Value 
+// The output value for the pattern is either (I1)p or (I1)p.Value 
 p is I1 { Name: "Fido" }
 ```
 
@@ -475,9 +475,9 @@ If the *type* portion of the *positional_pattern* is present, the pattern is equ
 ``` c#
 record Cat(string Name);
 // a union type with its own deconstruct
-union Pet(Cat, Dog) { public void Deconstruct(out object value) { value = this.Value; }}}
+union Pet(Cat, Dog) { public void Deconstruct(out object value) { value = this.Value; }}
 
-Pet p = new Cat(Name="Fido");
+Pet p = new Cat(Name: "Fido");
 
 p is ("Fido")           // false: applied to p
 p is (Cat)              // true: applied to p
@@ -492,7 +492,7 @@ Pet p = GetPet();
 // true when
 // - p implements I1 and its deconstruction is ("Fido"), or
 // - when p doesn't implement I1, p.Value implements I1 and its deconstruction is ("Fido")
-// The output value for the patter is either (I1)p or (I1)p.Value 
+// The output value for the pattern is either (I1)p or (I1)p.Value 
 p is I1 ("Fido")
 ```
 
@@ -627,12 +627,12 @@ negated_pattern
 For a *negated_pattern* the *negated_pattern* is applied to the same input value and then the result is negated.
 The output value of a *negated_pattern* is its input value.
 
-In an `and` pattern, the *input value* of the left pattern is the *input value* of the the `and`.
+In an `and` pattern, the *input value* of the left pattern is the *input value* of the `and`.
 The *input value* of the right pattern is the *output value* of the left pattern of the `and`.
 The *output value* of an `and` pattern is the *output value* of its right pattern.
 
-In an `or` pattern, the *input value* of the left pattern is the *input value* of the the `or`.
-The *input value* of the right pattern is the *input value* of the the `or`.
+In an `or` pattern, the *input value* of the left pattern is the *input value* of the `or`.
+The *input value* of the right pattern is the *input value* of the `or`.
 The *output value* of an `or` pattern is its *input value*, the *narrowed type* is the common type
 of the *narrowed type* for that *value source* of the subpatterns if such a common type exists.
 Note that union instance unwrapping is changing the *value source*. 
@@ -661,7 +661,7 @@ Pet p = GetPet();
 // - p implements I1, or
 // - when p doesn't implement I1 and p.Value implements I1
 // The output value for the left pattern is either (I1)p or (I1)p.Value,
-// which also serves as in input value for the right patter.
+// which also serves as in input value for the right pattern.
 // The right pattern is true when I1.Name is "Fido" for its input value.
 // The output value for the entire `and` pattern is either (I1)p or (I1)p.Value.
 p is I1 and { Name: "Fido" }
