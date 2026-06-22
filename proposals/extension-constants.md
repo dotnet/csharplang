@@ -58,7 +58,7 @@ public static class E
     extension(object)
     {
         public const int I = 1; // OK
-        public int F;           // Error: not allowed in an extension block
+        public static int F;    // Error: not allowed in an extension block
     }
 }
 ```
@@ -88,8 +88,7 @@ Extension constants participate in extension member lookup and resolution as non
 - Applicability uses the same receiver compatibility model as extension members generally (including extension block type parameters and constraints).
 - If multiple extension constants with the same name are applicable in the selected extension scope, resolution applies an overload-resolution-like betterness step using the receiver type as the single argument.
 - Like other `const` fields, extension constants are static members and therefore must be accessed through a type receiver (`T.Member`), not an instance receiver (`t.Member`).
-
-Note: there is no disambiguation syntax for extension constants, unlike other extension block members. An extension constant cannot be accessed through the enclosing static class (`E.Member`).
+- Extension constants can also be accessed through the enclosing static class (`E.Member`) as a disambiguation syntax.
 
 Examples:
 
@@ -103,6 +102,7 @@ public static class E
 }
 
 _ = string.Member; // OK
+_ = E.Member;      // OK
 ```
 
 ```cs
@@ -141,17 +141,11 @@ Because extension constants are constants (not properties), they are valid in co
 
 ## Metadata model
 
-Extension constants follow the extension-member lowering model by being emitted on the synthesized extension marker type corresponding to the extension block.
-
-Unlike methods/properties/operators/indexers in extension blocks, there is no generated static implementation member corresponding to an extension constant. The constant itself is emitted only on the marker type.
+Extension constants follow the extension-member lowering model by being emitted on the synthesized extension marker type corresponding to the extension block. A corresponding constant field is also emitted on the enclosing static class, enabling the enclosing-class disambiguation form (`E.Member`).
 
 This is appropriate because constants are compile-time values: consumers substitute the constant value during compilation, so no runtime implementation body is required.
 
 The metadata encoding of the constant on the marker type is consistent with normal constants: a static literal field with constant value metadata (for non-`decimal` types) or a static field with the appropriate decimal constant attribute (for `decimal` types).
-
-## Open issues
-
-- extension constants cannot be accessed through the enclosing static class (`E.Member`), which limits usage from other/older compilers
 
 ## References
 
