@@ -345,7 +345,7 @@ Given a pattern input value *e* of a union type or of a nullable of a union type
 the union instance and the union's value. If either of the tests succeed, then the pattern succeeds. The union
 instance is always tested first and then the union value only if the union test failed.
 
-Union `Value` is *pattern compatible* with *type* when there is a t least one *element type* that
+Union `Value` is *pattern compatible* with *type* when there is at least one *element type* that
 is *pattern compatible* with *type*.
 
 If the union type itself is *pattern compatible* with *type* and union `Value` is *pattern compatible* with *type*,
