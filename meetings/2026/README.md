@@ -4,6 +4,7 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ## Schedule ASAP
 
+- [Unsafe in `async` methods](https://github.com/dotnet/csharplang/pull/10235) (333fred, jjonescz)
 
 ## Schedule when convenient
 
