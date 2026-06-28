@@ -64,8 +64,9 @@ The following breaking changes can be observed when updating to a compiler imple
   - `stackalloc` under [certain conditions](#stack-allocation) requires an `unsafe` context.
   - `unsafe` modifier is an error on type declarations, static constructors, and destructors, because it does not have any effect.
 - Under a new langversion:
-  - Lambda inference might consider more candidates, resulting in overload resolution [ambiguities](https://github.com/dotnet/roslyn/blob/330ad108d2786a50ce6755b9cb27c17a74723eb5/docs/compilers/CSharp/Compiler%20Breaking%20Changes%20-%20DotNet%2011.md#pointer-types-no-longer-require-an-unsafe-context).
-  - `safe` is now a contextual keyword which might [break](https://github.com/dotnet/roslyn/blob/ec5714da29ab7d9d7deecdcf4ee6cd014373cb38/docs/compilers/CSharp/Compiler%20Breaking%20Changes%20-%20DotNet%2011.md#safe-is-a-contextual-keyword) code that used it as a type.
+  - Lambda inference might consider more candidates, resulting in overload resolution [ambiguities](https://github.com/dotnet/roslyn/blob/8a40f5642f23bd941ec62d753ac7dbd7cc53dab5/docs/compilers/CSharp/Compiler%20Breaking%20Changes%20-%20DotNet%2011.md#pointer-types-no-longer-require-an-unsafe-context).
+  - `safe` is now a contextual keyword which might [break](https://github.com/dotnet/roslyn/blob/8a40f5642f23bd941ec62d753ac7dbd7cc53dab5/docs/compilers/CSharp/Compiler%20Breaking%20Changes%20-%20DotNet%2011.md#safe-is-a-contextual-keyword) code that used it as a type.
+  - Compat mode under legacy mode can result in [more errors](https://github.com/dotnet/roslyn/blob/8a40f5642f23bd941ec62d753ac7dbd7cc53dab5/docs/compilers/CSharp/Compiler%20Breaking%20Changes%20-%20DotNet%2011.md#unsafe-required-for-more-members).
 
 ## Detailed Design
 
