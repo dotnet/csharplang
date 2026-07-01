@@ -199,7 +199,7 @@ async Task ExampleAsyncMethod(ref int p1, SomeRefStruct p2, ref SomeRefStruct p3
     Console.WriteLine(p1);
     Console.WriteLine(p2.RefField);
     Console.WriteLine(p3.RefField);
-    Console.WriteLine(p3.ref-likeField.Length);
+    Console.WriteLine(p3.RefLikeField.Length);
     await Task.Delay(1);
 }
 ```
@@ -218,7 +218,7 @@ using System.Threading.Tasks;
 ref struct SomeRefStruct
 {
     public ref int RefField;
-    public Span<int> ref-likeField;
+    public Span<int> RefLikeField;
 };
 
 class Program
@@ -229,7 +229,7 @@ class Program
     {
         var p1 = 42;
         var p2 = new SomeRefStruct { RefField = ref refTarget1 };
-        var p3 = new SomeRefStruct { RefField = ref refTarget2, ref-likeField = [1, 2, 3] };
+        var p3 = new SomeRefStruct { RefField = ref refTarget2, RefLikeField = [1, 2, 3] };
         await ExampleAsyncMethod(ref p1, p2, ref p3);
     }
 
@@ -286,7 +286,7 @@ struct GeneratedStateMachine : IAsyncStateMachine
                     Console.WriteLine(p1);
                     Console.WriteLine(p2.RefField);
                     Console.WriteLine(p3.RefField);
-                    Console.WriteLine(p3.ref-likeField.Length);
+                    Console.WriteLine(p3.RefLikeField.Length);
                 }
                 awaiter = Task.Delay(1).GetAwaiter();
                 if (!awaiter.IsCompleted)
