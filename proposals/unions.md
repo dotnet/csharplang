@@ -295,26 +295,351 @@ class Program
 
 #### Union matching
 
-When the incoming value of a pattern is of a union type or of a nullable of a union type, 
+When the input value of a pattern is of a union type or of a nullable of a union type, 
 the nullable value and the underlying union value's contents may be "unwrapped", depending on the pattern.
 
-For the unconditional `_`, `var` and `not` patterns, the pattern is applied to the incoming value itself. For example:
+The compiler will prefer implementing pattern behavior by means of members prescribed by the non-boxing access pattern.
+While it is free to do any optimization within the bounds of the well-formedness rules,
+the following are the minimum set guaranteed to be applied:
 
+* For a pattern that implies checking for a specific type `T`, if a `TryGetValue(S value)` method is available,
+  and there is an identity, or implicit reference/boxing conversion from `T` to `S`, then that method is used
+  to obtain the value. The pattern is then applied to that value. If there is more than one such method,
+  then any where the conversion from `T` to `S` is not a boxing conversion is preferred if available.
+  If there is still more than one method, one is chosen in an implementation-defined manner.
+* Otherwise, for a pattern that implies checking for `null`, if a `HasValue` property is available, that property is used to check if the union value is null.
+* Otherwise, the pattern is applied to the result of accessing the `Value` property on the incoming union.
+
+[The is-type operator](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/expressions.md#1214121-the-is-type-operator) applied to a union type
+has the same meaning as a type pattern applied to the union type.
+
+##### Parenthesized pattern
+
+```ANTLR
+parenthesized_pattern
+    : '(' pattern ')'
+    ;
+```
+The underlying *pattern* is applied to an input value of the enclosing parenthesized pattern and
+the resulting output value is the output value of the enclosing parenthesized pattern.
+
+##### Var pattern
+
+See [Var pattern](https://github.com/dotnet/csharpstandard/blob/6156604067898c974df203083b476dfb210a29ba/standard/patterns.md#1124-var-pattern).
+
+Underlying union value is not unwrapped. This applies to all forms of the `var pattern`. 
 ```csharp
 if (GetPet() is var pet) { ... } // 'pet' is the union value returned from `GetPet`
 ```
 
-However, all other patterns get implicitly applied to the underlying union's `Value` property:
+##### Type pattern
 
-``` c#
-if (GetPet() is Dog dog) { ... }   // 'Dog dog' is applied to 'GetPet().Value'
-if (GetPet() is null) { ... }      // 'null' is applied to 'GetPet().Value'
-if (GetPet() is { } value) { ... } // '{ } value' is applied to 'GetPet().Value'
+See [Type pattern](https://github.com/dotnet/csharpstandard/blob/6156604067898c974df203083b476dfb210a29ba/standard/patterns.md#1128-type-pattern).
+```ANTLR
+type_pattern
+    : type
+    ;
 ```
 
-For logical patterns, this rule is applied individually to the branches, bearing in mind that the left branch of an `and` pattern can affect the incoming type and value of the right branch:
+Given a pattern input value *e* of a union type or of a nullable of a union type, test is done against both
+the union instance and the union's value. If either of the tests succeed, then the pattern succeeds. The union
+instance is always tested first and then the union value only if the union test failed.
+
+Union `Value` is *pattern compatible* with *type* when there is at least one *element type* that
+is *pattern compatible* with *type*.
+
+If the union type itself is *pattern compatible* with *type* and union `Value` is *pattern compatible* with *type*,
+*type_pattern* is equivalent to ```type or { Value: type }```, assuming that this form doesn't
+use any special treatment for unions.
+The output value of the *type_pattern* in this case is the union type instance narrowed to *type* if it successfully matched against the *type*.
+Otherwise, it is union's `Value` narrowed to the `type`. 
+
+If the union type itself is not *pattern compatible* with *type* and union `Value` is *pattern compatible* with *type*,
+*type_pattern* is equivalent to ```{ Value: type }```, assuming that this form doesn't use any special treatment for unions.
+The output value of the *type_pattern* in this case is union's `Value` narrowed to the `type`. 
+
+If the union type itself is *pattern compatible* with *type* and union `Value` is not *pattern compatible* with *type*,
+*type_pattern* is equivalent to ```type```, assuming that this form doesn't use any special treatment for unions.
+The output value of the *type_pattern* in this case is the union type instance narrowed to *type*. 
+
+If the union type itself is not *pattern compatible* with *type* and union `Value` is not *pattern compatible* with *type*,
+*type_pattern* is not applicable to the input value and a compilation error is reported. 
 
 ``` c#
+union Pet(Cat, Dog);
+Pet? p = new Cat(...);
+
+p is Pet                      // true, since p.Value is a Pet, output value is p.Value
+p is Cat                      // true, since p.Value.Value is a Cat, output value is (Cat)p.Value.Value
+```
+
+##### Declaration pattern
+
+See [Declaration pattern](https://github.com/dotnet/csharpstandard/blob/6156604067898c974df203083b476dfb210a29ba/standard/patterns.md#1122-declaration-pattern).
+```ANTLR
+declaration_pattern
+    : type simple_designation
+    ;
+simple_designation
+    : discard_designation
+    | single_variable_designation
+    ;
+discard_designation
+    : '_'
+    ;
+single_variable_designation
+    : identifier
+    ;
+```
+
+The *declaration_pattern* is equivalent to ```type and var simple_designation```.
+
+``` C#
+record Cat(...) : ICat;
+union Pet(Cat, Dog) : IPet;
+
+Pet p = new Cat(...);
+
+p is IPet ip      // true, since Pet implements IPet, ip is (IPet)p
+p is ICat c       // true, since p.Value is a Cat and Cat implements ICat, c is (ICat)p.Value
+```
+
+##### Property pattern
+
+See [Property pattern](https://github.com/dotnet/csharpstandard/blob/6156604067898c974df203083b476dfb210a29ba/standard/patterns.md#1126-property-pattern).
+```ANTLR
+property_pattern
+    : type? property_subpattern simple_designation?
+    ;
+property_subpattern
+    : '{' '}'
+    | '{' subpatterns ','? '}'
+    ;
+```
+
+If the *type* portion of the *property_pattern* is missing, underlying union value is not unwrapped and the matching is done
+only against the union instance.
+
+If the *type* portion of the *property_pattern* is present, the pattern is equivalent to
+```type and property_subpattern simple_designation?```.
+
+``` c#
+record Cat(string Name);
+union Pet(Cat, Dog);
+Pet p = new Cat(Name: "Fido");
+
+p is { Name: "Fido" }                      // error: Pet has no 'Name'; applied to p
+p is { Value: Cat }                        // true; applied to p
+p is Pet { Value: Cat }                    // true; applied to p
+p is Cat { Name: "Fido" }                  // true; applied to p.Value
+p is {}                                    // true; applied to p and always true for struct union
+```
+
+Assuming that `Pet` is a class union and `I1` is an interface with a property `Name` of type string:
+``` c#
+Pet p = GetPet();
+
+// true when
+// - p implements I1 and its I1.Name is "Fido", or
+// - when p doesn't implement I1, p.Value implements I1 and its I1.Name is "Fido"
+// The output value for the pattern is either (I1)p or (I1)p.Value 
+p is I1 { Name: "Fido" }
+```
+
+##### Positional pattern
+
+See [Positional pattern](https://github.com/dotnet/csharpstandard/blob/6156604067898c974df203083b476dfb210a29ba/standard/patterns.md#1125-positional-pattern).
+```ANTLR
+positional_pattern
+    : type? '(' subpatterns? ')' property_subpattern? simple_designation?
+    ;
+subpatterns
+    : subpattern (',' subpattern)*
+    ;
+subpattern
+    : pattern
+    | subpattern_name ':' pattern
+    ;
+subpattern_name
+    : identifier
+    | subpattern_name '.' identifier
+    ;
+```
+
+If the *type* portion of the *positional_pattern* is missing, underlying union value is not unwrapped and the matching is done
+only against the union instance.
+
+If the *type* portion of the *positional_pattern* is present, the pattern is equivalent to
+```type and '(' subpatterns? ')' property_subpattern? simple_designation?```.
+
+``` c#
+record Cat(string Name);
+// a union type with its own deconstruct
+union Pet(Cat, Dog) { public void Deconstruct(out object value) { value = this.Value; }}
+
+Pet p = new Cat(Name: "Fido");
+
+p is ("Fido")           // false: applied to p
+p is (Cat)              // true: applied to p
+p is Pet (Cat)          // true: applied to p
+p is Cat ("Fido")       // true; applied to p.Value
+```
+
+Assuming that `Pet` is a class union and `I1` is an interface with a suitable Deconstruct method:
+``` c#
+Pet p = GetPet();
+
+// true when
+// - p implements I1 and its deconstruction is ("Fido"), or
+// - when p doesn't implement I1, p.Value implements I1 and its deconstruction is ("Fido")
+// The output value for the pattern is either (I1)p or (I1)p.Value 
+p is I1 ("Fido")
+```
+
+##### Constant pattern
+
+See [Constant pattern](https://github.com/dotnet/csharpstandard/blob/6156604067898c974df203083b476dfb210a29ba/standard/patterns.md#1123-constant-pattern).
+```ANTLR
+constant_pattern
+    : constant_expression
+    ;
+```
+
+###### When *constant_expression* is ```null```.
+
+If the input value is a class union type, then the `null` *constant_pattern* will succeed regardless of whether the union value itself is `null` or its contained value is `null`:
+
+```csharp
+if (result is null) { ... } // if (result == null || result.Value == null)
+```
+
+``` c#
+union class StringOrInt(string, int?);  // not actual syntax
+StringOrInt? n1 = null;
+StringOrInt n2 = (int?)null;
+
+n1 is null           // true : n1 *is* null
+n2 is null           // true : n2.Value *is* null
+```
+
+Similarly, if the input value is a nullable value type (wrapping a struct union type), then the `null` pattern will succeed 
+regardless of whether the incoming value itself is `null` or its contained value is `null`:
+
+```csharp
+if (result is null) { ... } // if (result.HasValue == false || result.GetValueOrDefault().Value == null)
+```
+
+``` c#
+union StringOrInt(string, int?);
+StringOrInt? n1 = null;
+StringOrInt? n2 = (int?)null;
+
+n1 is null           // true : n1 *is* null
+n2 is null           // true : n2.Value *is* null
+```
+
+If the input value is a struct union type, then the `null` *constant_pattern* will succeed when union's contained value is `null`:
+
+```csharp
+if (result is null) { ... } // if (result.Value == null)
+```
+
+The output value of the `null` *constant_pattern* is its input value
+
+###### When *constant_expression* is not ```null```.
+
+*constant_pattern*s of this form will succeed only when the union instance itself is not `null` and
+its `Value` matches the *constant_expression*.
+```csharp
+if (result is 1) { ... } // if (result != null && result.Value is 1)
+```
+
+The output value of the *constant_pattern* then is union's `Value` narrowed to the type of the *constant_expression*.
+``` c#
+union StringOrInt(string, int);
+StringOrInt? s = 10;
+
+s is 10           // true : s.Value.Value is an int and the int has the value 10, output value is (int)s.Value.Value
+```
+
+##### Discard pattern
+
+See [Discard pattern](https://github.com/dotnet/csharpstandard/blob/6156604067898c974df203083b476dfb210a29ba/standard/patterns.md#1127-discard-pattern).
+
+Underlying union value is not unwrapped.
+
+##### Relational pattern
+
+See [Relational pattern](https://raw.githubusercontent.com/dotnet/csharpstandard/6156604067898c974df203083b476dfb210a29ba/standard/patterns.md).
+```ANTLR
+relational_pattern
+    : '<'  relational_expression
+    | '<=' relational_expression
+    | '>'  relational_expression
+    | '>=' relational_expression
+    ;
+```
+
+A *relational_pattern* will succeed only when the union instance itself is not `null` and
+its `Value` matches the pattern.
+```csharp
+if (result is > 1) { ... } // if (result != null && result.Value is > 1)
+```
+
+The output value of the *relational_pattern* then is union's `Value` narrowed to the type of the *relational_expression*.
+``` c#
+union StringOrInt(string, int);
+StringOrInt? s = 10;
+
+s is > 9           // true : s.Value.Value is an int and the int has the value > 9, output value is (int)s.Value.Value
+```
+
+##### List pattern
+
+See [List pattern](https://github.com/dotnet/csharpstandard/blob/6156604067898c974df203083b476dfb210a29ba/standard/patterns.md#list-pattern-new-clause-list-pattern).
+
+Underlying union value is not unwrapped.
+
+##### Logical pattern
+
+See [Logical pattern](https://github.com/dotnet/csharpstandard/blob/6156604067898c974df203083b476dfb210a29ba/standard/patterns.md#11210-logical-pattern).
+```ANTLR
+logical_pattern
+    : disjunctive_pattern
+    ;
+
+disjunctive_pattern
+    : disjunctive_pattern 'or' conjunctive_pattern
+    | conjunctive_pattern
+    ;
+
+conjunctive_pattern
+    : conjunctive_pattern 'and' negated_pattern
+    | negated_pattern
+    ;
+
+negated_pattern
+    : 'not' negated_pattern
+    | primary_pattern
+    ;
+```
+
+For a *negated_pattern* the *negated_pattern* is applied to the same input value and then the result is negated.
+The output value of a *negated_pattern* is its input value.
+
+In an `and` pattern, the *input value* of the left pattern is the *input value* of the `and`.
+The *input value* of the right pattern is the *output value* of the left pattern of the `and`.
+The *output value* of an `and` pattern is the *output value* of its right pattern.
+
+In an `or` pattern, the *input value* of the left pattern is the *input value* of the `or`.
+The *input value* of the right pattern is the *input value* of the `or`.
+The *output value* of an `or` pattern is its *input value*, the *narrowed type* is the common type
+of the *narrowed type* for that *value source* of the subpatterns if such a common type exists.
+Note that union instance unwrapping is changing the *value source*. 
+
+``` c#
+union Pet(Cat, Dog);
+
 GetPet() switch
 {
     var pet and not null    => ... // 'var pet' applies to the incoming 'Pet' as does 'not' and 'null' to its 'Value'
@@ -328,41 +653,33 @@ GetPet() switch
 }
 ```
 
-*Note:* This rule means that `GetPet() is Pet pet` will likely not succeed, as `Pet` is applied to the _contents_, not to the `Pet` union itself.
+Assuming that `Pet` is a class union and `I1` is an interface with a property `Name` of type string:
+``` c#
+Pet p = GetPet();
 
-*Note:* The reason for the different treatment of unconditional `var` pattern (as well as `_`, which is essentially a shorthand for `var _`) is an assumption that their use is qualitatively different from other patterns. `var` patterns are used simply to name the value being matched against, oftentimes in nested patterns, such as `PetOwner{ Pet: var pet }`. Here, the helpful semantics is for `pet` to retain the union type `Pet`, instead of the `Value` property being dereferenced to a useless `object?` type.
-
-If the incoming value is a class type, then the `null` pattern will succeed regardless of whether the union value itself is `null` or its contained value is `null`:
-
-```csharp
-if (result is null) { ... } // if (result == null || result.Value == null)
+// The left pattern is true when
+// - p implements I1, or
+// - when p doesn't implement I1 and p.Value implements I1
+// The output value for the left pattern is either (I1)p or (I1)p.Value,
+// which also serves as in input value for the right pattern.
+// The right pattern is true when I1.Name is "Fido" for its input value.
+// The output value for the entire `and` pattern is either (I1)p or (I1)p.Value.
+p is I1 and { Name: "Fido" }
 ```
 
-Other union matching patterns will succeed only when the union value itself is not `null`.
-```csharp
-if (result is 1) { ... } // if (result != null && result.Value is 1)
+``` c#
+union StringOrInt(string, int);
+
+GetStringOrInt() switch
+{
+    1 or 2 => ...   // '1' applies to the incoming 'StringOrInt''s `Value`
+                    // '2' also applies to the incoming 'StringOrInt''s `Value
+                    // The output value for `or` pattern is the incoming 'StringOrInt' instance
+    3 or "a" => ... // '3' applies to the incoming 'StringOrInt''s `Value`
+                    // "a" also applies to the incoming 'StringOrInt''s `Value
+                    // The output value for `or` pattern is the incoming 'StringOrInt' instance
+}
 ```
-
-Similarly, if the incoming value is a nullable value type (wrapping a struct union type), then the `null` pattern will succeed 
-regardless of whether the incoming value itself is `null` or its contained value is `null`:
-
-```csharp
-if (result is null) { ... } // if (result.HasValue == false || result.GetValueOrDefault().Value == null)
-```
-
-Other union matching patterns will succeed only when the the incoming value itself is not `null`.
-```csharp
-if (result is 1) { ... } // if (result.HasValue && result.GetValueOrDefault().Value is 1)
-```
-
-The compiler will prefer implementing pattern behavior by means of members prescribed by the non-boxing access pattern. While it is free to do any optimization within the bounds of the well-formedness rules, the following are the minimum set guaranteed to be applied:
-
-* For a pattern that implies checking for a specific type `T`, if a `TryGetValue(S value)` method is available, and there is an identity, or implicit reference/boxing conversion from `T` to `S`, then that method is used to obtain the value. The pattern is then applied to that value. If there is more than one such method, then any where the conversion from `T` to `S` is not a boxing conversion is preferred if available. If there is still more than one method, one is chosen in an implementation-defined manner.
-* Otherwise, for a pattern that implies checking for `null`, if a `HasValue` property is available, that property is used to check if the union value is null.
-* Otherwise, the pattern is applied to the result of accessing the `Value` property on the incoming union.
-
-[The is-type operator](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/expressions.md#1214121-the-is-type-operator) applied to a union type
-has the same meaning as a type pattern applied to the union type.
 
 #### Union exhaustiveness
 
