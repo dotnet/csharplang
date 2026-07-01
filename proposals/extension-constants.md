@@ -119,10 +119,13 @@ _ = object.Member; // ambiguity
 ```
 
 ```cs
-public static class E
+public static class E1
 {
     extension(object) { public const int Member = 1; }
-    extension(string) { public const int Member = 2; }
+}
+public static class E2
+{
+    extension(string) { public static int Member => 2; }
 }
 
 _ = object.Member; // 1
@@ -131,7 +134,7 @@ _ = string.Member; // 2; extension(string) is better than extension(object)
 
 ### Constant-expression contexts
 
-Because extension constants are constants (not properties), they are valid in constant-expression contexts where ordinary constants are valid, for example:
+Because extension constants are constants, they are valid in constant-expression contexts where ordinary constants are valid, for example:
 
 - attribute arguments,
 - `const` initializers,
@@ -143,9 +146,7 @@ Because extension constants are constants (not properties), they are valid in co
 
 Extension constants follow the extension-member lowering model by being emitted on the synthesized extension marker type corresponding to the extension block. A corresponding constant field is also emitted on the enclosing static class, enabling the enclosing-class disambiguation form (`E.Member`).
 
-This is appropriate because constants are compile-time values: consumers substitute the constant value during compilation, so no runtime implementation body is required.
-
-The metadata encoding of the constant on the marker type is consistent with normal constants: a static literal field with constant value metadata (for non-`decimal` types) or a static field with the appropriate decimal constant attribute (for `decimal` types).
+The metadata encoding of the constant is consistent with normal constants: a static literal field with constant value metadata (for non-`decimal` types) or a static field with the appropriate decimal constant attribute (for `decimal` types).
 
 ## References
 
