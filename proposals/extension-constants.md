@@ -136,8 +136,8 @@ public static class E2
     extension(string) { public const int Member = 2; }
 }
 
-_ = object.Member; // 1
-_ = string.Member; // 2; extension(string) is better than extension(object)
+_ = object.Member; // E1.Member
+_ = string.Member; // E2.Member, extension(string) is better than extension(object)
 ```
 
 ### Constant-expression contexts
