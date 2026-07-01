@@ -119,13 +119,21 @@ _ = object.Member; // ambiguity
 ```
 
 ```cs
+public static class E
+{
+    extension(object) { public const int Member = 1; }
+    extension(string) { public const int Member = 2; } // error: cannot have two `E.Member` members
+}
+```
+
+```cs
 public static class E1
 {
     extension(object) { public const int Member = 1; }
 }
 public static class E2
 {
-    extension(string) { public static int Member => 2; }
+    extension(string) { public const int Member = 2; }
 }
 
 _ = object.Member; // 1
