@@ -170,6 +170,37 @@ Unlike other changes to `unsafe` rules which are relaxations, this is a tighteni
 
 Note that a `stackalloc` of a managed type remains an error.
 
+#### `await` in `unsafe` contexts
+
+`await` expressions are allowed in `unsafe` contexts. This permits an async method to directly await a *requires-unsafe* operation without first spilling the awaitable to a temporary variable:
+
+```cs
+async Task M()
+{
+    unsafe
+    {
+        await DoUnsafeAsync();
+    }
+}
+
+unsafe Task DoUnsafeAsync() => ...;
+```
+
+The `unsafe` context still represents the programmer's manual safety audit boundary. If a pointer, function pointer, or other unsafe value is kept live across an `await`, the language does not attempt to prove that the use is safe after resumption; that responsibility remains with the `unsafe` code author. This is consistent with the rest of unsafe code, which permits operations such as storing pointers in fields or using pointers after their referent's lifetime has ended.
+
+However, `await` remains disallowed inside a `fixed` statement. A `fixed` statement pins a moveable variable for the duration of the statement, and allowing suspension while the statement is active would require the pinning lifetime to span an async suspension point.
+
+The corresponding csharpstandard update is in [§15.15.1 Async functions > General][async-funcs-general]. Throughout this section, ~~strikethrough~~ indicates text being removed from the existing specification, and **bold** indicates text being added.
+
+> It is a compile-time error for the formal parameter list of an async function to specify
+> any `in`, `out`, or `ref` parameters, or any parameter of a `ref struct` type.
+>
+> It is a compile-time error for an unsafe context ([§24.2][unsafe-context-spec]) to contain
+> ~~an `await` expression ([§12.9.8][await-expressions]) or~~ a `yield return` statement ([§13.15][yield-statement]).
+>
+> **It is a compile-time error for a `fixed` statement ([§24.7][fixed-statement]) to contain
+> an `await` expression ([§12.9.8][await-expressions]).**
+
 #### `sizeof`
 
 For certain predefined types, `sizeof` has always been constant and safe ([§12.8.19][sizeof-const]) and that remains unchanged.
@@ -328,7 +359,7 @@ We do not need to add support to Visual Basic for *requires-unsafe* members sinc
 
 ### `unsafe` expressions
 
-An `unsafe` expression introduces a minimal `unsafe` context for evaluating a single expression. It is useful in situations where an `unsafe` block would unnecessarily widen the `unsafe` scope, or where `unsafe` blocks cannot be used syntactically (such as in `catch` filters, field initializers, constructor initializers, and the operand position of `await`).
+An `unsafe` expression introduces a minimal `unsafe` context for evaluating a single expression. It is useful in situations where an `unsafe` block would unnecessarily widen the `unsafe` scope, or where `unsafe` blocks cannot be used syntactically (such as in `catch` filters, field initializers, and constructor initializers).
 
 #### Syntax
 
@@ -350,24 +381,24 @@ The `unsafe` context established by an `unsafe_expression` does not extend beyon
 
 #### Motivation and migration examples
 
-Several syntactic positions do not admit `unsafe` blocks at all, yet may contain subexpressions that call *requires-unsafe* members. Without `unsafe` expressions, migrating such code requires extracting the unsafe sub-expression into a helper local function or a temporary variable, which obscures intent and increases verbosity.
+Several syntactic positions do not admit `unsafe` blocks at all, yet may contain subexpressions that call *requires-unsafe* members. Without `unsafe` expressions, migrating such code requires extracting the unsafe sub-expression into a helper local function or a temporary variable, or using a broader `unsafe` block than necessary, which obscures intent and increases verbosity.
 
-**`await` on a *requires-unsafe* method.** An `await` expression cannot appear inside an `unsafe` block. When the method being awaited becomes *requires-unsafe*, a temporary variable is required to hold the task before it can be awaited:
+**`await` on a *requires-unsafe* method.** When the method being awaited becomes *requires-unsafe*, an `unsafe` block can be used around the whole `await`, but an `unsafe` expression can keep the unsafe context limited to the operation that requires it:
 
 ```cs
-// Without unsafe expressions: must spill to a temporary
-Task t;
-// SAFETY: Discharges obligations because reasons
-unsafe { t = DoWork(); }
-await t;
+// Without unsafe expressions: the unsafe context includes the await expression
+unsafe
+{
+    // SAFETY: Discharges obligations because reasons
+    await DoWork();
+}
 
-// With unsafe expressions: the unsafe context wraps only the call;
-// the await remains outside it and is fully legal
+// With unsafe expressions: the unsafe context wraps only the call
 // SAFETY: Discharges obligations because reasons
 await unsafe(DoWork());
 ```
 
-**Catch filters.** The `when` filter of a `catch` clause is an expression, not a statement body. An `unsafe` block can only surround statements, so there is no place to put one around just the filter expression. Additionally, if the `try` body contains an `await` expression, an `unsafe` block cannot surround the entire `try`/`catch` statement either—`await` is not permitted inside an `unsafe` block. When a method used in a filter becomes *requires-unsafe*, the only alternative without `unsafe` expressions is a helper:
+**Catch filters.** The `when` filter of a `catch` clause is an expression, not a statement body. An `unsafe` block can only surround statements, so there is no place to put one around just the filter expression. When a method used in a filter becomes *requires-unsafe*, the only alternative without `unsafe` expressions is a helper:
 
 ```cs
 // Without unsafe expressions: must spill to a local function
@@ -569,11 +600,15 @@ Console.WriteLine(result);
 
 Answer: [yes](https://github.com/dotnet/csharplang/blob/main/meetings/2026/LDM-2026-05-27.md#unsafe-expressions). See the [detailed design section](#unsafe-expressions).
 
-### More `unsafe` contexts and relaxations
+### (answered) `await` in `unsafe` contexts
 
-Should we relax more restrictions around `unsafe` and pointer parameters in iterators and async methods?
-Especially allowing `await UnsafeMethod()` would be useful because now users have to rewrite that to `Task t; unsafe { t = UnsafeMethod(); } await t;`.
+Should we relax restrictions around `await` expressions in `unsafe` contexts?
+Especially allowing `await UnsafeMethod()` is useful because otherwise users have to rewrite that to `Task t; unsafe { t = UnsafeMethod(); } await t;`.
 See [ref/unsafe in iterators/async](./csharp-13.0/ref-unsafe-in-iterators-async.md#alternatives) for more details.
+
+Answer: yes. See [`await` in `unsafe` contexts](#await-in-unsafe-contexts).
+
+### More `unsafe` contexts and relaxations
 
 Should we also allow `&UnsafeMethod` in safe context? Today as the proposal stands, this requires `unsafe` context if the method is marked as `unsafe`.
 But since we are just getting its address, which will need `unsafe` context when dereferenced/called, we could allow the address-of itself in a safe context.
@@ -1016,6 +1051,7 @@ Should we have a blanket warning when an opted-in assembly references a non-opte
 
 [unsafe-code]: https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/expressions.md#128-primary-expressions
 [sizeof-const]: https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/expressions.md#12819-the-sizeof-operator
+[await-expressions]: https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/expressions.md#1298-await-expressions
 [unsafe-context-spec]: https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/unsafe-code.md#242-unsafe-contexts
 [pointer-types-spec]: https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/unsafe-code.md#243-pointer-types
 [fixed-and-moveable-variables]: https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/unsafe-code.md#244-fixed-and-moveable-variables
@@ -1029,4 +1065,6 @@ Should we have a blanket warning when an opted-in assembly references a non-opte
 [fixed-statement]: https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/unsafe-code.md#247-the-fixed-statement
 [fixed-size-buffer-declarations]: https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/unsafe-code.md#2482-fixed-size-buffer-declarations
 [stack-allocation-spec]: https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/unsafe-code.md#249-stack-allocation
+[async-funcs-general]: https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/classes.md#15151-general
+[yield-statement]: https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/statements.md#1315-the-yield-statement
 [csharp-11-unsafe-changes]: https://github.com/dotnet/csharplang/blob/6a0a9b281aa0c36159117ece733d487af0ca23a1/proposals/csharp-11.0/low-level-struct-improvements.md#changes-in-unsafe-context
