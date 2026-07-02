@@ -23,15 +23,17 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ## Schedule
 
-### Wed Jul 1, 2026
-
-- [Unsafe in `async` methods](https://github.com/dotnet/csharplang/pull/10235) (333fred, jjonescz)
-- [Extension constants](https://github.com/dotnet/csharplang/blob/main/proposals/extension-constants.md) (Julien)
-- [Partial extension members](https://github.com/dotnet/csharplang/pull/10126) (Julien)
-
 ### Wed Jun 10, 2026
 
 ## C# Language Design Notes for 2026
+
+### Wed Jul 1, 2026
+
+[C# Language Design Meeting for July 1, 2026](https://github.com/dotnet/csharplang/blob/main/meetings/2026/LDM-2026-07-01.md)
+
+- Unsafe awaits
+- Extension constants
+- Partial extension members
 
 ### Mon Jun 8, 2026
 
