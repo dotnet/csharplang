@@ -31,11 +31,18 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ### Wed Jun 10, 2026
 
+## C# Language Design Notes for 2026
+
 ### Mon Jun 8, 2026
 
-- [ Dictionary expressions: Open questions](https://github.com/dotnet/csharplang/blob/main/proposals/dictionary-expressions.md#open-questions) (333fred)
+[C# Language Design Meeting for June 8, 2026](https://github.com/dotnet/csharplang/blob/main/meetings/2026/LDM-2026-06-08.md)
 
-## C# Language Design Notes for 2026
+- Dictionary expressions
+    - IReadOnlyDictionary comparer binding
+    - KeyValuePair variance in params
+- Unions
+    - Union pattern target for custom unions
+- Labeled break and continue
 
 ### Wed May 27, 2026
 
