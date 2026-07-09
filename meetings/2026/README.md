@@ -23,7 +23,23 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ## Schedule
 
-### Wed Jun 10, 2026
+### Wed Sep 2, 2026
+
+### Wed Aug 26, 2026
+
+### Wed Aug 19, 2026
+
+### Wed Aug 12, 2026
+
+### Wed Aug 5, 2026
+
+### Wed Jul 22, 2026
+
+- C# 16 Priorities (Mads)
+
+### Wed Jul 15, 2026
+
+- Reactor (Chris Anderson)
 
 ## C# Language Design Notes for 2026
 
