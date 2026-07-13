@@ -154,7 +154,7 @@ Because extension constants are constants, they are valid in constant-expression
 
 Extension constants follow the extension-member lowering model by being emitted on the synthesized extension marker type corresponding to the extension block. A corresponding constant field is also emitted on the enclosing static class, enabling the enclosing-class disambiguation form (`E.Member`).
 
-The metadata encoding of the constant is consistent with normal constants: a static literal field with constant value metadata (for non-`decimal` types) or a static field with the appropriate decimal constant attribute (for `decimal` types).
+The metadata encoding of the constant is consistent with normal constants: a static literal field with constant value metadata (for non-`decimal` types) or a static readonly field with the appropriate decimal constant attribute (for `decimal` types).
 
 ## References
 
