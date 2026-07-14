@@ -39,7 +39,7 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ### Wed Jul 15, 2026
 
-- Reactor (Chris Anderson)
+- [Reactor](https://github.com/microsoft/microsoft-ui-reactor/blob/main/docs/specs/019-collection-initializer-api-exploration.md) (Chris Anderson)
 
 ## C# Language Design Notes for 2026
 
