@@ -745,6 +745,8 @@ namespace System.Runtime.CompilerServices
 }
 ```
 
+Beyond its use by the compiler, `[module: RefSafetyRules(11)]` also carries guarantees about the emitted IL that the runtime is permitted to rely on. For more information see the ECMA-335 augment [III.1.7.7 Opt-in restrictions](https://github.com/dotnet/runtime/blob/main/docs/design/specs/Ecma-335-Augments.md).
+
 ### Safe fixed size buffers
 
 Safe fixed size buffers was not delivered in C# 11. This feature may be implemented in a future version of C#.
