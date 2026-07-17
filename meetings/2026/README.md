@@ -37,11 +37,13 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 - C# 16 Priorities (Mads)
 
+## C# Language Design Notes for 2026
+
 ### Wed Jul 15, 2026
 
-- [Reactor](https://github.com/microsoft/microsoft-ui-reactor/blob/main/docs/specs/019-collection-initializer-api-exploration.md) (Chris Anderson)
+[C# Language Design Meeting for July 15th, 2026](https://github.com/dotnet/csharplang/blob/main/meetings/2026/LDM-2026-07-15.md)
 
-## C# Language Design Notes for 2026
+- Declarative UI construction
 
 ### Wed Jul 1, 2026
 
