@@ -4,7 +4,6 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ## Schedule ASAP
 
-- [Unsafe evolution: `safe` on non-`extern` members](https://github.com/dotnet/csharplang/blob/main/proposals/unsafe-evolution.md#allow-safe-on-non-extern-members-libraryimport)
 
 ## Schedule when convenient
 
@@ -37,6 +36,7 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ### Wed Jul 22, 2026
 
+- [Unsafe evolution: `safe` on non-`extern` members](https://github.com/dotnet/csharplang/blob/main/proposals/unsafe-evolution.md#allow-safe-on-non-extern-members-libraryimport)
 - C# 16 Priorities (Mads)
 
 ## C# Language Design Notes for 2026
