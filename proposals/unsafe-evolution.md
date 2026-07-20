@@ -856,6 +856,63 @@ We may run into situations where adding the extra wrapper is difficult due to ru
 
 Answer: `extern` members must be marked either `unsafe` or `safe` (we add a new keyword for it, but can revisit that before the feature ships, based on feedback).
 
+### Allow `safe` on non-`extern` members (`LibraryImport`)
+
+This is not the first time we have considered this question.
+The working group originally discussed [`extern` and `LibraryImport` members together](https://github.com/dotnet/csharplang/blob/main/meetings/working-groups/unsafe-evolution/unsafe-simple-core-model.md#extern-and-libraryimport-members).
+LDM then considered whether members with `unsafe` blocks or pointers in their signatures should be required to carry an explicit `safe` marker, and
+[decided](https://github.com/dotnet/csharplang/blob/main/meetings/2026/LDM-2026-04-13.md#safe-markers-for-members-with-internal-unsafe-code)
+that analyzable method bodies do not need this ceremony: unlike an `extern` boundary, their implementations can be inspected to determine whether they discharge their safety obligations.
+Consequently, `safe` is currently permitted only where an explicit safety choice is required, such as on `extern` members and fields in explicit layout.
+
+The libraries team has since provided new data from [`LibraryImport` source generation](https://github.com/dotnet/roslyn/issues/84555) that warrants revisiting the question.
+`LibraryImport` is the preferred modern form of P/Invoke, but whether its generated partial implementation is `extern` is an implementation detail.
+For a blittable signature, the generator can emit a direct `extern` implementation (examples simplified):
+
+```cs
+// User code
+[LibraryImport("kernel32.dll")]
+static partial int Blit(int x);
+
+// Generated code
+[DllImport("kernel32.dll", EntryPoint = "Blit", ExactSpelling = true)]
+static extern partial int Blit(int x);
+```
+
+The generated `extern` declaration must be marked `safe` or `unsafe`, and partial declarations must agree on their safety modifier.
+The user-authored declaration therefore needs the same modifier.
+
+For a signature requiring marshalling, the generator instead emits a managed wrapper around a private `extern`:
+
+```cs
+// User code
+[LibraryImport("kernel32.dll")]
+static partial int NotBlit(ref int x);
+
+// Generated code
+static partial int NotBlit(ref int x)
+{
+    fixed (int* xNative = &x)
+    {
+        return __PInvoke(xNative);
+    }
+
+    [DllImport("kernel32.dll", EntryPoint = "NotBlit", ExactSpelling = true)]
+    static extern unsafe int __PInvoke(int* xNative);
+}
+```
+
+Here the user-facing partial method is not `extern`, so `safe` is not permitted.
+The user's available syntax therefore depends on which implementation shape the generator chooses, even though that choice is not part of the `LibraryImport` contract and may change as the generator evolves.
+Always generating a wrapper would make the syntax consistent, but would pessimize signatures that can be emitted directly and would create a user-experience difference between `LibraryImport` and `DllImport`.
+
+Should `safe` be permitted on every declaration where `unsafe` can mark the member *requires-unsafe*, even when it is not required?
+Alternatively, should the language provide a narrower rule for partial members implemented by source generators?
+
+**Working Group Recommendation**: Permit `safe` as a declaration modifier anywhere that `unsafe` can mark a declaration *requires-unsafe*.
+Where it is not required, `safe` is a no-op.
+Scenarios that need to require an explicit modifier when the language does not, such as a `LibraryImport` that generates a non-`extern` wrapper, will need an analyzer to enforce the presence of `safe` or `unsafe`.
+
 ### (answered) `unsafe` context defaults in members
 
 We could consider not automatically making the entire body of an `unsafe` method an `unsafe` context. Rust did this in [RFC 2585](https://github.com/rust-lang/rfcs/blob/master/text/2585-unsafe-block-in-unsafe-fn.md),
