@@ -42,11 +42,13 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 - [C# 16 Priorities](https://github.com/dotnet/csharplang/discussions/10276) (Mads)
 
+## C# Language Design Notes for 2026
+
 ### Wed Jul 22, 2026
 
-- [Unsafe evolution: `safe` on non-`extern` members](https://github.com/dotnet/csharplang/blob/main/proposals/unsafe-evolution.md#allow-safe-on-non-extern-members-libraryimport)
+[C# Language Design Meeting for July 22nd, 2026](https://github.com/dotnet/csharplang/blob/main/meetings/2026/LDM-2026-07-22.md)
 
-## C# Language Design Notes for 2026
+- Allowing `safe` on non-`extern` members
 
 ### Wed Jul 15, 2026
 
