@@ -24,9 +24,15 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ## Schedule
 
-### Wed Sep 2, 2026
+### Wed Sep 30, 2026
 
-### Wed Aug 26, 2026
+### Mon Sep 28, 2026
+
+### Wed Sep 23, 2026
+
+### Mon Sep 21, 2026
+
+### Wed Sep 9, 2026
 
 ### Wed Aug 19, 2026
 
@@ -34,10 +40,11 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ### Wed Aug 5, 2026
 
+- [C# 16 Priorities](https://github.com/dotnet/csharplang/discussions/10276) (Mads)
+
 ### Wed Jul 22, 2026
 
 - [Unsafe evolution: `safe` on non-`extern` members](https://github.com/dotnet/csharplang/blob/main/proposals/unsafe-evolution.md#allow-safe-on-non-extern-members-libraryimport)
-- [C# 16 Priorities](https://github.com/dotnet/csharplang/discussions/10276) (Mads)
 
 ## C# Language Design Notes for 2026
 
