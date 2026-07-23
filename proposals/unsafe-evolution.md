@@ -78,11 +78,23 @@ Terminology: we call members *requires-unsafe* (previously known as *caller-unsa
 
 This proposal introduces:
 
-- a new `safe` contextual keyword that can be applied to [`extern` members](#extern) and [fields in explicit layout](#fields),
+- a new `safe` contextual keyword, detailed [below](#safe-keyword),
 - and `unsafe` expressions (`unsafe(expression)`), detailed in [unsafe expressions](#unsafe-expressions).
 
 This new syntax is available under new LangVersion, but regardless of [opt-in](#metadata), under the premise that
 we are trying to make it so that anything you are required to do when you are opted in, you are allowed to do before you opt in.
+
+#### `safe` keyword
+
+The `safe` modifier can be applied to all declarations which allow `unsafe` to mark them as *requires-unsafe*.
+It is disallowed to apply both the `safe` and `unsafe` modifier on the same declaration.
+Like `unsafe` modifier, the `safe` modifier must match on both parts of partial declarations.
+The compiler requires an explicit `safe` or `unsafe` modifier on [`extern` members](#extern) and [fields in explicit layout](#fields).
+Allowing `safe` even on declarations where it is not required (and hence has no effect for the compiler)
+is motivated by source generators, e.g., [LibraryImport](#answered-allow-safe-on-non-extern-members-libraryimport).
+
+The `safe` modifier only marks the declaration as *not* *requires-unsafe*, it does not introduce a safe context.
+There is also no `safe` block or expression form.
 
 ### Existing `unsafe` rules
 
@@ -169,6 +181,9 @@ Unlike other changes to `unsafe` rules which are relaxations, this is a tighteni
 > This means that assigning a `stackalloc` to a pointer is _always_ safe, regardless of context.
 
 Note that a `stackalloc` of a managed type remains an error.
+
+We might need to explicitly mention in the language spec that `stackalloc` pointers don't survive `await`.
+Before this feature, pointers were disallowed in `async` methods, so this wasn't observable before.
 
 #### `await` in `unsafe` contexts
 
@@ -606,14 +621,19 @@ Should we relax restrictions around `await` expressions in `unsafe` contexts?
 Especially allowing `await UnsafeMethod()` is useful because otherwise users have to rewrite that to `Task t; unsafe { t = UnsafeMethod(); } await t;`.
 See [ref/unsafe in iterators/async](./csharp-13.0/ref-unsafe-in-iterators-async.md#alternatives) for more details.
 
+- [LDM 2026-05-27](https://github.com/dotnet/csharplang/blob/main/meetings/2026/LDM-2026-05-27.md#await-in-unsafe-blocks): `await` in `unsafe` needs a concrete proposal
+- [LDM 2026-07-01](https://github.com/dotnet/csharplang/blob/main/meetings/2026/LDM-2026-07-01.md#unsafe-awaits): allow `await` in `unsafe`
+
 Answer: yes. See [`await` in `unsafe` contexts](#await-in-unsafe-contexts).
 
 ### More `unsafe` contexts and relaxations
 
+Following up on [`await` in `unsafe` contexts](#answered-await-in-unsafe-contexts), should we also allow `yield` in `unsafe` contexts,
+and pointer parameters for async and iterator methods?
+See [ref/unsafe in iterators/async](./csharp-13.0/ref-unsafe-in-iterators-async.md#alternatives) for more details.
+
 Should we also allow `&UnsafeMethod` in safe context? Today as the proposal stands, this requires `unsafe` context if the method is marked as `unsafe`.
 But since we are just getting its address, which will need `unsafe` context when dereferenced/called, we could allow the address-of itself in a safe context.
-
-- [LDM 2026-05-27](https://github.com/dotnet/csharplang/blob/main/meetings/2026/LDM-2026-05-27.md#await-in-unsafe-blocks): `await` in `unsafe` needs a concrete proposal
 
 ### Unsafe relaxations gated on LangVersion
 
@@ -891,7 +911,7 @@ We may run into situations where adding the extra wrapper is difficult due to ru
 
 Answer: `extern` members must be marked either `unsafe` or `safe` (we add a new keyword for it, but can revisit that before the feature ships, based on feedback).
 
-### Allow `safe` on non-`extern` members (`LibraryImport`)
+### (answered) Allow `safe` on non-`extern` members (`LibraryImport`)
 
 This is not the first time we have considered this question.
 The working group originally discussed [`extern` and `LibraryImport` members together](https://github.com/dotnet/csharplang/blob/main/meetings/working-groups/unsafe-evolution/unsafe-simple-core-model.md#extern-and-libraryimport-members).
@@ -947,6 +967,8 @@ Alternatively, should the language provide a narrower rule for partial members i
 **Working Group Recommendation**: Permit `safe` as a declaration modifier anywhere that `unsafe` can mark a declaration *requires-unsafe*.
 Where it is not required, `safe` is a no-op.
 Scenarios that need to require an explicit modifier when the language does not, such as a `LibraryImport` that generates a non-`extern` wrapper, will need an analyzer to enforce the presence of `safe` or `unsafe`.
+
+- [LDM 2026-07-22](https://github.com/dotnet/csharplang/blob/main/meetings/2026/LDM-2026-07-22.md#allowing-safe-on-non-extern-members): allow `safe` as a declaration modifier everywhere that `unsafe` can mark a declaration as *requires-unsafe*
 
 ### (answered) `unsafe` context defaults in members
 
