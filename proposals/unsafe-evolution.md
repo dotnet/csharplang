@@ -845,6 +845,16 @@ Otherwise, the user would be forced to expand these auto-declarations into manua
 What about a primary constructor parameter which gets a backing field?
 Both `safe` and `unsafe` modifier is currently disallowed on a parameter declaration.
 
+### Synthesized members
+
+When a user-declared member is marked as *requires-unsafe*, should the associated compiler-synthesized members
+that are unspeakable but could be called via reflection (like `MoveNext` for iterators)
+be also marked with `[RequiresUnsafe]` attribute in metadata?
+
+Note that this does not apply to property and event accessors
+where we already exactly [specify](#unsafe-modifiers-and-contexts) when they are *requires-unsafe*
+and hence they get the `[RequiresUnsafe]` attribute in metadata correspondingly.
+
 ### `[Out]` and `[SkipLocalsInit]`
 
 Since for example VB doesn't guarantee that `[Out]` parameters are initialized, in combination with `[SkipLocalsInit]`, calling such parameters could be considered `unsafe` in C#.
