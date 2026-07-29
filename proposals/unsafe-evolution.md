@@ -655,45 +655,6 @@ We could consider not automatically making the entire lexical scope of an `unsaf
 
 Answer: `unsafe` on a type is an error (can be revisited based on feedback) under the updated rules.
 
-### `unsafe` on accessors
-
-We newly allow `unsafe` on property accessors but not on event accessors, in line with other pre-existing modifiers.
-This also means that `unsafe` on a property is just a shortcut for `unsafe` on its accessors.
-But at the same time, `partial`s require the `unsafe` modifiers to match:
-
-```cs
-partial class C
-{
-    unsafe partial int P { get; set; } // effectively both `get` and `set` are `unsafe` here
-    unsafe partial int P { unsafe get => 0; set { } } // still an error: `unsafe` on `get` doesn't match
-}
-
-// similar to this pre-existing behavior:
-unsafe partial class D
-{
-    unsafe partial void M();
-}
-unsafe partial class D
-{
-    partial void M() { } // error about missing `unsafe`
-}
-```
-
-Maybe it should behave similarly to `readonly`, i.e., disallow `unsafe` on both the property and its accessor at the same time:
-
-```cs
-partial struct S
-{
-    readonly partial int P { get; set; }
-
-    // error: Both partial member declarations must be readonly or neither may be readonly
-    partial int P { readonly get => 0; set { } }
-
-    // error: Cannot specify 'readonly' modifiers on both property or indexer 'S.P2' and its accessor. Remove one of them.
-    readonly int P2 { readonly get => 0; set { } }
-}
-```
-
 ### (answered) Allow suppressing *requires-unsafe* errors in edge case scenarios
 
 How should we allow suppressing *requires-unsafe* errors in the following scenarios?
