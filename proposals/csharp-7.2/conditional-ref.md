@@ -1,5 +1,7 @@
 # Conditional ref expressions
 
+Champion issue: <https://github.com/dotnet/csharplang/issues/223>
+
 The pattern of binding a ref variable to one or another expression conditionally is not currently expressible in C#.
 
 The typical workaround is to introduce a method like:

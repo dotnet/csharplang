@@ -1,9 +1,8 @@
-# Async Streams
+﻿# Async Streams
 
-* [x] Proposed
-* [x] Prototype
-* [ ] Implementation
-* [ ] Specification
+[!INCLUDE[Specletdisclaimer](../speclet-disclaimer.md)]
+
+Champion issue: <https://github.com/dotnet/csharplang/issues/43>
 
 ## Summary
 [summary]: #summary
@@ -33,12 +32,12 @@ namespace System
     }
 }
 ```
-As with `Dispose`, invoking `DisposeAsync` multiple times is acceptable, and subsequent invocations after the first should be treated as nops, returning a synchronously completed successful task (`DisposeAsync` need not be thread-safe, though, and need not support concurrent invocation).  Further, types may implement both `IDisposable` and `IAsyncDisposable`, and if they do, it's similarly acceptable to invoke `Dispose` and then `DisposeAsync` or vice versa, but only the first should be meaningful and subsequent invocations of either should be a nop.  As such, if a type does implement both, consumers are encouraged to call once and only once the more relevant method based on the context, `Dispose` in synchronous contexts and `DisposeAsync` in asynchronous ones.
+As with `Dispose`, invoking `DisposeAsync` multiple times is acceptable, and subsequent invocations after the first should be treated as no-ops, returning a synchronously completed successful task (`DisposeAsync` need not be thread-safe, though, and need not support concurrent invocation).  Further, types may implement both `IDisposable` and `IAsyncDisposable`, and if they do, it's similarly acceptable to invoke `Dispose` and then `DisposeAsync` or vice versa, but only the first should be meaningful and subsequent invocations of either should be a nop.  As such, if a type does implement both, consumers are encouraged to call once and only once the more relevant method based on the context, `Dispose` in synchronous contexts and `DisposeAsync` in asynchronous ones.
 
-(I'm leaving discussion of how `IAsyncDisposable` interacts with `using` to a separate discussion.  And coverage of how it interacts with `foreach` is handled later in this proposal.)
+(How `IAsyncDisposable` interacts with `using` is a separate discussion.  And coverage of how it interacts with `foreach` is handled later in this proposal.)
 
 Alternatives considered:
-- _`DisposeAsync` accepting a `CancellationToken`_: while in theory it makes sense that anything async can be canceled, disposal is about cleanup, closing things out, free'ing resources, etc., which is generally not something that should be canceled; cleanup is still important for work that's canceled.  The same `CancellationToken` that caused the actual work to be canceled would typically be the same token passed to `DisposeAsync`, making `DisposeAsync` worthless because cancellation of the work would cause `DisposeAsync` to be a nop.  If someone wants to avoid being blocked waiting for disposal, they can avoid waiting on the resulting `ValueTask`, or wait on it only for some period of time.
+- _`DisposeAsync` accepting a `CancellationToken`_: while in theory it makes sense that anything async can be canceled, disposal is about cleanup, closing things out, free'ing resources, etc., which is generally not something that should be canceled; cleanup is still important for work that's canceled.  The same `CancellationToken` that caused the actual work to be canceled would typically be the same token passed to `DisposeAsync`, making `DisposeAsync` worthless because cancellation of the work would cause `DisposeAsync` to be a no-op.  If someone wants to avoid being blocked waiting for disposal, they can avoid waiting on the resulting `ValueTask`, or wait on it only for some period of time.
 - _`DisposeAsync` returning a `Task`_: Now that a non-generic `ValueTask` exists and can be constructed from an `IValueTaskSource`, returning `ValueTask` from `DisposeAsync` allows an existing object to be reused as the promise representing the eventual async completion of `DisposeAsync`, saving a `Task` allocation in the case where `DisposeAsync` completes asynchronously.
 - _Configuring `DisposeAsync` with a `bool continueOnCapturedContext` (`ConfigureAwait`)_: While there may be issues related to how such a concept is exposed to `using`, `foreach`, and other language constructs that consume this, from an interface perspective it's not actually doing any `await`'ing and there's nothing to configure... consumers of the `ValueTask` can consume it however they wish.
 - _`IAsyncDisposable` inheriting `IDisposable`_:  Since only one or the other should be used, it doesn't make sense to force types to implement both.
@@ -89,6 +88,10 @@ Discarded options considered:
 - _`IAsyncEnumerator<T>` not implementing `IAsyncDisposable`_: We could choose to separate these.  However, doing so complicates certain other areas of the proposal, as code must then be able to deal with the possibility that an enumerator doesn't provide disposal, which makes it difficult to write pattern-based helpers.  Further, it will be common for enumerators to have a need for disposal (e.g. any C# async iterator that has a finally block, most things enumerating data from a network connection, etc.), and if one doesn't, it is simple to implement the method purely as `public ValueTask DisposeAsync() => default(ValueTask);` with minimal additional overhead.
 - _ `IAsyncEnumerator<T> GetAsyncEnumerator()`: No cancellation token parameter.
 
+The following subsection discuss alternatives that weren't chosen.
+
+<details>
+
 #### Viable alternative:
 
 ```csharp
@@ -134,6 +137,8 @@ However, there are non-trivial downsides, including significantly increased comp
 
 Discarded options considered:
 - `ValueTask<bool> WaitForNextAsync(); bool TryGetNext(out T result);`: `out` parameters can't be covariant.  There's also a small impact here (an issue with the try pattern in general) that this likely incurs a runtime write barrier for reference type results.
+
+</details>
 
 #### Cancellation
 
@@ -192,52 +197,78 @@ await foreach (var i in enumerable)
 
 No syntax would be provided that would support using either the async or the sync APIs; the developer must choose based on the syntax used.
 
-Discarded options considered:
-- _`foreach (var i in await enumerable)`_: This is already valid syntax, and changing its meaning would be a breaking change.  This means to `await` the `enumerable`, get back something synchronously iterable from it, and then synchronously iterate through that.
-- _`foreach (var i await in enumerable)`, `foreach (var await i in enumerable)`, `foreach (await var i in enumerable)`_: These all suggest that we're awaiting the next item, but there are other awaits involved in foreach, in particular if the enumerable is an `IAsyncDisposable`, we will be `await`'ing its async disposal.  That await is as the scope of the foreach rather than for each individual element, and thus the `await` keyword deserves to be at the `foreach` level.  Further, having it associated with the `foreach` gives us a way to describe the `foreach` with a different term, e.g. a "await foreach".  But more importantly, there's value in considering `foreach` syntax at the same time as `using` syntax, so that they remain consistent with each other, and `using (await ...)` is already valid syntax.
-- _`foreach await (var i in enumerable)`_
+### Semantics
 
-Still to consider:
-- `foreach` today does not support iterating through an enumerator.  We expect it will be more common to have `IAsyncEnumerator<T>`s handed around, and thus it's tempting to support `await foreach` with both `IAsyncEnumerable<T>` and `IAsyncEnumerator<T>`.  But once we add such support, it introduces the question of whether `IAsyncEnumerator<T>` is a first-class citizen, and whether we need to have overloads of combinators that operate on enumerators in addition to enumerables?    Do we want to encourage methods to return enumerators rather than enumerables? We should continue to discuss this.  If we decide we don't want to support it, we might want to introduce an extension method `public static IAsyncEnumerable<T> AsEnumerable<T>(this IAsyncEnumerator<T> enumerator);` that would allow an enumerator to still be `foreach`'d.  If we decide we do want to support it, we'll need to also decide on whether the `await foreach` would be responsible for calling `DisposeAsync` on the enumerator, and the answer is likely "no, control over disposal should be handled by whoever called `GetEnumerator`."
+The compile-time processing of an `await foreach` statement first determines the ***collection type***, ***enumerator type*** and ***iteration type*** of the expression (very similar to https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/statements.md#1395-the-foreach-statement). This determination proceeds as follows:
 
-### Pattern-based Compilation
+- If the type `X` of *expression* is `dynamic` or an array type, then an error is produced and no further steps are taken.
+- Otherwise, determine whether the type `X` has an appropriate `GetAsyncEnumerator` method:
+  - Perform member lookup on the type `X` with identifier `GetAsyncEnumerator` and no type arguments. If the member lookup does not produce a match, or it produces an ambiguity, or produces a match that is not a method group, check for an enumerable interface as described below.
+  - Perform overload resolution using the resulting method group and an empty argument list. If overload resolution results in no applicable methods, results in an ambiguity, or results in a single best method but that method is either static or not public, check for an enumerable interface as described below.
+  - If the return type `E` of the `GetAsyncEnumerator` method is not a class, struct or interface type, an error is produced and no further steps are taken.
+  - Member lookup is performed on `E` with the identifier `Current` and no type arguments. If the member lookup produces no match, the result is an error, or the result is anything except a public instance property that permits reading, an error is produced and no further steps are taken.
+  - Member lookup is performed on `E` with the identifier `MoveNextAsync` and no type arguments. If the member lookup produces no match, the result is an error, or the result is anything except a method group, an error is produced and no further steps are taken.
+  - Overload resolution is performed on the method group with an empty argument list. If overload resolution results in no applicable methods, results in an ambiguity, or results in a single best method but that method is either static or not public, or its return type is not awaitable into `bool`, an error is produced and no further steps are taken.
+  - The collection type is `X`, the enumerator type is `E`, and the iteration type is the type of the `Current` property.
+- Otherwise, check for an enumerable interface:
+  - If among all the types `Tᵢ` for which there is an implicit conversion from `X` to `IAsyncEnumerable<ᵢ>`, there is a unique type `T` such that `T` is not dynamic and for all the other `Tᵢ` there is an implicit conversion from `IAsyncEnumerable<T>` to `IAsyncEnumerable<Tᵢ>`, then the collection type is the interface `IAsyncEnumerable<T>`, the enumerator type is the interface `IAsyncEnumerator<T>`, and the iteration type is `T`.
+  - Otherwise, if there is more than one such type `T`, then an error is produced and no further steps are taken.
+- Otherwise, an error is produced and no further steps are taken.
 
-The compiler will bind to the pattern-based APIs if they exist, preferring those over using the interface (the pattern may be satisfied with instance methods or extension methods).  The requirements for the pattern are:
-- The enumerable must expose a `GetAsyncEnumerator` method that may be called with no arguments and that returns an enumerator that meets the relevant pattern.
-- The enumerator must expose a `MoveNextAsync` method that may be called with no arguments and that returns something which may be `await`ed and whose `GetResult()` returns a `bool`.
-- The enumerator must also expose `Current` property whose getter returns a `T` representing the kind of data being enumerated.
-- The enumerator may optionally expose a `DisposeAsync` method that may be invoked with no arguments and that returns something that can be `await`ed and whose `GetResult()` returns `void`.
-
-This code:
+The above steps, if successful, unambiguously produce a collection type `C`, enumerator type `E` and iteration type `T`.
 
 ```csharp
-var enumerable = ...;
-await foreach (T item in enumerable)
-{
-   ...
-}
+await foreach (V v in x) «embedded_statement»
 ```
 
-is translated to the equivalent of:
+is then expanded to:
 
 ```csharp
-var enumerable = ...;
-var enumerator = enumerable.GetAsyncEnumerator();
-try
 {
-    while (await enumerator.MoveNextAsync())
-    {
-       T item = enumerator.Current;
-       ...
+    E e = ((C)(x)).GetAsyncEnumerator();
+    try {
+        while (await e.MoveNextAsync()) {
+            V v = (V)(T)e.Current;
+            «embedded_statement»
+        }
+    }
+    finally {
+        ... // Dispose e
     }
 }
-finally
-{
-    await enumerator.DisposeAsync(); // omitted, along with the try/finally, if the enumerator doesn't expose DisposeAsync
-}
 ```
 
-If the iterated type doesn't expose the right pattern, the interfaces will be used.
+The body of the `finally` block is constructed according to the following steps:
+- If the type `E` has an appropriate `DisposeAsync` method:
+  - Perform member lookup on the type `E` with identifier `DisposeAsync` and no type arguments. If the member lookup does not produce a match, or it produces an ambiguity, or produces a match that is not a method group, check for the disposal interface as described below.
+  - Perform overload resolution using the resulting method group and an empty argument list. If overload resolution results in no applicable methods, results in an ambiguity, or results in a single best method but that method is either static or not public, check for the disposal interface as described below.
+  - If the return type of the `DisposeAsync` method is not awaitable, an error is produced and no further steps are taken.
+  - The `finally` clause is expanded to the semantic equivalent of:
+  ```csharp
+    finally {
+        await e.DisposeAsync();
+    }
+    ```
+- Otherwise, if there is an implicit conversion from `E` to the `System.IAsyncDisposable` interface, then
+  - If `E` is a non-nullable value type then the `finally` clause is expanded to the semantic equivalent of:
+  ```csharp
+    finally {
+        await ((System.IAsyncDisposable)e).DisposeAsync();
+    }
+    ```
+  - Otherwise the `finally` clause is expanded to the semantic equivalent of:
+    ```csharp
+    finally {
+        System.IAsyncDisposable d = e as System.IAsyncDisposable;
+        if (d != null) await d.DisposeAsync();
+    }
+    ```
+    except that if `E` is a value type, or a type parameter instantiated to a value type, then the conversion of `e` to `System.IAsyncDisposable` shall not cause boxing to occur.
+- Otherwise, the `finally` clause is expanded to an empty block:
+  ```csharp
+  finally {
+  }
+  ```
 
 ### ConfigureAwait
 
@@ -275,12 +306,12 @@ namespace System.Threading.Tasks
             public ConfiguredAsyncEnumerator<T> GetAsyncEnumerator() =>
                 new ConfiguredAsyncEnumerator<T>(_enumerable.GetAsyncEnumerator(), _continueOnCapturedContext);
 
-            public struct Enumerator
+            public struct ConfiguredAsyncEnumerator<T>
             {
                 private readonly IAsyncEnumerator<T> _enumerator;
                 private readonly bool _continueOnCapturedContext;
 
-                internal Enumerator(IAsyncEnumerator<T> enumerator, bool continueOnCapturedContext)
+                internal ConfiguredAsyncEnumerator(IAsyncEnumerator<T> enumerator, bool continueOnCapturedContext)
                 {
                     _enumerator = enumerator;
                     _continueOnCapturedContext = continueOnCapturedContext;

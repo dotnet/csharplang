@@ -1,9 +1,6 @@
 # Target-typed "default" literal
 
-* [x] Proposed
-* [x] Prototype
-* [x] Implementation
-* [ ] Specification
+Champion issue: <https://github.com/dotnet/csharplang/issues/102>
 
 ## Summary
 [summary]: #summary

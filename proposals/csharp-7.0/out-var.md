@@ -1,5 +1,7 @@
 # Out variable declarations
 
+Champion issue: <https://github.com/dotnet/csharplang/issues/60>
+
 The *out variable declaration* feature enables a variable to be declared at the location that it is being passed as an `out` argument.
 
 ```antlr

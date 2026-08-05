@@ -1,0 +1,272 @@
+# Upcoming meetings for 2026
+
+All schedule items must have a public issue or checked-in proposal that can be linked from the notes.
+
+## Schedule ASAP
+
+
+## Schedule when convenient
+
+- [Labeled `break` and `continue` Statements](https://github.com/dotnet/csharplang/blob/c4ec6fb60c2e174b1abb6c019f22bb15b9b13f6c/proposals/labeled-break-continue.md) (CyrusNajmabadi) Finalize specification.
+- [Final initializers](https://github.com/dotnet/csharplang/blob/5055b97eee8c10d12f822f6d4db9464329615947/proposals/final-initializers.md)
+  - [LDM in 2020](https://github.com/dotnet/csharplang/blob/main/meetings/2020/LDM-2020-04-27.md#primary-constructor-bodies-and-validators) approved the syntax. Next is discussing semantics.
+- [Anonymous using declarations](https://github.com/dotnet/csharplang/blob/665a9392e172e6f4f16347c502d9f80220a6e7a4/proposals/anonymous-using-declarations.md) (jnm2, 333fred, CyrusNajmabadi)
+- [Extension members on typeless receivers](https://github.com/dotnet/csharplang/blob/main/proposals/extension-members-on-typeless-receivers.md) (CyrusNajmabadi, jnm2)
+- [Collection expression spread optimization question](https://github.com/dotnet/csharplang/issues/10178) (Rikki)
+- [Ref and ref-like parameters of async methods](https://github.com/dotnet/csharplang/blob/c623e9fb9e2c1a61da95cd8d2768117a1c358247/proposals/async-method-ref-parameters.md) (jnm2)
+- [Mixed object and collection initializers](https://github.com/dotnet/csharplang/blob/main/proposals/mixed-object-and-collection-initializers.md) (CyrusNajmabadi)
+- Triage (working set)
+
+## Recurring topics
+
+- *Triage championed features and milestones*
+- *Design review*
+
+## Schedule
+
+### Wed Sep 30, 2026
+
+### Mon Sep 28, 2026
+
+### Wed Sep 23, 2026
+
+### Mon Sep 21, 2026
+
+### Wed Sep 9, 2026
+
+### Wed Aug 19, 2026
+
+### Wed Aug 12, 2026
+
+### Wed Aug 5, 2026
+
+- [C# 16 Priorities](https://github.com/dotnet/csharplang/discussions/10276) (Mads)
+
+## C# Language Design Notes for 2026
+
+### Wed Jul 22, 2026
+
+[C# Language Design Meeting for July 22nd, 2026](https://github.com/dotnet/csharplang/blob/main/meetings/2026/LDM-2026-07-22.md)
+
+- Allowing `safe` on non-`extern` members
+
+### Wed Jul 15, 2026
+
+[C# Language Design Meeting for July 15th, 2026](https://github.com/dotnet/csharplang/blob/main/meetings/2026/LDM-2026-07-15.md)
+
+- Declarative UI construction
+
+### Wed Jul 1, 2026
+
+[C# Language Design Meeting for July 1, 2026](https://github.com/dotnet/csharplang/blob/main/meetings/2026/LDM-2026-07-01.md)
+
+- Unsafe awaits
+- Extension constants
+- Partial extension members
+
+### Mon Jun 8, 2026
+
+[C# Language Design Meeting for June 8, 2026](https://github.com/dotnet/csharplang/blob/main/meetings/2026/LDM-2026-06-08.md)
+
+- Dictionary expressions
+    - IReadOnlyDictionary comparer binding
+    - KeyValuePair variance in params
+- Unions
+    - Union pattern target for custom unions
+- Labeled break and continue
+
+### Wed May 27, 2026
+
+[C# Language Design Meeting for May 27th, 2026](https://github.com/dotnet/csharplang/blob/main/meetings/2026/LDM-2026-05-27.md)
+
+- Unsafe evolution
+    - Unsafe expressions
+    - Await in unsafe blocks
+    - Safety comments
+
+### Wed May 20, 2026
+
+[C# Language Design Meeting for May 20th, 2026](https://github.com/dotnet/csharplang/blob/main/meetings/2026/LDM-2026-05-20.md)
+
+- Unions
+    - Union pattern matching target for custom unions
+    - Missing required APIs in custom union declarations
+    - Direct value property matching and union rules
+
+### Mon May 18, 2026
+
+[C# Language Design Meeting for May 18th, 2026](https://github.com/dotnet/csharplang/blob/main/meetings/2026/LDM-2026-05-18.md)
+
+- Closed hierarchies open questions
+    - Exhaustiveness when no subtypes exist
+    - Matching the base type after all subtypes
+    - Type parameters constrained to closed types
+    - Constraint-based ruling out of generic subtypes
+
+### Wed May 13, 2026
+
+[C# Language Design Meeting for May 13th, 2026](https://github.com/dotnet/csharplang/blob/main/meetings/2026/LDM-2026-05-13.md)
+
+- Unsafe evolution, continued
+    - `safe` marker syntax
+    - `unsafe` on types
+    - `unsafe` fields
+    - Explicit and extended layout fields
+    - Implicit calls and constructor edge cases
+
+### Wed Apr 29, 2026
+
+[C# Language Design Meeting for April 29th, 2026](https://github.com/dotnet/csharplang/blob/main/meetings/2026/LDM-2026-04-29.md)
+
+- Unsafe evolution
+    - Finer-grained opt-in
+    - More gradual opt-in
+    - Members with pointers in their signature
+
+### Mon Apr 27, 2026
+
+[C# Language Design Meeting for April 27th, 2026](https://github.com/dotnet/csharplang/blob/main/meetings/2026/LDM-2026-04-27.md)
+
+- Relaxed partial ordering
+- Labeled break and continue
+- Null-conditional await
+- Chained relational comparisons
+- Compound assignment in initializers
+- Prioritization
+
+### Wed Apr 22, 2026
+
+[C# Language Design Meeting for April 22nd, 2026](https://github.com/dotnet/csharplang/blob/main/meetings/2026/LDM-2026-04-22.md)
+
+- Unsafe evolution, continued
+    - Signature `unsafe` and unsafe contexts
+    - Transitional diagnostics for pointer-signature calls
+
+### Mon Apr 20, 2026
+
+[C# Language Design Meeting for April 20th, 2026](https://github.com/dotnet/csharplang/blob/main/meetings/2026/LDM-2026-04-20.md)
+
+- Closed hierarchies continued
+    - Generics and exhaustiveness
+    - Accessibility and exhaustiveness
+    - Interface convertibility of sealed classes
+    - Concrete intermediate nodes
+
+### Wed Apr 15, 2026
+
+[C# Language Design Meeting for April 15th, 2026](https://github.com/dotnet/csharplang/blob/main/meetings/2026/LDM-2026-04-15.md)
+
+- Deconstruction in lambda parameters
+- Labeled `break` and `continue`
+
+### Mon Apr 13, 2026
+
+[C# Language Design Meeting for April 13th, 2026](https://github.com/dotnet/csharplang/blob/main/meetings/2026/LDM-2026-04-13.md)
+
+- Unsafe evolution, continued
+    - Safe markers for members with internal `unsafe` code
+    - Members with pointers in their signatures
+    - Choosing a temporary spelling for `safe`
+
+### Wed Apr 8, 2026
+
+[C# Language Design Meeting for April 8th, 2026](https://github.com/dotnet/csharplang/blob/main/meetings/2026/LDM-2026-04-08.md)
+
+- Target-typed static member access
+    - Scope review and motivating examples
+    - Dot or no dot
+    - Initial rollout scope
+
+### Mon Apr 6, 2026
+
+[C# Language Design Meeting for April 6th, 2026](https://github.com/dotnet/csharplang/blob/main/meetings/2026/LDM-2026-04-06.md)
+
+- Unsafe evolution, continued
+    - Simple core model
+    - `extern` members and explicit safety markers
+
+### Wed Apr 1, 2026
+
+[C# Language Design Meeting for April 1st, 2026](https://github.com/dotnet/csharplang/blob/main/meetings/2026/LDM-2026-04-01.md)
+
+- Unsafe evolution migration and explicit safety markers
+    - Marking `extern` members as explicitly safe
+    - Avoiding easy but incorrect unsafe evolution migration paths
+
+### Wed Mar 11, 2026
+
+[C# Language Design Meeting for March 11th, 2026](https://github.com/dotnet/csharplang/blob/main/meetings/2026/LDM-2026-03-11.md)
+
+- Target-typed static member access
+    - Overview and smorgasbord of parts
+    - Factory containers
+    - Ambiguity with parenthesized expression
+    - Ambiguity with conditional expression
+
+### Mon Mar 9, 2026
+
+[C# Language Design Meeting for March 9th, 2026](https://github.com/dotnet/csharplang/blob/main/meetings/2026/LDM-2026-03-09.md)
+
+- Extension indexers
+    - Ordering for implicit indexers and list patterns
+    - Slice extensions for range access
+    - Spread optimization in collection expressions
+
+### Wed Feb 11, 2026
+
+[C# Language Design Meeting for February 11th, 2026](https://github.com/dotnet/csharplang/blob/main/meetings/2026/LDM-2026-02-11.md)
+
+- Union patterns update
+
+### Mon Feb 9, 2026
+
+[C# Language Design Meeting for February 9th, 2026](https://github.com/dotnet/csharplang/blob/main/meetings/2026/LDM-2026-02-09.md)
+
+- Closed hierarchies open questions
+    - Confirming API shape
+    - Blocking subtyping from other languages
+    - Multiple `CompilerFeatureRequired` attributes
+    - Same module restriction
+    - Permit explicit use of `abstract` modifier
+    - Subtype metadata
+
+### Wed Feb 4, 2026
+
+[C# Language Design Meeting for February 4th, 2026](https://github.com/dotnet/csharplang/blob/main/meetings/2026/LDM-2026-02-04.md)
+
+- Discriminated unions patterns
+    - Null ambiguity in constructor selection
+    - Marking unions with an attribute instead of IUnion interface
+    - Factory method support
+    - Union member providers
+
+### Mon Feb 2, 2026
+
+[C# Language Design Meeting for February 2nd, 2026](https://github.com/dotnet/csharplang/blob/main/meetings/2026/LDM-2026-02-02.md)
+
+- Extension indexers
+
+### Mon Jan 26, 2026
+
+[C# Language Design Meeting for January 26th, 2026](https://github.com/dotnet/csharplang/blob/main/meetings/2026/LDM-2026-01-26.md)
+
+- Alternative syntax for caller-unsafe
+
+### Wed Jan 21, 2026
+
+[C# Language Design Meeting for January 21st, 2026](https://github.com/dotnet/csharplang/blob/main/meetings/2026/LDM-2026-01-21.md)
+
+- Unsafe evolution
+
+### Mon Jan 12, 2026
+
+[C# Language Design Meeting for January 12, 2026](https://github.com/dotnet/csharplang/blob/main/meetings/2026/LDM-2026-01-12.md)
+
+- Triage
+    - Relaxed ordering for `partial` and `ref` modifiers
+    - Deconstruction in lambda parameters
+    - Unsigned sizeof
+    - Labeled `break` and `continue` Statements
+    - Extra accessor in property override
+    - Immediately Enumerated Collection Expressions
+    - Allow arrays as CollectionBuilder Create parameter type

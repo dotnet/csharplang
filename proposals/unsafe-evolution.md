@@ -1,0 +1,1124 @@
+# Unsafe Evolution
+
+Champion issue: https://github.com/dotnet/csharplang/issues/9704
+
+## Summary
+
+We update the definition of `unsafe` in C# from referring to locations where pointer types are used, to be locations where memory unmanaged by the runtime is dereferenced. These locations
+are where memory unsafety occurs, and are responsible for the bulk of CVEs (Common Vulnerabilities and Exposures) categorized as memory safety issues.
+
+```cs
+// Under the proposed rules:
+void M()
+{
+    int i = 1;
+    int* ptr = &i; // Allowed: creating a pointer is not itself unsafe
+    unsafe
+    {
+        Console.WriteLine(*ptr); // Dereference of memory not managed by the runtime. This is unsafe.
+        ref int intRef = Unsafe.AsRef(ptr); // Conversion of memory not managed by the runtime to a `ref`. This is unsafe.
+    }
+}
+
+namespace System.Runtime.CompilerServices
+{
+    public static class Unsafe
+    {
+        unsafe public static ref T AsRef<T>(void* source) { /* ... */ } // `unsafe` marks the member as *requires-unsafe*.
+    }
+}
+```
+
+## Motivation
+
+Background for this feature can also be found in https://github.com/dotnet/designs/blob/main/accepted/2025/memory-safety/caller-unsafe.md, which tracks the broader ecosystem changes that will be needed as part of this proposal.
+These include BCL updates to properly annotate methods as being unsafe, as well as tooling updates for better understanding of where memory unsafety occurs. For C#
+specifically, we want to make sure that memory unsafety is properly tracked by the language; today, it can be difficult to look at a program holistically and understand all locations where
+memory unsafety occurs. This is because various helpers such as the `System.Runtime.CompilerServices.Unsafe`, `System.Runtime.InteropServices.Marshal`, and others do not express that they
+violate memory safety and need special consideration. Methods that then use these helpers aren't immediately obvious, and when auditing code for memory safety issues (either ahead of time
+when doing review, or when trying to determine the cause of a vulnerability that is being reported) it can be difficult to pinpoint the locations that could be contributing to issues.
+
+Historically, `unsafe` in C# has referred to a specific memory-safety hole: the existence of pointer types. The moment that a pointer type is no longer involved, C# is perfectly happy to let
+memory unsafety lie latent in code. It is this issue that we are looking to address with this evolution of `unsafe` in C# and the .NET ecosystem, labeling areas where memory unsafety could
+potentially occur, making it easier for reviewers and auditors to understand the boundaries of potential memory unsafety in a program. Importantly, this means that we will be _changing_
+the meaning of `unsafe`, not just augmenting it. The existence of a pointer is not itself unsafe; the unsafe action is dereferencing the pointer. This extends further to types themselves;
+types cannot be inherently unsafe. It is only the action of using a type that could be unsafe, not the existence of that type.
+
+In order for this information to flow through the system, we therefore need to have a way to mark methods themselves as `unsafe`. Today, `unsafe` as a method modifier has no external impact,
+it only allows pointers to be used in the signature and body of the member. Going forward, `unsafe` as a modifier will actually publicly change the meaning of the member; it will indicate that
+the member has memory safety concerns and any usages must be manually validated by the programmer using the member. This is an expansion of the existing meaning of `unsafe`:
+`unsafe` on a body localizes the audit obligation to that body, while `unsafe` on a signature extends that obligation to the caller.
+
+This is a potentially large breaking change for particular segments of the C# user base. Our hope is that, for many of our users, this is effectively transparent, and updating to the new rules
+will be seamless. However, given that some large API surfaces like large parts of reflection may need to be marked `unsafe`, we do think it likely that there will need to be a decent on-ramp to
+the new rules to avoid entirely bifurcating the ecosystem.
+
+## Breaking changes
+
+The following breaking changes can be observed when updating to a compiler implementing this language feature.
+
+- If the [updated memory safety rules](#metadata) are enabled (which might be the default or even the only option in a future .NET version):
+  - `unsafe` on a member now also marks it as *requires-unsafe*, meaning callers must be in an `unsafe` context and overrides cannot be `unsafe` if the base member is safe.
+  - `unsafe` on a member or a type does not automatically introduce an `unsafe` context, meaning explicit `unsafe` blocks must be used around `unsafe` operations in member bodies and initializers.
+  - [`extern` members](#extern) and [fields in explicit layout](#fields) require an explicit `unsafe`/`safe` keyword on the declaration.
+  - `stackalloc` under [certain conditions](#stack-allocation) requires an `unsafe` context.
+  - `unsafe` modifier is an error on type declarations, static constructors, and destructors, because it does not have any effect.
+- Under a new langversion:
+  - Lambda inference might consider more candidates, resulting in overload resolution [ambiguities](https://github.com/dotnet/roslyn/blob/8a40f5642f23bd941ec62d753ac7dbd7cc53dab5/docs/compilers/CSharp/Compiler%20Breaking%20Changes%20-%20DotNet%2011.md#pointer-types-no-longer-require-an-unsafe-context).
+  - `safe` is now a contextual keyword which might [break](https://github.com/dotnet/roslyn/blob/8a40f5642f23bd941ec62d753ac7dbd7cc53dab5/docs/compilers/CSharp/Compiler%20Breaking%20Changes%20-%20DotNet%2011.md#safe-is-a-contextual-keyword) code that used it as a type.
+  - Compat mode under legacy mode can result in [more errors](https://github.com/dotnet/roslyn/blob/8a40f5642f23bd941ec62d753ac7dbd7cc53dab5/docs/compilers/CSharp/Compiler%20Breaking%20Changes%20-%20DotNet%2011.md#unsafe-required-for-more-members).
+
+## Detailed Design
+
+Terminology: we call members *requires-unsafe* (previously known as *caller-unsafe*) if
+- under [the updated memory safety rules](#metadata) they [are marked `unsafe`](#metadata),
+- under [the legacy memory safety rules](#metadata) they [contain pointers in signature](#compat-mode).
+
+### Syntax
+
+This proposal introduces:
+
+- a new `safe` contextual keyword, detailed [below](#safe-keyword),
+- and `unsafe` expressions (`unsafe(expression)`), detailed in [unsafe expressions](#unsafe-expressions).
+
+This new syntax is available under new LangVersion, but regardless of [opt-in](#metadata), under the premise that
+we are trying to make it so that anything you are required to do when you are opted in, you are allowed to do before you opt in.
+
+#### `safe` keyword
+
+The `safe` modifier can be applied to all declarations which allow `unsafe` to mark them as *requires-unsafe*.
+It is disallowed to apply both the `safe` and `unsafe` modifier on the same declaration.
+Other restrictions that apply to `unsafe` and `safe` modifiers are specified in section [Unsafe modifiers and contexts](#unsafe-modifiers-and-contexts).
+
+The compiler requires an explicit `safe` or `unsafe` modifier on [`extern` members](#extern) and [fields in explicit layout](#fields).
+Allowing `safe` even on declarations where it is not required (and hence has no effect for the compiler)
+is motivated by source generators, e.g., [LibraryImport](#answered-allow-safe-on-non-extern-members-libraryimport).
+
+The `safe` modifier only marks the declaration as *not* *requires-unsafe*, it does not introduce a safe context.
+There is also no `safe` block or expression form.
+
+### Existing `unsafe` rules
+
+The existing C# specification has a large section devoted to `unsafe`: [§24 Unsafe code][unsafe-code]. It is defined as conditionally normative, as it is not required for a valid C# compiler
+to support the `unsafe` feature. Much of what is currently considered conditionally normative will no longer be so after this change, as most of the definition of pointers is no longer considered
+unsafe in itself. [Pointer types][pointer-types-spec], [Fixed and moveable variables][fixed-and-moveable-variables], all [pointer expressions][pointer-expressions] (except for
+[pointer indirection][pointer-indirection], [pointer member access][pointer-member-access], and [pointer element access][pointer-element-access]), and [the `fixed` statement][fixed-statement]
+are all no longer considered `unsafe`, and exist in normal C# with no requirement to be used in an `unsafe` context. Similarly, declaring a [fixed size buffer][fixed-size-buffer-declarations] or
+an initialized [`stackalloc`][stack-allocation-spec] are also perfectly legal in safe C#. For all of these cases, it is only _accessing_ the memory that is unsafe.
+
+Importantly, these pointer relaxations apply **regardless of whether an assembly opts in** to the [updated memory safety rules](#metadata).
+Only operations that actually dereference or otherwise directly access pointed-to memory continue to require an `unsafe` context.
+This enables an incremental migration path: users can reshape existing code by moving `unsafe` inward when the member handles the risk internally,
+or outward when the caller must participate in the audit, before flipping the assembly-wide opt-in switch.
+
+Given the extensive rewrite of both the `unsafe` code section and other parts C# specification inherent in this change, it would be unwieldy and likely not useful to provide a line-by-line diff
+of the existing rules of the specification. Instead, we will provide an overview of the change to make in a given section, as well as specific new rules for what is allowed in `unsafe` contexts.
+
+#### Redefining expressions that require unsafe contexts
+
+The following expressions require an `unsafe` context when used:
+
+* [Pointer indirections][pointer-indirection]
+* [Pointer member access][pointer-member-access]
+* [Pointer element access][pointer-element-access]
+* Function pointer invocation
+* Element access on a fixed-size buffer
+* `stackalloc` under the conditions defined [below](#stack-allocation)
+
+In addition to these expressions, expressions and statements can also conditionally require an `unsafe` context if they depend on any symbol that is marked as `unsafe`. For example, calling a method
+that is *requires-unsafe* will cause the _invocation_expression_ to require an `unsafe` context. Statements with invocations embedded (such as `using`s, `foreach`, and similar) can also require an
+`unsafe` context when they use a *requires-unsafe* member.
+
+When we say "requires an unsafe context" or similar in this document, it means emitting an error that the construct requires an `unsafe` context to be used.
+
+> [!NOTE]
+> This section probably needs expansion to formally declare what each expression and statement must consider to require an `unsafe` context.
+
+#### Pointer types
+
+As mentioned, pointers become no longer inherently unsafe. Any references to unsafe contexts in [§24.3][pointer-types-spec] are deleted. Pointer types exist in normal C# and do not require `unsafe`
+to bring them into existence. The type definitions should be worked into [§8.1](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/types.md#81-general) and its following sections, as
+other types.
+
+Similarly, [pointer conversions][pointer-conversions] should be worked into [§10](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/conversions.md#10-conversions), with references to
+`unsafe` contexts removed.
+
+Similarly, [pointer expressions][pointer-expressions], except for [pointer indirection][pointer-indirection], [pointer member access][pointer-member-access], and
+[pointer element access][pointer-element-access], should be worked into [§12](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/expressions.md), with references to `unsafe` contexts
+removed. No semantics change about the meaning of these expressions; the only change is that they no longer require an `unsafe` context to use.
+
+For [pointer indirection][pointer-indirection], [pointer member access][pointer-member-access], and [pointer element access][pointer-element-access], these operators remain unsafe, as these
+access memory that is not managed the runtime. They remain in [§24][unsafe-code], and continue to require an `unsafe` context to be used. Any use outside of an `unsafe` context is an error.
+No semantics about these operators change; they still continue to mean exactly the same thing that they do today. These expressions must always occur in an `unsafe` context.
+
+The [fixed statement][fixed-statement] moves to [§13](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/statements.md), with references to `unsafe` contexts removed.
+
+Function pointers are not yet incorporated into the main C# specification, but they are similarly affected; everything but function pointer invocation is moved into the standard specification.
+A function pointer invocation expression must always occur in an `unsafe` context.
+
+#### Fixed-size buffers
+
+The story for [fixed-size buffers][fixed-size-buffer-declarations] is similar to [pointers](#pointer-types). The definition of a fixed-size buffer is not itself dangerous, and moves to
+[§16.3](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/structs.md#163-struct-members). Accessing a fixed-size buffer in an expression is similarly safe, unless the expression occurs
+as the _primary_expression_ of an `element_access`; these are evaluated as a _pointer_element_access_, which is unsafe, as per the rules above.
+
+#### Stack allocation
+
+Again, the story for [stack allocation][stack-allocation-spec] is very similar to [pointers](#pointer-types). Converting a `stackalloc` to a pointer is no longer unsafe; it is the deference of that
+pointer that is unsafe. We do add one new rule, however:
+
+A _stackalloc_expression_ is unsafe if all of the following statements are true:
+
+* The _stackalloc_expression_ is being converted to a `Span<T>` or a `ReadOnlySpan<T>`.
+* The _stackalloc_expression_ does not have a _stackalloc_initializer_.
+* The _stackalloc_expression_ is used within a member that has `SkipLocalsInitAttribute` applied.
+
+In these contexts, the resulting stack space could have unknown memory contents, and it is being converted to a type that provides a safe wrapper around unmanaged memory access. This violates the
+contract of `Span<T>` and `ReadOnlySpan<T>`, and so must be subject to extra scrutiny by the author and reviewers of such code.
+
+Unlike other changes to `unsafe` rules which are relaxations, this is a tightening, and hence it applies only under opt-in to the updated memory safety rules to avoid a break.
+
+> [!NOTE]
+> This means that assigning a `stackalloc` to a pointer is _always_ safe, regardless of context.
+
+Note that a `stackalloc` of a managed type remains an error.
+
+We might need to explicitly mention in the language spec that `stackalloc` pointers don't survive `await`.
+Before this feature, pointers were disallowed in `async` methods, so this wasn't observable before.
+
+#### `await` in `unsafe` contexts
+
+`await` expressions are allowed in `unsafe` contexts. This permits an async method to directly await a *requires-unsafe* operation without first spilling the awaitable to a temporary variable:
+
+```cs
+async Task M()
+{
+    unsafe
+    {
+        await DoUnsafeAsync();
+    }
+}
+
+unsafe Task DoUnsafeAsync() => ...;
+```
+
+The `unsafe` context still represents the programmer's manual safety audit boundary. If a pointer, function pointer, or other unsafe value is kept live across an `await`, the language does not attempt to prove that the use is safe after resumption; that responsibility remains with the `unsafe` code author. This is consistent with the rest of unsafe code, which permits operations such as storing pointers in fields or using pointers after their referent's lifetime has ended.
+
+However, `await` remains disallowed inside a `fixed` statement. A `fixed` statement pins a moveable variable for the duration of the statement, and allowing suspension while the statement is active would require the pinning lifetime to span an async suspension point.
+
+The corresponding csharpstandard update is in [§15.15.1 Async functions > General][async-funcs-general]. Throughout this section, ~~strikethrough~~ indicates text being removed from the existing specification, and **bold** indicates text being added.
+
+> It is a compile-time error for the formal parameter list of an async function to specify
+> any `in`, `out`, or `ref` parameters, or any parameter of a `ref struct` type.
+>
+> It is a compile-time error for an unsafe context ([§24.2][unsafe-context-spec]) to contain
+> ~~an `await` expression ([§12.9.8][await-expressions]) or~~ a `yield return` statement ([§13.15][yield-statement]).
+>
+> **It is a compile-time error for a `fixed` statement ([§24.7][fixed-statement]) to contain
+> an `await` expression ([§12.9.8][await-expressions]).**
+
+#### `sizeof`
+
+For certain predefined types, `sizeof` has always been constant and safe ([§12.8.19][sizeof-const]) and that remains unchanged.
+For other types, `sizeof` used to require unsafe context ([§24.6.9][sizeof-unsafe]) but is now safe regardless of opt-in to the updated memory safety rules.
+
+### Overriding, inheritance, and implementation
+
+It is a memory safety error to add `unsafe` at the member level in any override or implementation of a member that is not *requires-unsafe* originally, because callers may be using the base
+definition and not see any addition of `unsafe` by a derived implementation.
+
+### Delegates and lambdas
+
+It is a memory safety error to convert a *requires-unsafe* member to a delegate type outside the `unsafe` context.
+Delegate types and [_function types_](csharp-10.0/lambda-improvements.md#natural-function-type) cannot be *requires-unsafe*.
+It is a compile-time error to apply `unsafe` on a lambda symbol.
+
+### `extern`
+
+Because `extern` methods are to native locations that cannot be guaranteed by the runtime, the compiler cannot tell whether they are safe or unsafe.
+Even methods that only take `unmanaged` parameters by value cannot be safely called by C#,
+as the calling convention used for the method could be incorrectly specified by the user and must be manually verified by review.
+
+Hence, under the updated memory-safety rules, the compiler requires each `extern` method to be explicitly marked as either `unsafe` or `safe`.
+
+`extern` methods from assemblies using the legacy memory safety rules are not considered implicitly `unsafe` because
+`extern` is considered implementation detail that is not part of public surface.
+`extern` is not guaranteed to be preserved in reference assemblies.
+
+Note that this is different from the [compat mode](#compat-mode) which applies to legacy-rules assemblies too
+because methods with pointers in signature would always need an unsafe context at the call site.
+
+### Unsafe modifiers and contexts
+
+Today, as covered by the [unsafe context specification][unsafe-context-spec], `unsafe` behaves in a lexical manner,
+marking the entire textual body contained by the `unsafe` block as an `unsafe` context (except for iterator bodies),
+and also some surrounding contexts in case of declarations:
+
+```cs
+class A : Attribute
+{
+    public A(object o) { }
+}
+class C
+{
+    [A(default(int*[]))] void M1() { } // error: using pointers outside `unsafe` context
+    [A(default(int*[]))] unsafe void M2() { } // ok
+}
+```
+
+With opt-in to the updated memory safety rules, `unsafe` on a member marks it as *requires-unsafe*, extending the audit obligation to the caller,
+and does *not* introduce an `unsafe` context (instead, only explicit `unsafe` regions in the body establish `unsafe` contexts).
+
+`unsafe` on the following declarations produces an error because it does not have a meaning anymore:
+- `delegate`,
+- static constructor,
+- destructor,
+- type declaration (`class`, `struct`, etc.).
+
+`unsafe` on a constructor introduces an `unsafe` context inside its initializer,
+i.e., an `unsafe` constructor may call a *requires-unsafe* `base` or `this` constructor.
+
+Types with parameterless *requires-unsafe* constructors do not satisfy the `new()` constraint.
+Similarly and in addition, structs with parameterless *requires-unsafe* constructors do not satisfy the `struct` constraint.
+
+`unsafe`/`safe` on a member is _not_ applied to any nested anonymous or local functions inside the member.
+The same goes for anonymous and local functions declared inside of an `unsafe` block
+(they are still in an `unsafe` context as always, but they don't become *requires-unsafe*).
+To mark a local function as *requires-unsafe*, it must manually be marked as `unsafe`.
+Lambdas cannot be marked *requires-unsafe* (the `unsafe` keyword is disallowed on them).
+
+When a member is `partial`, both parts must agree on the `unsafe`/`safe` modifier, unchanged from C# rules today.
+
+```cs
+partial class C1
+{
+    public partial void M1(); // Error: both parts must be unsafe, or neither can be
+    public partial unsafe void M2();
+}
+
+partial class C1
+{
+    public unsafe partial void M1() => Console.WriteLine("hello world");
+    public partial void M2() => Console.WriteLine("hello world"); // Error: both parts must be unsafe, or neither can be
+}
+```
+
+For properties, `get` and `set`/`init` accessors can be independently declared as `unsafe`/`safe`.
+If the accessors don't have the `unsafe`/`safe` modifier, they inherit it from the property.
+Similar to `readonly` modifier, we introduce the following restrictions for properties and accessors:
+- `unsafe`/`safe` modifiers can be applied either to the property or its accessors, not both.
+- It is an error to apply the same `unsafe`/`safe` modifier to all of the property accessors (that modifier should be applied to the property instead).
+
+It is currently not possible to place any modifiers on event accessors, and this proposal doesn't change that, i.e., `add` and `remove` event accessors cannot be independently declared as `unsafe`.
+Only if the entire event is marked as `unsafe`, it means that the accessors are unsafe; otherwise they are safe.
+
+#### Fields
+
+`unsafe` on a field also marks it as *requires-unsafe*, and doesn't introduce an `unsafe` context in its initializer.
+The [compat mode](#compat-mode) also applies to fields.
+
+Marking a property or event as `unsafe` does not make its backing field *requires-unsafe*.
+
+In a type with `[StructLayout(LayoutKind.Explicit)]` or `[ExtendedLayout]`, all instance fields must be marked either `safe` or `unsafe`.
+If the field is "hidden" behind an auto-property or field-like event, the `safe`/`unsafe` requirement is moved to the auto-property or field-like event instead.
+
+#### Metadata
+
+When an assembly is compiled with the new memory safety rules, it gets marked with `MemorySafetyRulesAttribute` (detailed below), filled in with `15` as the language version. This is a signal to
+any downstream consumers that any members defined in the assembly will be properly attributed with `RequiresUnsafeAttribute` (detailed below) if an `unsafe` context is required to call them.
+Any member in such an assembly that is not marked with `RequiresUnsafeAttribute` does not require an `unsafe` context to be called, regardless of the types in the signature of the member.
+
+It is an error to apply the `MemorySafetyRulesAttribute` or `RequiresUnsafeAttribute` to any symbol explicitly in source.
+
+The compiler ignores `RequiresUnsafeAttribute`-marked members from assemblies that are using the legacy memory safety rules (instead, the [compat mode](#compat-mode) is used there).
+
+When a non-type member is *requires-unsafe*, the compiler will synthesize a `RequiresUnsafeAttribute` application on the member in metadata.
+
+The `MemorySafetyRulesAttribute` and `RequiresUnsafeAttribute` definition is synthesized by the compiler if necessary per standard well-known member rules.
+
+```cs
+namespace System.Runtime.CompilerServices
+{
+    /// <summary>Indicates the language version of the memory safety rules used when the module was compiled.</summary>
+    [AttributeUsage(AttributeTargets.Module, Inherited = false)]
+    public sealed class MemorySafetyRulesAttribute : Attribute
+    {
+        /// <summary>Initializes a new instance of the <see cref="MemorySafetyRulesAttribute"/> class.</summary>
+        /// <param name="version">The language version of the memory safety rules used when the module was compiled.</param>
+        public MemorySafetyRulesAttribute(int version) => Version = version;
+ 
+        /// <summary>Gets the language version of the memory safety rules used when the module was compiled.</summary>
+        public int Version { get; }
+    }
+
+    [AttributeUsage(AttributeTargets.Event | AttributeTargets.Method | AttributeTargets.Property | AttributeTargets.Constructor, AllowMultiple = false, Inherited = false)]
+    public sealed class RequiresUnsafeAttribute : Attribute
+    {
+    }
+}
+```
+
+#### Compat mode
+
+For compat purposes, and to reduce the number of false negatives that occur when enabling the new rules, we have a fallback rule for modules that have not been updated to the new rules. For such modules,
+a member is considered *requires-unsafe* if it contains a pointer or function pointer type somewhere among its parameter types or return type (can be nested in a non-pointer type, e.g., `int*[]`).
+Note that this doesn't apply to pointers in constraint types (e.g., `where T : I<int*[]>`) as those wouldn't need unsafe context at the call sites previously either.
+
+This does not include substituted generic parameters (e.g., method `I<T>.M(T)` when substituted `T` for `int*[]`)
+as there is no type-safe way for the target member to use that pointer type for anything anyway.
+
+Such compat-mode *requires-unsafe* members require an `unsafe` context to be used even from callers that have not opted into the updated memory-safety rules.
+That should avoid a "dip" where just updating LangVersion (but not updating memory-safety rules version) makes most pointer operations safe
+(including calling functions with pointers in signature that will likely be marked as *requires-unsafe* when opted into the updated rules),
+and hence making code less protected in this migration window.
+
+### VB
+
+We do not need to add support to Visual Basic for *requires-unsafe* members since there are no `unsafe` contexts in VB today and no way to work with pointers there either.
+
+### `unsafe` expressions
+
+An `unsafe` expression introduces a minimal `unsafe` context for evaluating a single expression. It is useful in situations where an `unsafe` block would unnecessarily widen the `unsafe` scope, or where `unsafe` blocks cannot be used syntactically (such as in `catch` filters, field initializers, and constructor initializers).
+
+#### Syntax
+
+An `unsafe_expression` is added as a *primary_no_array_creation_expression*:
+
+```antlr
+unsafe_expression
+    : 'unsafe' '(' expression ')'
+    ;
+```
+
+It is subject to the same `AllowUnsafeBlocks` requirement as the `unsafe` keyword elsewhere.
+
+#### Semantics
+
+An `unsafe_expression` establishes an `unsafe` context for evaluating its *expression*. This means that pointer dereferences, function pointer invocations, and calls to *requires-unsafe* members are all permitted within the enclosed expression. The type and value of the `unsafe_expression` are the type and value of the enclosed *expression*.
+
+The `unsafe` context established by an `unsafe_expression` does not extend beyond its closing parenthesis.
+
+#### Motivation and migration examples
+
+Several syntactic positions do not admit `unsafe` blocks at all, yet may contain subexpressions that call *requires-unsafe* members. Without `unsafe` expressions, migrating such code requires extracting the unsafe sub-expression into a helper local function or a temporary variable, or using a broader `unsafe` block than necessary, which obscures intent and increases verbosity.
+
+**`await` on a *requires-unsafe* method.** When the method being awaited becomes *requires-unsafe*, an `unsafe` block can be used around the whole `await`, but an `unsafe` expression can keep the unsafe context limited to the operation that requires it:
+
+```cs
+// Without unsafe expressions: the unsafe context includes the await expression
+unsafe
+{
+    // SAFETY: Discharges obligations because reasons
+    await DoWork();
+}
+
+// With unsafe expressions: the unsafe context wraps only the call
+// SAFETY: Discharges obligations because reasons
+await unsafe(DoWork());
+```
+
+**Catch filters.** The `when` filter of a `catch` clause is an expression, not a statement body. An `unsafe` block can only surround statements, so there is no place to put one around just the filter expression. When a method used in a filter becomes *requires-unsafe*, the only alternative without `unsafe` expressions is a helper:
+
+```cs
+// Without unsafe expressions: must spill to a local function
+static bool FilterHelper(Exception e)
+{
+    // SAFETY: Discharges obligations because reasons
+    unsafe { return NowUnsafeCall(e); }
+}
+
+try
+{
+    await DoWork(); // 'await' here prevents wrapping the whole try/catch in 'unsafe'
+}
+catch (Exception e) when (NowUnsafeCall(e))
+{
+}
+
+// With unsafe expressions: inline and minimal scope
+try
+{
+    await DoWork();
+}
+// SAFETY: Discharges obligations because reasons
+catch (Exception e) when (unsafe(NowUnsafeCall(e)))
+{
+}
+```
+
+**Field initializers.** Under the updated rules, `unsafe` on a field does not introduce an `unsafe` context in its initializer. When a field's initializer calls a *requires-unsafe* member, an `unsafe` expression provides the context without requiring a helper method:
+
+```cs
+// Without unsafe expressions: must spill to a helper method
+static int InitialValue()
+{
+    // SAFETY: Discharges obligations because reasons
+    unsafe { return ReadFromPointer(); }
+}
+static int _value = InitialValue();
+
+// With unsafe expressions: inline
+// SAFETY: Discharges obligations because reasons
+static int _value = unsafe(ReadFromPointer());
+```
+
+**Constructor initializers.** `this(...)` and `base(...)` initializer argument lists are expressions, not statement bodies. If one of those arguments calls a *requires-unsafe* member, there is again no place to insert an `unsafe` block, so the call must otherwise be moved to a helper:
+
+```cs
+class C(int x)
+{
+    // SAFETY: Discharges obligations because reasons
+    C() : this(unsafe(GetUnsafeValue()))
+    {
+    }
+}
+
+class Derived : Base
+{
+    // SAFETY: Discharges obligations because reasons
+    Derived() : base(unsafe(GetUnsafeValue()))
+    {
+    }
+}
+```
+
+**Inline calls.** More generally, wrapping only the *requires-unsafe* sub-expression keeps the audit scope tight and avoids pulling surrounding safe code (such as argument evaluation or a containing method call) into the `unsafe` context:
+
+```cs
+extern int Add(int i1, int i2); // Some fancy extern addition function
+
+// Code I want to write:
+
+// SAFETY: Discharges obligations because reasons
+Console.WriteLine(unsafe(Add(1, 2)));
+
+// Code I have to write without unsafe expressions, option 1
+// (unsafe context unnecessarily includes the WriteLine call):
+
+// SAFETY: Discharges obligations because reasons
+unsafe
+{
+    Console.WriteLine(Add(1, 2));
+}
+
+// Code I have to write without unsafe expressions, option 2
+// (very verbose and harder to read):
+int result;
+// SAFETY: Discharges obligations because reasons
+unsafe
+{
+    result = Add(1, 2);
+}
+Console.WriteLine(result);
+```
+
+## Questions
+
+### (answered) Use `RequiresUnsafeAttribute` to denote *requires-unsafe* members
+
+Instead of using the `unsafe` keyword on the member to denote *requires-unsafe* members, we could use an attribute (`RequiresUnsafeAttribute`) applied to the member
+(and not change the meaning of the `unsafe` modifier on members).
+
+Advantages of `unsafe`:
+- similar to other languages and hence easier to understand,
+- more discoverable than an attribute.
+
+Advantages of an attribute (or another keyword):
+- avoids breaking existing members marked as `unsafe`,
+- incremental adoption possible (member-by-member),
+- doesn't force marking the whole body as `unsafe` (even with `unsafe` keyword we could
+  [change](#answered-unsafe-context-defaults-in-members)
+  `unsafe` to not have an effect on bodies though),
+- allows suppressing all *requires-unsafe* errors without needing to mark the member itself as *requires-unsafe*
+  ([examples](#answered-allow-suppressing-requires-unsafe-errors-in-edge-case-scenarios)).
+
+Discussions:
+- [LDM 2025-11-12](https://github.com/dotnet/csharplang/blob/main/meetings/2025/LDM-2025-11-12.md#unsafe-evolution): use keyword
+- [LDM 2026-01-26](https://github.com/dotnet/csharplang/blob/main/meetings/2026/LDM-2026-01-26.md#alternative-syntax-for-caller-unsafe): use attribute
+- [LDM 2026-04-06](https://github.com/dotnet/csharplang/blob/main/meetings/2026/LDM-2026-04-06.md#unsafe-evolution-continued): use keyword
+
+Answer: use keyword `unsafe` to denote *requires-unsafe* members.
+
+### Local functions/lambda safe contexts
+
+Right now `unsafe` on a method body is lexically scoped. Any nested local functions or lambdas inherit this, and their bodies are in a memory unsafe context.
+Is this behavior that we want to keep in the language?
+Note that if we do keep `unsafe` as the modifier used to expose that the caller must be unsafe, this could then have impacts on the signature of the method.
+As currently proposed, nested anonymous and local functions do not keep the unsafe context of their containing member.
+
+### Delegate type `unsafe`ty
+
+We could allow marking delegate types and lambdas (and function types) as *requires-unsafe*.
+This would require several additional rules (outside `unsafe` context):
+- disallow using *requires-unsafe* delegates as type arguments,
+- disallow converting those delegates to anything that's not *requires-unsafe* (`Delegate`,`Expression`, and `object`),
+Without this, there is a risk of forcing `unsafe` annotations in the wrong spot and having an area where the real area of `unsafe`ty isn't properly called out.
+
+#### Lambda/method group conversion to safe delegate types
+
+If we allow `unsafe` lambdas and delegates, should conversion of a *requires-unsafe* lambda or method group to a non-*requires-unsafe* delegate type permitted without warning or error in an `unsafe` context? If we don't do this, then it could be fairly painful
+for various parts of the ecosystem, particularly any enumerables that are passed through LINQ queries.
+
+#### Lambda/method group natural types
+
+Today, the only real impact on semantics and codegen (besides additional metadata) is changing the *function_type* of a lambda or method group when `unsafe` is in the signature. If we were to avoid doing this, then
+there would be no real impact to either, which could give adopters more confidence that behavior has not subtly changed under the hood.
+
+> [!NOTE]
+> If we decide to keep the ability to have `unsafe` lambdas, we need to update this proposal to include a syntax change to allow lambdas to be declared `unsafe` in the first place.
+
+### Pointers to managed types
+
+C# 11 [allows pointers to managed types with a warning][csharp-11-unsafe-changes].
+Should we relax that warning for address-of operations?
+We think the problem is only when the user dereferences such pointer, which falls under normal unsafe evolution rules.
+But what about `sizeof`?
+
+### `stackalloc` as initialized
+
+Today, [the spec](https://github.com/dotnet/csharpstandard/blob/draft-v9/standard/expressions.md#12822-stack-allocation) always considers `stackalloc` memory as uninitialized, and says that the contents
+are undefined unless manually cleared or assigned. Do we consider this a spec bug, or do we need to change what we consider `unsafe` for `stackalloc` purposes?
+
+### `stackalloc` rule
+
+LDM should confirm the [`stackalloc` rule defined above](#stack-allocation) and whether it should apply regardless of opt-in like other pointer-related changes.
+
+### `AllowUnsafeBlocks`
+
+Meaning of `AllowUnsafeBlocks` is currently unchanged - it's required to be set to `true` in order to be able to use the `unsafe` keyword or `SkipLocalsInitAttribute`.
+Should we not require it for `SkipLocalsInitAttribute` under the updated rules since BCL can mark that attribute as *requires-unsafe*?
+Should we require it for the `safe` keyword too?
+Should we require it for both `unsafe` blocks and `unsafe` member declarations or other combination of those?
+
+### (answered) `unsafe` expressions
+
+Other languages with more comprehensive `unsafe` features have added `unsafe` as an expression that improves user ergonomics and allow authors to more precisely limit where `unsafe` is used. Is this
+something that we want to have in C#? Consider an inline call to an `unsafe` member that handles the safety directly: right now, the author would either need to wrap the entire statement in an `unsafe`
+block, expanding the scope of the `unsafe` context, or they would need to break out the inner function call into an intermediate variable.
+
+```cs
+extern int Add(int i1, int i2); // Some fancy extern addition function
+
+// Code I want to write:
+Console.WriteLine(unsafe(Add(1, 2)));
+
+// Code I have to write option 1, unsafe context unnecessary includes the WriteLine call
+unsafe
+{
+    Console.WriteLine(Add(1, 2));
+}
+
+// Code I have to write option 2, very verbose and harder to read:
+int result;
+unsafe
+{
+    result = Add(1, 2);
+}
+Console.WriteLine(result);
+```
+
+Answer: [yes](https://github.com/dotnet/csharplang/blob/main/meetings/2026/LDM-2026-05-27.md#unsafe-expressions). See the [detailed design section](#unsafe-expressions).
+
+### (answered) `await` in `unsafe` contexts
+
+Should we relax restrictions around `await` expressions in `unsafe` contexts?
+Especially allowing `await UnsafeMethod()` is useful because otherwise users have to rewrite that to `Task t; unsafe { t = UnsafeMethod(); } await t;`.
+See [ref/unsafe in iterators/async](./csharp-13.0/ref-unsafe-in-iterators-async.md#alternatives) for more details.
+
+- [LDM 2026-05-27](https://github.com/dotnet/csharplang/blob/main/meetings/2026/LDM-2026-05-27.md#await-in-unsafe-blocks): `await` in `unsafe` needs a concrete proposal
+- [LDM 2026-07-01](https://github.com/dotnet/csharplang/blob/main/meetings/2026/LDM-2026-07-01.md#unsafe-awaits): allow `await` in `unsafe`
+
+Answer: yes. See [`await` in `unsafe` contexts](#await-in-unsafe-contexts).
+
+### More `unsafe` contexts and relaxations
+
+Following up on [`await` in `unsafe` contexts](#answered-await-in-unsafe-contexts), should we also allow `yield` in `unsafe` contexts,
+and pointer parameters for async and iterator methods?
+See [ref/unsafe in iterators/async](./csharp-13.0/ref-unsafe-in-iterators-async.md#alternatives) for more details.
+
+Should we also allow `&UnsafeMethod` in safe context? Today as the proposal stands, this requires `unsafe` context if the method is marked as `unsafe`.
+But since we are just getting its address, which will need `unsafe` context when dereferenced/called, we could allow the address-of itself in a safe context.
+
+### Unsafe relaxations gated on LangVersion
+
+Should we make [the unsafe context relaxations](#existing-unsafe-rules) unconditional on LangVersion?
+
+- [LDM 2026-04-06](https://github.com/dotnet/csharplang/blob/main/meetings/2026/LDM-2026-04-06.md#unsafe-evolution-continued): they are not conditional on memory safety rules version
+- TODO: what about LangVersion?
+
+### (answered) `unsafe` on types
+
+We could consider not automatically making the entire lexical scope of an `unsafe` type to be an `unsafe` context and warn for an `unsafe` on a type as it would have no meaning.
+
+- [LDM 2025-11-12](https://github.com/dotnet/csharplang/blob/main/meetings/2025/LDM-2025-11-12.md#unsafe-evolution): `unsafe` on a type will have no meaning
+- [LDM 2026-05-13](https://github.com/dotnet/csharplang/blob/main/meetings/2026/LDM-2026-05-13.md#unsafe-on-types): it will be an error (can be revisited based on feedback)
+
+Answer: `unsafe` on a type is an error (can be revisited based on feedback) under the updated rules.
+
+### (answered) Allow suppressing *requires-unsafe* errors in edge case scenarios
+
+How should we allow suppressing *requires-unsafe* errors in the following scenarios?
+
+```cs
+class A : System.Attribute
+{
+    unsafe public A() { } // declaring requires-unsafe constructor
+}
+
+class C
+{
+    [A] public void M() { } // error: applying requires-unsafe `A..ctor`
+}
+
+class B : A
+{
+    public B() { } // error: calling requires-unsafe `A..ctor` (implicit `: base()`)
+}
+
+class X<T> where T : new();
+class D
+{
+    public void M(X<A> x) { } // error: using `X` which uses requires-unsafe `A..ctor`
+}
+```
+
+To suppress the *requires-unsafe* errors, we need to somehow introduce an `unsafe` context in the signature of those members.
+But the `unsafe` keyword does not introduce an `unsafe` context [anymore](#answered-unsafe-context-defaults-in-members).
+We could make `unsafe` introduce an `unsafe` context in the signature but forcing making a constructor *requires-unsafe* when wanting to call a base *requires-unsafe* constructor seems unfortunate.
+We could make *requires-unsafe* usages in signatures warnings which users could suppress in-place if they hit these rare edge cases.
+
+There is a similar issue with types since `unsafe` on them [does not](#answered-unsafe-on-types) introduce `unsafe` context either:
+
+```cs
+class A : Attribute
+{
+    unsafe public A() { } // declaring requires-unsafe constructor
+}
+
+[A] class C; // error: applying requires-unsafe `A..ctor`
+
+class B() : A(); // error: calling requires-unsafe `A..ctor`
+
+class X<T> where T : new();
+class D : X<A>; // error: inheriting from `X` which uses requires-unsafe `A..ctor`
+```
+
+- [LDM 2026-05-13](https://github.com/dotnet/csharplang/blob/main/meetings/2026/LDM-2026-05-13.md#implicit-calls-and-constructor-edge-cases):
+  - non-executable code, like attribute application, should remain an unsuppressible error (until we hear some feedback)
+  - other edge cases like `new()` can also remain an error until we hear feedback
+  - don't disallow declaring parameterless *requires-unsafe* constructors
+  - only an `unsafe` constructor's initializer may call a *requires-unsafe* `base` or `this` constructor
+
+### `params` collections
+
+```cs
+class C
+{
+    unsafe public C() { } // declaring requires-unsafe constructor
+}
+
+class B
+{
+    public void M(params C c) { }
+}
+```
+
+This declaration could be simply allowed since calling such method requires an `unsafe` context anyway because the unsafe `params` collection is constructed at the call site.
+Although that makes the declaration effectively *requires-unsafe*, so we could just require the `unsafe` annotation or at least warn about that fact.
+Note that the `params` collection case is an error today in line with how other similar features behave here (`Obsolete`, `UnmanagedCallersOnly`), but that might be an implementation bug.
+
+### Well-known members
+
+For simplicity and sanity of the implementation, we propose that the compiler is free to assume that all well-known members (such as `Array.Length`) can be assumed to be safe (i.e., not *requires-unsafe*).
+
+### Xml docs
+
+Passing an obligation to callers comes with a responsibility to make it clear what that obligation is.
+Should we formalize this beyond what can already be represented in xml docs?
+
+Members marked `unsafe` should have comments indicating what is necessary for the caller to do to ensure the code is correct.
+To make it easier to see and easier to differentiate in documentation, a new XML doc tag would be helpful: `<safety />`.
+It would be expected that all pre/post-conditions would be placed in `<safety>` block. 
+
+To document reasoning of each `unsafe` block, we recommend the use of `// SAFETY` comments,
+similar to [Rust](https://std-dev-guide.rust-lang.org/policy/safety-comments.html).
+Should we also be checking these by the compiler (e.g., have some off-by-default warning), or leave that to an analyzer?
+
+- [LDM 2026-05-27](https://github.com/dotnet/csharplang/blob/main/meetings/2026/LDM-2026-05-27.md#safety-comments): no concrete decision
+
+### More meaningless `unsafe` warnings
+
+Should more declarations produce the meaningless `unsafe` warning or error?
+For example, methods with empty bodies (or `extern`), etc.
+We already have an IDE analyzer for unnecessary `unsafe` though.
+
+Should `[ModuleInitializer] unsafe void M() { }` be an error, similarly to a static constructor?
+
+### (answered) `unsafe` fields
+
+Today, no proposal is made around `unsafe` on a field. We may need to add it though, such that any read from or write to a field marked as `unsafe` must be in an `unsafe` context. This would
+enable us to better annotate the concerns around code such as:
+
+```cs
+class SafeWrapper
+{
+    internal byte* _p;
+
+    public void DoStuff()
+    {
+        unsafe
+        {
+            // ... validate that the object state is good ...
+            // ... perform operation with _p .... 
+        }
+    }
+}
+
+// Elsewhere in safe code:
+void M(SafeWrapper w)
+{
+     w._p = stackalloc byte[10];
+}
+```
+
+Should we also mark auto-property's backing field as `unsafe`?
+
+To be consistent with our [decision](#answered-unsafe-context-defaults-in-members) for members,
+it would be good to make `unsafe` on a field also not introduce an `unsafe` context.
+If *requires-unsafe* operations are used in the field's initializer, the user can always encapsulate them into a method,
+or we could introduce [`unsafe` expressions](#unsafe-expressions).
+
+- [LDM 2026-05-13](https://github.com/dotnet/csharplang/blob/main/meetings/2026/LDM-2026-05-13.md#unsafe-fields): fields can be marked *requires-unsafe* via `unsafe`; the initializers are not in `unsafe` context.
+
+### (answered) Explicit layout
+
+Should fields in structs marked as `[StructLayout(Explicit)]` or `[ExtendedLayout]` be required to be marked as `unsafe`?
+
+Recommendation: yes.
+
+- [LDM 2026-05-13](https://github.com/dotnet/csharplang/blob/main/meetings/2026/LDM-2026-05-13.md#explicit-and-extended-layout-fields): yes, require either `unsafe` or `safe`, just like for `extern`s.
+
+### Explicit layout and backing fields
+
+If compiler synthesizes a backing field for an auto-property or field-like event in an `Explicit`/`Extended` type,
+should we require `safe`/`unsafe` on the property/event instead?
+Otherwise, the user would be forced to expand these auto-declarations into manual field plus wrapper member declarations.
+What about a primary constructor parameter which gets a backing field?
+Both `safe` and `unsafe` modifier is currently disallowed on a parameter declaration.
+
+### Synthesized members
+
+When a user-declared member is marked as *requires-unsafe*, should the associated compiler-synthesized members
+that are unspeakable but could be called via reflection (like `MoveNext` for iterators)
+be also marked with `[RequiresUnsafe]` attribute in metadata?
+
+Note that this does not apply to property and event accessors
+where we already exactly [specify](#unsafe-modifiers-and-contexts) when they are *requires-unsafe*
+and hence they get the `[RequiresUnsafe]` attribute in metadata correspondingly.
+
+### `[Out]` and `[SkipLocalsInit]`
+
+Since for example VB doesn't guarantee that `[Out]` parameters are initialized, in combination with `[SkipLocalsInit]`, calling such parameters could be considered `unsafe` in C#.
+On the other hand, it feels like the callee's problem that it's not upholding its `[Out]` contract (similarly it could be unsafe in many other ways).
+
+If we decide those cases should be `unsafe`, we can exclude methods we know have [opted in](#metadata)
+(currently those are from C# which guarantees correct usage of `[Out]` but if other languages implement the new rules, they should guarantee that too).
+
+### Taking the address of an uninitialized variable
+
+Today, taking the address of a not definitely assigned variable can consider that variable definitely assigned, exposing uninitialized member. We have a couple of options to solving that:
+
+1. Require that variables be definitely assigned before allowing an address-of operator to be used on them.
+2. Make taking the address of an uninitialized variable unsafe.
+
+Examples:
+
+```cs
+static void SkipInit<T>(out T value)  
+{
+    // value is considered definitely assigned after the address-of
+    fixed (void* ptr = &value);
+}
+```
+
+```cs
+int i;
+// i is considered definitely assigned after the address-of
+_ = &i;
+// Incrementing whatever was on the stack
+i++;
+```
+
+### Value of `MemorySafetyRulesAttribute`
+
+What should be the "enabled"/"updated" memory safety rules version? `2`? `15`? `11`?
+See also [SDK Unsafe Adoption](https://github.com/dotnet/designs/blob/main/accepted/2025/memory-safety/sdk-memory-safety-enforcement.md)
+and [More gradual opt-in?](#answered-more-gradual-opt-in).
+
+### (answered) More gradual opt-in?
+
+Today, opting in gives you two things at once: enforcement of the unsafe rules in your own code, and a signal published to your consumers (via an assembly-level attribute) that your annotations are intentional.
+There may be users who want to start getting the enforcement diagnostics as they annotate, without being ready to publish that they have fully annotated their assembly.
+Should we have a "middle" opt-in level which would surface the unsafe diagnostics as warnings, and the full opt-in would promote them to errors?
+
+- [LDM 2026-04-29](https://github.com/dotnet/csharplang/blob/main/meetings/2026/LDM-2026-04-29.md#more-gradual-opt-in): yes, but it's not blocking for preview
+
+### (answered) Finer-grained opt-in
+
+Provide a fine-grained, region-based opt-in mechanism analogous to the one we built for nullable reference types, where users can use directives to enable the feature for specific regions of source code?
+See also [Opt in/out for code regions](#opt-inout-for-code-regions).
+
+- [LDM 2026-04-29](https://github.com/dotnet/csharplang/blob/main/meetings/2026/LDM-2026-04-29.md#finer-grained-opt-in): no
+
+### (answered) `extern` implicitly unsafe
+
+This is currently the only place where `RequiresUnsafeAttribute` is synthesized without an explicit `unsafe` keyword.
+Are we okay with this outlier?
+
+Also, CoreLib exposes many extern methods (FCalls) as safe today.
+Treating extern methods as implicitly unsafe will require wrapping the implicitly unsafe extern methods with a safe wrapper.
+We may run into situations where adding the extra wrapper is difficult due to runtime implementation details.
+
+- [LDM 2026-04-01](https://github.com/dotnet/csharplang/blob/main/meetings/2026/LDM-2026-04-01.md#unsafe-evolution-migration-and-explicit-safety-markers): `extern` members should be explicitly marked either safe or unsafe
+- [LDM 2026-04-06](https://github.com/dotnet/csharplang/blob/main/meetings/2026/LDM-2026-04-06.md#unsafe-evolution-continued): same decision reiterated
+- [LDM 2026-04-13](https://github.com/dotnet/csharplang/blob/main/meetings/2026/LDM-2026-04-13.md#choosing-a-temporary-spelling-for-safe): temporary decision to use `safe` keyword
+- [LDM 2026-05-13](https://github.com/dotnet/csharplang/blob/main/meetings/2026/LDM-2026-05-13.md#safe-marker-syntax): use `safe` keyword (still open to revisiting though)
+
+Answer: `extern` members must be marked either `unsafe` or `safe` (we add a new keyword for it, but can revisit that before the feature ships, based on feedback).
+
+### (answered) Allow `safe` on non-`extern` members (`LibraryImport`)
+
+This is not the first time we have considered this question.
+The working group originally discussed [`extern` and `LibraryImport` members together](https://github.com/dotnet/csharplang/blob/main/meetings/working-groups/unsafe-evolution/unsafe-simple-core-model.md#extern-and-libraryimport-members).
+LDM then considered whether members with `unsafe` blocks or pointers in their signatures should be required to carry an explicit `safe` marker, and
+[decided](https://github.com/dotnet/csharplang/blob/main/meetings/2026/LDM-2026-04-13.md#safe-markers-for-members-with-internal-unsafe-code)
+that analyzable method bodies do not need this ceremony: unlike an `extern` boundary, their implementations can be inspected to determine whether they discharge their safety obligations.
+Consequently, `safe` is currently permitted only where an explicit safety choice is required, such as on `extern` members and fields in explicit layout.
+
+The libraries team has since provided new data from [`LibraryImport` source generation](https://github.com/dotnet/roslyn/issues/84555) that warrants revisiting the question.
+`LibraryImport` is the preferred modern form of P/Invoke, but whether its generated partial implementation is `extern` is an implementation detail.
+For a blittable signature, the generator can emit a direct `extern` implementation (examples simplified):
+
+```cs
+// User code
+[LibraryImport("kernel32.dll")]
+static partial int Blit(int x);
+
+// Generated code
+[DllImport("kernel32.dll", EntryPoint = "Blit", ExactSpelling = true)]
+static extern partial int Blit(int x);
+```
+
+The generated `extern` declaration must be marked `safe` or `unsafe`, and partial declarations must agree on their safety modifier.
+The user-authored declaration therefore needs the same modifier.
+
+For a signature requiring marshalling, the generator instead emits a managed wrapper around a private `extern`:
+
+```cs
+// User code
+[LibraryImport("kernel32.dll")]
+static partial int NotBlit(ref int x);
+
+// Generated code
+static partial int NotBlit(ref int x)
+{
+    fixed (int* xNative = &x)
+    {
+        return __PInvoke(xNative);
+    }
+
+    [DllImport("kernel32.dll", EntryPoint = "NotBlit", ExactSpelling = true)]
+    static extern unsafe int __PInvoke(int* xNative);
+}
+```
+
+Here the user-facing partial method is not `extern`, so `safe` is not permitted.
+The user's available syntax therefore depends on which implementation shape the generator chooses, even though that choice is not part of the `LibraryImport` contract and may change as the generator evolves.
+Always generating a wrapper would make the syntax consistent, but would pessimize signatures that can be emitted directly and would create a user-experience difference between `LibraryImport` and `DllImport`.
+
+Should `safe` be permitted on every declaration where `unsafe` can mark the member *requires-unsafe*, even when it is not required?
+Alternatively, should the language provide a narrower rule for partial members implemented by source generators?
+
+**Working Group Recommendation**: Permit `safe` as a declaration modifier anywhere that `unsafe` can mark a declaration *requires-unsafe*.
+Where it is not required, `safe` is a no-op.
+Scenarios that need to require an explicit modifier when the language does not, such as a `LibraryImport` that generates a non-`extern` wrapper, will need an analyzer to enforce the presence of `safe` or `unsafe`.
+
+- [LDM 2026-07-22](https://github.com/dotnet/csharplang/blob/main/meetings/2026/LDM-2026-07-22.md#allowing-safe-on-non-extern-members): allow `safe` as a declaration modifier everywhere that `unsafe` can mark a declaration as *requires-unsafe*
+
+### (answered) `unsafe` context defaults in members
+
+We could consider not automatically making the entire body of an `unsafe` method an `unsafe` context. Rust did this in [RFC 2585](https://github.com/rust-lang/rfcs/blob/master/text/2585-unsafe-block-in-unsafe-fn.md),
+with the motivation that it helps reduce the scope of `unsafe` blocks to the locations in which `unsafe` is actually used. We could do the same thing in C#, either as a warning or an error, with similar motivations.
+
+- [LDM 2026-04-22](https://github.com/dotnet/csharplang/blob/main/meetings/2026/LDM-2026-04-22.md#signature-unsafe-and-unsafe-contexts): yes, `unsafe` in signature doesn't make the body `unsafe`
+
+### (answered) `new()` constraint
+
+Do we want to support `new()` with *requires-unsafe* (something we currently don't seem to support in the compiler for other features, like `Obsolete`)?
+
+```cs
+M<C>(); // should be an error outside `unsafe` context since `M` calls the requires-unsafe `C..ctor`?
+
+void M<T>() where T : new()
+{
+    _ = new T();
+}
+
+class C
+{
+    unsafe public C() { }
+}
+```
+
+- [LDM 2026-05-13](https://github.com/dotnet/csharplang/blob/main/meetings/2026/LDM-2026-05-13.md#implicit-calls-and-constructor-edge-cases):
+  types with *requires-unsafe* parameterless constructors should not satisfy the `new()` constraint
+
+#### `new()` constraint and `using`s
+
+How should it behave in aliases and static usings?
+- Should it be an error at the `using` declaration, suppressible via the `unsafe` keyword we already support there, or
+- should it be an error normally at the use site like it would be if used directly without an alias or static using?
+
+> [!NOTE]
+> In the second case, we would need to add "meaningless `unsafe`" warning for using aliases and static usings.
+
+```cs
+class C
+{
+    unsafe public C() { }
+}
+
+class D<T> where T : new()
+{
+    public static void M() { _ = new T(); }
+}
+```
+
+```cs
+using X = D<C>;
+using unsafe X = D<C>;
+
+X.M();
+```
+
+```cs
+using static D<C>;
+using static unsafe D<C>;
+
+M();
+```
+
+Note that other constraints behave like the former option today:
+
+```cs
+using X = D<C>; // error here
+
+_ = new X(); // ok
+_ = new D<C>(); // error here
+
+class C
+{
+    public C(int x) { }
+}
+
+class D<T> where T : new();
+```
+
+### Should more constructs be `unsafe`?
+
+- `dynamic` (probably should match what BCL decides for reflection APIs)
+
+### (answered) How breaking do we want to skew
+
+<details>
+<summary>Question text</summary>
+
+The initial proposal is a maximally-breaking approach, mainly as a litmus test for how aggressive we want to be. It proposes no ability to opt in/out sections of the code, changes the meaning of `unsafe`
+on methods, prohibits the usage of `unsafe` on types, uses errors instead of warnings, and generally forces migration to occur all at once, at the time the compiler is upgraded (and then potentially
+repeatedly as dependencies update and add `unsafe` to members that were already in use). However, we have a wealth of experience in making changes like this that we can draw on to scope the size of
+the breaks down and allow incremental adoption. These options are covered below.
+
+#### Opt in/out for code regions
+
+This is not the first time that C# has redefined the "base" case of unannotated code. C# 8.0 introduced the nullable reference type feature, which in many ways can be seen as a blueprint for how the
+`unsafe` feature is shaping up. It had similar goals (prevent bugs that cost billions of dollars by redefining the way default C# is interpreted) and a similar general featureset (add new info to types
+to propagate states and avoid bugs). It was also heavily breaking, and needed a strong set of opt in and opt out functionality to allow the feature to be adopted over time by codebases. That
+functionality is the "nullable reference type context". This is a lexical scope that informs the compiler, for a given region in code, both how to interpret unannotated type references and what types
+of warnings to give to the user. We could use this as a model for `unsafe` as well, adding an "safety rules context" or similar to allow controlling whether these new rules are being applied or not.
+
+One advantage that we have with the new `unsafe` features is that they are much less prevalent. While there are a decent number of `unsafe` calls in top libraries, our guesstimates on the percentage
+of top libraries that use `unsafe` is much lower than "every single line of C# code ever written". Hopefully this means that, while some ability to opt in/out is possibly needed, we don't need as
+complicated a mechanism as nullable has, with dedicated preprocessor switches and the like.
+
+#### Warnings vs errors
+
+The proposal currently states that memory safety requirements are currently enforced via a warning, rather than error. This is drawing from our experience working with the nullable feature, where warnings
+allowed code bases to incrementally adopt the new feature and not need to convert large swathes of code all at once. We expect a similar process will be needed for unsafe warnings: many codebases will
+simply be able to turn on the new rules globally and move on with their lives. But we expect the codebases we most care about adopting the new rules will have large amounts of code to annotate, and we
+want them to be able to move forward with the feature, rather than seeing a wall of errors and giving up immediately. By making the requirements warnings, we allow these codebases to fix warnings file-by-file
+or method-by-method as required, disabling the warnings everywhere else.
+
+#### Method signature breaks
+
+Right now, we propose that `unsafe` as a keyword on the method move from something that is lexically scoped without a semantic impact to something that has semantic impact, and isn't lexically scoped.
+We could limit this break by introducing a new keyword for when the caller of a method or member must be in an `unsafe` context; for example, `callerunsafe` as a modifier.
+
+#### Defaults for source generators
+
+For nullable, we force generator authors to explicitly opt-in to nullable regardless of whether the entire project has opted into the feature by default, so that generator output isn't broken by the user
+turning on nullable and warn as error. Should we do the same for source generators?
+
+</details>
+
+#### Conclusion
+
+Answered in [LDM 2025-11-05](https://github.com/dotnet/csharplang/blob/main/meetings/2025/LDM-2025-11-05.md#unsafe-evolution). We will report errors for memory safety issues when the new rules are turned on, and no exceptions
+for source generators will be made.
+
+### (answered) Errors or warnings?
+
+- [LDM 2025-11-05](https://github.com/dotnet/csharplang/blob/main/meetings/2025/LDM-2025-11-05.md#unsafe-evolution): errors
+
+### (answered) Source generator affordance
+
+- [LDM 2025-11-05](https://github.com/dotnet/csharplang/blob/main/meetings/2025/LDM-2025-11-05.md#unsafe-evolution): none
+
+### (answered) Require `safe` maker for members with `unsafe` blocks or pointers?
+
+- [LDM 2026-04-13](https://github.com/dotnet/csharplang/blob/main/meetings/2026/LDM-2026-04-13.md#unsafe-evolution-continued): no
+
+### (answered) Compat mode for non-opted-in callers too?
+
+- [LDM 2026-04-22](https://github.com/dotnet/csharplang/blob/main/meetings/2026/LDM-2026-04-22.md#transitional-diagnostics-for-pointer-signature-calls): yes
+- [LDM 2026-04-29](https://github.com/dotnet/csharplang/blob/main/meetings/2026/LDM-2026-04-29.md#non-opted-in-caller-opted-in-callee): no change for opted-in callees
+- [LDM 2026-04-29](https://github.com/dotnet/csharplang/blob/main/meetings/2026/LDM-2026-04-29.md#severity-of-these-diagnostics): severity: errors
+
+Answer: non-opted-in members with pointers in signature are considered *requires-unsafe* to opted-in callers.
+
+### (answered) Extend the compat mode?
+
+Should we consider `nint` and `System.IntPtr` as pointers too?
+Should we consider `extern`/`DllImport` from non-opted-in callers as *requires-unsafe* too?
+Should we have a blanket warning when an opted-in assembly references a non-opted-in assembly?
+
+- [LDM 2026-04-29](https://github.com/dotnet/csharplang/blob/main/meetings/2026/LDM-2026-04-29.md#opted-in-caller-non-opted-in-callee): no extensions (analyzers could cover some less certain unsafety signals)
+
+[unsafe-code]: https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/expressions.md#128-primary-expressions
+[sizeof-const]: https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/expressions.md#12819-the-sizeof-operator
+[await-expressions]: https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/expressions.md#1298-await-expressions
+[unsafe-context-spec]: https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/unsafe-code.md#242-unsafe-contexts
+[pointer-types-spec]: https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/unsafe-code.md#243-pointer-types
+[fixed-and-moveable-variables]: https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/unsafe-code.md#244-fixed-and-moveable-variables
+[pointer-conversions]: https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/unsafe-code.md#245-pointer-conversions
+[pointer-expressions]: https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/unsafe-code.md#246-pointers-in-expressions
+[the-addressof-operator]: https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/unsafe-code.md#2465-the-address-of-operator
+[pointer-indirection]: https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/unsafe-code.md#2462-pointer-indirection
+[pointer-member-access]: https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/unsafe-code.md#2463-pointer-member-access
+[pointer-element-access]: https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/unsafe-code.md#2464-pointer-element-access
+[sizeof-unsafe]: https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/unsafe-code.md#2469-the-sizeof-operator
+[fixed-statement]: https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/unsafe-code.md#247-the-fixed-statement
+[fixed-size-buffer-declarations]: https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/unsafe-code.md#2482-fixed-size-buffer-declarations
+[stack-allocation-spec]: https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/unsafe-code.md#249-stack-allocation
+[async-funcs-general]: https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/classes.md#15151-general
+[yield-statement]: https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/statements.md#1315-the-yield-statement
+[csharp-11-unsafe-changes]: https://github.com/dotnet/csharplang/blob/6a0a9b281aa0c36159117ece733d487af0ca23a1/proposals/csharp-11.0/low-level-struct-improvements.md#changes-in-unsafe-context

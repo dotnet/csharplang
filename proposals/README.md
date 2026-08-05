@@ -2,7 +2,7 @@
 
 Language proposals are living documents describing the current thinking about a given language feature.
 
-Proposals can be either *active*, *inactive*, *rejected* or *done*. *Active* proposals are stored directly in the proposals folder, *inactive* and *rejected* proposals are stored in the [inactive](proposals/inactive) and [rejected](proposals/rejected) subfolders, and *done* proposals are archived in a folder corresponding to the language version they are part of.
+Proposals can be either *active*, *inactive*, *rejected* or *done*. *Active* proposals are stored directly in the proposals folder, *inactive* and *rejected* proposals are stored in the [inactive](inactive) and [rejected](rejected) subfolders, and *done* proposals are archived in a folder corresponding to the language version they are part of.
 
 ## Lifetime of a proposal
 
@@ -12,7 +12,7 @@ The proposal may start out as an idea in a [discussion issue](https://github.com
 
 A proposal is *active* if it is moving forward through design and implementation toward an upcoming release. Once it is completely *done*, i.e. an implementation has been merged into a release and the feature has been specified, it is moved into a subdirectory corresponding to its release.
 
-If a feature turns out not to be likely to make it into the language at all, e.g. because it proves unfeasible, does not seem to add enough value or just isn't right for the language, it will be [rejected](proposals/rejected). If a feature has reasonable promise but is not currently being prioritized to work on, it may be declared [inactive](proposals/inactive) to avoid cluttering the main folder. It is perfectly fine for work to happen on inactive or rejected proposals, and for them to be resurrected later. The categories are there to reflect current design intent.
+If a feature turns out not to be likely to make it into the language at all, e.g. because it proves unfeasible, does not seem to add enough value or just isn't right for the language, it will be [rejected](rejected). If a feature has reasonable promise but is not currently being prioritized to work on, it may be declared [inactive](inactive) to avoid cluttering the main folder. It is perfectly fine for work to happen on inactive or rejected proposals, and for them to be resurrected later. The categories are there to reflect current design intent.
 
 ## Nature of a proposal
 

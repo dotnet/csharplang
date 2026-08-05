@@ -1,9 +1,6 @@
 # Readonly references
 
-* [x] Proposed
-* [x] Prototype
-* [x] Implementation: Started
-* [ ] Specification: Not Started
+Champion issue: <https://github.com/dotnet/csharplang/issues/38>
 
 ## Summary
 [summary]: #summary
@@ -268,6 +265,8 @@ Same requirements apply to `Invoke` methods in delegates.
 
 **Motivation**: this is to ensure that existing compilers cannot simply ignore `readonly` when creating or assigning delegates.
 
+**Warning**: this is currently not implemented. See https://github.com/dotnet/roslyn/issues/69079.
+
 ## Returning by readonly reference.
 
 ### Motivation
@@ -395,7 +394,7 @@ Therefore for the purpose of capturing in lambdas, async, iterators, stack spill
 ### Metadata representation.
 When `System.Runtime.CompilerServices.IsReadOnlyAttribute` is applied to the return of a byref returning method, it means that the method returns a readonly reference.
 
-In addition, the result signature of such methods (and only those methods) must have `modreq[System.Runtime.CompilerServices.IsReadOnlyAttribute]`.
+In addition, the result signature of such methods (and only those methods) must have `modreq[System.Runtime.InteropServices.InAttribute]`.
 
 **Motivation**: this is to ensure that existing compilers cannot simply ignore `readonly` when invoking methods with `ref readonly` returns
 

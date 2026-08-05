@@ -1,5 +1,7 @@
 # Allow digit separator after 0b or 0x
 
+Champion issue: <https://github.com/dotnet/csharplang/issues/65>
+
 In C# 7.2, we extend the set of places that digit separators (the underscore character) can appear in integral literals. [Beginning in C# 7.0, separators are permitted between the digits of a literal](../csharp-7.0/digit-separators.md). Now, in C# 7.2, we also permit digit separators before the first significant digit of a binary or hexadecimal literal, after the prefix.
 
 ```csharp

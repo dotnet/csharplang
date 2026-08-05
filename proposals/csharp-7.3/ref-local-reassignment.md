@@ -1,5 +1,7 @@
 # Ref Local Reassignment
 
+Champion issue: <https://github.com/dotnet/csharplang/issues/933>
+
 In C# 7.3, we add support for rebinding the referent of a ref local variable or a ref parameter.
 
 We add the following to the set of `assignment_operator`s.

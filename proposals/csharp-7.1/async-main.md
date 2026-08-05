@@ -1,9 +1,6 @@
 # Async Main
 
-* [x] Proposed
-* [ ] Prototype
-* [ ] Implementation
-* [ ] Specification
+Champion issue: <https://github.com/dotnet/csharplang/issues/97>
 
 ## Summary
 [summary]: #summary

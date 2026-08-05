@@ -1,5 +1,7 @@
 # Stackalloc array initializers
 
+Champion issue: <https://github.com/dotnet/csharplang/issues/1286>
+
 ## Summary
 [summary]: #summary
 

@@ -1,5 +1,7 @@
 # Binary literals
 
+Champion issue: <https://github.com/dotnet/csharplang/issues/55>
+
 There’s a relatively common request to add binary literals to C# and VB. For bitmasks (e.g. flag enums) this seems genuinely useful, but it would also be great just for educational purposes.
 
 Binary literals would look like this:

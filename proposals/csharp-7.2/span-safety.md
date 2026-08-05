@@ -13,7 +13,7 @@ All the above problems would be alleviated if instances of `Span<T>` are constra
 
 An additional problem arises due to composition. It would be generally desirable to build more complex data types that would embed `Span<T>` and `ReadOnlySpan<T>` instances. Such composite types would have to be structs and would share all the hazards and requirements of `Span<T>`. As a result the safety rules described here should be viewed as applicable to the whole range of **_ref-like types_**.
 
-The [draft language specification](#draft-language-specification) is intended to ensure that values of a ref-like type occurs only on the stack.
+The [draft language specification](#draft-language-specification) is intended to ensure that values of a ref-like type occur only on the stack.
 
 ## Generalized `ref-like` types in source code
 
@@ -34,7 +34,7 @@ TwoSpans<T>[] arr = null;
 
 Designating a struct as ref-like will allow the struct to have ref-like instance fields and will also make all the requirements of ref-like types applicable to the struct. 
 
-## Metadata representation or ref-like structs
+## Metadata representation of ref-like structs
 
 Ref-like structs will be marked with **System.Runtime.CompilerServices.IsRefLikeAttribute** attribute.
 
@@ -147,11 +147,13 @@ The precise rules for computing the *safe-to-return* status of an expression, an
 
 The *ref-safe-to-escape* is a scope, enclosing an lvalue expression, to which it is safe for a ref to the lvalue to escape to. If that scope is the entire method, we say that a ref to the lvalue is *safe to return* from the method.
 
+The *ref-safe-to-escape* scope for an lvalue expression can never be to a greater scope than the *safe-to-escape* for the same value. That means when the spec limits the *safe-to-escape* of a value it is implicitly also limiting the *ref-safe-to-escape*. However *ref-safe-to-escape* scope can be to a smaller scope than *safe-to-escape*. Consider that non-ref locals have *safe-to-escape* scope outside method but *ref-safe-to-escape* inside the method.
+
 ### safe-to-escape
 
-The *safe-to-escape* is a scope, enclosing an expression, to which it is safe for the value to escape to. If that scope is the entire method, we say that a the value is *safe to return* from the method.
+The *safe-to-escape* is a scope, enclosing an expression, to which it is safe for the value to escape to. If that scope is the entire method, we say that the value is *safe to return* from the method.
 
-An expression whose type is not a `ref struct` type is *safe-to-return* from the entire enclosing method. Otherwise we refer to the rules below.
+An expression whose type is not a `ref struct` type is always *safe-to-return* from the entire enclosing method. Otherwise we refer to the rules below.
 
 #### Parameters
 
@@ -215,7 +217,7 @@ An rvalue resulting from a method invocation `e1.M(e2, ...)` is *safe-to-escape*
 - the *safe-to-escape* of all argument expressions (including the receiver)
 
 #### An Rvalue
-An rvalue is *ref-safe-to-escape* from the nearest enclosing scope. This occurs for example in an invocation such as `M(ref d.Length)` where `d` is of type `dynamic`. It is also consistent with (and perhaps subsumes) our handling of arguments corresponding to `in` parameters.*
+An rvalue is *ref-safe-to-escape* from the nearest enclosing scope. This occurs for example in an invocation such as `M(ref d.Length)` where `d` is of type `dynamic`. It is also consistent with (and perhaps subsumes) our handling of arguments corresponding to `in` parameters.
 
 #### Property invocations
 
@@ -243,7 +245,7 @@ void Example(ref int x)
 ```
 
 Such a constructor makes `Span<T>` which are used as fields indistinguishable from a `ref` field. The safety rules described in this document
-depend on `ref` fields not being a valid construct in C#, or .NET.
+depend on `ref` fields not being a valid construct in C# or .NET.
 
 #### `default` expressions
 
@@ -271,7 +273,7 @@ We wish to ensure that no `ref` local variable, and no variable of `ref struct` 
   - No instance method declared in `object` or in `System.ValueType` but not overridden in a `ref struct` type may be called with a receiver of that `ref struct` type.
   - No instance method of a `ref struct` type may be captured by method conversion to a delegate type.
 
-- For a ref reassignment `ref e1 = ref e2`, the *ref-safe-to-escape* of `e2` must be at least as wide a scope as the *ref-safe-to-escape* of `e1`.
+- For a ref reassignment `e1 = ref e2`, the *ref-safe-to-escape* of `e2` must be at least as wide a scope as the *ref-safe-to-escape* of `e1`.
 
 - For a ref return statement `return ref e1`, the *ref-safe-to-escape* of `e1` must be *ref-safe-to-escape* from the entire method. (TODO: Do we also need a rule that `e1` must be *safe-to-escape* from the entire method, or is that redundant?)
 
@@ -279,7 +281,7 @@ We wish to ensure that no `ref` local variable, and no variable of `ref struct` 
 
 - For an assignment `e1 = e2`, if the type of `e1` is a `ref struct` type, then the *safe-to-escape* of `e2` must be at least as wide a scope as the *safe-to-escape* of `e1`.
 
-- For a method invocation if there is a `ref` or `out` argument of a `ref struct` type (including the receiver), with *safe-to-escape* E1, then no argument (including the receiver) may have a narrower *safe-to-escape* than E1. [Sample](#method-arguments-must-match)
+- For a method invocation if there is a `ref` or `out` argument of a `ref struct` type (including the receiver unless the type is `readonly`), with *safe-to-escape* E1, then no argument (including the receiver) may have a narrower *safe-to-escape* than E1. [Sample](#method-arguments-must-match)
 
 - A local function or anonymous function may not refer to a local or parameter of `ref struct` type declared in an enclosing scope.
 
@@ -292,9 +294,11 @@ We wish to ensure that no `ref` local variable, and no variable of `ref struct` 
 These explanations and samples help explain why many of the safety rules above exist
 
 ### Method Arguments Must Match
-When invoking a method where there is an `out`, `ref` parameter that is a `ref struct` including the receiver then all of the `ref struct` need to have the same lifetime. This is necessary because C# must make all of it's decisions around lifetime safety based on the information available in the signature of the method and the lifetime of the values at the call site. 
+<a name="method-arguments-must-match"></a>
 
-When there are `ref` parameters that are `ref struct` then there is the possiblity they could swap around their contents. Hence at the call site we must ensure all of these **potential** swaps are compatible. If the language didn't enforce that then it will allow for bad code like the following.
+When invoking a method where there is an `out` or `ref` parameter that is a `ref struct` then all of the `ref struct` parameters need to have the same lifetime. This is necessary because C# must make all of its decisions around lifetime safety based on the information available in the signature of the method and the lifetime of the values at the call site. 
+
+When there are `ref` parameters that are `ref struct` then there is the potential that they could swap around their contents. Hence at the call site we must ensure all of these **potential** swaps are compatible. If the language didn't enforce that then it will allow for bad code like the following.
 
 ```csharp
 void M1(ref Span<int> s1)
@@ -303,7 +307,7 @@ void M1(ref Span<int> s1)
     Swap(ref s1, ref s2);
 }
 
-void Swap(ref Span<int> x, ref int Span<int> y)
+void Swap(ref Span<int> x, ref Span<int> y)
 {
     // This will effectively assign the stackalloc to the s1 parameter and allow it
     // to escape to the caller of M1
@@ -311,7 +315,7 @@ void Swap(ref Span<int> x, ref int Span<int> y)
 }
 ```
 
-The restriction on the receiver is necessary because while none of its contents are ref-safe-to-escape it can store the provided values. This means with mismatched lifetimes you could create a type safety hole in the following way:
+This analysis of `ref` parameters includes the receiver in instance methods. This is necessary because it can be used to store values passed in as parameters, just as a `ref` parameter could`. This means with mismatched lifetimes you could create a type safety hole in the following way:
 
 ```csharp
 ref struct S
@@ -334,8 +338,10 @@ void Broken(ref S s)
 }
 ```
 
+For the purpose of this analysis the receiver is considered an `in`, not a `ref`, if the type is a `readonly struct`. In that case the receiver cannot be used to store values from other parameters, it is effectively an `in` parameter for analysis purposes. Hence the same example above is legal when `S` is `readonly` because the `span` cannot be stored anywhere.
+
 ### Struct This Escape
-When it comes to span safety rules the `this` value in an instance member is modeled as a parameter to the member. Now for a `struct` the type of `this` is actually `ref S` where in a `class` it's simply `S` (for members of a `class / struct` named S). 
+When it comes to span safety rules, the `this` value in an instance member is modeled as a parameter to the member. Now for a `struct` the type of `this` is actually `ref S` where in a `class` it's simply `S` (for members of a `class / struct` named S). 
 
 Yet `this` has different escaping rules than other `ref` parameters. Specifically it is not ref-safe-to-escape while other parameters are:
 
@@ -344,7 +350,7 @@ ref struct S
 { 
     int Field;
 
-    // Illegal because this isn't safe to escape as ref
+    // Illegal because `this` isn't safe to escape as ref
     ref int Get() => ref Field;
 
     // Legal

@@ -1,5 +1,7 @@
 # Improved overload candidates
 
+Champion issue: <https://github.com/dotnet/csharplang/issues/98>
+
 ## Summary
 [summary]: #summary
 
