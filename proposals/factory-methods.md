@@ -1,6 +1,8 @@
 Factory Methods
 =====
 
+Champion issue: <https://github.com/dotnet/csharplang/issues/10292>
+
 ## Summary
 This proposal will extend the scenarios in which object initializers can be
 used to include type factory methods in addition to constructors. 
