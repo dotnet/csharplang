@@ -253,6 +253,39 @@ may not be accessed, transferred, reassigned, or dropped.
 
 To accommodate read-only and mutable borrows we also have to adjust the rules for classes themselves. The `readonly` keyword will now be legal for class methods, just like struct methods. It will have the same rules. An ordinary (non-readonly) class instance method will have a `Borrow<this>` receiver. A `readonly` instance member has a `ReadOnlyBorrow<this>` receiver. Importantly, read-only borrows may only call readonly members. Note that this is shallow mutability -- non-resource members may effectively be mutated due to lack of mutability requirements on interior members.
 
+### Bridging the worlds
+
+If owned resources and GC types do not cooperate they will force parallel worlds to be created and code to be duplicated. Fortunately, the restrictions are smaller than they appear. The biggest problem with allowing regular GC references to appear in `Borrow`, like owned resources, is that the methods on the GC type do not internally follow ownership rules. Fundamentally, this is about the receiver. In classes, the receiver type is the parent type -- meaning a normal GC tracked reference. For normal GC references, the lifetime of `this` is not tracked and may escape to any other part of the program.
+
+The solution is to allow individual methods of classes to opt-in to having _borrowed receivers_. This feature requires a new attribute:
+
+```C#
+public sealed class BorrowedReceiver : System.Attribute {}
+```
+
+Arbitrary class types may apply it to any number of instance methods:
+
+```C#
+class C
+{
+    [BorrowedReceiver]
+    public void M1() { ... }
+
+    public void M2() { ... }
+}
+```
+
+The effect is to change the type of the receiver from the containing type `C`, to the borrow type `Borrow<C>`.  The full formal lifetime would look like,
+
+```C#
+class C
+{
+    [BorrowedReceiver]
+    public void M1<$a>(Borrow<$a, C> this) { ... }
+}
+```
+
+Like all borrows, it would be illegal to convert a borrowed reference to a GC reference. Thus, `M1` is restricted from escaping the receiver outside the current method. This cleanly allows arbitrary class types to appear as borrowed types.
 
 ### Worked examples
 
