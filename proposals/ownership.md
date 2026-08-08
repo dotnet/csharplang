@@ -60,7 +60,7 @@ The following rules apply to all resource types `R`:
   - The result of a constructor of `R` is an owning reference.
   - At any given point in the program, only one owning reference to a value is permitted. Therefore,
     - Copying resource variables is not permitted. All implicit struct copy behavior is disabled for resource types.
-    - Resource variables may only appear as fields of resource types.
+    - Resource variables may not appear as fields of non-resource types.
     - Assigning an owning reference to another owning reference is considered a transfer of ownership.
       - If the variable may be assigned before another assignment, assigning it ends its lifetime
       - After transfer, use of the original reference is disallowed.
