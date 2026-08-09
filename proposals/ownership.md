@@ -67,6 +67,7 @@ The following rules apply to all resource types `R`:
   - There may be only one mutable reference, or any number of read-only references (aliasing rules).
   - `R` may not be substituted for generic type parameters
   - `R` may not be boxed into `object`, an interface, `dynamic`, or captured inside a delegate.
+  - `R` may only inherit from `object`, `ValueType`, or another resource type
 
 Let's look at a few examples:
 
@@ -139,7 +140,7 @@ readonly struct ReadOnlyBorrow<T>(T value) where T : class
 
 Note that there is a mutable and read-only version of the `Borrow` type. These are analogous to `ref` and `ref readonly` and serve similar purposes. They fall into the same aliasing restrictions above: there may be either one mutable borrowed reference or any number of read-only borrows, but they are mutually exclusive.
 
-Also note that the Borrow types are intrinsic -- they can violate some other rules, like substitution of resource types for generics. It is also illegal to copy `Borrow<T>`, as this would create multiple mutable references. In addition, the owner cannot be used, moved, or dropped while borrowed.
+Also note that the Borrow types are intrinsic -- they can violate some other rules, like substitution of resource types for generics. It is also illegal to copy `Borrow<T>`, as this would create multiple mutable references. For the same reason, a mutable borrow may not be stored in a regular type. A read-only borrow may be stored, and any containing type becomes lifetime-bearing. Copying such a type copies the read-only borrow and preserves its lifetime. In addition, the owner cannot be used, moved, or dropped while borrowed.
 
 The `Value` property will be illegal to access by all code except the compiler. Note that all instance methods of resource types consider their receiver borrowed, so this includes all instance members. In fact, the compiler is responsible for analyzing all operations on `Borrow<T>` as if they were operations on `T` and automatically translating them through calls to `Value`.
 
@@ -199,7 +200,7 @@ ref struct E<$a>
 }
 ```
 
-Quite simply, ref structs are parameterized by N lifetime variables for N by-ref nested fields. Currently, ref structs are the only type definitions that require lifetime parameters. Now, however, any type may contain `Borrow<T>` fields, which carry parameterized lifetimes. Therefore, all types must now allow lifetime parameterization. Just like ref structs, all types now contain N lifetime parameters for all N nested `Borrow<T>` fields. For example, we might define
+Quite simply, ref structs are parameterized by N lifetime variables for N by-ref nested fields. Currently, ref structs are the only type definitions that require lifetime parameters. Now, however, any type may contain `ReadOnlyBorrow<T>` fields, which carry parameterized lifetimes. Therefore, all types must now allow lifetime parameterization. Just like ref structs, all types now contain N lifetime parameters for all N nested `Borrow<T>` fields. For example, we might define
 
 ```csharp
 struct E<$a>
