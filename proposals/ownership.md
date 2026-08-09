@@ -285,7 +285,35 @@ class C
 }
 ```
 
-Like all borrows, it would be illegal to convert a borrowed reference to a GC reference. Thus, `M1` is restricted from escaping the receiver outside the current method. This cleanly allows arbitrary class types to appear as borrowed types.
+Like all borrows, it would be illegal to convert a borrowed reference to a GC reference. Thus, `M1` is restricted from escaping the receiver outside the current method. This cleanly allows arbitrary class types to appear as borrowed types. `BorrowedReceiver` is also legal on constructors -- because constructors can access `this` they have the same risk of exposing it outside the constructor method, unless it is typed as a borrow.
+
+However, converting just GC types to borrows is not particularly useful on its own. We would like to be able to treat a class as either GC-tracked or owned, _per instantiation_. To do so we will need another instrinsic type:
+
+```C#
+public readonly struct Owned<T> : IResource
+    where T : class
+{
+    public T Value { get; }
+}
+```
+
+This is another primitive type with special permissions and restrictions.
+
+* It has no public constructor. The `Owned` type effectively re-exports the constructors of `T`. Each constructor must be marked `BorrowedReceiver` to indicate that it is borrow safe.
+
+* Existing instances of `T` may never be converted to `Owned` -- `Owned` must completely control the lifetime of the instance.
+* Direct access to `Value` is prohibited. Instead, all `BorrowedReceiver` methods on `T` will re-exported as theough on the `Owned<T>` instance and the compiler is responsible for translating all such invocations through `Value`.
+
+`Owned` therefore allows individual instantiations to control whether they are GC-tracked or borrowed. `string` would remain GC-tracked by default, but an `Owned<string>` could also be created that would follow ownership rules. This may provide performance advantages in certain scenarios. This also does not lift all restrictions related to ownership: optionally-GC-tracked types may never contain fields of a resource type.
+
+Notably, there is one very useful type that `Owned` does not help: arrays. Resource types may not safely appear as element types in normal arrays for multiple reasons:
+
+* Arrays do not carry aliasing restrictions, meaning that multiple aliases to the parent array could appear, violating unique ownership
+* Arrays would not call Drop on the elements
+
+All of these problems are solved using a new language construct: _conditional implementation_. In existing C#, all types either implement an interface or not. This proposal would add a new special case, just for arrays: for a substituted type `T[]`, `T[]` implements the `IResource` interface if and only if `T` implements `IResource`. Correspondly, `T[]` is a resource if and only if `T` is a resource. The implementation of `Drop` is also specified as walking the array from beginning to end and calling `Drop` on each element.
+
+This means that arrays of resource types can be created and, if they are, they are resources themselves. `string[]` is not a resource because `string` is not a resource. `CustomResource[]`, however, (where `CustomResource` is defined as `class CustomResource : IResource`) would be considered a resource and would be required to follow all resource rules.
 
 ### Worked examples
 
