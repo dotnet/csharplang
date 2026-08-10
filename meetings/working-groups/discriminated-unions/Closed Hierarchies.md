@@ -1,1 +1,1 @@
-This proposal has moved to: https://github.com/dotnet/csharplang/blob/main/proposals/closed-hierarchies.md
+This proposal has moved to: https://github.com/dotnet/csharplang/blob/main/proposals/csharp-15.0/closed-hierarchies.md

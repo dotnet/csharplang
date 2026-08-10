@@ -1,6 +1,6 @@
 # Unions
 
-[!INCLUDE[Specletdisclaimer](./speclet-disclaimer.md)]
+[!INCLUDE[Specletdisclaimer](../speclet-disclaimer.md)]
 
 Champion issue: https://github.com/dotnet/csharplang/issues/9662
 
@@ -27,7 +27,7 @@ Unions are a long-requested C# feature, which allows expressing values from a cl
 
 The separation between union *types* and union *declarations* allows C# to have a succinct union declaration syntax with opinionated semantics, while also allowing existing types or types with other implementation choices to opt into union behaviors.
 
-The proposed unions in C# are unions of *types* and not "discriminated" or "tagged". "Discriminated unions" can be expressed in terms of "type unions" by using fresh type declarations as case types. Alternatively they can be implemented as a [closed hierarchy](https://github.com/dotnet/csharplang/blob/main/proposals/closed-hierarchies.md), which is another, related, upcoming C# feature focused on exhaustiveness.
+The proposed unions in C# are unions of *types* and not "discriminated" or "tagged". "Discriminated unions" can be expressed in terms of "type unions" by using fresh type declarations as case types. Alternatively they can be implemented as a [closed hierarchy](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-15.0/closed-hierarchies.md), which is another, related, upcoming C# feature focused on exhaustiveness.
 
 ## Detailed design
 [design]: #detailed-design

@@ -10,7 +10,7 @@ Champion issue: https://github.com/dotnet/csharplang/issues/9856
 
 Extension indexers are added to the set of permitted members inside an extension
 declaration by extending the grammar as follows (relative to
-[proposals/csharp-14.0/extensions.md](proposals/csharp-14.0/extensions.md#declaration)):
+[proposals/csharp-14.0/extensions.md](../csharp-14.0/extensions.md#declaration)):
 
 ```antlr
 extension_member_declaration

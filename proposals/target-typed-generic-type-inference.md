@@ -22,7 +22,7 @@ IEnumerable<string> c = MyCollection.Create(); // 'T' = 'string' inferred from t
 
 Generic factory methods often need explicit type arguments, even when the information is clear from context; i.e. from the target type. That's because generic type inference only takes arguments into account, not target types.
 
-This would also make generic type inference a more helpful addition in non-method situations, as proposed for [constructor calls](https://github.com/dotnet/csharplang/blob/main/proposals/inference-for-constructor-calls.md) and [type patterns](https://github.com/dotnet/csharplang/blob/main/proposals/inference-for-type-patterns.md). Specifically, [union types](https://github.com/dotnet/csharplang/blob/main/proposals/nominal-type-unions.md) and [closed classes](https://github.com/dotnet/csharplang/blob/main/proposals/closed-hierarchies.md) would benefit from this, as they are frequently a target type when case types are constructed or matched.
+This would also make generic type inference a more helpful addition in non-method situations, as proposed for [constructor calls](https://github.com/dotnet/csharplang/blob/main/proposals/inference-for-constructor-calls.md) and [type patterns](https://github.com/dotnet/csharplang/blob/main/proposals/inference-for-type-patterns.md). Specifically, [union types](https://github.com/dotnet/csharplang/blob/main/proposals/nominal-type-unions.md) and [closed classes](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-15.0/closed-hierarchies.md) would benefit from this, as they are frequently a target type when case types are constructed or matched.
 
 ## Detailed design
 

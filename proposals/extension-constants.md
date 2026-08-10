@@ -159,4 +159,4 @@ The metadata encoding of the constant is consistent with normal constants: a sta
 ## References
 
 - [C# 14 extension members proposal](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-14.0/extensions.md)
-- [Extension indexers proposal](https://github.com/dotnet/csharplang/blob/main/proposals/extension-indexers.md)
+- [Extension indexers proposal](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-15.0/extension-indexers.md)

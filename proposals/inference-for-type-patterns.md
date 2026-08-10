@@ -22,7 +22,7 @@ if (intOption is Some some) ... // 'Some<int>' inferred from the type of 'intOpt
 
 Type patterns can get unwieldy when the types are generic, which seems especially grating when the information to infer the type arguments is already available in context. 
 
-For [closed hierarchies](https://github.com/dotnet/csharplang/blob/main/proposals/closed-hierarchies.md) and [unions](https://github.com/dotnet/csharplang/blob/main/proposals/nominal-type-unions.md) in particular, there are already rules in place that ensure that type arguments for a case type depend functionally on those of the closed class or union. This means that those type arguments are almost *guaranteed* to be inferrable when the input value is of a closed class or union type, and the type pattern is for a case type.
+For [closed hierarchies](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-15.0/closed-hierarchies.md) and [unions](https://github.com/dotnet/csharplang/blob/main/proposals/nominal-type-unions.md) in particular, there are already rules in place that ensure that type arguments for a case type depend functionally on those of the closed class or union. This means that those type arguments are almost *guaranteed* to be inferrable when the input value is of a closed class or union type, and the type pattern is for a case type.
 
 ## Detailed specification
 

@@ -44,7 +44,7 @@ classDef rejected fill:#fdd,stroke:#333,stroke-width:1.5px;
 
 ## Unions
 
-- **Proposal**: [Unions](https://github.com/dotnet/csharplang/blob/main/proposals/unions.md)
+- **Proposal**: [Unions](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-15.0/unions.md)
 - **LDM**: Approved. 
 - **Dependencies**: None.
 
@@ -101,7 +101,7 @@ _ = color switch
 
 ## Closed hierarchies
 
-- **Proposal**: [Closed hierarchies](https://github.com/dotnet/csharplang/blob/main/proposals/closed-hierarchies.md)
+- **Proposal**: [Closed hierarchies](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-15.0/closed-hierarchies.md)
 - **LDM**: Approved. 
 - **Dependencies**: None. Design with [Closed enums](#closed-enums) to ensure coherence.
 
