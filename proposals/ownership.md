@@ -447,3 +447,9 @@ var array = OwnedImmutableBuilder.ToImmutable(builder);
 ```
 
 This looks very similar to how we use the rented array, with one notable exception: the static method `ToImmutable`. The main difference here is between instance and static methods on resource types. Static methods, or any method except the receiver of an instance method, will consider parameters of a resource type to be <u>owning references</u>, not borrowing references. Functionally, this is what allows us to guarantee that the array is transferred safely — it is never exposed by the builder, the builder is a resource so it is never copied, and the `ToImmutable` function takes ownership of the builder, meaning no references could live past the transfer.
+
+## Acknowledgements
+
+1. Walker, David (2002). "Substructural Type Systems"
+2. The Rust programming language for general understanding of ergonomics
+3. Special thanks to [boats](without.boats), who's writing has heavily influenced my framing of how to think of a GC hybrid language
