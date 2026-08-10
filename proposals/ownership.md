@@ -452,4 +452,4 @@ This looks very similar to how we use the rented array, with one notable excepti
 
 1. Walker, David (2002). "Substructural Type Systems"
 2. The Rust programming language for general understanding of ergonomics
-3. Special thanks to [boats](without.boats), who's writing has heavily influenced my framing of how to think of a GC hybrid language
+3. Special thanks to [boats](https://without.boats/)), who's writing has heavily influenced my framing of how to think of a GC hybrid language
