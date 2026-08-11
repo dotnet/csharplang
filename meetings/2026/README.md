@@ -38,6 +38,9 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ### Wed Aug 12, 2026
 
+- Review implementation of [Type Parameter Inference from Constraints](https://github.com/dotnet/csharplang/blob/main/proposals/type-parameter-inference-from-constraints.md) (Andy)
+- Revisit [Union Pattern Matching](https://github.com/dotnet/csharplang/blob/main/meetings/working-groups/discriminated-unions/union-patterns.md) after issues with "try-both" approach (Mads)
+
 ### Wed Aug 5, 2026
 
 - [C# 16 Priorities](https://github.com/dotnet/csharplang/discussions/10276) (Mads)
