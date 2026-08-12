@@ -26,7 +26,7 @@ Even without [target-typed generic type inference](https://github.com/dotnet/csh
 
 For constructor calls we already have "target type new" for when a target type is exactly the type to be created, but even when that's not the case, arguments or the target type often have sufficient information between them that the type arguments for the constructed type could be inferred.
 
-This is frequently the case for [closed hierarchies](https://github.com/dotnet/csharplang/blob/main/proposals/closed-hierarchies.md) and [unions](https://github.com/dotnet/csharplang/blob/main/proposals/nominal-type-unions.md). Most commonly, a target type will be the closed class or union type itself, whereas the constructed type will be one of the case types:
+This is frequently the case for [closed hierarchies](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-15.0/closed-hierarchies.md) and [unions](https://github.com/dotnet/csharplang/blob/main/proposals/nominal-type-unions.md). Most commonly, a target type will be the closed class or union type itself, whereas the constructed type will be one of the case types:
 
 ```csharp
 Option<string> option = new Some<string>("Hello");

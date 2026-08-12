@@ -1,5 +1,7 @@
 # Labeled `break` and `continue` Statements
 
+[!INCLUDE[Specletdisclaimer](../speclet-disclaimer.md)]
+
 * Championed issue: https://github.com/dotnet/csharplang/issues/9875
 
 ## Summary

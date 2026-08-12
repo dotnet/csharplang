@@ -1,6 +1,6 @@
 # Case types: To nest or not to nest?
 
-Both [closed hierarchies](https://github.com/dotnet/csharplang/blob/main/proposals/closed-hierarchies.md) and [nominal type unions](https://github.com/dotnet/csharplang/blob/main/proposals/nominal-type-unions.md) allow the declaration of "case types" (derived types of closed classes or listed case types of unions) to be either nested or not - both approaches are perfectly valid for a programmer to choose.
+Both [closed hierarchies](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-15.0/closed-hierarchies.md) and [nominal type unions](https://github.com/dotnet/csharplang/blob/main/proposals/nominal-type-unions.md) allow the declaration of "case types" (derived types of closed classes or listed case types of unions) to be either nested or not - both approaches are perfectly valid for a programmer to choose.
 
 With the [case declarations](https://github.com/dotnet/csharplang/blob/main/proposals/case-declarations.md) proposal in its current form we are implicitly encouraging a style where case types are nested within their closed class or union type. This is further supported by the [Target-typed static member access](https://github.com/dotnet/csharplang/blob/main/proposals/target-typed-static-member-lookup.md) proposal, which eliminates the drudgery of fishing such nested members out again, at least when a target type is present.
 

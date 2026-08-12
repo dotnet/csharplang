@@ -1,6 +1,6 @@
 # Union patterns update
 
-Union patterns matter for "custom unions", i.e., union types that are "handwritten" to get the language's [union behaviors](https://github.com/dotnet/csharplang/blob/main/proposals/unions.md#union-behaviors), rather than generated from [union declarations](https://github.com/dotnet/csharplang/blob/main/proposals/unions.md#union-declarations). 
+Union patterns matter for "custom unions", i.e., union types that are "handwritten" to get the language's [union behaviors](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-15.0/unions.md#union-behaviors), rather than generated from [union declarations](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-15.0/unions.md#union-declarations).
 
 We anticipate custom unions to include existing "union-like" types that are augmented to be recognized as unions by the language, as well as new types for which different characteristics (e.g. in terms of storage or performance) are desired compared to what's generated from union declarations. We expect both kinds to be rare in comparison to use of union declarations, and for most users never having to declare custom union types.
 
