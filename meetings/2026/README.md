@@ -41,11 +41,19 @@ All schedule items must have a public issue or checked-in proposal that can be l
 - Review implementation of [Type Parameter Inference from Constraints](https://github.com/dotnet/csharplang/blob/main/proposals/type-parameter-inference-from-constraints.md) (Andy)
 - Revisit [Union Pattern Matching](https://github.com/dotnet/csharplang/blob/main/meetings/working-groups/discriminated-unions/union-patterns.md) after issues with "try-both" approach (Mads)
 
+## C# Language Design Notes for 2026
+
 ### Wed Aug 5, 2026
 
-- [C# 16 Priorities](https://github.com/dotnet/csharplang/discussions/10276) (Mads)
+[C# Language Design Meeting for August 5th, 2026](https://github.com/dotnet/csharplang/blob/main/meetings/2026/LDM-2026-08-05.md)
 
-## C# Language Design Notes for 2026
+- C# 16 feature focus
+    - Unsafe v2
+    - Dictionary expressions
+    - Closed enums
+    - Type inference improvements
+    - Declarative UI construction
+    - Other areas
 
 ### Wed Jul 22, 2026
 
