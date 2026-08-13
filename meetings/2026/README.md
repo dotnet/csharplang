@@ -36,12 +36,14 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ### Wed Aug 19, 2026
 
+## C# Language Design Notes for 2026
+
 ### Wed Aug 12, 2026
 
-- Review implementation of [Type Parameter Inference from Constraints](https://github.com/dotnet/csharplang/blob/main/proposals/type-parameter-inference-from-constraints.md) (Andy)
-- Revisit [Union Pattern Matching](https://github.com/dotnet/csharplang/blob/main/meetings/working-groups/discriminated-unions/union-patterns.md) after issues with "try-both" approach (Mads)
+[C# Language Design Meeting for August 12th, 2026](https://github.com/dotnet/csharplang/blob/main/meetings/2026/LDM-2026-08-12.md)
 
-## C# Language Design Notes for 2026
+- Type parameter inference from constraints implementation review
+- Union pattern matching targets
 
 ### Wed Aug 5, 2026
 
