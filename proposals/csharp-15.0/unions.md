@@ -341,35 +341,23 @@ type_pattern
     ;
 ```
 
-Given a pattern input value *e* of a union type or of a nullable of a union type, test is done against both
-the union instance and the union's value. If either of the tests succeed, then the pattern succeeds. The union
-instance is always tested first and then the union value only if the union test failed.
+Given a pattern input value *e* of a union type or of a nullable of a union type, test is done against
+the union's value.
 
 Union `Value` is *pattern compatible* with *type* when there is at least one *element type* that
 is *pattern compatible* with *type*.
 
-If the union type itself is *pattern compatible* with *type* and union `Value` is *pattern compatible* with *type*,
-*type_pattern* is equivalent to ```type or { Value: type }```, assuming that this form doesn't
-use any special treatment for unions.
-The output value of the *type_pattern* in this case is the union type instance narrowed to *type* if it successfully matched against the *type*.
-Otherwise, it is union's `Value` narrowed to the `type`. 
-
-If the union type itself is not *pattern compatible* with *type* and union `Value` is *pattern compatible* with *type*,
-*type_pattern* is equivalent to ```{ Value: type }```, assuming that this form doesn't use any special treatment for unions.
-The output value of the *type_pattern* in this case is union's `Value` narrowed to the `type`. 
-
-If the union type itself is *pattern compatible* with *type* and union `Value` is not *pattern compatible* with *type*,
-*type_pattern* is equivalent to ```type```, assuming that this form doesn't use any special treatment for unions.
-The output value of the *type_pattern* in this case is the union type instance narrowed to *type*. 
-
-If the union type itself is not *pattern compatible* with *type* and union `Value` is not *pattern compatible* with *type*,
+If union `Value` is not *pattern compatible* with *type*,
 *type_pattern* is not applicable to the input value and a compilation error is reported. 
+
+Otherwise, the *type_pattern* is equivalent to ```{ Value: type }```, assuming that this form doesn't use any special treatment for unions.
+The output value of the *type_pattern* is union's `Value` narrowed to the `type`. 
 
 ``` c#
 union Pet(Cat, Dog);
 Pet? p = new Cat(...);
 
-p is Pet                      // true, since p.Value is a Pet, output value is p.Value
+p is Pet                      // error, since p.Value.Value is not *pattern compatible* with *Pet*
 p is Cat                      // true, since p.Value.Value is a Cat, output value is (Cat)p.Value.Value
 ```
 
@@ -400,7 +388,7 @@ union Pet(Cat, Dog) : IPet;
 
 Pet p = new Cat(...);
 
-p is IPet ip      // true, since Pet implements IPet, ip is (IPet)p
+p is IPet ip      // error, since p.Value is not *pattern compatible* with *IPet*
 p is ICat c       // true, since p.Value is a Cat and Cat implements ICat, c is (ICat)p.Value
 ```
 
@@ -430,7 +418,7 @@ Pet p = new Cat(Name: "Fido");
 
 p is { Name: "Fido" }                      // error: Pet has no 'Name'; applied to p
 p is { Value: Cat }                        // true; applied to p
-p is Pet { Value: Cat }                    // true; applied to p
+p is Pet { Value: Cat }                    // error; p.Value is not *pattern compatible* with *Pet*
 p is Cat { Name: "Fido" }                  // true; applied to p.Value
 p is {}                                    // true; applied to p and always true for struct union
 ```
@@ -439,10 +427,8 @@ Assuming that `Pet` is a class union and `I1` is an interface with a property `N
 ``` c#
 Pet p = GetPet();
 
-// true when
-// - p implements I1 and its I1.Name is "Fido", or
-// - when p doesn't implement I1, p.Value implements I1 and its I1.Name is "Fido"
-// The output value for the pattern is either (I1)p or (I1)p.Value 
+// true when p.Value implements I1 and its I1.Name is "Fido"
+// The output value for the pattern is (I1)p.Value 
 p is I1 { Name: "Fido" }
 ```
 
@@ -481,7 +467,7 @@ Pet p = new Cat(Name: "Fido");
 
 p is ("Fido")           // false: applied to p
 p is (Cat)              // true: applied to p
-p is Pet (Cat)          // true: applied to p
+p is Pet (Cat)          // error: p.Value is not *pattern compatible* with *Pet
 p is Cat ("Fido")       // true; applied to p.Value
 ```
 
@@ -489,10 +475,8 @@ Assuming that `Pet` is a class union and `I1` is an interface with a suitable De
 ``` c#
 Pet p = GetPet();
 
-// true when
-// - p implements I1 and its deconstruction is ("Fido"), or
-// - when p doesn't implement I1, p.Value implements I1 and its deconstruction is ("Fido")
-// The output value for the pattern is either (I1)p or (I1)p.Value 
+// true when p.Value implements I1 and its deconstruction is ("Fido")
+// The output value for the pattern is (I1)p.Value 
 p is I1 ("Fido")
 ```
 
@@ -657,13 +641,11 @@ Assuming that `Pet` is a class union and `I1` is an interface with a property `N
 ``` c#
 Pet p = GetPet();
 
-// The left pattern is true when
-// - p implements I1, or
-// - when p doesn't implement I1 and p.Value implements I1
-// The output value for the left pattern is either (I1)p or (I1)p.Value,
+// The left pattern is true when p.Value implements I1
+// The output value for the left pattern is (I1)p.Value,
 // which also serves as in input value for the right pattern.
 // The right pattern is true when I1.Name is "Fido" for its input value.
-// The output value for the entire `and` pattern is either (I1)p or (I1)p.Value.
+// The output value for the entire `and` pattern is (I1)p.Value.
 p is I1 and { Name: "Fido" }
 ```
 
