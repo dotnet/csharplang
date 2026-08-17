@@ -1,6 +1,6 @@
 # Type groups
 
-Champion issue: None yet. This shared infrastructure may temporarily be associated with [constructor inference](https://github.com/dotnet/csharplang/issues/9627).
+Champion issue: none dedicated yet; tracked provisionally under [#9627](https://github.com/dotnet/csharplang/issues/9627).
 
 ## Summary
 [summary]: #summary
@@ -21,7 +21,7 @@ namespace Widgets
 }
 ```
 
-Today, `Widgets.Queue`, `Widgets.Queue<>`, and `Widgets.Queue<,>` each tell lookup how many type parameters to look for. That works when the programmer supplies the type arguments. It does not work for a feature such as constructor inference, where inference may need to discover not only the arguments but also whether there are zero, one, or two of them.
+Today, `Widgets.Queue`, `Widgets.Queue<>`, and `Widgets.Queue<,>` each tell lookup how many type parameters to look for. That works when the programmer supplies the type arguments. It does not work for a feature such as [constructor inference](https://github.com/dotnet/csharplang/pull/10312), where inference may need to discover not only the arguments but also whether there are zero, one, or two of them.
 
 Lookup cannot first pick an arity and then ask inference to justify that choice. It needs to make the whole `Widgets.Queue` family available to the later binding operation. This is much like a method group: lookup gathers same-name declarations first, and invocation later decides which method works.
 
@@ -30,7 +30,9 @@ Type groups provide that first half. They do not say how to infer type arguments
 ## Detailed design
 [design]: #detailed-design
 
-The corresponding specification changes are tracked in [csharpstandard PR #2](https://github.com/MadsTorgersen/csharpstandard/pull/2). They add type-group-name lookup alongside [§7.8 Namespace and type names](https://github.com/dotnet/csharpstandard/blob/draft-v9/standard/basic-concepts.md#78-namespace-and-type-names), and type-group formation alongside [§8.4 Constructed types](https://github.com/dotnet/csharpstandard/blob/draft-v9/standard/types.md#84-constructed-types).
+The corresponding specification changes are tracked in [csharpstandard PR #2](https://github.com/MadsTorgersen/csharpstandard/pull/2). They add type-group-name lookup alongside [§7.8 Namespace and type names](https://github.com/dotnet/csharpstandard/blob/alpha-v12/standard/basic-concepts.md#78-namespace-and-type-names), and type-group formation alongside [§8.4 Constructed types](https://github.com/dotnet/csharpstandard/blob/alpha-v12/standard/types.md#84-constructed-types).
+
+Type groups are conceptually independent of [generalized generic type inference](https://github.com/dotnet/csharplang/pull/10311): they are lookup infrastructure, not an inference algorithm. [Constructor inference](https://github.com/dotnet/csharplang/pull/10312) is their first intended consumer.
 
 ### Type group names
 
@@ -81,7 +83,7 @@ int                 // Singleton group containing System.Int32
 
 When both grammar alternatives can recognize the same text, *type_group_name* is preferred. Thus `Widgets.Queue` denotes the whole family in a type-group context, even though it can also name the non-generic `Widgets.Queue` type. Without this preference the presence of the arity-zero type would accidentally prevent the generic siblings from participating.
 
-This proposal does not change any existing grammar context to accept a type group. The first intended consumer is constructor inference. Type patterns may become another consumer later, but their binding behavior is not designed here.
+This proposal does not change any existing grammar context to accept a type group. The first intended consumer is [constructor inference](https://github.com/dotnet/csharplang/pull/10312). Type patterns may become another consumer later, but their binding behavior is not designed here.
 
 ### Lookup as a single operation
 
@@ -187,7 +189,7 @@ It intentionally does not:
 - change overload resolution; or
 - define how type patterns would consume a type group.
 
-Those decisions belong to each consumer. Constructor inference is the first such consumer and is tracked by [#9627](https://github.com/dotnet/csharplang/issues/9627).
+Those decisions belong to each consumer. The [constructor inference proposal](https://github.com/dotnet/csharplang/pull/10312) is the first such consumer and is tracked by [#9627](https://github.com/dotnet/csharplang/issues/9627).
 
 ## Compatibility
 
