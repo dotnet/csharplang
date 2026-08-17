@@ -18,7 +18,7 @@ var pair = new Pair("answer", 42); // Pair<string, int>
 
 This puts constructors on a more equal footing with generic factory methods. There should be no need to write a factory method just to get the type inference that method calls already enjoy.
 
-This proposal is the object-creation part of a series. It builds on the sibling proposal for [generalized type inference and target-derived bounds](target-typed-generic-type-inference.md), and on a sibling type-groups proposal (link to be added) that looks up accessible types with the same name across arities. The corresponding normative changes are being developed in [csharpstandard#3](https://github.com/MadsTorgersen/csharpstandard/pull/3).
+This proposal is the object-creation part of a series. It builds on the sibling proposal for [generalized type inference and target-derived bounds](https://github.com/dotnet/csharplang/pull/10311), and on the sibling [type-groups proposal](https://github.com/dotnet/csharplang/pull/10310) that looks up accessible types with the same name across arities. The corresponding normative changes are being developed in [csharpstandard#3](https://github.com/MadsTorgersen/csharpstandard/pull/3).
 
 ## Motivation
 [motivation]: #motivation
@@ -69,7 +69,7 @@ That last example is a useful payoff, but not a special case. The feature applie
 
 ### Type groups in object creation
 
-Object creation consumes the shared `type_group` abstraction from the sibling type-groups proposal. An explicitly bound type produces a singleton group. A type-group name such as `Pair` can produce accessible same-name types of different arities, such as `Pair`, `Pair<T>`, and `Pair<TFirst, TSecond>`. A target-typed `new()` expression likewise starts with its single implied type.
+Object creation consumes the shared `type_group` abstraction from the sibling [type-groups proposal](https://github.com/dotnet/csharplang/pull/10310). An explicitly bound type produces a singleton group. A type-group name such as `Pair` can produce accessible same-name types of different arities, such as `Pair`, `Pair<T>`, and `Pair<TFirst, TSecond>`. A target-typed `new()` expression likewise starts with its single implied type.
 
 Lookup determines the group before constructor binding. In other words, lookup exposes the available arities, and then one constructor-binding operation selects from them. This is deliberately similar to method-group lookup followed by overload resolution.
 
@@ -110,7 +110,7 @@ C<TElement, TCount> M<TElement, TCount>(TCount count);
 IEnumerable<string> l = M(5);
 ```
 
-The generalized inference proposal defines how argument inputs and target-derived result bounds interact. This proposal only supplies the constructor-specific inputs.
+The sibling [generalized inference proposal](https://github.com/dotnet/csharplang/pull/10311) defines how argument inputs and target-derived result bounds interact. This proposal only supplies the constructor-specific inputs.
 
 Inference for a constructor fails if the supplied arguments cannot first be matched to its parameters, or if inference cannot determine all required containing-type arguments. Such a failure only removes that constructor from consideration.
 
@@ -122,9 +122,7 @@ Constructors of bound types do not need inference. They contribute candidates un
 
 ### One combined candidate set
 
-**The design uses one candidate set across all bound and unbound types in the type group. It does not first try a non-generic type and fall back to generic types.**
-
-This is the central selection choice in the proposal. Type-group lookup is method-group-like: it intentionally preserves same-name candidates of different arities for a later binding operation. Once lookup has produced that group, constructor binding should choose the best constructor across the whole group rather than let one arity hide the others procedurally.
+This is the central selection choice: object creation uses one candidate set across every bound and unbound type in the group rather than trying a non-generic type first and falling back to generic ones. Type-group lookup is method-group-like: it intentionally preserves same-name candidates of different arities for a later binding operation. Once lookup has produced that group, constructor binding should choose the best constructor across the whole group rather than let one arity hide the others procedurally.
 
 All constructors that survive inference, substitution, constraint checking, and applicability form one candidate set. Normal overload resolution then selects the best constructor using the substituted parameter types. For the better-function-member rules, a constructor of a generic type is treated as the generic counterpart of a constructor of a non-generic type, with the containing type's parameters and inferred arguments standing in for method type parameters and arguments.
 
@@ -152,7 +150,7 @@ The default constructor of a struct with no declared parameterless constructor p
 
 ### Specification impact
 
-The normative draft updates the C# specification's [`expressions.md` type-inference section](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/expressions.md#1263-type-inference) and [`expressions.md` object-creation section](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/expressions.md#128172-object-creation-expressions). The shared lookup and generalized inference algorithms are owned by the sibling proposals; this proposal specifies how object creation consumes them.
+The normative draft updates the C# specification's [`expressions.md` type-inference section](https://github.com/dotnet/csharpstandard/blob/alpha-v12/standard/expressions.md#1263-type-inference) and [`expressions.md` object-creation section](https://github.com/dotnet/csharpstandard/blob/alpha-v12/standard/expressions.md#128172-object-creation-expressions). The shared lookup and generalized inference algorithms are owned by the sibling proposals; this proposal specifies how object creation consumes them.
 
 ## Compatibility
 
