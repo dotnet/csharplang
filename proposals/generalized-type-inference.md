@@ -2,11 +2,6 @@
 
 Champion issue: https://github.com/dotnet/csharplang/issues/9626
 
-This proposal generalizes and is intended to supersede the mechanism in the earlier
-[target-typed generic type inference](target-typed-generic-type-inference.md) draft.
-That draft remains useful motivation, but it should not be read as defining a second,
-competing form of target inference.
-
 ## Summary
 [summary]: #summary
 
@@ -30,6 +25,12 @@ The result type `IEnumerable<T>` must fit in the target type
 Method invocations and method-group conversions are the first consumers of the
 generalized algorithm. Other proposals can use the same foundation for constructs
 such as constructor calls, without having to disguise everything as a method call.
+
+**Relationship to the earlier proposal:** This proposal generalizes and is intended
+to supersede the mechanism in
+[target-typed generic type inference](target-typed-generic-type-inference.md).
+That draft remains useful motivation, but it should not be read as defining a
+second, competing form of target inference.
 
 ## Motivation
 [motivation]: #motivation
@@ -219,9 +220,11 @@ invocation and method-group conversion.
 
 It does **not** define how an omitted generic type name is looked up, how
 constructor candidates are formed, or how overload resolution chooses among those
-candidates. Those are sibling design problems. Constructor inference and
-type-group lookup can supply their own adapters and candidate sets while reusing
-the algorithm defined here.
+candidates. Those are sibling design problems, covered by the
+[type groups proposal](https://github.com/dotnet/csharplang/pull/10310) and the
+[constructor inference proposal](https://github.com/dotnet/csharplang/pull/10312).
+They can supply their own adapters and candidate sets while reusing the algorithm
+defined here.
 
 The earlier
 [target-typed generic type inference](target-typed-generic-type-inference.md)
@@ -234,16 +237,15 @@ superseded rather than as another active owner of target-derived bounds.
 
 ## Benefits
 
-- Generic APIs no longer need redundant type arguments when the result's
-  destination already contains the information.
-- Arguments and targets can cooperate, which helps APIs where inputs and outputs
-  determine different type parameters.
-- Generic method groups can use delegate return types as well as parameter types.
-- New inference sites can reuse one vocabulary and algorithm instead of being
-  specified through fictional method calls.
-- The standards refactoring creates a stable seam for future inference work,
-  including constructor inference, without committing this proposal to those
-  constructs' lookup and overload-resolution rules.
+The immediate benefit is that generic APIs stop asking for type arguments already
+written into the destination. Arguments and targets can also cooperate, as in
+`Transform` above, and a method group can learn from the return type of its delegate
+as well as from its parameters.
+
+The larger benefit is coherence. New inference sites get one vocabulary and one
+algorithm instead of being specified through fictional method calls. That gives
+constructor inference a stable foundation without deciding its lookup or
+overload-resolution rules here.
 
 ## Compatibility
 
@@ -338,7 +340,7 @@ combinations of `ref`, `ref readonly`, and related contexts may be paired, and
 exactly where incompatibility is rejected. Inference should not accidentally make
 an incompatible by-reference flow look like an ordinary by-value conversion.
 
-### Is method-group return inference one feature decision?
+### Is method-group return inference separable?
 
 Method-group return inference follows directly from the generalized model and
 makes conversion and invocation more consistent. It also has its own compatibility
