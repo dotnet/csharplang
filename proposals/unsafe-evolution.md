@@ -278,8 +278,21 @@ and does *not* introduce an `unsafe` context (instead, only explicit `unsafe` re
 `unsafe` on a constructor introduces an `unsafe` context inside its initializer,
 i.e., an `unsafe` constructor may call a *requires-unsafe* `base` or `this` constructor.
 
-Types with parameterless *requires-unsafe* constructors do not satisfy the `new()` constraint.
-Similarly and in addition, structs with parameterless *requires-unsafe* constructors do not satisfy the `struct` constraint.
+In declaration positions, types with parameterless *requires-unsafe* constructors do not satisfy the `new()` or `struct` constraint.
+In expression positions, types with parameterless *requires-unsafe* constructors satisfy the `new()` or `struct` constraint only inside an `unsafe` context.
+
+```cs
+class Unsafe { public unsafe Unsafe() { } }
+class C<T> where T : new();
+class D : C<Unsafe> // error: Unsafe cannot satisfy new() in this declaration position
+{
+    void M()
+    {
+        _ = new C<Unsafe>(); // error: Unsafe cannot satisfy new() in this expression position
+        unsafe { _ = new C<Unsafe>(); } // ok: unsafe context
+    }
+}
+```
 
 `unsafe`/`safe` on a member is _not_ applied to any nested anonymous or local functions inside the member.
 The same goes for anonymous and local functions declared inside of an `unsafe` block
@@ -972,6 +985,7 @@ class C
 
 - [LDM 2026-05-13](https://github.com/dotnet/csharplang/blob/main/meetings/2026/LDM-2026-05-13.md#implicit-calls-and-constructor-edge-cases):
   types with *requires-unsafe* parameterless constructors should not satisfy the `new()` constraint
+  in declaration positions (where we have no way to introduce an `unsafe` context)
 
 #### `new()` constraint and `using`s
 
