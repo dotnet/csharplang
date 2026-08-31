@@ -34,14 +34,16 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ### Wed Sep 9, 2026
 
+## C# Language Design Notes for 2026
+
 ### Wed Aug 19, 2026
 
-- Type parameter inference for constructor calls (Mads)
-    - [Generalized type inference](https://github.com/MadsTorgersen/csharpstandard/pull/1)
-    - [Type groups](https://github.com/MadsTorgersen/csharpstandard/pull/2)
-    - [Constructor type inference](https://github.com/MadsTorgersen/csharpstandard/pull/3)
- 
-## C# Language Design Notes for 2026
+[C# Language Design Meeting for August 19th, 2026](https://github.com/dotnet/csharplang/blob/main/meetings/2026/LDM-2026-08-19.md)
+
+- Type parameter inference for constructor calls
+    - Generalized generic type inference
+    - Type groups
+    - Constructor type inference
 
 ### Wed Aug 12, 2026
 
