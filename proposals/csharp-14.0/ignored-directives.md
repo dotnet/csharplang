@@ -60,6 +60,38 @@ Ignored directives must occur before the first token ([§6.4][tokens]) in the co
 This improves readability (all package references and other configuration is in one place), tooling performance (no need to scan long files in full).
 Ignored directives must also occur before any `#if` directives because the tooling might not know the full set of conditional compilation symbols while parsing ignored directives.
 
+```cs
+Console.WriteLine();
+// error - #: directive after the first token
+#:directive
+```
+
+```cs
+#:dir1
+#if DEBUG
+// error - #: directive after #if
+#:dir2
+#endif
+```
+
+No error is reported if an ignored directive after the first token is in a disabled region
+(even though normally an ignored directive cannot follow `#if` nor the first token).
+As noted above, tooling is expected to process only directives preceding the first token.
+
+```cs
+// always works - not parsed as a directive, but as a raw string
+string code1 = """
+    #:directive
+    """;
+
+// works as well regardless of DEBUG - even though in a disabled region, the #: would be parsed as a directive
+#if DEBUG
+string code2 = """
+    #:directive
+    """;
+#endif
+```
+
 Furthermore, the compiler should report a warning if the `#!` directive is not placed at the first line and the first character in the file
 (not even a BOM marker can be in front of it), because otherwise shells won't recognize it.
 
