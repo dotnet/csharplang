@@ -97,6 +97,10 @@ is motivated by source generators, e.g., [LibraryImport](#answered-allow-safe-on
 The `safe` modifier only marks the declaration as *not* *requires-unsafe*, it does not introduce a safe context.
 There is also no `safe` block or expression form.
 
+Any usage of the `safe` keyword requires the `/unsafe` compiler option (which corresponds to the `AllowUnsafeBlocks` MSBuild project option),
+in the same way as the `unsafe` keyword does.
+That is because putting `safe` on a member can be viewed as wrapping the member's implementation in an `unsafe` block.
+
 ### Existing `unsafe` rules
 
 The existing C# specification has a large section devoted to `unsafe`: [§24 Unsafe code][unsafe-code]. It is defined as conditionally normative, as it is not required for a valid C# compiler
@@ -598,10 +602,7 @@ LDM should confirm the [`stackalloc` rule defined above](#stack-allocation) and 
 
 ### `AllowUnsafeBlocks`
 
-Meaning of `AllowUnsafeBlocks` is currently unchanged - it's required to be set to `true` in order to be able to use the `unsafe` keyword or `SkipLocalsInitAttribute`.
-Should we not require it for `SkipLocalsInitAttribute` under the updated rules since BCL can mark that attribute as *requires-unsafe*?
-Should we require it for the `safe` keyword too?
-Should we require it for both `unsafe` blocks and `unsafe` member declarations or other combination of those?
+This proposal makes the `safe` keyword require the `AllowUnsafeBlocks` flag just like the `unsafe` keyword does. This decision should be reviewed by LDM.
 
 ### (answered) `unsafe` expressions
 
