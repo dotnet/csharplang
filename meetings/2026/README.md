@@ -24,15 +24,20 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ## Schedule
 
-### Wed Sep 30, 2026
+### Mon Nov 30, 2026
 
-### Mon Sep 28, 2026
+### Mon Nov 23, 2026
 
-### Wed Sep 23, 2026
+### Mon Nov 9, 2026
 
-### Mon Sep 21, 2026
+### Mon Nov 2, 2026
 
-### Wed Sep 9, 2026
+### Mon Oct 12, 2026
+
+### Mon Oct 5, 2026
+
+- Simple LDM decisions (Fred, Mads)
+- Target typed generic inference (Mads)
 
 ## C# Language Design Notes for 2026
 
