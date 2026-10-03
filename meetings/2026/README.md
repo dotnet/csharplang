@@ -37,7 +37,7 @@ All schedule items must have a public issue or checked-in proposal that can be l
 ### Mon Oct 5, 2026
 
 - Simple LDM decisions (Fred, Mads)
-- Target typed generic inference (Mads)
+- [Target typed generic inference](https://github.com/dotnet/csharplang/pull/10345) (Mads)
 
 ## C# Language Design Notes for 2026
 
