@@ -60,7 +60,7 @@ The following breaking changes can be observed when updating to a compiler imple
 - If the [updated memory safety rules](#metadata) are enabled (which might be the default or even the only option in a future .NET version):
   - `unsafe` on a member now also marks it as *requires-unsafe*, meaning callers must be in an `unsafe` context and overrides cannot be `unsafe` if the base member is safe.
   - `unsafe` on a member or a type does not automatically introduce an `unsafe` context, meaning explicit `unsafe` blocks must be used around `unsafe` operations in member bodies and initializers.
-  - [`extern` members](#extern) and [fields in explicit layout](#fields) require an explicit `unsafe`/`safe` keyword on the declaration.
+  - [`extern` members](#extern) and [fields in types with explicit or extended layout, nonzero packing size, or nonzero size](#fields) require an explicit `unsafe`/`safe` keyword on the declaration.
   - `stackalloc` under [certain conditions](#stack-allocation) requires an `unsafe` context.
   - `unsafe` modifier is an error on type declarations, static constructors, and destructors, because it does not have any effect.
 - Under a new langversion:
@@ -90,7 +90,7 @@ The `safe` modifier can be applied to all declarations which allow `unsafe` to m
 It is disallowed to apply both the `safe` and `unsafe` modifier on the same declaration.
 Other restrictions that apply to `unsafe` and `safe` modifiers are specified in section [Unsafe modifiers and contexts](#unsafe-modifiers-and-contexts).
 
-The compiler requires an explicit `safe` or `unsafe` modifier on [`extern` members](#extern) and [fields in explicit layout](#fields).
+The compiler requires an explicit `safe` or `unsafe` modifier on [`extern` members](#extern) and [fields in types with explicit or extended layout, nonzero packing size, or nonzero size](#fields).
 Allowing `safe` even on declarations where it is not required (and hence has no effect for the compiler)
 is motivated by source generators, e.g., [LibraryImport](#answered-allow-safe-on-non-extern-members-libraryimport).
 
@@ -336,7 +336,12 @@ The [compat mode](#compat-mode) also applies to fields.
 
 Marking a property or event as `unsafe` does not make its backing field *requires-unsafe*.
 
-In a type with `[StructLayout(LayoutKind.Explicit)]` or `[ExtendedLayout]`, all instance fields must be marked either `safe` or `unsafe`.
+All instance fields must be marked either `safe` or `unsafe` if their containing type has any of the following:
+
+- `[StructLayout(LayoutKind.Explicit)]`,
+- `[StructLayout(...)]` with a nonzero `Pack` or `Size` argument, regardless of layout kind,
+- `[ExtendedLayout]`.
+
 If the field is "hidden" behind an auto-property or field-like event, the `safe`/`unsafe` requirement is moved to the auto-property or field-like event instead.
 
 #### Metadata
@@ -812,9 +817,15 @@ Recommendation: yes.
 
 - [LDM 2026-05-13](https://github.com/dotnet/csharplang/blob/main/meetings/2026/LDM-2026-05-13.md#explicit-and-extended-layout-fields): yes, require either `unsafe` or `safe`, just like for `extern`s.
 
+### Pack or Size
+
+The explicit layout requirement has been extended to a nonzero `Pack` or `Size` argument on `StructLayoutAttribute`, because their fields can also be misaligned.
+See https://github.com/dotnet/roslyn/issues/85173.
+This decision should be reviewed by LDM.
+
 ### Explicit layout and backing fields
 
-If compiler synthesizes a backing field for an auto-property or field-like event in an `Explicit`/`Extended` type,
+If compiler synthesizes a backing field for an auto-property or field-like event in a type [whose fields require an explicit safety annotation](#fields),
 should we require `safe`/`unsafe` on the property/event instead?
 Otherwise, the user would be forced to expand these auto-declarations into manual field plus wrapper member declarations.
 What about a primary constructor parameter which gets a backing field?
@@ -907,7 +918,7 @@ The working group originally discussed [`extern` and `LibraryImport` members tog
 LDM then considered whether members with `unsafe` blocks or pointers in their signatures should be required to carry an explicit `safe` marker, and
 [decided](https://github.com/dotnet/csharplang/blob/main/meetings/2026/LDM-2026-04-13.md#safe-markers-for-members-with-internal-unsafe-code)
 that analyzable method bodies do not need this ceremony: unlike an `extern` boundary, their implementations can be inspected to determine whether they discharge their safety obligations.
-Consequently, `safe` is currently permitted only where an explicit safety choice is required, such as on `extern` members and fields in explicit layout.
+Consequently, `safe` is currently permitted only where an explicit safety choice is required, such as on `extern` members and [fields requiring an explicit safety annotation](#fields).
 
 The libraries team has since provided new data from [`LibraryImport` source generation](https://github.com/dotnet/roslyn/issues/84555) that warrants revisiting the question.
 `LibraryImport` is the preferred modern form of P/Invoke, but whether its generated partial implementation is `extern` is an implementation detail.
