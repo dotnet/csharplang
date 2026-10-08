@@ -61,9 +61,21 @@ The existing interpretation of a bare `is` expression is preserved. If the right
 
 If an omitted-argument name only identifies generic types, it does not resolve as an ordinary type. The expression can then be interpreted as an is-pattern, where `pattern_type` resolution may infer the missing type arguments.
 
-## Compatibility
-[compatibility]: #compatibility
+## Drawbacks
+[drawbacks]: #drawbacks
+
+### Breaking changes
 
 This proposal makes previously invalid patterns with omitted type arguments valid. It can also make a type name ambiguous when generic types of different arities infer to viable candidates.
 
 Declaration and recursive patterns use the candidate-resolution rules above. In contrast, a bare `is C` that already resolves to an accessible type retains its legacy is-type interpretation and does not perform inference.
+
+## Alternatives
+[alternatives]: #alternatives
+
+None.
+
+## Open questions
+[open]: #open-questions
+
+None.
