@@ -38,7 +38,7 @@ A full draft specification is at [MadsTorgersen/csharpstandard#7](https://github
 
 ### Pattern types
 
-Every pattern form that contains a type uses a shared `pattern_type` production, which wraps `type_group`. This covers declaration patterns, type patterns, typed positional patterns, and typed property patterns. Existing type parameters and aliases continue to work through the fallback behavior of type-group resolution.
+Every pattern form that contains a type uses a shared `pattern_type` production, which wraps `type_group`. This covers declaration patterns, type patterns, typed positional patterns, and typed property patterns.
 
 The `type_group` is resolved through the shared type-group machinery. Its bound types are considered directly, while each unbound generic type `C<X₁...Xᵥ>` is considered by applying [generalized type inference](https://github.com/dotnet/csharplang/blob/main/proposals/target-typed-generic-type-inference.md) with:
 
