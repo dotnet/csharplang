@@ -66,7 +66,7 @@ If an omitted-argument name only identifies generic types, it does not resolve a
 
 ### Breaking changes
 
-This proposal makes previously invalid patterns with omitted type arguments valid. It can also make a type name ambiguous when generic types of different arities infer to viable candidates.
+Type group lookup as currently defined can in rare cases shadow a non-generic type that would have previously been found and selected.
 
 ## Alternatives
 [alternatives]: #alternatives
