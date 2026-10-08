@@ -71,7 +71,7 @@ Type group lookup as currently defined can in rare cases shadow a non-generic ty
 ## Alternatives
 [alternatives]: #alternatives
 
-None.
+We only do inference with the incoming expression type as a target type, leading to an upper-bound inference. However, pattern types are valid both if they convert to the incoming type *and* the other way around. We could consider *also* attempting a lower-bound inference, maybe as a fallback.
 
 ## Open questions
 [open]: #open-questions
