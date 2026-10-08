@@ -40,7 +40,7 @@ A full draft specification is at [MadsTorgersen/csharpstandard#7](https://github
 
 Every pattern form that contains a type uses a shared `pattern_type` production, which wraps `type_group`. This covers declaration patterns, type patterns, typed positional patterns, and typed property patterns.
 
-The `type_group` is resolved through the shared type-group machinery. Its bound types are considered directly, while each unbound generic type `C<X₁...Xᵥ>` is considered by applying [generalized type inference](https://github.com/dotnet/csharplang/blob/main/proposals/target-typed-generic-type-inference.md) with:
+A type group resolves to one or more bound and unbound candidate types. Its bound types are considered directly, while each unbound generic type `C<X₁...Xᵥ>` is considered by applying [generalized type inference](https://github.com/dotnet/csharplang/blob/main/proposals/target-typed-generic-type-inference.md) with:
 
 - the type parameters and constraints of `C<X₁...Xᵥ>`;
 - empty parameter and argument lists;
