@@ -144,13 +144,7 @@ We could accept this, try to limit inference to when a union conversion would no
 ## Alternatives
 [alternatives]: #alternatives
 
-### Infer through union type arguments
-
-The compiler could map a case back to the type arguments of its containing union and infer through those arguments. This is rejected because generic class and struct parameters are invariant. It would replace the variance and parameter arrangement of the case type with the unrelated shape of the union type, producing exact inference in cases such as `Seq<T>(IEnumerable<T>)` and mishandling reordered, repeated, or omitted parameters.
-
-### Add rules to each inference consumer
-
-Target-typed invocations, type patterns, and future consumers could each specify union-aware inference independently, potentially through pretend method calls. This is more complex and risks differences between consumers. Extending the shared bound-inference operations expresses the behavior once at the point where source and target types are already compared.
+None.
 
 ## Open questions
 [open]: #open-questions
