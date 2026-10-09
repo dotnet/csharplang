@@ -135,6 +135,12 @@ Multiple possible substitutions for one case type do not count as multiple match
 
 This is an improvement to inference and can therefore change binding of existing source code. New bounds can make a previously inapplicable overload candidate applicable, change which inferred type is selected, introduce an overload-resolution ambiguity, or cause an inference which previously succeeded to fail. The frequency and practical impact of those changes require investigation.
 
+### Conversion precedence
+
+The proposed inference mirrors union conversions, and if successful would often be followed by a case type being successfully converted to a union type. However, user defined conversions can shadow union conversions and take precedence, even where union/case type inference has been applied.
+
+We could accept this, try to limit inference to when a union conversion would not be shadowed (very gnarly!) or perhaps rethink the precedence order between user-defined conversions and union conversions.
+
 ## Alternatives
 [alternatives]: #alternatives
 
