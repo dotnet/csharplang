@@ -62,7 +62,7 @@ public union Option<T>(None, Some<T>);
 
 #### Lower-bound inference
 
-An argument of case type can contribute bounds to a parameter of union type:
+An argument of a case type can contribute bounds to a parameter of a union type:
 
 ```csharp
 static void Consume<T>(Option<T> option) { }
@@ -74,7 +74,7 @@ Input type inference makes a lower-bound inference from `Some<int>` to `Option<T
 
 #### Upper-bound inference
 
-A union target can contribute bounds to a result of case type:
+A union target can contribute bounds to a result of a case type:
 
 ```csharp
 static Some<T> CreateSome<T>() => ...;
