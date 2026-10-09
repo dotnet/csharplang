@@ -74,7 +74,7 @@ Input type inference makes a lower-bound inference from `Some<int>` to `Option<T
 
 #### Upper-bound inference
 
-A union target can contribute bounds to a result of a case type:
+In combination with [target-typed generic type inference](https://github.com/dotnet/csharplang/blob/main/proposals/target-typed-generic-type-inference.md), a union target can contribute bounds to a result of a case type:
 
 ```csharp
 static Some<T> CreateSome<T>() => ...;
