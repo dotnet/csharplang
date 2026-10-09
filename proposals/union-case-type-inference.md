@@ -16,7 +16,7 @@ This allows, for example, `Some<int>` to contribute an `int` bound when the para
 
 The union conversion and matching features connect a union type to its case types, but generic type inference does not otherwise see that relationship.
 
-Inference should follow the same type relationship that makes the case relevant: select the unique matching case, then recurse through that case using the existing bound-inference rules. In particular, inference should not project through the type arguments of the union itself. Class and struct type parameters are invariant, so such a projection would incorrectly turn covariance or contravariance in a case type into exact inference.
+Inference should follow the same type relationship that makes the case relevant: select the unique matching case, then recurse through that case using the existing bound-inference rules.
 
 Putting this behavior in lower-bound and upper-bound inference also makes it available to any inference consumer that supplies the relevant source and target types. Target-typed invocation inference and type-pattern inference can use the shared behavior directly, without specifying pretend or "as if" method calls for unions.
 
