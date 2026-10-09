@@ -2,7 +2,7 @@
 
 Champion issue: <https://github.com/dotnet/csharplang/issues/9662>
 
-*This proposal builds on the [unions](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-15.0/unions.md), [target-typed generic type inference](https://github.com/dotnet/csharplang/blob/main/proposals/target-typed-generic-type-inference.md), and [target-typed inference for type patterns](https://github.com/dotnet/csharplang/blob/main/proposals/inference-for-type-patterns.md) proposals.*
+*This proposal builds on the [unions](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-15.0/unions.md) proposal and generalized type inference.*
 
 ## Summary
 [summary]: #summary
