@@ -31,7 +31,7 @@ The case selection test admits identity and the inheritance or interface relatio
 
 The following bullet is added to [§12.6.3.11 Lower-bound inferences](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/expressions.md#126311-lower-bound-inferences) in `standard/expressions.md`, before the existing bullet which determines sets of type arguments.
 
-Throughout this section, **bold** indicates text being added to the existing specification.
+**Bold** indicates text being added to the existing specification.
 
 > A *lower-bound inference from* a type `U` *to* a type `V` is made as follows:
 >
