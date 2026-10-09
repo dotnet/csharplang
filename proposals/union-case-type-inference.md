@@ -131,8 +131,6 @@ Multiple possible substitutions for one case type do not count as multiple match
 ## Drawbacks
 [drawbacks]: #drawbacks
 
-This adds union-specific behavior to the core bound-inference rules and therefore affects every inference consumer. The unique-case requirement also deliberately gives up inference in ambiguous cases rather than trying to reproduce later conversion or overload-resolution decisions.
-
 ### Compatibility impact
 
 This is an improvement to inference and can therefore change binding of existing source code. New bounds can make a previously inapplicable overload candidate applicable, change which inferred type is selected, introduce an overload-resolution ambiguity, or cause an inference which previously succeeded to fail. The frequency and practical impact of those changes require investigation.
