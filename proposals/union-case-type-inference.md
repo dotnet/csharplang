@@ -102,14 +102,15 @@ Inference recurses through the case type rather than through the union's generic
 ```csharp
 public union Seq<T>(IEnumerable<T>);
 
-static IEnumerable<T> Singleton<T>(T value) => [value];
+static IEnumerable<T> Singleton<T>(ref T value) => [value];
 
-Seq<object> sequence = Singleton("item"); // T is inferred as string
+string item = "item";
+Seq<object> sequence = Singleton(ref item); // T is inferred as string
 ```
 
-Inference from the argument contributes a lower bound of `string`. Upper-bound inference from `Seq<object>` to `IEnumerable<T>` selects the case `IEnumerable<object>` and recurses through `IEnumerable<out T>`, contributing an upper bound of `object`. The ordinary variance rules therefore allow `T` to be fixed as `string`.
+Inference from the `ref` argument contributes an exact bound of `string`. Upper-bound inference from `Seq<object>` to `IEnumerable<T>` selects the case `IEnumerable<object>` and recurses through `IEnumerable<out T>`, contributing an upper bound of `object`. Fixing therefore retains the exact bound and fixes `T` as `string`.
 
-Projecting the inference through `Seq<T>` instead would treat the union's class or struct type parameter as invariant and infer `object` exactly, losing the covariance expressed by the actual case type.
+Projecting the inference through `Seq<T>` instead would treat the union's class or struct type parameter as invariant and contribute an exact bound of `object`. That would conflict with the exact `string` bound and cause inference to fail, losing the covariance expressed by the actual case type.
 
 ### Case type shapes
 
