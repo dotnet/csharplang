@@ -18,8 +18,6 @@ The union conversion and matching features connect a union type to its case type
 
 Inference should follow the same type relationship that makes the case relevant: select the unique matching case, then recurse through that case using the existing bound-inference rules.
 
-Putting this behavior in lower-bound and upper-bound inference also makes it available to any inference consumer that supplies the relevant source and target types. Target-typed invocation inference and type-pattern inference can use the shared behavior directly, without specifying pretend or "as if" method calls for unions.
-
 ## Detailed design
 [design]: #detailed-design
 
