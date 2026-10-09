@@ -112,30 +112,6 @@ Inference from the `ref` argument contributes an exact bound of `string`. Upper-
 
 Projecting the inference through `Seq<T>` instead would treat the union's class or struct type parameter as invariant and contribute an exact bound of `object`. That would conflict with the exact `string` bound and cause inference to fail, losing the covariance expressed by the actual case type.
 
-#### Case type shapes
-
-Reordered and repeated type parameters are handled by ordinary inference after the case is selected:
-
-```csharp
-public record Pair<TFirst, TSecond>(TFirst First, TSecond Second);
-public union Reordered<T, U>(Pair<U, T>);
-public union Repeated<T>(Pair<T, T>);
-```
-
-Lower-bound inference from `Pair<string, int>` to `Reordered<T, U>` selects `Pair<U, T>` and infers `T` as `int` and `U` as `string`. A source of `Pair<int, int>` can similarly match `Repeated<T>`, while `Pair<int, string>` cannot make that case type match through a single substitution for `T`.
-
-A case type need not mention every union type parameter:
-
-```csharp
-public union Wrapped<TTag, T>(None, Some<T>);
-
-static void Use<TTag, T>(TTag tag, Wrapped<TTag, T> value) { }
-
-Use("tag", new Some<int>(42)); // TTag is string; T is int
-```
-
-The `Some<T>` case contributes a bound only for `T`; the first argument determines `TTag`. The rules also require neither the union nor every case to be generic. A non-generic union can still contribute its fixed case type when inference compares it with a generic target shape, and a direct type-parameter case is handled by the ordinary recursive rule when selected.
-
 ### Ambiguity and no inference
 
 Case selection is deliberately conservative. If more than one case type satisfies the substitution and type-relationship test, the union bullet does not apply and no union-derived inference is made:
