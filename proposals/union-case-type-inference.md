@@ -128,12 +128,6 @@ This rule does not attempt to predict which case a later union conversion or ove
 
 Multiple possible substitutions for one case type do not count as multiple matching cases. After that case is selected, existing recursive inference rules apply, including their own uniqueness requirements, and may still produce no bounds.
 
-### Interactions and limitations
-
-This proposal assumes the definitions of *union type* and *case type* from the current unions proposal. It changes only lower-bound and upper-bound inference. It does not specify union declarations, representation, conversions, matching or exhaustiveness, case construction or type-pattern syntax, or compiler implementation.
-
-The proposal does not itself introduce a new inference consumer. Consumers such as target-typed generic type inference and type-pattern inference benefit when they initiate the relevant upper-bound or lower-bound inference. Existing consumers benefit in the same way without needing union-specific mappings to synthetic method signatures.
-
 ## Drawbacks
 [drawbacks]: #drawbacks
 
