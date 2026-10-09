@@ -14,7 +14,7 @@ This allows, for example, `Some<int>` to contribute an `int` bound when the para
 ## Motivation
 [motivation]: #motivation
 
-The union conversion and matching features connect a union type to its case types, but generic type inference does not otherwise see that relationship. As a result, type arguments which are clear from the selected case must be written explicitly, or each consumer of inference must introduce its own special rule.
+The union conversion and matching features connect a union type to its case types, but generic type inference does not otherwise see that relationship.
 
 Inference should follow the same type relationship that makes the case relevant: select the unique matching case, then recurse through that case using the existing bound-inference rules. In particular, inference should not project through the type arguments of the union itself. Class and struct type parameters are invariant, so such a projection would incorrectly turn covariance or contravariance in a case type into exact inference.
 
