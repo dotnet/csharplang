@@ -30,7 +30,7 @@ This can be implemented through one of two strategies:
 1. The runtime adds a new virtual method to System.Object, and the compiler unconditionally calls this new method for every `new T` expression.
 2. Or, the compiler adds some runtime check via an interface or a pattern-based runtime helper to resolve and call a final initializer if one exists.
 
-Strategy 1 is our only option if we don't want it to _still_ be a breaking change to add a final initializer to an _unsealed_ type. If we start with a base class with no final initializer in assembly A and a derived class with no final initializer in assembly B, instantiating the derived class doesn't run any final initializers. Then if a new version of assembly A adds a final initializer to the base class and is used together with the _original_ assembly B, instantiating a the derived class will still not run any final initializers. This bypasses the new final initializer in A, and there is the break. The only way to overcome this break is for the derived class to have inherited the final initializer method from System.Object, so that it was called all along even when neither class had yet declared a final initializer.
+Strategy 1 is our only option if we don't want it to _still_ be a breaking change to add a final initializer to an _unsealed_ type. If we start with a base class with no final initializer in assembly A and a derived class with no final initializer in assembly B, instantiating the derived class doesn't run any final initializers. Then if a new version of assembly A adds a final initializer to the base class and is used together with the _original_ assembly B, instantiating the derived class will still not run any final initializers. This bypasses the new final initializer in A, and there is the break. The only way to overcome this break is for the derived class to have inherited the final initializer method from System.Object, so that it was called all along even when neither class had yet declared a final initializer.
 
 Either strategy would be a virally invasive change. It adds boilerplate IL to everything, from `throw new ArgumentException(...);` to `new List<int>()`. Adding a new call after every `new T` expression in System.Private.CoreLib increases code size by 6.5%. The JIT may be able to do some extra analysis and elide some of the calls at runtime to avoid the some of the performance hit.
 
@@ -111,7 +111,7 @@ To allow passing to a `: new()` type parameter, there are two routes that could 
 
    If users are blocked by wanting to use their types with `: new()` type parameters in existing libraries, they can request the library author to add a target for the latest langversion, opt in to final initializer safety, and publish. No extra work is needed on the part of the library author (though the library author may be transitively blocked on passing their own `: new()` type parameter to the `: new()` type parameter of an upstream dependency which also needs the same publish).
 
-2. Place the burden on the user of opting into the new behavior a type parameter at a time with `allows init` for example. This seems like a fairly unpleasant assertion: hardly anyone will have a use case for accepting all types except for ones final initializers, and most everyone will want to enable it, so the explicitness becomes an attractive nuisance.
+2. Place the burden on the user of opting into the new behavior a type parameter at a time with `allows init` for example. This seems like a fairly unpleasant assertion: hardly anyone will have a use case for accepting all types except for ones with final initializers, and most everyone will want to enable it, so the explicitness becomes an attractive nuisance.
 
 Alternatively, the option would remain open to implement this later, or never. Types with final initializers would be blocked on all `: new()` type parameters in the meantime.
 
@@ -137,7 +137,7 @@ var c = new C { A = 1 };
 c.B = 2;
 // Output:
 // set A
-// Final initialize
+// Final initializer
 // set B
 ```
 
@@ -146,7 +146,7 @@ var c = new C { A = 1, B = 2 };
 // Output:
 // set A
 // set B
-// Final initialize
+// Final initializer
 ```
 
 The only thing that would make these examples behave differently is the explicit call to the final initializer method. If you remove that call, the IL is identical between these two examples for today's release-optimized builds. The runtime cannot infer the call.
