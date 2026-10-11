@@ -2,6 +2,17 @@
 
 This document shares the motivation from the main [Final initializers](./final-initializers.md) proposal and aims to present the main design principles for discussion. When consensus is found, conclusions can be merged into the proposal spec.
 
+## Prevent ordinary calls to the final initializer method
+
+The final initializer method has the ability to set readonly fields and call `init` accessors on the current instance. This is a special ability, shared with `init` accessors, which ends at the end of object construction.
+
+Therefore, it is not possible to call the final initializer method directly. The compiler calls it implicitly at the end of object construction and `with` expressions, but user code cannot call the final initializer. This also guarantees that the final initializer is never called more than once for the same instance.
+
+There is an open question on the [means of preventing ordinary calls](#means-of-preventing-ordinary-calls).
+
+> [!NOTE]
+> An implementer might also assume that the final initializer is running before certain other members (such as methods not called from inside the class) could possibly run, but that would always be an incorrect assumption regardless of how this question is decided. During object construction, an extension property, indexer, or Add method can be invoked which has full access to all members on the partially-constructed object. This language feature does not guarantee that the final initializer gets a chance to run before other members. Therefore, any implementer of a final initializer may wish to harden the final initializer against being invoked unexpectedly late in the object's usage, or at least think through the potential outcomes.
+
 ## Breaking change to add a final initializer to an existing type
 
 At the opposite end of lifecycle management, it's a documented breaking change to implement IDisposable on an existing type.
@@ -83,21 +94,13 @@ The required members actually uses a looser check which leaves the possibility o
 
 ## Open questions
 
-### Prevent ordinary calls to the final initializer method?
+### Means of preventing ordinary calls?
 
-Is there a sufficient reason to prevent the ordinary calls to the method that implements the final initializer?
+[Ordinary calls to the final initializer method are prevented](#prevent-ordinary-calls-to-the-final-initializer-method). How is this implemented?
 
-One possible pitfall is if a final initializer is implemented in such a way that was assumed to have an no-more-than-once guarantee and therefore was free of thread synchronization.
+The method could be declared with an unspeakable name, though this risks having it show in an unpleasant way in tooling that lists members. If combined with a choice to place the method on System.Object, the new unspeakable name would show up on every type.
 
-> [!NOTE]
-> An implementer might also assume that the final initializer is running before certain other members (such as methods not called from inside the class) could possibly run, but that would always be an incorrect assumption regardless of how this question is decided. During object construction, an extension property, indexer, or Add method can be invoked which has full access to all members on the partially-constructed object. This language feature does not guarantee that the final initializer gets a chance to run before other members. Therefore, any implementer of a final initializer may wish to harden the final initializer against being invoked unexpectedly late in the object's usage, or at least think through the potential outcomes.
-
-If this prevention is not made part of the design, it will need to be clearly documented to authors of final initializers that they may be invoked normally, and to consider them as any other method in their design. If they wish to prevent more-than-once calls, they will need to implement the check themselves (and decide whether to make the check thread-safe or not).
-
-If this prevention is made part of the design, it remains to be decided how this prevention is implemented.
-
-- The method could be declared with an unspeakable name, though this risks having it show in an unpleasant way in tooling that lists members. If combined with a choice to place the method on System.Object, the new unspeakable name would show up on every type.
-- The method's signature could be modreq'd so that only the compiler can invoke, override, or implement it. There is another lifecycle instance method on all objects which has an ordinary name in metadata, but which may not be called from code (`object.Finalize`).
+Alternatively, the method's signature could be modreq'd so that only the compiler can invoke, override, or implement it. There is another lifecycle instance method on all objects which has an ordinary name in metadata, but which may not be called from code (`object.Finalize`).
 
 ### Conditionality for object creation?
 
