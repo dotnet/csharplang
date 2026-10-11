@@ -69,11 +69,13 @@ Checking for a possible final initializer and running it can be accomplished reg
 
 ## Downlevel compiler protection
 
-A type with a final initializer must gain a `[CompilerFeatureRequired]` attribute on the type itself to block a downlevel compiler. A downlevel compiler needs to be blocked not just from instantiating or inheriting such a type directly, for which placing the attribute on constructors would suffice; it also must be prevented from using the type as a type parameter with a `: new()` constraint. Otherwise, it will be possible to use the type without calling the final initializer, which breaks the language feature's guarantee.
+A type with a final initializer must gain a `[CompilerFeatureRequired]` attribute on the type itself to block a downlevel compiler, along with `[Obsolete(true)]` for even older compilers which is typically done in combination. A downlevel compiler needs to be blocked not just from instantiating or inheriting such a type directly, for which placing the attribute on constructors would suffice; it also must be prevented from using the type as a type parameter with a `: new()` constraint. Otherwise, it will be possible to use the type without calling the final initializer, which breaks the language feature's guarantee.
 
 This cannot be mitigated by tying the language feature to a new runtime version and augmenting `Activator.CreateInstance<T>()` on that runtime to run a final initializer. Generic code such as `new T { InterfaceProp = 1 }` must run the final initializer after the `InterfaceProp` setter has been invoked.
 
 Without this protection, it would not be safe to create a brand-new type with a final initializer, because not all consumers will be forced to use a compiler which knows about final initializers.
+
+The required members actually uses a looser check which leaves the possibility of a downlevel compiler passing a type with required members to a `: new()` type parameter which bypasses it. Open question: [Match the downlevel compiler loophole of required members?](#match-the-downlevel-compiler-loophole-of-required-members)
 
 ## Unconditionality for object creation
 
@@ -114,6 +116,18 @@ To allow passing to a `: new()` type parameter, there are two routes that could 
 2. Place the burden on the user of opting into the new behavior a type parameter at a time with `allows init` for example. This seems like a fairly unpleasant assertion: hardly anyone will have a use case for accepting all types except for ones with final initializers, and most everyone will want to enable it, so the explicitness becomes an attractive nuisance.
 
 Alternatively, the option would remain open to implement this later, or never. Types with final initializers would be blocked on all `: new()` type parameters in the meantime.
+
+Recommendation: Do nothing. Types with required members have the exact same limitation.
+
+### Match the downlevel compiler loophole of required members?
+
+The [Downlevel compiler protection](#downlevel-compiler-protection) section currently blocks all usage of a type with a final initializer on downlevel compilers. This is necessary to prevent a downlevel compiler from passing such a type to a `: new()` type parameter which would then bypass the final initializer.
+
+However, the required members feature has the same problem with `: new()` type parameters bypassing the required member guarantee, and it uses a looser approach where only constructors are blocked downlevel, not the entire type. That leaves a loophole.
+
+If the additional safety was not important for required members, maybe it is not for final initializers. On the other hand, what's the anticipated downside of keeping the loophole closed?
+
+Recommendation: block all downlevel usage of a type with a final initializer.
 
 ## Appendix A: Final initializer calls cannot be inferred by the runtime
 
