@@ -34,6 +34,12 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ### Mon Oct 12, 2026
 
+- More type inference (Mads)
+  - [Inference for pattern types](https://github.com/dotnet/csharplang/pull/10352)
+  - [Inference between union and case types](https://github.com/dotnet/csharplang/pull/10355)
+- [Final initializers](https://github.com/dotnet/csharplang/blob/5055b97eee8c10d12f822f6d4db9464329615947/proposals/final-initializers.md) (Joseph)
+  - [LDM in 2020](https://github.com/dotnet/csharplang/blob/main/meetings/2020/LDM-2020-04-27.md#primary-constructor-bodies-and-validators) approved the syntax. Next is discussing semantics.
+
 ### Mon Oct 5, 2026
 
 - Simple LDM decisions (Fred, Mads)
