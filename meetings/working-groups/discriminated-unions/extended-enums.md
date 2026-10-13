@@ -127,6 +127,63 @@ Each case with a parameter list generates a nested record type. `enum class` gen
 
 TODO: Should the structs be readonly?  Seems like that goes against normal structs (including `record struct`).  Seems like that could be opt in with `readonly enum struct X`.
 
+#### Case Construction Expressions
+
+Case construction is part of the enum's source-level behavior. Ordinary enums use `Color.Red` to obtain a value; adding a payload to a case should add arguments to that form, giving `E.Case(arguments)`. It should not require adding `new`.
+
+```csharp
+enum struct Option<T>
+{
+    None,
+    Some(T value)
+}
+
+Option<int> empty = Option<int>.None;
+Option<int> present = Option<int>.Some(42);
+
+enum class State
+{
+    Ready,
+    Running(int attempt)
+}
+
+State ready = State.Ready;
+State running = State.Running(3);
+```
+
+A case declared without a parameter list is a value expression when accessed in a value context. A case declared with a parameter list is constructed by invoking its case name with the corresponding arguments, including an empty argument list for a declaration such as `Empty()`. Argument binding follows the generated case constructor's rules. Construction creates an active case and preserves its payload, including null payloads where permitted. The enum's default-value policy remains a separate choice.
+
+The type of either case construction expression is the enclosing enum type. This follows the behavior of ordinary enum member access and allows a variable initialized from one case to later hold another:
+
+```csharp
+var option = Option<int>.Some(42); // Option<int>
+option = Option<int>.None;
+```
+
+The nested case type remains available in type contexts, including type patterns, declarations, casts, and `typeof`. Direct construction with `new E.Case(arguments)` retains ordinary object-creation behavior and produces the nested case type. Thus `Option<int>.Some caseValue = new(42)` and `Option<int>.Some(42)` serve different purposes: the first explicitly constructs a case value, while the second constructs an enum value.
+
+This is a language rule for declared enum cases. The compiler binds the case name according to its type, value, invocation, or pattern context, and lowers enum construction to the representation's case construction and case-to-enum conversion. Data-free class cases can use their shared instances; data-free struct cases produce the corresponding active case. A case's metadata must allow a consuming compiler to recognize these operations across assemblies. The precise encoding remains open.
+
+The lowering does not need a nested type and an ordinary same-name factory method or property in the same declaration, which would conflict in C#. The case declaration supplies the source-level operation; generated implementation members can have distinct metadata names. User-declared members that conflict with a case name require a diagnostic.
+
+##### Target-Typed Case Construction
+
+With [target-typed static member access](../../../proposals/target-typed-static-member-access.md), the expected enum type supplies the qualifier for these same operations:
+
+```csharp
+void UseInt(Option<int> value) { /* ... */ }
+
+UseInt(.None);
+UseInt(.Some(42));
+
+Option<int> Empty() => .None;
+Option<int> Present(int value) => .Some(value);
+```
+
+The enum proposal defines the case's value and invocation behavior; target-typed access finds that case on the expected enum type. Its invocation binding must compose with enum case construction as well as ordinary static method calls. The leading dot should therefore allow `.Case(arguments)` with the same construction behavior as `E.Case(arguments)`, without requiring `new`. This does not depend on making arbitrary type names callable or adopting a general type-to-value conversion feature.
+
+These leading-dot examples require the proposed target-typed member access feature. As with its other uses, a target type must be available, and the case name does not resolve an otherwise ambiguous overload. Generic inference can help provide that type, as discussed in the [separate construction and inference proposal change](https://github.com/dotnet/csharplang/pull/10369).
+
 #### Combination Rules
 
 - **Constant enums**: Can use extended base types but NOT have parameter lists
@@ -319,12 +376,12 @@ public struct Option<T> : IUnion
         return false;
     }
     
-    // Constructors and factories
+    // Constructors and case-to-enum conversions
     public Option(None _) => _discriminant = 1;
     public Option(Some some) => (_discriminant, _value) = (2, some.value);
     
-    public static Option<T> None => new Option<T>(new None());
-    public static Option<T> Some(T value) => new Option<T>(new Some(value));
+    public static implicit operator Option<T>(None value) => new(value);
+    public static implicit operator Option<T>(Some value) => new(value);
 }
 ```
 
