@@ -344,6 +344,120 @@ var message = operation switch
 };
 ```
 
+### Switch Translation
+
+The emit strategy for `switch` statements and expressions over shape enums remains open. The following strategies are candidates to validate through benchmarks and inspection of generated code. The default strategy should expose case tests that the runtime can optimize efficiently; the optimizations described here are expectations, rather than guarantees about a particular JIT version.
+
+The switch input is evaluated once. The examples show distinct cases without guards; a full translation must also preserve null handling, source ordering where it affects behavior, guards, deconstruction, and the fallback behavior of the original statement or expression. Only case tests whose reordering preserves those semantics can be reorganized.
+
+#### `enum class` Case Tests
+
+For an `enum class`, an initial strategy is to compare the active case's exact runtime type against the sealed generated case types. For example:
+
+```csharp
+enum class E
+{
+    C1(int value),
+    C2(int value),
+    C3(int value)
+}
+
+switch (e)
+{
+    case E.C1(var value):
+        HandleC1(value);
+        break;
+    case E.C2(var value):
+        HandleC2(value);
+        break;
+    case E.C3(var value):
+        HandleC3(value);
+        break;
+}
+```
+
+The conceptual translation is:
+
+```csharp
+// Evaluate the input and unwrap its active case reference once,
+// if the union representation uses a wrapper.
+var __case = /* active case reference from e */;
+var __type = __case?.GetType();
+
+if (__type == typeof(E.C1))
+{
+    var __c1 = (E.C1)__case;
+    HandleC1(__c1.value);
+}
+else if (__type == typeof(E.C2))
+{
+    var __c2 = (E.C2)__case;
+    HandleC2(__c2.value);
+}
+else if (__type == typeof(E.C3))
+{
+    var __c3 = (E.C3)__case;
+    HandleC3(__c3.value);
+}
+// Emit the original null and fallback behavior as needed.
+```
+
+Because the case types are sealed, each exact type comparison identifies one case. The runtime can potentially replace `GetType()` and `typeof` equality with comparisons of method-table pointers, performing dispatch directly on the case reference's type identity. The successful comparison also establishes the case type for the subsequent extraction.
+
+Although the emitted tests form a linear chain, they compare one runtime type against distinct known types. For a large number of cases, we expect the runtime to be able to recognize this structure and choose a balanced comparison tree or another efficient dispatch strategy. Whether it does so, and when that strategy beats a linear chain or profile-guided ordering, needs validation.
+
+#### `enum struct` Case Tests
+
+For an `enum struct`, we expect generated case predicates along these lines:
+
+```csharp
+public bool IsC1 => _discriminant == 1;
+public bool IsC2 => _discriminant == 2;
+public bool IsC3 => _discriminant == 3;
+```
+
+An initial translation of the corresponding switch uses these predicates followed by case extraction:
+
+```csharp
+var __value = e;
+if (__value.IsC1)
+{
+    E.C1 __c1 = (E.C1)__value;
+    HandleC1(__c1.value);
+}
+else if (__value.IsC2)
+{
+    E.C2 __c2 = (E.C2)__value;
+    HandleC2(__c2.value);
+}
+else if (__value.IsC3)
+{
+    E.C3 __c3 = (E.C3)__value;
+    HandleC3(__c3.value);
+}
+// Emit the original fallback behavior as needed.
+```
+
+Inlining the predicates should expose a sequence equivalent to:
+
+```csharp
+if (__value._discriminant == 1) { /* C1 body */ }
+else if (__value._discriminant == 2) { /* C2 body */ }
+else if (__value._discriminant == 3) { /* C3 body */ }
+```
+
+These are comparisons of the same integral discriminant against distinct constants. We expect the runtime to be able to select a jump table for dense case values, a comparison tree for sparse values, or a linear chain when that is more efficient. It should also be able to eliminate redundant discriminant checks in case extraction after a successful predicate. These expectations need validation; predicate inlining alone does not establish that the comparison chain will become a jump table or tree.
+
+The compiler could alternatively emit an integral switch over the discriminant directly. This is another candidate if predicate-based emit does not produce competitive dispatch. Both strategies must preserve the case-conversion semantics, including reconstructing data from shared storage when necessary.
+
+#### Runtime Recognition and Alternatives
+
+If the runtime does not optimize these patterns sufficiently, we should consider teaching it to recognize exact-type comparison chains and discriminant predicates. Another option is an attribute in `System.Runtime.CompilerServices` identifying a well-behaved discriminated union and describing its case mapping and representation. For a struct, that metadata could identify the discriminant field, allowing the runtime to use it directly when optimizing case dispatch.
+
+Such an attribute would need a defined contract for the case mapping, discriminant access, and extraction behavior. It would provide optimization information while preserving the ordinary semantics of the emitted code. No attribute name or contract is selected here.
+
+Class-based unions could also use the same predicate-and-extraction emit as struct-based unions if the runtime can optimize the class representation efficiently. The final choice should follow performance validation, including switches with many cases, different case distributions, guards, and both statement and expression forms.
+
 ### Exhaustiveness
 
 The compiler tracks all declared cases. Both constant and shape enums can be open or closed (see [Closed Enums proposal](https://github.com/dotnet/csharplang/blob/main/proposals/closed-enums.md)).
