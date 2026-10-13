@@ -124,9 +124,7 @@ enum class Result // or enum struct
 }
 ```
 
-Each case with a parameter list generates a nested record type. `enum class` generates `sealed record class` types that derive from the enum's base class; `enum struct` generates `readonly record struct` types. While these are the generated types, the struct implementation may optimize internal storage.
-
-TODO: Should the structs be readonly?  Seems like that goes against normal structs (including `record struct`).  Seems like that could be opt in with `readonly enum struct X`.
+Cases generate nested record types. `enum class` generates `sealed record class` types that derive from the enum's base class. `enum struct` generates `record struct` types; when the enum has the `readonly` modifier, its generated cases are `readonly record struct` types. Cases without payloads also have record semantics. The struct implementation may optimize internal storage while preserving those semantics.
 
 #### Case Construction Expressions
 
@@ -183,7 +181,7 @@ Option<int> Present(int value) => .Some(value);
 
 The enum proposal defines the case's value and invocation behavior; target-typed access finds that case on the expected enum type. Its invocation binding must compose with enum case construction as well as ordinary static method calls. The leading dot should therefore allow `.Case(arguments)` with the same construction behavior as `E.Case(arguments)`, without requiring `new`. This does not depend on making arbitrary type names callable or adopting a general type-to-value conversion feature.
 
-These leading-dot examples require the proposed target-typed member access feature. As with its other uses, a target type must be available, and the case name does not resolve an otherwise ambiguous overload. Generic inference can help provide that type, as discussed in the [separate construction and inference proposal change](https://github.com/dotnet/csharplang/pull/10369).
+These leading-dot examples require the proposed target-typed member access feature. As with its other uses, a target type must be available, and the case name does not resolve an otherwise ambiguous overload. Generic inference can help provide that type, as discussed in [Contextual Case Construction and Inference](#contextual-case-construction-and-inference).
 
 #### Combination Rules
 
@@ -271,6 +269,69 @@ enum struct Option<T>
 - Inline case storage without boxing on construction
 - Better cache locality
 - Reduced GC pressure
+
+#### Readonly, Copying, and `with`
+
+An `enum struct` supports the `readonly` modifier with the same meaning and restrictions as an ordinary [readonly struct](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/structs.md#1622-struct-modifiers). An unmodified enum struct is mutable. A `readonly enum struct` has readonly instance storage and cannot mutate `this` in its instance members, subject to the usual constructor and initialization rules. Readonly values can still be assigned to mutable variables; the modifier constrains the value's instance state, rather than preventing reassignment of a variable.
+
+The generated case types follow the corresponding [record-struct rules](../../../proposals/csharp-10.0/record-structs.md#properties): a mutable enum struct generates mutable record-struct cases with `get`/`set` payload properties; a readonly enum struct generates readonly record-struct cases with `get`/`init` payload properties. This choice applies to generated cases. User-declared nested types follow the ordinary rules for nested declarations. Generated case queries, extraction methods, and equality members are readonly instance members.
+
+Copying follows the usual class and struct rules. Assigning an enum class copies a reference to its case instance. Assigning an enum struct copies the discriminant and stored payload. Extracting a struct case produces a separate case value, reconstructed from the stored payload as needed; changing that case value does not update the enum from which it was extracted. Reference payloads retain their original references in either representation, so these copies are shallow. `readonly` does not make referenced objects immutable.
+
+Case types support `with` through their ordinary record behavior. A `with` expression on a class case clones that record; one on a struct case copies it and applies the member initializers. The result can be converted back to the enum:
+
+```csharp
+enum struct Progress
+{
+    Waiting,
+    Running(int count)
+}
+
+Progress progress = Progress.Running(1);
+Progress.Running running = (Progress.Running)progress;
+running.count = 2; // changes the extracted case, not progress
+int originalCount = ((Progress.Running)progress).count; // 1
+progress = running with { count = 3 }; // assigns a new enum value
+```
+
+The same copy-and-update operation is available for readonly case records through their init-only properties:
+
+```csharp
+readonly enum struct Snapshot
+{
+    Ready,
+    Running(int count)
+}
+
+Snapshot snapshot = Snapshot.Running(1);
+Snapshot.Running running = (Snapshot.Running)snapshot;
+// running.count = 2; // error: count is init-only
+snapshot = running with { count = 2 }; // allowed: update a copy, then reassign
+```
+
+An enum class is itself a record base, so `e with { }` clones the runtime case record and preserves its case identity. An enum struct supports the ordinary [struct `with` expression](../../../proposals/csharp-10.0/record-structs.md#allow-with-expression-on-structs), so `e with { }` copies the enum value, including its active case or uninitialized state. Member initializers are bound against the receiver's static type. Case-specific payload properties are members of the case type, so updating them requires a case-typed receiver as above; they are not projected onto the enclosing enum. These operations preserve shallow-copy semantics, and a new enum value is constructed to change cases.
+
+#### Equality and Hashing
+
+Equality and hashing follow the record nature of the cases. Class cases use their generated record equality, including case type identity. For a struct enum, the generated equality members compare case identity and then use the corresponding case record's equality. Thus two values of the same case compare their payloads using the ordinary record rules, including `EqualityComparer<T>.Default` for payload members; different cases remain unequal even when their payloads are equal.
+
+Both representations expose the ordinary record equality surface, including strongly typed `Equals`, `IEquatable<E>`, `Equals(object)`, and `==`/`!=` for the enum type `E`. Struct hashing follows the active case's record hashing and may incorporate case identity. These operations describe the logical case value: unused storage slots and padding do not participate, and an implementation need not reconstruct a case solely to perform them. Ordinary record customization rules apply where matching members can be declared.
+
+Two uninitialized values of the same enum struct are equal and have the same hash code; they are unequal to any active case. A designated default case instead participates as that active case. Class null comparisons follow ordinary record reference equality. A null payload remains part of its active case, so `Some(null)` is distinct from `None` and from a no-case value. Hash values and the precise hash-combining algorithm remain implementation details.
+
+#### Recursive Payloads
+
+Enum structs obey the existing [struct value-semantics rules for cyclic instance-field dependencies](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/structs.md#1642-value-semantics). An inline case payload cannot make the enum depend on itself, directly or indirectly through other value types or constructed generic value types. Choosing shared storage does not relax that rule.
+
+```csharp
+enum struct Expr
+{
+    Number(int value),
+    Add(Expr left, Expr right) // error: recursive value-type layout
+}
+```
+
+The same declaration using `enum class` is permitted because its recursive payloads are references. A struct enum can likewise use a reference type, such as a class wrapper or an array, to break the layout dependency. Wrapping the payload in another value type, including `Nullable<Expr>`, does not itself introduce indirection.
 
 #### Default Values
 
@@ -445,11 +506,11 @@ public struct Message<T>
 
 #### Case Conversions
 
-Converting a case value to the union packs its constituent data into the assigned slots and sets the discriminant. Extracting a case checks the discriminant, reads the slots, and reconstructs the case value. These operations rearrange (or "swizzle") the data between the case's own layout and the union's shared layout; they cannot generally reinterpret the union's payload as the complete case type.
+Converting a case value to the enum packs its constituent data into the assigned slots and sets the discriminant. Extracting a case checks the discriminant, reads the slots, and reconstructs the case value. These operations rearrange (or "swizzle") the data between the case's own layout and the enum's shared layout; they cannot generally reinterpret the enum's payload as the complete case type.
 
-In the example above, constructing a union from `Buffer` stores its array in `_reference0` and its two integers in `_unmanaged`. Extracting `Buffer` reconstructs the case from those locations. Constructing from `Pair` instead uses both reference slots and needs no unmanaged data. Unused reference and typed slots are initialized or cleared to their default values, so the union does not retain references belonging to an inactive case.
+In the example above, constructing an enum from `Buffer` stores its array in `_reference0` and its two integers in `_unmanaged`. Extracting `Buffer` reconstructs the case from those locations. Constructing from `Pair` instead uses both reference slots and needs no unmanaged data. Unused reference and typed slots are initialized or cleared to their default values, so the enum does not retain references belonging to an inactive case.
 
-Storing every complete case in a separate field would avoid this rearrangement, but would make the union pay for the sum of the cases' sizes even though only one case is active. That cost is especially significant for structs, which are copied by value and stored inline in arrays and containing objects. Sharing storage and reconstructing cases is therefore the general strategy for compact, non-boxing storage of mixed case data.
+Storing every complete case in a separate field would avoid this rearrangement, but would make the enum pay for the sum of the cases' sizes even though only one case is active. That cost is especially significant for structs, which are copied by value and stored inline in arrays and containing objects. Sharing storage and reconstructing cases is therefore the general strategy for compact, non-boxing storage of mixed case data.
 
 For `Option<T>`, the shared storage is simply one typed `T` slot:
 
@@ -463,8 +524,9 @@ public enum struct Option<T>
 // Conceptually translates to:
 public struct Option<T>
 {
-    public readonly struct None { }
-    public readonly record struct Some(T value);
+    public record struct None;
+    public record struct Some(T value);
+    // Enum-level record equality members are omitted from this illustration.
 
     // Zero represents no case in this declaration.
     // None needs no payload; Some needs one typed T slot.
@@ -472,18 +534,18 @@ public struct Option<T>
     // The payload slot may be unused and contain default(T).
     private T? _value;
 
-    public bool IsNone => _discriminant == 1;
-    public bool IsSome => _discriminant == 2;
-    public bool HasValue => _discriminant != 0;
+    public readonly bool IsNone => _discriminant == 1;
+    public readonly bool IsSome => _discriminant == 2;
+    public readonly bool HasValue => _discriminant != 0;
 
     // Non-boxing case access
-    public bool TryGetValue(out None value)
+    public readonly bool TryGetValue(out None value)
     {
         value = default;
         return _discriminant == 1;
     }
 
-    public bool TryGetValue(out Some value)
+    public readonly bool TryGetValue(out Some value)
     {
         if (_discriminant == 2)
         {
@@ -567,7 +629,7 @@ Struct case type tests are recognized by the compiler when the input is statical
 
 Generated members must agree on the active case. Extracting a struct case produces a value, not a reference into the enum's storage. Its payload is reconstructed as needed by the storage strategy, and managed-reference payloads retain their original references.
 
-The proposed API uses ordinary constructor syntax, such as `new Result.Success("ok")`, rather than a generated same-name factory. Ordinary C# cannot declare a nested case type alongside a method or property with the same name. User-declared members that conflict with generated members are errors; additional construction shorthand and the final generated API names remain open questions.
+The proposed API supports explicit case-type construction, such as `new Result.Success("ok")`, as well as the enum-level [case construction expressions](#case-construction-expressions). Ordinary C# cannot declare a nested case type alongside a method or property with the same name, so enum-level construction is a compiler-recognized case operation. Matching record members follow ordinary record customization rules; other user-declared members that conflict with generated members are errors. The final generated API names remain an open question.
 
 ## 6. Pattern Matching and Behaviors
 
@@ -624,9 +686,8 @@ switch (e)
 The conceptual translation is:
 
 ```csharp
-// Evaluate the input and unwrap its active case reference once,
-// if the union representation uses a wrapper.
-var __case = /* active case reference from e */;
+// Evaluate the input once; the enum value is the case reference.
+var __case = e;
 var __type = __case?.GetType();
 
 if (__type == typeof(E.C1))
@@ -656,9 +717,9 @@ Although the emitted tests form a linear chain, they compare one runtime type ag
 For an `enum struct`, we expect generated case predicates along these lines:
 
 ```csharp
-public bool IsC1 => _discriminant == 1;
-public bool IsC2 => _discriminant == 2;
-public bool IsC3 => _discriminant == 3;
+public readonly bool IsC1 => _discriminant == 1;
+public readonly bool IsC2 => _discriminant == 2;
+public readonly bool IsC3 => _discriminant == 3;
 ```
 
 An initial translation of the corresponding switch uses these predicates followed by case extraction:
@@ -701,9 +762,9 @@ Another option is an attribute in `System.Runtime.CompilerServices` identifying 
 
 The presence of the attribute would assert that the type follows this contract, giving the runtime a basis for DU-specific optimization. For a struct, the metadata could identify the discriminant field, allowing the runtime to read it directly when optimizing case dispatch. These optimizations must preserve the observable semantics of the switch, including its guards and case bodies. No attribute name or contract is selected here.
 
-Class-based unions could also use the same predicate-and-extraction emit as struct-based unions if the runtime can optimize the class representation efficiently. The final choice should follow performance validation, including switches with many cases, different case distributions, guards, and both statement and expression forms.
+Class enums could also use the same predicate-and-extraction emit as struct enums if the runtime can optimize the class representation efficiently. The final choice should follow performance validation, including switches with many cases, different case distributions, guards, and both statement and expression forms.
 
-If these approaches do not produce satisfactory results, a final fallback is to expose a discriminant and have the compiler emit an integral switch over it directly. This would use the runtime's existing integral-switch optimizations without requiring it to recover a switch from a comparison chain. Class-based unions would also need a discriminant mapping for their cases. Case extraction must still preserve the conversion semantics, including reconstructing data from shared storage when necessary.
+If these approaches do not produce satisfactory results, a final fallback is to expose a discriminant and have the compiler emit an integral switch over it directly. This would use the runtime's existing integral-switch optimizations without requiring it to recover a switch from a comparison chain. Class enums would also need a discriminant mapping for their cases. Case extraction must still preserve the conversion semantics, including reconstructing data from shared storage when necessary.
 
 ### Exhaustiveness
 
@@ -748,6 +809,20 @@ var value = priority switch
 The generated APIs preserve the declared case identity. An active case remains active when one of its payload members is null, and extracting it preserves the payload members' declared types and nullability annotations.
 
 Classes follow ordinary reference nullability rules. For structs, analysis of whether a case is active is separate from the nullability of its payload. Construction from a case, successful case tests, and successful `TryGetValue` calls establish the active case; the default-value rules determine whether zero-initialized storage has an active case.
+
+### Library Evolution
+
+The [open/closed case-set policy](#exhaustiveness) describes whether consumers must account for cases added by later library versions. An open shape enum may acquire new declared cases; existing consumers use their fallback for those cases. Adding a case to a closed shape enum changes its closed-case contract and is a breaking change. Neither policy permits callers to invent case types or arbitrary discriminant values.
+
+Case-set policy does not by itself guarantee source, binary, or layout compatibility. Renaming or removing a public case, changing its payload constructor or properties, or changing between class and struct representations affects existing APIs. Changing the designated default case changes the meaning of zero-initialized storage and is a behavioral breaking change. Adding a struct case can enlarge the unmanaged, reference, or typed storage pools and change alignment. Libraries that depend on fixed native layouts or ahead-of-time ABI contracts need to account for that separately from open-case matching.
+
+The compiler's case mapping must also support the intended versioning policy. If a consuming assembly embeds numeric tags for case tests, existing case mappings must remain valid across supported updates or the tests must obtain the mapping from the defining type. Reordering declarations must not cause a previously compiled test for one case to recognize another. Exposing a discriminant for switch lowering would require an explicit compatibility contract for that API; storage tags are otherwise implementation details. Previously compiled switches retain their normal fallback or unmatched-switch behavior when encountering a case they did not know about.
+
+#### Known-Case Coverage with a Future-Case Fallback
+
+A plain fallback handles future cases, but also hides omissions of cases already known when the consumer is compiled. We would like an opt-in way to mark a fallback as intended for future cases, following the idea of Swift's [`@unknown default`](https://github.com/swiftlang/swift-evolution/blob/main/proposals/0192-non-exhaustive-enums.md#unknown).
+
+Such a fallback still matches all remaining values at runtime. The compiler would additionally warn when the preceding patterns do not fully cover a declared case known at compilation, using the existing exhaustiveness analysis. A guarded or partial payload pattern therefore does not necessarily cover an entire case. Recompiling against a library that adds a case would prompt the consumer to review it while retaining a working fallback. This is a diagnostic refinement of the existing exhaustiveness rules. The handling of null and uninitialized values remains as specified above. The exact opt-in syntax or mechanism remains an LDM decision.
 
 ## 7. Examples and Use Cases
 
@@ -809,7 +884,7 @@ These are proposed language features; the examples below describe their intended
 
 #### Use the Expected Enum Type
 
-The [case construction proposal change](https://github.com/dotnet/csharplang/pull/10370) defines `E.None` and `E.Some(arguments)` as enum construction expressions. When the expected type is `Option<int>`, a leading-dot case name can be looked up on that constructed type. There is no need to repeat either `Option` or `int`, or to introduce `new` when the case carries data:
+[Case construction expressions](#case-construction-expressions) define `E.None` and `E.Some(arguments)` as enum construction expressions. When the expected type is `Option<int>`, a leading-dot case name can be looked up on that constructed type. There is no need to repeat either `Option` or `int`, or to introduce `new` when the case carries data:
 
 ```csharp
 enum struct Option<T>
@@ -833,7 +908,7 @@ For `.None`, the enum's data-free case access produces an active `None` value, u
 
 Constructing `None` does not imply that `default(Option<int>)` represents `None`; default-value policy is a separate choice. The nested case types remain available in type contexts. The target-typed member access proposal's direct nested-type construction form, `new .Some(42)`, can also construct a case value and convert it to the enum.
 
-Target-typed invocation binding must therefore support enum case construction as well as ordinary static method calls. The enum supplies the source-level case operation; its lowering does not need an ordinary same-name factory beside the nested case type, which would conflict in C#. The case construction proposal owns that behavior and its metadata; this section describes how target typing and inference make it convenient to use.
+Target-typed invocation binding must therefore support enum case construction as well as ordinary static method calls. The enum supplies the source-level case operation; its lowering does not need an ordinary same-name factory beside the nested case type, which would conflict in C#. The case construction rules above define that behavior; this section describes how target typing and inference make it convenient to use.
 
 #### Infer Generic Factory Results from Context
 
@@ -950,11 +1025,11 @@ The distinction between `enum class` and `enum struct` allows developers to choo
 ```csharp
 // Allocation per construction
 enum class Result { Ok(int value), Error(string message) }
-Result r1 = new Result.Ok(42); // Heap allocation
+var r1 = Result.Ok(42); // Heap allocation
 
 // No allocation
 enum struct Result { Ok(int value), Error(string message) }  
-Result r2 = new Result.Ok(42); // Inline case storage; no allocation for construction
+var r2 = Result.Ok(42); // Inline case storage; no allocation for construction
 ```
 
 ### Optimization Opportunities
@@ -973,19 +1048,23 @@ Potential optimizations include:
 4. **Serialization**: How should enhanced enums interact with System.Text.Json?
 5. **Additional state**: Should shape enums allow instance fields outside case data?
 6. **Custom constructors**: Should enums allow custom constructors that delegate to cases?
-7. **Construction shorthand**: Should `Result.Ok(42)` be supported in addition to `new Result.Ok(42)`, and how would it coexist with the nested case type name?
-8. **Generic cases**: Should cases support independent generic parameters?
-9. **Interface implementation**: Should enhanced enums automatically implement `IEquatable<T>`?
-10. **Exact lowering**: What names and shapes should the generated APIs and hierarchy metadata have, and are additional convenience APIs needed?
-11. **Uninitialized matching**: Should the `null` pattern match an uninitialized enum struct, or should this state be tested only through case-state APIs?
+7. **Generic cases**: Should cases support independent generic parameters?
+8. **Exact lowering**: What names and shapes should the generated APIs and hierarchy metadata have, and are additional convenience APIs needed?
+9. **Uninitialized matching**: Should the `null` pattern match an uninitialized enum struct, or should this state be tested only through case-state APIs?
+10. **Future-case fallbacks**: What syntax or mechanism should opt into known-case coverage diagnostics while retaining a fallback for future cases?
 
 ## Appendix A: Grammar Changes
 
 ```antlr
 enum_declaration
     : attributes? enum_modifier* 'enum' identifier enum_base? enum_body ';'?
-    | attributes? enum_modifier* 'enum' ('class' | 'struct') identifier type_parameter_list?
+    | attributes? shape_enum_modifier* 'enum' ('class' | 'struct') identifier type_parameter_list?
       type_parameter_constraints_clause* shape_enum_body ';'?
+    ;
+
+shape_enum_modifier
+    : enum_modifier
+    | 'readonly'
     ;
 
 enum_base
@@ -1030,7 +1109,7 @@ shape_enum_case_declaration
     ;
 ```
 
-The `= default` form is permitted only in an `enum struct`, at most once per declaration. It designates a case without a parameter list. Other explicit case initializers are not permitted in shape enums. Type parameter lists and constraints are permitted on shape enums, while constant enums retain their existing non-generic declarations.
+The `= default` form is permitted only in an `enum struct`, at most once per declaration. It designates a case without a parameter list. Other explicit case initializers are not permitted in shape enums. Type parameter lists and constraints are permitted on shape enums, while constant enums retain their existing non-generic declarations. The shape-enum modifiers additionally permit `readonly` for `enum struct`, with the restrictions described above; it is not permitted for `enum class` or constant enums.
 
 ## Appendix B: Possible Connections to Type Unions
 
