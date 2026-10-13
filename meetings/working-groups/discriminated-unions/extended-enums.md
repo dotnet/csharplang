@@ -432,10 +432,10 @@ enum struct Option<T>
 
 ### Contextual Case Construction and Inference
 
-Shape enums should compose with [target-typed static member access](../../../proposals/target-typed-static-member-access.md) and the inference improvements proposed by Mads:
+Shape enums should compose with [target-typed static member access](../../../proposals/target-typed-static-member-access.md) and the proposed inference improvements:
 
-- [Target-typed generic type inference](../../../proposals/target-typed-generic-type-inference.md), including the [revised target-aware binding proposal](https://github.com/dotnet/csharplang/pull/10345).
-- [Inference for constructor calls](../../../proposals/inference-for-constructor-calls.md), including the [updated constructor inference proposal](https://github.com/dotnet/csharplang/pull/10312) and its [type-group lookup](https://github.com/dotnet/csharplang/pull/10310) and [generalized inference](https://github.com/dotnet/csharplang/pull/10311) foundations.
+- [Generalized generic type inference](https://github.com/dotnet/csharplang/pull/10311), which provides shared inference machinery and lets target types contribute bounds alongside arguments.
+- [Inference for constructor calls](../../../proposals/inference-for-constructor-calls.md), tracked by [#9627](https://github.com/dotnet/csharplang/issues/9627), including the [updated constructor inference proposal](https://github.com/dotnet/csharplang/pull/10312) and its [type-group lookup](https://github.com/dotnet/csharplang/pull/10310) foundation.
 - [Inference for type patterns](../../../proposals/inference-for-type-patterns.md).
 
 These are proposed language features; the examples below describe their intended composition with shape enums. They are not available in current C# merely by declaring a shape enum.
@@ -470,7 +470,7 @@ Data-carrying cases retain `new`: `new .Some(42)` is explicitly covered by targe
 
 #### Infer Generic Factory Results from Context
 
-Target-typed generic inference addresses a related problem: a generic factory may lack argument information for one or more enum type parameters. For the struct declaration above, illustrative factories could be:
+Generalized generic type inference addresses a related problem: a generic factory may lack argument information for one or more enum type parameters. For the struct declaration above, illustrative factories could be:
 
 ```csharp
 static class Option
@@ -482,11 +482,14 @@ static class Option
 Option<int> empty = Option.CreateNone(); // infer T = int from the target
 UseInt(Option.CreateNone());             // infer T = int from the parameter
 UseInt(.CreateNone());                   // also omit the factory qualifier
+Func<Option<int>> noneFactory = Option.CreateNone; // infer T from the delegate result
 ```
 
 The last form additionally uses the target-typed member access proposal's [factory-container lookup](../../../proposals/target-typed-static-member-access.md#factory-containers) on the nongeneric sibling `Option`. These factories illustrate composition with the other proposals; shape enums do not need to generate them.
 
-The revised target-typed inference proposal retries inference when ordinary candidate selection fails. `CreateNone()` has no argument from which to infer `T`, so it can use this path. A factory call that already binds successfully keeps that result; the target does not automatically reinterpret it or filter overloads by their return types. Constructor inference extends inference to `new` expressions, but inference for omitted *containing-type* arguments in names such as `new Option.Some(42)` remains an open issue. The leading-dot form avoids that issue by supplying the already constructed containing type `Option<int>`.
+For `CreateNone<T>`, the result type `Option<T>` must fit the target `Option<int>`, supplying the missing bound for `T`. The generalized proposal also lets a method group use the destination delegate's result type, as in `noneFactory`, and allows arguments and targets to determine different type parameters in one inference operation. Constraints, applicability, result conversion, and overload selection still need to succeed; gathering target-derived bounds does not replace those checks. The precise contexts and binding stages that supply target information remain part of the inference design. These examples require that information to flow from assignments, returns, and resolved argument parameter types.
+
+Constructor inference extends the shared machinery to `new` expressions, but inference for omitted *containing-type* arguments in names such as `new Option.Some(42)` remains an open issue. The leading-dot form avoids that issue by supplying the already constructed containing type `Option<int>`.
 
 #### Case Patterns and Limits
 
