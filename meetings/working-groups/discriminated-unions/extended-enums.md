@@ -384,17 +384,8 @@ public struct Option<T> : IUnion
     }
     
     // Constructors and implicit case conversions
-    public Option(None _)
-    {
-        this = default;
-        _discriminant = 1;
-    }
-
-    public Option(Some some)
-    {
-        this = default;
-        (_discriminant, _value) = (2, some.value);
-    }
+    public Option(None _) => _discriminant = 1;
+    public Option(Some some) => (_discriminant, _value) = (2, some.value);
 
     public static implicit operator Option<T>(None value) => new(value);
     public static implicit operator Option<T>(Some value) => new(value);
