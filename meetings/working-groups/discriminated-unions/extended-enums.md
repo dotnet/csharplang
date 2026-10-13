@@ -346,7 +346,9 @@ var message = operation switch
 
 ### Switch Translation
 
-The emit strategy for `switch` statements and expressions over shape enums remains open. The following strategies are candidates to validate through benchmarks and inspection of generated code. The default strategy should expose case tests that the runtime can optimize efficiently; the optimizations described here are expectations, rather than guarantees about a particular JIT version.
+The emit strategy for `switch` statements and expressions over shape enums remains open. The following strategies are candidates to validate through benchmarks and inspection of generated code. We believe the compiler should be able to emit case tests that the runtime can optimize efficiently.
+
+Current JIT code generation does not yet produce the intended dispatch optimizations for the patterns below. In local .NET 11 RC1 checks on ARM64 with 16 sealed class cases and 16 struct cases, both exact-type comparison chains and discriminant-predicate chains remained linear in fully optimized code and Tier 1 code with dynamic PGO. Struct predicates inlined into discriminant comparisons, but those comparisons did not become a jump table or comparison tree. We believe these transformations should be possible with additional runtime support; performance validation is still needed to choose the default strategy.
 
 The switch input is evaluated once. The examples show distinct cases without guards; a full translation must also preserve null handling, source ordering where it affects behavior, guards, deconstruction, and the fallback behavior of the original statement or expression. Only case tests whose reordering preserves those semantics can be reorganized.
 
@@ -404,7 +406,7 @@ else if (__type == typeof(E.C3))
 
 Because the case types are sealed, each exact type comparison identifies one case. The runtime can potentially replace `GetType()` and `typeof` equality with comparisons of method-table pointers, performing dispatch directly on the case reference's type identity. The successful comparison also establishes the case type for the subsequent extraction.
 
-Although the emitted tests form a linear chain, they compare one runtime type against distinct known types. For a large number of cases, we expect the runtime to be able to recognize this structure and choose a balanced comparison tree or another efficient dispatch strategy. Whether it does so, and when that strategy beats a linear chain or profile-guided ordering, needs validation.
+Although the emitted tests form a linear chain, they compare one runtime type against distinct known types. For a large number of cases, we believe the runtime could recognize this structure and choose a balanced comparison tree or another efficient dispatch strategy. When that strategy beats a linear chain or profile-guided ordering needs validation.
 
 #### `enum struct` Case Tests
 
@@ -446,17 +448,19 @@ else if (__value._discriminant == 2) { /* C2 body */ }
 else if (__value._discriminant == 3) { /* C3 body */ }
 ```
 
-These are comparisons of the same integral discriminant against distinct constants. We expect the runtime to be able to select a jump table for dense case values, a comparison tree for sparse values, or a linear chain when that is more efficient. It should also be able to eliminate redundant discriminant checks in case extraction after a successful predicate. These expectations need validation; predicate inlining alone does not establish that the comparison chain will become a jump table or tree.
-
-The compiler could alternatively emit an integral switch over the discriminant directly. This is another candidate if predicate-based emit does not produce competitive dispatch. Both strategies must preserve the case-conversion semantics, including reconstructing data from shared storage when necessary.
+These are comparisons of the same integral discriminant against distinct constants. We believe the runtime could select a jump table for dense case values, a comparison tree for sparse values, or a linear chain when that is more efficient. It should also be able to eliminate redundant discriminant checks in case extraction after a successful predicate. In the local checks, marking the struct conversions for inlining allowed their redundant checks to be removed, but the dispatch chain remained linear. Predicate inlining alone does not establish that the comparison chain will become a jump table or tree.
 
 #### Runtime Recognition and Alternatives
 
-If the runtime does not optimize these patterns sufficiently, we should consider teaching it to recognize exact-type comparison chains and discriminant predicates. Another option is an attribute in `System.Runtime.CompilerServices` identifying a well-behaved discriminated union and describing its case mapping and representation. For a struct, that metadata could identify the discriminant field, allowing the runtime to use it directly when optimizing case dispatch.
+We should consider teaching the runtime to recognize exact-type comparison chains and discriminant predicates with distinct case bodies. The runtime already has a [limited switch-recognition pass](https://github.com/dotnet/runtime/blob/main/src/coreclr/jit/switchrecognition.cpp#L28) for constant-comparison chains whose successful tests all reach the same destination. It runs after inlining, but stops recognizing a chain when successful tests reach different destinations, as they do in these DU switches. Extending this recognition is one possible starting point.
 
-Such an attribute would need a defined contract for the case mapping, discriminant access, and extraction behavior. It would provide optimization information while preserving the ordinary semantics of the emitted code. No attribute name or contract is selected here.
+Another option is an attribute in `System.Runtime.CompilerServices` identifying a well-behaved discriminated union and describing its case mapping and representation. If optimizing these patterns in arbitrary user code raises correctness concerns, the attribute could provide an explicit opt-in with a well-defined contract. That contract would specify how case identity remains stable during dispatch, that case predicates are side-effect-free and agree with the case mapping, and how extraction behaves after a successful test.
+
+The presence of the attribute would assert that the type follows this contract, giving the runtime a basis for DU-specific optimization. For a struct, the metadata could identify the discriminant field, allowing the runtime to read it directly when optimizing case dispatch. These optimizations must preserve the observable semantics of the switch, including its guards and case bodies. No attribute name or contract is selected here.
 
 Class-based unions could also use the same predicate-and-extraction emit as struct-based unions if the runtime can optimize the class representation efficiently. The final choice should follow performance validation, including switches with many cases, different case distributions, guards, and both statement and expression forms.
+
+If these approaches do not produce satisfactory results, a final fallback is to expose a discriminant and have the compiler emit an integral switch over it directly. This would use the runtime's existing integral-switch optimizations without requiring it to recover a switch from a comparison chain. Class-based unions would also need a discriminant mapping for their cases. Case extraction must still preserve the conversion semantics, including reconstructing data from shared storage when necessary.
 
 ### Exhaustiveness
 
