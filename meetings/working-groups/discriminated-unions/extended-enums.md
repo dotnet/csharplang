@@ -1,6 +1,6 @@
 # Discriminated Unions and Enhanced Enums for C#
 
-This proposal introduces enhanced enums as an elegant way to build discriminated unions in C#. Building on [type unions](../../../proposals/csharp-15.0/unions.md) and [closed hierarchies](../../../proposals/csharp-15.0/closed-hierarchies.md), enhanced enums provide familiar, concise syntax for algebraic sum types where cases are known at declaration time.
+This proposal introduces enhanced enums as a way to express discriminated unions in C#. Like [type unions](../../../proposals/csharp-15.0/unions.md), they represent a value drawn from a set of possible case types. Enhanced enums define the enum and its named, data-carrying cases together, with a choice of class or struct representation.
 
 It consolidates design feedback from many years of repository discussions, especially [#113](https://github.com/dotnet/csharplang/issues/113) and related issues.
 
@@ -29,13 +29,13 @@ It consolidates design feedback from many years of repository discussions, espec
 
 ## 1. Overview
 
-C# gains a layered approach to union types: type unions provide the foundation for combining types, while enhanced enums offer elegant syntax for discriminated unions where you define cases and their union together.
+Type unions specify a set of possible case types, which may be existing types. Shape enums define fresh, named cases together with the data each case carries. Both can express algebraic sum types, but shape enums preserve the identity of each declared case even when multiple cases have the same payload types.
 
 ```csharp
-// Type unions - combine existing types
+// Type unions - combine existing case types
 union Result(string, ValidationError, NetworkException);
 
-// Shape enums - discriminated unions with integrated case definitions
+// Shape enums - define data-carrying cases together
 enum struct PaymentResult // or `enum class`
 {
     Success(string transactionId),
@@ -48,13 +48,13 @@ enum struct PaymentResult // or `enum class`
 
 ### From Type Unions to Discriminated Unions
 
-Type unions solve the fundamental problem of representing "one of several types". A particularly important pattern is discriminated unions, where:
+Type unions represent "one of several types". Discriminated unions give each alternative a distinct case identity and its own payload shape, where:
 
 - Cases are defined together as a logical unit
 - Each case may carry different data
 - The set of cases is typically closed and known at design time
 
-Shape enums provide natural syntax for this pattern—expressing the entire discriminated union in a single declaration rather than manually defining and combining types.
+Shape enums provide natural syntax for this pattern, defining the enum and its case types in a single declaration.
 
 ### Limitations of Current Enums
 
@@ -70,17 +70,16 @@ Enhanced enums address all these limitations while preserving conceptual simplic
 
 By extending the existing `enum` keyword, enhanced enums provide a grow-up story. Simple enums remain simple, while advanced scenarios become possible without abandoning familiar patterns.
 
-## 3. Type Unions (Foundation)
+## 3. Type Unions and Shape Enums
 
-The [unions proposal](../../../proposals/csharp-15.0/unions.md#summary) describes type unions. They provide:
+The [unions proposal](../../../proposals/csharp-15.0/unions.md) describes union types whose contents can be one of their case types. Those case types can be existing types, may overlap, and can carry data through their own members. A shape enum instead declares fresh case types together with the enum. For example, `Left(int value)` and `Right(int value)` remain different cases even though both carry an `int`.
 
-- Implicit conversions from case types to the union type
-- Pattern matching that unwraps union contents
-- Exhaustiveness checking in switch expressions
-- Enhanced nullability tracking
-- Flexible storage strategies (boxing or non-boxing)
+The related behaviors include case-to-enclosing-type conversion, matching against case types, and exhaustiveness analysis. Shape enums specify those behaviors for their own representations:
 
-An `enum struct` uses these union behaviors to test and extract its active case. An `enum class` is an abstract base class whose cases derive from it; reference conversions and pattern matching operate on the case instance itself. Both forms declare their case types together with the discriminated union.
+- An `enum class` is an abstract base class whose sealed case types derive from it. Reference conversions and pattern matching operate on the case instance itself.
+- An `enum struct` stores a discriminant and the active case's data. Generated members support construction, case tests, and extraction without boxing; the compiler recognizes its declared case types for pattern matching.
+
+Union types can also be classes or structs, while the current `union` declaration syntax generates a struct storing its contents in an object reference. Shape enums offer the class hierarchy and inline struct representations described here. Whether either representation should literally implement the type-union pattern is a separate design choice discussed in [Appendix B](#appendix-b-possible-connections-to-type-unions).
 
 ## 4. Enhanced Enums
 
@@ -89,7 +88,7 @@ An `enum struct` uses these union behaviors to test and extract its active case.
 - **Progressive enhancement**: Simple enums stay simple; complexity is opt-in
 - **Data carrying**: Each case can carry its own constituent data
 - **Familiar syntax**: Builds on existing enum and record concepts
-- **Union foundation**: Shape enums are discriminated unions
+- **Known cases**: A shape enum declares its case set together with its case types
 
 ### Syntax Extensions
 
@@ -107,7 +106,7 @@ enum TranscendentalConstants : double { Pi = 3.14159, E = 2.71828 }
 
 #### Shape Declarations
 
-Create a shape enum (discriminated union) by:
+Create a shape enum by:
 - Adding `class` or `struct` after `enum`
 
 ```csharp
@@ -125,7 +124,7 @@ enum class Result // or enum struct
 }
 ```
 
-Each case with a parameter list generates a nested record type. `enum class` generates `sealed record class` types that derive from the enum's base class; `enum struct` generates `readonly record struct` types. While these are the generated types, the struct union implementation may optimize internal storage.
+Each case with a parameter list generates a nested record type. `enum class` generates `sealed record class` types that derive from the enum's base class; `enum struct` generates `readonly record struct` types. While these are the generated types, the struct implementation may optimize internal storage.
 
 TODO: Should the structs be readonly?  Seems like that goes against normal structs (including `record struct`).  Seems like that could be opt in with `readonly enum struct X`.
 
@@ -175,9 +174,9 @@ enum Priority : string
 
 These compile to `System.Enum` subclasses with the appropriate `value__` backing field. Non-integral constant enums require explicit values for each member.
 
-### Shape Enums: Discriminated Unions Made Elegant
+### Shape Enums: Data-Carrying Cases
 
-Shape enums define a discriminated union and its cases with integrated syntax:
+Shape enums define the enum type and its cases with integrated syntax:
 
 ```csharp
 enum class FileOperation // or enum struct
@@ -211,7 +210,7 @@ enum struct Option<T>
 - No struct tearing risk
 - Natural null representation
 
-**`enum struct`** creates discriminated unions with optimized value-type storage:
+**`enum struct`** creates an enum with inline value-type case storage:
 - Inline case storage without boxing on construction
 - Better cache locality
 - Reduced GC pressure
@@ -256,7 +255,7 @@ A null payload does not mean that the enum has no active case. For example, `new
 
 #### Members and Methods
 
-Enums can contain members just like unions:
+Enhanced enums can contain members:
 
 ```csharp
 enum class Result<T>
@@ -285,7 +284,7 @@ Members are restricted to:
 
 ## 5. Translation Strategy
 
-Shape enums generate nested case types. An `enum class` uses inheritance to represent its cases; an `enum struct` stores a discriminant and case data and implements the union access patterns. The following translations illustrate the proposed API surface, rather than prescribing exact storage layouts or metadata names.
+Shape enums generate nested case types. An `enum class` uses inheritance to represent its cases; an `enum struct` stores a discriminant and case data and generates members for case access. The following translations illustrate the proposed API surface, rather than prescribing exact storage layouts or metadata names.
 
 ### `enum class` Translation
 
@@ -341,8 +340,7 @@ public enum struct Option<T>
 }
 
 // Conceptually translates to:
-[Union]
-public struct Option<T> : IUnion
+public struct Option<T>
 {
     public readonly struct None { }
     public readonly record struct Some(T value);
@@ -356,14 +354,7 @@ public struct Option<T> : IUnion
     public bool IsSome => _discriminant == 2;
     public bool HasValue => _discriminant != 0;
 
-    public object? Value => _discriminant switch
-    {
-        1 => new None(),
-        2 => new Some(_value!),
-        _ => null
-    };
-    
-    // Non-boxing access pattern
+    // Non-boxing case access
     public bool TryGetValue(out None value)
     {
         value = default;
@@ -396,9 +387,9 @@ public struct Option<T> : IUnion
 }
 ```
 
-The `[Union]` attribute identifies the struct as a union type. Its public constructors and `Value` property satisfy the basic union pattern, and `HasValue` with the `TryGetValue` overloads satisfy the non-boxing access pattern. `IUnion` provides access through the union interface described in the [unions proposal](../../../proposals/csharp-15.0/unions.md).
+The compiler recognizes the struct as a shape enum through its declaration and emitted case metadata. The generated predicates and `TryGetValue` methods provide non-boxing case access; the constructor and conversion operators provide construction and checked extraction. The exact metadata encoding remains open.
 
-If this declaration instead uses `None = default`, the `None` constructor sets the discriminant to zero, `IsNone` and `TryGetValue(out None)` test for zero, and `Value` maps zero to the `None` case. `HasValue` is then always true for values produced by the generated APIs, including `default(Option<T>)`.
+If this declaration instead uses `None = default`, the `None` constructor sets the discriminant to zero, and `IsNone` and `TryGetValue(out None)` test for zero. `HasValue` is then always true for values produced by the generated APIs, including `default(Option<T>)`.
 
 ### Generated APIs and Conversions
 
@@ -428,9 +419,8 @@ For structs, we propose generating the following members in addition to the case
 - `HasValue`, which is false for the uninitialized representation and true for any active case, including a designated default case.
 - A `TryGetValue(out Case value)` overload for each case. It returns true and supplies the case value when that case is active; otherwise it returns false and assigns `default(Case)` to the out parameter.
 - An explicit conversion from the enum type to each case type. It returns the active case value or throws `InvalidCastException` if a different case, or no case, is active.
-- The basic union pattern's `Value` property. It returns a boxed active case or null for an uninitialized enum. Access through `Value` may allocate; the case predicates, `TryGetValue`, and case conversions do not require boxing.
 
-The implicit operators make case-to-enum conversion available to callers that do not recognize the union pattern. The explicit operators provide checked extraction, which the type-union proposal does not otherwise supply.
+The generated operators allow callers to construct and extract cases through ordinary C# conversions. The case predicates, `TryGetValue`, and case conversions do not require boxing.
 
 ```csharp
 Option<int> option = new Option<int>.Some(42);
@@ -445,7 +435,7 @@ if (option.TryGetValue(out Option<int>.Some value))
 Option<int>.Some extracted = (Option<int>.Some)option;
 ```
 
-Struct case type tests use union pattern matching at compile time. They do not establish CLR inheritance between the enum and the case types. Boxing an enum struct boxes the enum itself, so a case type test on a value whose static type is `object` does not unwrap it. The `as` operator does not invoke the generated conversions; `TryGetValue` provides conditional case extraction for structs.
+Struct case type tests are recognized by the compiler when the input is statically known to be a shape enum. They do not establish CLR inheritance between the enum and the case types. Boxing an enum struct boxes the enum itself, so a case type test on a value whose static type is `object` does not extract its case. The `as` operator does not invoke the generated conversions; `TryGetValue` provides conditional case extraction for structs.
 
 Generated members must agree on the active case. Extracting a struct case produces a value, not a reference into the enum's storage. Its payload is reconstructed as needed by the storage strategy, and managed-reference payloads retain their original references.
 
@@ -453,9 +443,9 @@ The proposed API uses ordinary constructor syntax, such as `new Result.Success("
 
 ## 6. Pattern Matching and Behaviors
 
-### Unified Pattern Matching
+### Case Pattern Matching
 
-Class cases use normal reference type patterns and record deconstruction. Struct cases use union patterns to test and extract the active case without boxing:
+Class cases use normal reference type patterns and record deconstruction. For structs, a type or declaration pattern naming a declared case tests whether that case is active and, on success, makes its value available without boxing. Property and positional patterns for that case operate on the extracted case value. Patterns examining the enum's own members operate on the enum value.
 
 ```csharp
 var message = operation switch
@@ -467,7 +457,7 @@ var message = operation switch
 };
 ```
 
-For an `enum class`, the `null` pattern matches a null enum reference. For an `enum struct` without a designated default case, it matches the uninitialized representation, following the union pattern's logical-null behavior (`HasValue` is false). With a designated default case, zero matches that case and does not match `null`. A case containing a null payload still matches its case type.
+For an `enum class`, the `null` pattern matches a null enum reference. For an `enum struct`, `HasValue` distinguishes the uninitialized representation from an active case. Whether the `null` pattern should also match the uninitialized representation remains an open question. With a designated default case, zero represents an active case. A case containing a null payload still matches its case type.
 
 ### Exhaustiveness
 
@@ -477,7 +467,7 @@ Open enums can be used to signal that the enum author may add new cases in futur
 
 For shape enums, this open/closed distinction concerns evolution of the declared case set. It does not permit arbitrary user-defined subclasses or arbitrary discriminant values.
 
-Covering all declared cases does not cover the no-case state. A possibly-null class input needs a `null` arm or a fallback to handle null. A struct without a designated default case likewise needs to handle its uninitialized representation unless analysis establishes that a case is active. A struct with a designated default case has no additional uninitialized state: covering that case also covers zero-initialized values. Diagnostics should account for these states even when every case type is non-nullable; the no-case state is distinct from payload nullability.
+Covering all declared cases does not cover the no-case state. A possibly-null class input needs a `null` arm or a fallback to handle null. A struct without a designated default case likewise needs to handle its uninitialized representation, for example with a `{ HasValue: false }` arm or a fallback, unless analysis establishes that a case is active. A struct with a designated default case has no additional uninitialized state: covering that case also covers zero-initialized values. Diagnostics should account for these states even when every case type is non-nullable; the no-case state is distinct from payload nullability.
 
 For constant enums, "open" also means values outside the declared set can be safely freely cast to the enum type.
 
@@ -507,14 +497,11 @@ var value = priority switch
 }
 ```
 
-### All Union Behaviors
+### Case State and Nullability
 
-Shape enums provide:
-- Implicit conversions from case values
-- Nullability tracking
-- Well-formedness guarantees
+The generated APIs preserve the declared case identity. An active case remains active when one of its payload members is null, and extracting it preserves the payload members' declared types and nullability annotations.
 
-For classes these follow from reference semantics and the declared hierarchy; for structs they follow from the generated union members. The default-value rules above remain part of the observable behavior of both forms.
+Classes follow ordinary reference nullability rules. For structs, analysis of whether a case is active is separate from the nullability of its payload. Construction from a case, successful case tests, and successful `TryGetValue` calls establish the active case; the default-value rules determine whether zero-initialized storage has an active case.
 
 ## 7. Examples and Use Cases
 
@@ -597,12 +584,12 @@ enum class ConnectionState
 - **Cognitive load**: One concept instead of two
 - **Migration path**: Existing enums can be enhanced incrementally
 
-### Union Foundation
+### Two Representations
 
-Shape enums are discriminated unions expressed through enum syntax. The two representations reuse different language mechanisms:
+Shape enums provide the same case declaration syntax with two representations:
 
 - `enum class` uses a base class and sealed case types, with ordinary reference conversions and pattern matching.
-- `enum struct` uses generated case types and the union access patterns, allowing inline storage and non-boxing case access.
+- `enum struct` uses a discriminant, inline case storage, and generated members for non-boxing case access.
 - Both expose their declared case set for exhaustiveness checking, with the default and no-case behavior specified above.
 
 ### Storage Strategy Trade-offs
@@ -619,9 +606,9 @@ The distinction between `enum class` and `enum struct` allows developers to choo
 - Singleton pattern for parameter-less cases
 
 **`enum struct`**:
-- Size equals discriminator plus space for largest case
+- Size depends on the discriminant, case storage, and required alignment
 - Inline storage, no heap allocation
-- Optimized layout per union's non-boxing pattern
+- Generated predicates and extraction methods access cases without boxing
 
 ### Allocation Patterns
 
@@ -637,17 +624,17 @@ Result r2 = new Result.Ok(42); // Inline case storage; no allocation for constru
 
 ### Optimization Opportunities
 
-Shape enums benefit from all union optimizations:
+Potential optimizations include:
 - Singleton cases to shared instances
 - Small structs fitting in registers
 - Pattern matching via optimized paths
-- Exhaustive switches avoiding default branches
+- Using the known case set to reduce redundant case checks
 
 ## 10. Open Questions
 
 1. **Case accessibility**: Should individual cases support access modifiers in addition to the proposed public nested case types?
 2. **Partial support**: Should enhanced enums support `partial` for source generators?
-3. **Generated API placement**: Should the struct union members be public directly, as illustrated, or use a union member provider to reduce name conflicts?
+3. **Optional type-union integration**: Should either representation implement the union pattern, as discussed in [Appendix B](#appendix-b-possible-connections-to-type-unions)?
 4. **Serialization**: How should enhanced enums interact with System.Text.Json?
 5. **Additional state**: Should shape enums allow instance fields outside case data?
 6. **Custom constructors**: Should enums allow custom constructors that delegate to cases?
@@ -655,6 +642,7 @@ Shape enums benefit from all union optimizations:
 8. **Generic cases**: Should cases support independent generic parameters?
 9. **Interface implementation**: Should enhanced enums automatically implement `IEquatable<T>`?
 10. **Exact lowering**: What names and shapes should the generated APIs and hierarchy metadata have, and are additional convenience APIs needed?
+11. **Uninitialized matching**: Should the `null` pattern match an uninitialized enum struct, or should this state be tested only through case-state APIs?
 
 ## Appendix A: Grammar Changes
 
@@ -708,3 +696,54 @@ shape_enum_case_declaration
 ```
 
 The `= default` form is permitted only in an `enum struct`, at most once per declaration. It designates a case without a parameter list. Other explicit case initializers are not permitted in shape enums. Type parameter lists and constraints are permitted on shape enums, while constant enums retain their existing non-generic declarations.
+
+## Appendix B: Possible Connections to Type Unions
+
+Shape enums and [type unions](../../../proposals/csharp-15.0/unions.md) both describe a value drawn from a set of possible case types. Shape enums declare fresh, named case types together with the enum and preserve their case identity, even when different cases carry the same payload types. This makes connections between the features possible, but does not require the same implementation or all of the same language behaviors.
+
+The design above does not require either representation to implement the union pattern, carry `[Union]`, or implement `IUnion`. Whether to generate union-pattern implementations for structs, classes, both, or neither is an LDM decision. The following discusses possible integration rather than specifying additional requirements.
+
+### Union Types, Declarations, and Runtime Access
+
+The unions proposal distinguishes a *union type* from a *union declaration*. A custom union type can be a class or struct. Compiler recognition uses `[Union]` and a pattern of creation and access members. The `union` declaration syntax chooses a particular struct implementation that stores its contents in an object reference. Implementing the custom-union pattern would therefore allow shape enums to retain their own representation and storage strategy.
+
+The `IUnion` interface is a separate option for runtime access to a value's contents. Implementing it alone does not opt a type into compiler union behavior. This distinction is described in the [union patterns update](union-patterns-update.md#marking-union-types-with-an-attribute).
+
+### Possible Integration for `enum class`
+
+An enum class could implement the union pattern while remaining a base class with sealed case types. Using a [union member provider](../../../proposals/csharp-15.0/unions.md#union-member-providers), generated `Create` methods could return the supplied case reference unchanged, and the provider's `Value` property could return `this`. An optional `IUnion` implementation could expose that same reference to runtime consumers. None of these members would require a wrapper allocation.
+
+This could give class enums a common access protocol with other union types and allow code that understands that protocol to consume them uniformly.
+
+The language benefits are limited, however. Inheritance already supplies case-to-enum conversions, type tests, `as`, downcasts, record deconstruction, and normal null behavior. Hierarchy metadata can supply the declared case set for exhaustiveness. Union-pattern integration would introduce additional APIs or provider metadata largely to describe behavior that these mechanisms already provide. It would also need to preserve the expected reference semantics and the restriction that only declared case types derive from the enum; the union pattern alone does not enforce that restriction.
+
+The `Value` view would refer to the case instance itself, rather than to a distinct contained object. Runtime consumers would need to account for that when interpreting or recursively inspecting union values.
+
+### Possible Integration for `enum struct`
+
+Struct enums have a closer fit with the custom-union pattern. The generated constructors could identify the case types, and the generated `HasValue` and `TryGetValue` members could satisfy the non-boxing access pattern. Integration would additionally require `[Union]` and an object-valued `Value` property that returns a boxed active case, or null when no case is active. `IUnion` could optionally expose this view at runtime.
+
+Potential benefits include:
+
+- Reusing the existing rules for case construction, case type matching, deconstruction, and nullable-union matching instead of specifying all of those rules independently.
+- Allowing a consuming compiler that understands the union pattern to recognize the generated members and case types, even without support for the shape-enum declaration syntax.
+- Preserving inline storage and non-boxing access through `TryGetValue`; the object-valued view would not require storing cases as boxed objects.
+- Reusing the member-provider mechanism when protocol names conflict with the enum's public API. For example, an `Option<T>` might want its public `Value` to mean the payload and its public `HasValue` to mean `Some`, while the union protocol's members mean the active case and the presence of any case, including `None`.
+
+The main proposal currently exposes `HasValue` directly with the active-case meaning. Changing its name or placement to accommodate a domain-specific property would be an additional API decision.
+
+The costs and semantic choices include:
+
+- The mandatory `Value` property would box struct cases when accessed and would require every case to be convertible to `object`. Future support for ref-like cases would require changes to that contract or a different integration strategy.
+- Exposing protocol members directly would reserve public API names. A member provider could hide those members from the enum's direct public surface, but would add generated interface metadata.
+- Union type patterns target the contained case value, while untyped property and positional patterns inspect the enum itself. These rules would need to be reconciled with patterns intended to test or examine the enum struct itself. The distinction is described in the [LDM decision on pattern targets](../../2026/LDM-2026-08-12.md#union-pattern-matching-targets).
+- Union null patterns would make an uninitialized struct match `null`, through its null `Value`. This is a possible choice for enum structs, but does not follow just from reserving discriminant zero. A designated default case would instead have a non-null case value, and a case with a null payload would remain an active case.
+- Union exhaustiveness treats the declared case types as exhaustive. The enum proposal's separate open/closed policy, including handling future cases, would need to be preserved explicitly.
+
+Both struct default strategies can satisfy the current union contract. An uninitialized default would expose a nullable `Value`; a designated default case could expose a non-nullable `Value` and report `HasValue` as true. The generated annotations and access members would need to agree on those meanings.
+
+### Scope of an LDM Decision
+
+LDM could choose full union-pattern integration, reuse selected compiler machinery without generating the pattern, or keep the features independent. Such a decision should determine which representations participate, whether protocol members are exposed directly or through a provider, whether `IUnion` is useful for runtime interoperability, and how pattern targets, uninitialized matching, and open/closed exhaustiveness interact.
+
+The enum-specific default designation, storage strategy, `IsCase` predicates, and checked struct extraction remain part of the enum design. Any JIT optimization contract would likewise need to describe the enum's stronger case and representation guarantees; `[Union]` alone supports arbitrary custom implementations and does not identify a discriminant field or its mapping. Using similar constructor and `TryGetValue` APIs does not by itself mandate union-pattern integration.
