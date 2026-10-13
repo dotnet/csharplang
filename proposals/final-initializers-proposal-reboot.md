@@ -43,7 +43,7 @@ public record Person
 
 ## Motivation
 
-Final initializers present a clear idiom which resolves a plethora of interrelated issues:
+Final initializers present a clear idiom which resolves a plethora of interrelated issues.
 
 1. Inability to fully adopt object initializers over constructor arguments, due to requiring coordinated validation
 2. Confusing gotchas where `with` expressions can unexpectedly bypass validation in constructors and member initializers, or preserve their stale computations
@@ -57,7 +57,7 @@ C# 9 moved the end of object construction. Before `init` accessors, an object wa
 Final initializers were designed alongside records to fill that gap. The [2020 design review](https://github.com/dotnet/csharplang/blob/main/meetings/2020/LDM-2020-05-04.md#final-initializers) called it "very complicated" to know when to use a constructors and when to use final initializers, so LDM [set them aside](https://github.com/dotnet/csharplang/blob/main/meetings/2020/LDM-2020-07-20.md#future-record-direction) until it had a better handle on the user scenarios. Six years of user requests show users repeatedly converging on the same request, showing that they understand the shape of the exact piece that is still missing.
 ### Required members without a constructor
 
-[Required members](csharp-11.0/required-members.md) exist so that types can stop maintaining constructors that take every required and optional value. Callers set members by name, and the compiler makes sure they set the required ones. But a constructor was also where a type checked those values once and computed whatever it derives from them. That code has nowhere to go. Here's [a user's example](https://github.com/dotnet/csharplang/discussions/6591#discussioncomment-11963490):
+[Required members](csharp-11.0/required-members.md) exist so that types can stop maintaining constructors that take every required and optional value. Instead, callers set member values in an object initializer, and the compiler makes sure they set the required members. But a constructor was also where the code used to live which a type used to check those values and compute any derived values. Now that the values are not available in a constructor, that code has nowhere to go. Here's [a user's example](https://github.com/dotnet/csharplang/discussions/6591#discussioncomment-11963490):
 
 ```cs
 public class Isotope
@@ -253,8 +253,9 @@ Users have asked for this in some form in eight of the last twelve years. Each r
 
 Various frameworks which set members after calling a constructor have each invented the same hook: [`ISupportInitialize`](https://learn.microsoft.com/dotnet/api/system.componentmodel.isupportinitialize) for designers, [`[OnDeserialized]`](https://learn.microsoft.com/dotnet/api/system.runtime.serialization.ondeserializedattribute) and [`IDeserializationCallback`](https://learn.microsoft.com/dotnet/api/system.runtime.serialization.ideserializationcallback) for serialization, and [`IJsonOnDeserialized`](https://learn.microsoft.com/dotnet/api/system.text.json.serialization.ijsonondeserialized) for System.Text.Json. Each only works when that framework does the creating.
 
-
 ### Other languages
+
+These lists are not of languages with the same feature. Since most languages with a "copy with changes" operation call a constructor with the new set of values, C# has set its own path by taking the opposite approach by having the `with` expression first clone, then overwrite fields directly with the changed values.
 
 Other languages with primary constructors, or constructors generated from field declarations, give a type a place to run its own code that every construction goes through:
 
@@ -311,7 +312,7 @@ Five principles decide most of the design:
 
 The final initializer runs at the end of each of these, on the object being created:
 
-- An object creation expression, after the constructor and any object or collection initializer, as in `new C()`, `new C { P = 1 }`, `new() { P = 1 }`, and, for a struct with or without an explicitly declared default constructor, `new S()`.
+- An object creation expression, after the constructor and any object or collection initializer, as in `new C()`, `new C { P = 1 }`, `new() { P = 1 }`, and, for a concrete struct type `S` with or without an explicitly declared default constructor, `new S()`.
 - A `with` expression, on the copy, after the assignments. Whether a `with` expression with no assignments runs it is an [open question](#empty-with-expressions).
 - A collection expression whose target type is created with a constructor and `Add` calls, after the elements are added.
 
