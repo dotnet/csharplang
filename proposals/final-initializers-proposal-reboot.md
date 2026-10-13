@@ -465,18 +465,13 @@ A new subsection, §15.11.7, is added after [§15.11.6 Primary constructors](htt
 >
 > ```antlr
 > final_initializer_declaration
->     : attributes? 'init' final_initializer_body
->     ;
->
-> final_initializer_body
->     : block
->     | '=>' expression ';'
+>     : attributes? 'init' method_body
 >     ;
 > ```
 >
 > A class or struct declaration shall contain at most one *final_initializer_declaration*. For a partial type, this applies across all of its parts.
 >
-> A *final_initializer_body* corresponds exactly to the *method_body* of an instance method with a `void` return type and no parameters (§15.6.11). A final initializer is an instance member.
+> The *method_body* of a final initializer shall be either a block body or an expression body (§15.6.1). It corresponds exactly to the *method_body* of an instance method with a `void` return type and no parameters (§15.6.11). A final initializer is an instance member.
 >
 > A class or struct ***has a final initializer*** if it declares one, or if it is a class whose direct base class has a final initializer. A type parameter has a final initializer if its effective base class has one.
 >
@@ -487,7 +482,7 @@ A new subsection, §15.11.7, is added after [§15.11.6 Primary constructors](htt
 > Invoking the final initializer of an instance whose run-time type is `T` consists of the following steps:
 >
 > - If `T` is a class whose direct base class `B` has a final initializer, the final initializer of `B` is invoked on the instance.
-> - If `T` declares a final initializer, its *final_initializer_body* is executed, with `this` referring to the instance.
+> - If `T` declares a final initializer, its *method_body* is executed, with `this` referring to the instance.
 >
 > > *Note*: This matches an instance constructor that has no *constructor_initializer*, which implicitly invokes the direct base class's constructor before its own body (§15.11.2). *end note*
 >
@@ -495,7 +490,7 @@ A new subsection, §15.11.7, is added after [§15.11.6 Primary constructors](htt
 >
 > > *Note*: In addition to what an instance method can do, a final initializer can assign `readonly` fields declared in the same type (§15.5.3.1), including the fields of a `readonly struct`, and set init-only properties on `this` or `base` (§15.7.3.3). *end note*
 >
-> With regard to nullable reference type analysis (§8.9), at the beginning of a final initializer, a required member (§15.7.1) has its declared nullable state. Any other field or property has its declared nullable state if every instance constructor of the type leaves it in that state, and otherwise is maybe-null. A field or automatically implemented property that is definitely assigned on every path through the *final_initializer_body* of its type need not be initialized to a valid nullable state when an instance constructor of that type returns.
+> With regard to nullable reference type analysis (§8.9), at the beginning of a final initializer, a required member (§15.7.1) has its declared nullable state. Any other field or property has its declared nullable state if every instance constructor of the type leaves it in that state, and otherwise is maybe-null. A field or automatically implemented property that is definitely assigned on every path through the final initializer of its type need not be initialized to a valid nullable state when an instance constructor of that type returns.
 
 ### Class members
 
