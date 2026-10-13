@@ -277,6 +277,70 @@ public union State(Ready, Processing, Complete)
 
 ### `enum struct` Translation
 
+An `enum struct` stores a discriminant and shared inline storage for its case data. The goal is to use the smallest storage that can safely represent any case without boxing its data.
+
+The runtime does not allow a managed reference to overlap non-reference data. The garbage collector must be able to identify reference locations from the type's layout, independently of the current discriminant. Consequently, a single byte buffer large enough for the largest case cannot generally hold arbitrary case values that are reinterpreted on access.
+
+#### Shared Storage
+
+The compiler separates the case data into storage that can safely be shared:
+
+1. **Unmanaged data**: An inline array of bytes large enough for the largest combined unmanaged payload of any one case, accounting for required alignment and padding. Unmanaged fields from different cases share this buffer; fields within the same case occupy distinct locations.
+2. **Managed references**: Reference fields shared across cases, with enough slots for the case containing the most references. Each slot is normally typed as `object`, but can have a more specific reference type when that type can represent every value assigned to the slot. For example, a slot used only for strings can be typed as `string`.
+3. **Generic data**: Strongly typed fields for type parameters whose constraints do not establish that they are reference types. For each such type parameter `T`, there are enough `T` slots for the maximum number of `T` values in any one case. Slots can be shared between cases, but slots for distinct type parameters cannot generally be combined. A type parameter known to be a reference type, such as `T where T : class`, can instead use the managed-reference slots.
+
+A `struct` constraint does not establish that a type parameter is unmanaged: a struct may contain references. Even an `unmanaged` constraint does not generally give the compiler a fixed byte size at declaration time, so generic data may still require typed slots.
+
+Value-type fields that themselves contain references also need a GC-safe representation. When the compiler can safely decompose and reconstruct such a value, its constituent data can use the same storage pools. Otherwise, it must remain in a strongly typed slot, shared with fields of the same type in other cases.
+
+Each pool is sized for its maximum requirement across cases, rather than the sum of all cases' requirements. Those maxima may come from different cases, so the resulting payload can be larger than the largest individual case. Exact field ordering, alignment, and slot assignment are implementation details.
+
+For example:
+
+```csharp
+enum struct Message<T>
+{
+    Text(string text, int code),
+    Buffer(byte[] data, int offset, int count),
+    Pair(string first, string second),
+    Values(T first, T second)
+}
+
+// Conceptual storage (generated case types and accessors omitted):
+public struct Message<T>
+{
+    private byte _discriminant;
+
+    // Buffer has the largest unmanaged payload: two ints.
+    private UnmanagedData _unmanaged;
+
+    // Pair needs two references. The first slot also stores Text's string
+    // or Buffer's byte array; the second is used only for a string.
+    private object? _reference0;
+    private string? _reference1;
+
+    // Values needs two T slots. T may be a value type containing references.
+    private T _value0;
+    private T _value1;
+
+    [InlineArray(8)]
+    private struct UnmanagedData
+    {
+        private byte _element0;
+    }
+}
+```
+
+#### Case Conversions
+
+Converting a case value to the union packs its constituent data into the assigned slots and sets the discriminant. Extracting a case checks the discriminant, reads the slots, and reconstructs the case value. These operations rearrange (or "swizzle") the data between the case's own layout and the union's shared layout; they cannot generally reinterpret the union's payload as the complete case type.
+
+In the example above, constructing a union from `Buffer` stores its array in `_reference0` and its two integers in `_unmanaged`. Extracting `Buffer` reconstructs the case from those locations. Constructing from `Pair` instead uses both reference slots and needs no unmanaged data. Unused reference and typed slots are initialized or cleared to their default values, so the union does not retain references belonging to an inactive case.
+
+Storing every complete case in a separate field would avoid this rearrangement, but would make the union pay for the sum of the cases' sizes even though only one case is active. That cost is especially significant for structs, which are copied by value and stored inline in arrays and containing objects. Sharing storage and reconstructing cases is therefore the general strategy for compact, non-boxing storage of mixed case data.
+
+For `Option<T>`, the shared storage is simply one typed `T` slot:
+
 ```csharp
 enum struct Option<T>
 {
@@ -290,7 +354,7 @@ public struct Option<T> : IUnion
     public readonly struct None { }
     public readonly record struct Some(T value);
 
-    // Optimized layout: discriminator + space for largest case
+    // None needs no payload; Some needs one typed T slot.
     private byte _discriminant;
     private T _value;
     
@@ -319,14 +383,31 @@ public struct Option<T> : IUnion
         return false;
     }
     
-    // Constructors and factories
-    public Option(None _) => _discriminant = 1;
-    public Option(Some some) => (_discriminant, _value) = (2, some.value);
-    
-    public static Option<T> None => new Option<T>(new None());
-    public static Option<T> Some(T value) => new Option<T>(new Some(value));
+    // Constructors and implicit case conversions
+    public Option(None _)
+    {
+        this = default;
+        _discriminant = 1;
+    }
+
+    public Option(Some some)
+    {
+        this = default;
+        (_discriminant, _value) = (2, some.value);
+    }
+
+    public static implicit operator Option<T>(None value) => new(value);
+    public static implicit operator Option<T>(Some value) => new(value);
 }
 ```
+
+The `TryGetValue` accessors reconstruct case values without boxing. Access through the `object`-typed `IUnion.Value` property boxes the returned case struct.
+
+#### Fully Unmanaged Cases
+
+When all case data is unmanaged and the case layouts are statically known, the compiler overlaps the complete case values in a single unmanaged storage region. The payload then requires only the size of the largest case, subject to alignment and padding, in addition to the discriminant.
+
+This layout preserves each case's own representation, so constructing or extracting a case copies its complete value without swizzling individual fields. Authors who need minimal storage and no rearrangement of case data get that layout when their cases meet these requirements. Generic cases that still require typed slots remain subject to the constraints described above.
 
 ## 6. Pattern Matching and Behaviors
 
@@ -485,9 +566,10 @@ The distinction between `enum class` and `enum struct` allows developers to choo
 - Singleton pattern for parameter-less cases
 
 **`enum struct`**:
-- Size equals discriminator plus space for largest case
+- Size includes the discriminant and the maximum storage needed in each shared pool, with required alignment and padding
 - Inline storage, no heap allocation
-- Optimized layout per union's non-boxing pattern
+- Mixed case data is packed and reconstructed through the union's non-boxing accessors
+- Fully unmanaged cases with statically known layouts share space for the largest complete case, without swizzling
 
 ### Allocation Patterns
 
@@ -498,7 +580,7 @@ var r1 = Result.Ok(42);  // Heap allocation
 
 // No allocation
 enum struct Result { Ok(int value), Error(string message) }  
-var r2 = Result.Ok(42);  // Stack only
+var r2 = Result.Ok(42);  // No allocation for case construction
 ```
 
 ### Optimization Opportunities
