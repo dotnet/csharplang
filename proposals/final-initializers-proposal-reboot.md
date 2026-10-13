@@ -296,14 +296,14 @@ struct S
 }
 ```
 
-Like a finalizer, a final initializer has a fixed form, with no name or parameters. It takes no modifiers, but can have attributes. A type can declare at most one, across all of its partial declarations, so that order-dependent code that touches the same state isn't spread across files. Interfaces and static classes can't declare one. No existing code changes meaning, because `init` followed by `{` or `=>` isn't a valid member declaration today.
+Like a finalizer, a final initializer has a fixed form, with no name or parameters. It takes no modifiers ([open question](#visibility-as-public-api)), but can have attributes. A type can declare at most one, across all of its partial declarations, so that order-dependent code that touches the same state isn't spread across files. Interfaces and static classes can't declare one. No existing code changes meaning, because `init` followed by `{` or `=>` isn't a valid member declaration today.
 
 ### Design principles
 
 Five principles decide most of the design:
 
 1. User code can't call a final initializer. This is because a final initializer can assign `readonly` and init-only state. That ability has to end when initialization ends.
-2. Adding a final initializer to an existing type is a breaking change, like adding `IDisposable`. We accept that code compiled before the change doesn't run it. Making the change non-breaking would require 1) blocking all newly compiled types on every downlevel compiler and 2) a run-time check after every `new` expression for a type that comes from, or derives from, another assembly, in case it gains a final initializer later. See [Alternative: Make adding a final initializer non-breaking](#make-adding-a-final-initializer-non-breaking).
+2. Adding a final initializer to an existing type is a breaking change, like adding `IDisposable`. We accept that code compiled before the change doesn't run it. Making the change non-breaking would require 1) blocking all newly compiled types on every downlevel compiler and 2) a runtime check after every `new` expression for a type that comes from, or derives from, another assembly, in case it gains a final initializer later. See [Alternative: Make adding a final initializer non-breaking](#make-adding-a-final-initializer-non-breaking).
 3. Final initializers are pay-for-play. Only types that have one get a method and get calls emitted for it. Whether a type has one is visible to compilers, serializers, and API authors. See [Alternative: Declare the final initializer on `System.Object`](#declare-the-final-initializer-on-systemobject).
 4. Older compilers can't use a type that has a final initializer, because they'd create instances without running it. The runtime can't run it for them, because IL doesn't record where object creation ends (see [Appendix A](#appendix-a-final-initializer-calls-cant-be-inferred-by-the-runtime)).
 5. Every object creation runs the final initializer, whether it's `new C()`, `new C { }`, or `new C { P = 1 }`. Types put important initialization code in their final initializers. Moving code between a constructor and a final initializer never changes *whether* it runs, only *when* it runs.
@@ -318,7 +318,7 @@ The final initializer runs at the end of each of these, on the object being crea
 
 A final initializer runs after every constructor and initializer, but it isn't the first code to see the object. An object initializer can call properties, indexers, `Add` methods, and extension members. Those can call any accessible member on the object before the final initializer runs. So code in other members can't assume the final initializer has run. A type that hands out `this` during initialization should think through what that code might observe.
 
-Serializers, dependency injection containers, and other code that creates objects through reflection don't go through the compiler, so they have to call the final initializer themselves, once, after setting members.
+Serializers, dependency injection containers, and other code that creates objects through reflection don't go through the compiler, so they have to call the final initializer themselves, once, after setting members. They can find it with a [new reflection API](#running-final-initializers-through-reflection).
 
 ### What the body can do
 
@@ -385,7 +385,7 @@ record C { init { } }     // ok
 record D : C { init { } } // ok
 ```
 
-With this rule, a `with` expression whose receiver type has no final initializer can never produce an object that has one. So no `with` expression needs a run-time check for a derived type's final initializer, and older compilers and older binaries never skip one through `with` on a base type.
+With this rule, a `with` expression whose receiver type has no final initializer can never produce an object that has one. So no `with` expression needs a runtime check for a derived type's final initializer, and older compilers and older binaries never skip one through `with` on a base type.
 
 This rule could be loosened later, with less risk the longer that it has been since shipping final initializers.
 
@@ -411,6 +411,8 @@ struct S { init { } }
 Every type that declares or inherits a final initializer gets `[CompilerFeatureRequired("FinalInitializers")]`, plus `[Obsolete]` as an error for compilers that predate `CompilerFeatureRequired`, as required members does. A compiler that supports final initializers ignores that `Obsolete` attribute. The compiler marks the whole type instead of only its constructors, because an older compiler could otherwise pass it to a `new()`, `struct`, or `unmanaged` type parameter ([open question](#marking-for-older-compilers)).
 
 Without this protection, it wouldn't be safe to declare even a brand-new type with a final initializer, because nothing would force its consumers to use a compiler that runs it.
+
+We'd update the VB compiler to run final initializers rather than leave it blocked ([open question](#calling-final-initializers-from-vb)).
 
 ### Versioning
 
@@ -446,9 +448,28 @@ With the recommended answers to two open questions, the compiler always knows st
 
 - An object creation expression that names a type can see whether that type has a final initializer.
 - `new T()` can't create a type that has one, as long as `new()`, `struct`, and `unmanaged` type parameters reject such types ([open question](#type-parameters-constrained-to-new-struct-or-unmanaged)). If a compilation or a type parameter could opt in instead, its `new T()` expressions would call a runtime helper.
-- A `with` expression whose receiver type has no final initializer can't produce an object that has one, under the [safety restriction for derived records](#safety-restriction-for-derived-records). If derived records could add one anyway ([open question](#derived-records-whose-base-has-no-final-initializer)), every `with` expression on an unsealed record type without a final initializer would need a run-time check.
+- A `with` expression whose receiver type has no final initializer can't produce an object that has one, under the [safety restriction for derived records](#safety-restriction-for-derived-records). If derived records could add one anyway ([open question](#derived-records-whose-base-has-no-final-initializer)), every `with` expression on an unsealed record type without a final initializer would need a runtime check.
 
-Future features could change that. An extension constructor whose return type is unsealed and has no final initializer, or a factory method used with an object initializer (`C.Create() { A = 42 }`, [#10207](https://github.com/dotnet/csharplang/discussions/10207)), could produce an object of a derived type that has one. Such features would need their own rule, or a runtime helper that runs the final initializer of the object's run-time type if it has one. An interface such as `System.Runtime.CompilerServices.IFinalInitializable` could make that helper faster; if we add one, users would need to be blocked from calling its method, and we'd need to decide what a constraint on it means.
+Future features could change that. An extension constructor whose return type is unsealed and has no final initializer, or a [factory method](factory-methods.md) used with an object initializer (`C.Create() { A = 42 }`), could produce an object of a derived type that has one. Such features would need their own rule, or a runtime helper that runs the final initializer of the object's runtime type if it has one. An interface such as `System.Runtime.CompilerServices.IFinalInitializable` could make that helper faster; if we add one, users would need to be blocked from calling its method, and we'd need to decide what a constraint on it means. With factory methods, a final initializer might also need to [run more than once](#factory-methods-and-extension-constructors) on the same object.
+
+### Running final initializers through reflection
+
+Code that creates objects through reflection acts as the compiler at runtime, so it needs to find the method the compiler would call. We propose a new method on `Type`, next to the members that reflection users already call to create objects, such as `GetConstructor`:
+
+```cs
+using System.Reflection;
+
+namespace System;
+
+public abstract partial class Type
+{
+    public MethodInfo? GetFinalInitializer() => ...;
+}
+```
+
+`GetFinalInitializer` returns the final initializer that the compiler runs for an object of the type: the one the type declares, or otherwise the one it inherits. Invoking it once on the object runs every final initializer in the hierarchy, base first. It returns `null` if the type has no final initializer. Because it returns a `MethodInfo` instead of running the method, a serializer can look it up once per type and compile the call into the code it already generates for setting members. The method can be implemented with existing reflection, from the final initializer's name and signature, so it can also work for `Type` objects that only read metadata, such as those from `MetadataLoadContext`.
+
+The trimmer needs to keep a type's final initializer whenever it keeps one of the type's constructors, so that objects created through reflection can still run it. Source generators emit C#, so the compiler runs the final initializer for them, as long as they set members in an object initializer rather than after the constructor returns.
 
 ## Specification
 
@@ -650,9 +671,9 @@ We could avoid that break, but only with two costly measures.
 
 First, every older compiler and every compiler for another language would have to be blocked from compiling against .NET vNext at all, because any type in it might gain a final initializer later, and compiling would produce a binary which bypasses the final initializer. Moving a library to .NET vNext would make it consumable only by compilers that know about final initializers.
 
-Second, `new` expressions would need to check at run time for a final initializer wherever another assembly could add one later. The narrowest version of that check, [suggested in the discussion](https://github.com/dotnet/csharplang/discussions/6591#discussioncomment-17478663), applies to a `new` expression whose type comes from another assembly or has a base class from another assembly, treating `System.Object` as a type that never gains one. A type whose whole hierarchy is in the current compilation needs no check, because adding a final initializer to it means recompiling the code that creates it.
+Second, `new` expressions would need to check at runtime for a final initializer wherever another assembly could add one later. The narrowest version of that check, [suggested in the discussion](https://github.com/dotnet/csharplang/discussions/6591#discussioncomment-17478663), applies to a `new` expression whose type comes from another assembly or has a base class from another assembly, treating `System.Object` as a type that never gains one. A type whose whole hierarchy is in the current compilation needs no check, because adding a final initializer to it means recompiling the code that creates it.
 
-The base-class part is what keeps the change non-breaking for unsealed types. Suppose assembly A declares `Base`, assembly B declares `Derived : Base`, and neither has a final initializer. Code in B that creates a `Derived` names a type from its own compilation, but `Derived` has a base class from A, so the check is emitted. When a new version of A adds a final initializer to `Base`, the check finds it, and a run-time helper or interface test is enough to run it, without a new method on `System.Object`.
+The base-class part is what keeps the change non-breaking for unsealed types. Suppose assembly A declares `Base`, assembly B declares `Derived : Base`, and neither has a final initializer. Code in B that creates a `Derived` names a type from its own compilation, but `Derived` has a base class from A, so the check is emitted. When a new version of A adds a final initializer to `Base`, the check finds it, and a runtime helper or interface test is enough to run it, without a new method on `System.Object`.
 
 Even this narrower check reaches most `new` expressions in application code, because most of them create framework types, from `new List<int>()` to `throw new ArgumentException(...)`. For scale, adding a call after every `new` expression in System.Private.CoreLib grows its IL code size by 6.5%. That's an upper bound, since it counts every `new` expression, but an application that mostly creates framework types could come close to it. The JIT might be able to elide some of the calls for types without a final initializer, but it's a blanket overhead nonetheless.
 
@@ -705,7 +726,7 @@ public record SpecialTag(string Name) : Tag(Name)
 }
 ```
 
-That has two costs. First, a new compiler would have to emit a run-time check after every `with` expression whose receiver is an unsealed record type without a final initializer, in case the object's run-time type has one (not C#):
+That has two costs. First, a new compiler would have to emit a runtime check after every `with` expression whose receiver is an unsealed record type without a final initializer, in case the object's runtime type has one (not C#):
 
 ```
 var __copy = b.<Clone>$();
@@ -720,11 +741,11 @@ Second, code from an older compiler, or compiled before this feature, has no suc
 Shall a record class be able to declare a final initializer when its base record class has none, and if so, how do `with` expressions through the base handle it?
 
 1. Make it an error for a record class to declare a final initializer if its base record class has none. A `with` expression through a type without a final initializer then always produces an object without one, so no `with` expression needs a runtime check, and older code has nothing to skip. Deriving a record that needs a final initializer requires a base record that has one. An author who owns the base can declare an empty `init { }` up front, but adding one to an existing base is a breaking change, and a base from another library may never have one. Moving to option 2 later breaks nothing.
-2. Allow it, and check at run time. Any record class can declare a final initializer. Every `with` expression whose receiver is an unsealed record type without a final initializer gets a run-time check, and older code skips the derived type's final initializer. Moving to option 1 later would break code.
+2. Allow it, and check at runtime. Any record class can declare a final initializer. Every `with` expression whose receiver is an unsealed record type without a final initializer gets a runtime check, and older code skips the derived type's final initializer. Moving to option 1 later would break code.
 3. Give every unsealed record class an implicit empty final initializer. This isn't pay-for-play: every unsealed record gets the method, and every `with` expression on an unsealed record pays for a virtual call to it, whether or not any type in the hierarchy declares a final initializer. Bases compiled with the new compiler get marked, which closes the gap with older code for them. But recompiling any existing unsealed record adds a final initializer to it, which is a breaking change, and the marking blocks older compilers from all of them. They'd also be excluded from `new()`, `struct`, and `unmanaged` type parameters unless an implicit empty final initializer is exempt. A base compiled before this feature still has none, so its derived records still need option 1 or 2.
-4. Check at run time as in option 2, and in record classes that have a final initializer, make the clone method that older code calls throw, while new compilers call a different clone method. Older code fails at run time instead of skipping the final initializer. That includes `b with { }`, which wouldn't need to fail if an [empty `with` expression](#empty-with-expressions) skips the final initializer. This is a workaround which leaves a historical stain on the ABI for clone methods.
+4. Check at runtime as in option 2, and in record classes that have a final initializer, make the clone method that older code calls throw, while new compilers call a different clone method. Older code fails at runtime instead of skipping the final initializer. That includes `b with { }`, which wouldn't need to fail if an [empty `with` expression](#empty-with-expressions) skips the final initializer. This is a workaround which leaves a historical stain on the ABI for clone methods.
 
-**Recommendation:** Option 1. It's the only option where no `with` expression needs a run-time check and older code has nothing to skip, and it can be relaxed to option 2 later without breaking anyone.
+**Recommendation:** Option 1. It's the only option where no `with` expression needs a runtime check and older code has nothing to skip, and it can be relaxed to option 2 later without breaking anyone.
 
 ### Type parameters constrained to `new()`, `struct`, or `unmanaged`
 
@@ -766,6 +787,25 @@ Shall we mark the type, or only its constructors?
 
 **Recommendation:** Option 1. Required members accepted the loophole, but closing it here costs older compilers only types they couldn't create correctly anyway.
 
+### Calling final initializers from VB
+
+VB reports an error when it uses a type that requires a compiler feature it doesn't support, so under the [proposed marking](#older-compilers), VB code can't use a type that has a final initializer. VB's [language strategy](https://learn.microsoft.com/dotnet/visual-basic/getting-started/strategy) is to consume new C# and runtime features without adding syntax to declare them. VB already consumes the two features that final initializers build on: it [sets init-only properties](https://learn.microsoft.com/dotnet/visual-basic/whats-new/#visual-basic-169) in object initializers, and it enforces required members, including at `New` constraints.
+
+```vb
+' Person is the record from the Summary, compiled with final initializers.
+Function Rename(p As Person, first As String) As Person                 ' 1 and 3: ok; 2: error
+    Return New Person With {.FirstName = first, .LastName = p.LastName} ' 1: ok, and the final initializer runs; 2 and 3: error
+End Function
+```
+
+Shall the VB compiler call final initializers, or stay blocked from types that have them?
+
+1. Update VB to call them. VB runs the final initializer at the end of each `New` expression, including those with `With` and `From` initializers. It rejects such types as type arguments for `New`, `Structure`, and `unmanaged` type parameters, and it marks its own classes that inherit a final initializer. VB gains no syntax, still can't declare a final initializer, and has no `with` expressions to update. Each later change to where final initializers run needs a matching VB change.
+2. Keep VB blocked, like an older C# compiler. VB code can't use these types at all, so a library whose users include VB code would avoid final initializers on its public types. VB can move to option 1 later without breaking anyone.
+3. Let VB use these types without creating them. VB code could accept instances that other code creates, but it would get an error wherever it creates one or derives from one. VB would need no new code generation, but its users still couldn't create the objects that an API asks them to pass in.
+
+**Recommendation:** Option 1. It's the consumption that VB's strategy calls for, and it follows what VB did for init-only properties and required members, so libraries don't have to choose between final initializers and their VB users.
+
 ### Means of preventing ordinary calls
 
 C# syntax can't name a final initializer, but the [emitted method](#metadata-and-code-generation) is visible in metadata to other compilers and tools. How is it kept from being called?
@@ -773,9 +813,38 @@ C# syntax can't name a final initializer, but the [emitted method](#metadata-and
 1. Give it an unspeakable name, as records do for `<Clone>$`. Tools that list members show the odd name on every type that has a final initializer.
 2. Give it a well-known name and put a modreq on its signature, so that only compilers that understand the modreq can call, override, or implement it, as `init` accessors do with `IsExternalInit`. `object.Finalize` is a precedent for a lifecycle method with an ordinary name that C# code can't call.
 
-Either way, reflection can still find and call it, which serializers need, so its name should be documented.
+Either way, reflection can still call it, which serializers need, and they can find it with [`GetFinalInitializer`](#running-final-initializers-through-reflection) without depending on its name.
 
 **Recommendation:** Option 2. It follows the precedent of `init` accessors and keeps the member lists readable.
+
+### Visibility as public API
+
+Adding a final initializer to an existing type is a [breaking change](#versioning), and a type that has one can't be used by older compilers or passed to `new()`, `struct`, or `unmanaged` type parameters. But the declaration reads like code the type runs for itself, so an author can add one in a minor version without noticing that the public API changed:
+
+```cs
+public class Temperature
+{
+    public double Celsius { get; init; }
+
+    // Added in version 1.1:
+    init
+    {
+        if (Celsius < -273.15) throw new ArgumentOutOfRangeException(nameof(Celsius));
+    }
+}
+```
+
+LDM [accepted `init { ... }`](#syntax) before deciding any semantics. When the original proposal gave every type a final initializer through `System.Object`, declaring one changed only the type's own behavior. Under this design, it changes how other code can use the type. Required members has similar consequences: adding a required member is a breaking change, and a type with one can't be passed to `new()` type parameters or created by older compilers. The only sign of them is the `required` keyword on a member. But `required` names a contract with callers, and `init { ... }` doesn't.
+
+Shall a final initializer stay `init { ... }`, or be marked as part of the type's public API?
+
+1. Keep `init { ... }`. Declaring a final initializer on a new type, the common case, has no compatibility cost. Adding one to a shipped public type is rarer, and API compatibility tools, which compare a library against its shipped version, are in a position to report it, because the type gains a public method and attributes. Requiring a marker later would break existing declarations, so this choice can't be tightened later.
+2. Also require an `init` modifier on the type, as in `public init class Temperature`. The declaration line then shows what the type gives up, the way `ref struct` shows that a type can't be boxed. It could be required only on types visible outside their assembly, where the break matters. Requiring it on derived classes that inherit a final initializer would show the break to their authors too, at the cost of repeating it down the hierarchy. The modifier alone could declare an empty final initializer, which is what a base record needs under the [safety restriction for derived records](#safety-restriction-for-derived-records). It can be made optional later without breaking anyone.
+3. Require `public init { ... }`. API reviews and public API listings look for `public`, and the method is emitted as public. But `public` suggests that other code can call it, when no code can, and it would be the only modifier allowed. It can be made optional later.
+4. Declare it with the type's name, `init Temperature() { ... }`, the way constructors and finalizers are declared. It reads as part of the type's construction, which readers already treat as public API. But the empty parentheses suggest that it could take parameters, and in a type with a primary constructor it reads like a second, parameterless constructor.
+5. Have the type implement a new interface, `System.IFinalInitializable`, as in `public class Temperature : IFinalInitializable`, with the final initializer as the interface's method. The base list then shows it, as it shows `IDisposable`, and framework hooks such as `IJsonOnDeserialized` already take this form. The same interface could serve the runtime helper that [future features](#metadata-and-code-generation) may need. But the compiler would have to block calls through the interface as well as direct calls, and run the base class's implementation first, which interface implementations don't do. And unlike the attributes this design uses, which compilers find by name so that libraries can declare their own copies for older target frameworks, an interface has a single identity, so declaring a final initializer would need a target framework that includes it.
+
+**Recommendation:** Option 1. A marker on every declaration taxes the common case to flag the rare one, and required members accepted similar consequences with a single keyword.
 
 ### Empty `with` expressions
 
@@ -791,6 +860,39 @@ Shall an empty `with` expression run the final initializer?
 2. Skip it. The copy duplicates an object whose final initializer has run, so the call is saved. If older code's clone method throws for records with a final initializer, one of the answers to [derived records whose base has no final initializer](#derived-records-whose-base-has-no-final-initializer), `b with { }` wouldn't have to fail.
 
 **Recommendation:** None. Running it treats every `with` expression alike, while skipping it treats the copy as the initialized object it duplicates, and we don't see a reason to prefer either.
+
+### Factory methods and extension constructors
+
+The [factory methods](factory-methods.md) proposal lets a call to a method marked `[Factory]` be followed by an object initializer, which can assign init-only members as it can after a constructor. The method returns an object that a `new` expression in its body created, so that object's final initializer has already run. The caller's object initializer then assigns more members, so the final initializer would have to run again to see the finished object:
+
+```cs
+var c = C.Create() { Name = "gizmo" };
+// 1: prints "unnamed", then "gizmo"
+// 2: prints "gizmo"
+// 3: error
+
+class C
+{
+    public string Name { get; init; } = "";
+
+    [Factory]
+    public static C Create() => new C { Name = "unnamed" };
+
+    init => Console.WriteLine(Name);
+}
+```
+
+[Extension constructors](csharp-14.0/extensions.md#constructors) are the same feature in this respect, if they allow object initializers. An extension constructor's body creates the object and returns it, so `new C(...) { ... }` that binds to an extension constructor would assign members to an object whose final initializer has already run.
+
+Any code that can call a constructor of `C` can declare a factory method for it, so the author of `C` doesn't decide whether this happens. If final initializers ship before factory methods, authors need to know from the first release whether a final initializer can run more than once on the same object.
+
+Shall a final initializer be able to run more than once on the same object, so that factory methods and extension constructors can take object initializers?
+
+1. Allow it. The final initializer runs again after the caller's object initializer, and the language says from the first release that a final initializer can run more than once on the same object. Validation, normalization, and computing derived values give the same result when they run again, so most final initializers work unchanged. A final initializer that registers the object, counts objects, or subscribes to events would do it twice. That weakens the [principle](#design-principles) that moving code from a constructor to a final initializer changes only when it runs, because it could also change how many times it runs. Factory methods need no new mechanism, and saying this from the first release keeps the other options open for the factory methods design.
+2. Run it once, at the call site. A `new` expression or factory method call that a factory method returns skips the final initializer, and each call to a factory method runs it afterward, with or without an object initializer. The factory methods proposal limits what a factory method can return, so no code in the factory method sees the object before the final initializer runs. But a factory method then returns an object whose final initializer hasn't run, so a caller that doesn't know about factory methods, such as reflection or another language, gets one too, unless factory methods are marked the way [types with final initializers](#older-compilers) are. Like option 3, it keeps a promise that a final initializer runs once per object.
+3. Don't allow an object initializer after a factory method or extension constructor whose return type has a final initializer. A final initializer then runs once per object, and factory methods keep working for other types. But setting init-only members is a main reason for factory methods, and final initializers exist mainly for types with init-only members.
+
+**Recommendation:** Option 1. The code that final initializers exist for gives the same result when it runs again, and saying so from the first release is the only answer that leaves every option open for factory methods.
 
 ## Appendix A: Final initializer calls can't be inferred by the runtime
 
