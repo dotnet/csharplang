@@ -319,12 +319,12 @@ public struct Option<T> : IUnion
         return false;
     }
     
-    // Constructors and factories
+    // Constructors and case-to-enum conversions
     public Option(None _) => _discriminant = 1;
     public Option(Some some) => (_discriminant, _value) = (2, some.value);
     
-    public static Option<T> None => new Option<T>(new None());
-    public static Option<T> Some(T value) => new Option<T>(new Some(value));
+    public static implicit operator Option<T>(None value) => new(value);
+    public static implicit operator Option<T>(Some value) => new(value);
 }
 ```
 
@@ -412,8 +412,8 @@ enum class Result<T, E>
     
     public Result<U, E> Map<U>(Func<T, U> mapper) => this switch
     {
-        Ok(var value) => Result<U, E>.Ok(mapper(value)),
-        Error(var err) => Result<U, E>.Error(err)
+        Ok(var value) => new .Ok(mapper(value)),
+        Error(var err) => new .Error(err)
     };
 }
 
@@ -429,6 +429,90 @@ enum struct Option<T>
     };
 }
 ```
+
+### Contextual Case Construction and Inference
+
+Shape enums should compose with [target-typed static member access](../../../proposals/target-typed-static-member-access.md) and the inference improvements proposed by Mads:
+
+- [Target-typed generic type inference](../../../proposals/target-typed-generic-type-inference.md), including the [revised target-aware binding proposal](https://github.com/dotnet/csharplang/pull/10345).
+- [Inference for constructor calls](../../../proposals/inference-for-constructor-calls.md), including the [updated constructor inference proposal](https://github.com/dotnet/csharplang/pull/10312) and its [type-group lookup](https://github.com/dotnet/csharplang/pull/10310) and [generalized inference](https://github.com/dotnet/csharplang/pull/10311) foundations.
+- [Inference for type patterns](../../../proposals/inference-for-type-patterns.md).
+
+These are proposed language features; the examples below describe their intended composition with shape enums. They are not available in current C# merely by declaring a shape enum.
+
+#### Use the Expected Enum Type
+
+When the expected type is `Option<int>`, a leading-dot case name can be looked up on that constructed type. There is no need to repeat either `Option` or `int`:
+
+```csharp
+enum struct Option<T>
+{
+    None,
+    Some(T value)
+}
+
+void UseInt(Option<int> value) { /* ... */ }
+
+UseInt(.None);
+UseInt(new .Some(42));
+
+Option<int> Empty() => .None;
+Option<int> Present(int value) => new .Some(value);
+```
+
+`new .Some(42)` uses the nested-type construction form in the target-typed member access proposal: it constructs `Option<int>.Some` and converts that case to `Option<int>`. The same syntax applies to class cases, using their case-to-base reference conversion. In the `Map` example above, the return type supplies `Result<U, E>` to the switch arms, so `new .Error(err)` selects the output enum's case even though `U` does not appear in that case's payload.
+
+Bare `.None` needs one more piece. Target-typed lookup finds the *type* `Option<int>.None`; it does not by itself turn that type into a value. We propose allowing generated data-free case types in value positions, along the lines of the [type-to-value conversion proposal](type-value-conversion.md). For a class case this can use the shared `Instance`; for a struct case it produces the data-free case value and applies the case-to-enum conversion. The mechanism for declaring or recognizing that conversion remains a design choice. It must compose with target-typed member access to support `UseInt(.None)`.
+
+This constructs an active `None` case. It does not imply that `default(Option<int>)` represents `None`; default-value policy is a separate choice. Without type-to-value conversion, a struct case can still be written `new .None()`, and a class case with a shared instance can be written `.None.Instance`.
+
+Data-carrying cases retain `new`: `new .Some(42)` is explicitly covered by target-typed nested-type construction. The shorter `.Some(42)` would require a factory or a separate rule for invoking a case type as a constructor. Ordinary C# cannot declare a nested type and a same-name method or property in the enclosing type, so generating both `Some` the type and `Some` the factory is not an ordinary-C# lowering.
+
+#### Infer Generic Factory Results from Context
+
+Target-typed generic inference addresses a related problem: a generic factory may lack argument information for one or more enum type parameters. For the struct declaration above, illustrative factories could be:
+
+```csharp
+static class Option
+{
+    public static Option<T> CreateNone<T>() => new Option<T>.None();
+    public static Option<T> CreateSome<T>(T value) => new Option<T>.Some(value);
+}
+
+Option<int> empty = Option.CreateNone(); // infer T = int from the target
+UseInt(Option.CreateNone());             // infer T = int from the parameter
+UseInt(.CreateNone());                   // also omit the factory qualifier
+```
+
+The last form additionally uses the target-typed member access proposal's [factory-container lookup](../../../proposals/target-typed-static-member-access.md#factory-containers) on the nongeneric sibling `Option`. These factories illustrate composition with the other proposals; shape enums do not need to generate them.
+
+The revised target-typed inference proposal retries inference when ordinary candidate selection fails. `CreateNone()` has no argument from which to infer `T`, so it can use this path. A factory call that already binds successfully keeps that result; the target does not automatically reinterpret it or filter overloads by their return types. Constructor inference extends inference to `new` expressions, but inference for omitted *containing-type* arguments in names such as `new Option.Some(42)` remains an open issue. The leading-dot form avoids that issue by supplying the already constructed containing type `Option<int>`.
+
+#### Case Patterns and Limits
+
+Target-typed member access also shortens case patterns, using the pattern input type:
+
+```csharp
+int GetOrDefault(Option<int> option, int fallback) => option switch
+{
+    .Some(var value) => value,
+    .None => fallback,
+    _ => fallback // no active case, if permitted by the default-value policy
+};
+```
+
+Here `.Some` resolves to `Option<int>.Some`. A data-free case pattern tests the case, rather than comparing against the value produced by type-to-value conversion. The type-pattern inference proposal serves the related scenario where a generic case type is named directly with its type arguments omitted; leading-dot lookup already supplies the containing type arguments for these nested cases.
+
+The expected type must come from somewhere. For example, another argument can first determine a generic method's type parameter, then provide the case argument's target:
+
+```csharp
+void Use<T>(Option<T> value, T fallback) { /* ... */ }
+
+Use(.None, 42);          // T = int from the second argument
+Use(new .Some(42), 0);   // T = int from the second argument
+```
+
+`var value = .None` has no target type and remains an error. A call with only a context-dependent case argument cannot infer an otherwise unknown `T` merely from the name `None`. Likewise, overloads accepting different enum types do not become unambiguous merely because only one has a case with that name: target-typed member access does not use member existence to choose the overload. Qualification or explicit type arguments remain available where context is insufficient.
 
 ### State Machines
 
