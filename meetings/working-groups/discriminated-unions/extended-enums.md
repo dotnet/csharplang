@@ -412,8 +412,8 @@ enum class Result<T, E>
     
     public Result<U, E> Map<U>(Func<T, U> mapper) => this switch
     {
-        Ok(var value) => new .Ok(mapper(value)),
-        Error(var err) => new .Error(err)
+        Ok(var value) => .Ok(mapper(value)),
+        Error(var err) => .Error(err)
     };
 }
 
@@ -442,7 +442,7 @@ These are proposed language features; the examples below describe their intended
 
 #### Use the Expected Enum Type
 
-When the expected type is `Option<int>`, a leading-dot case name can be looked up on that constructed type. There is no need to repeat either `Option` or `int`:
+The [case construction proposal change](https://github.com/dotnet/csharplang/pull/10370) defines `E.None` and `E.Some(arguments)` as enum construction expressions. When the expected type is `Option<int>`, a leading-dot case name can be looked up on that constructed type. There is no need to repeat either `Option` or `int`, or to introduce `new` when the case carries data:
 
 ```csharp
 enum struct Option<T>
@@ -454,19 +454,19 @@ enum struct Option<T>
 void UseInt(Option<int> value) { /* ... */ }
 
 UseInt(.None);
-UseInt(new .Some(42));
+UseInt(.Some(42));
 
 Option<int> Empty() => .None;
-Option<int> Present(int value) => new .Some(value);
+Option<int> Present(int value) => .Some(value);
 ```
 
-`new .Some(42)` uses the nested-type construction form in the target-typed member access proposal: it constructs `Option<int>.Some` and converts that case to `Option<int>`. The same syntax applies to class cases, using their case-to-base reference conversion. In the `Map` example above, the return type supplies `Result<U, E>` to the switch arms, so `new .Error(err)` selects the output enum's case even though `U` does not appear in that case's payload.
+`.Some(42)` uses the enum's case invocation behavior after target-typed lookup supplies `Option<int>`. It constructs an active case with the payload and produces an `Option<int>` value. The same syntax applies to class cases, whose enum value is a reference to the constructed case instance. In the `Map` example above, the return type supplies `Result<U, E>` to the switch arms, so `.Error(err)` selects the output enum's case even though `U` does not appear in that case's payload.
 
-Bare `.None` needs one more piece. Target-typed lookup finds the *type* `Option<int>.None`; it does not by itself turn that type into a value. We propose allowing generated data-free case types in value positions, along the lines of the [type-to-value conversion proposal](type-value-conversion.md). For a class case this can use the shared `Instance`; for a struct case it produces the data-free case value and applies the case-to-enum conversion. The mechanism for declaring or recognizing that conversion remains a design choice. It must compose with target-typed member access to support `UseInt(.None)`.
+For `.None`, the enum's data-free case access produces an active `None` value, using a shared instance for a class case or the corresponding active case for a struct. This follows ordinary enum member access: callers write `Color.Red`, and adding a payload adds arguments to that form. It does not require a general type-to-value conversion rule.
 
-This constructs an active `None` case. It does not imply that `default(Option<int>)` represents `None`; default-value policy is a separate choice. Without type-to-value conversion, a struct case can still be written `new .None()`, and a class case with a shared instance can be written `.None.Instance`.
+Constructing `None` does not imply that `default(Option<int>)` represents `None`; default-value policy is a separate choice. The nested case types remain available in type contexts. The target-typed member access proposal's direct nested-type construction form, `new .Some(42)`, can also construct a case value and convert it to the enum.
 
-Data-carrying cases retain `new`: `new .Some(42)` is explicitly covered by target-typed nested-type construction. The shorter `.Some(42)` would require a factory or a separate rule for invoking a case type as a constructor. Ordinary C# cannot declare a nested type and a same-name method or property in the enclosing type, so generating both `Some` the type and `Some` the factory is not an ordinary-C# lowering.
+Target-typed invocation binding must therefore support enum case construction as well as ordinary static method calls. The enum supplies the source-level case operation; its lowering does not need an ordinary same-name factory beside the nested case type, which would conflict in C#. The case construction proposal owns that behavior and its metadata; this section describes how target typing and inference make it convenient to use.
 
 #### Infer Generic Factory Results from Context
 
@@ -512,7 +512,7 @@ The expected type must come from somewhere. For example, another argument can fi
 void Use<T>(Option<T> value, T fallback) { /* ... */ }
 
 Use(.None, 42);          // T = int from the second argument
-Use(new .Some(42), 0);   // T = int from the second argument
+Use(.Some(42), 0);       // T = int from the second argument
 ```
 
 `var value = .None` has no target type and remains an error. A call with only a context-dependent case argument cannot infer an otherwise unknown `T` merely from the name `None`. Likewise, overloads accepting different enum types do not become unambiguous merely because only one has a case with that name: target-typed member access does not use member existence to choose the overload. Qualification or explicit type arguments remain available where context is insufficient.
