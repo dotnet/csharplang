@@ -506,7 +506,7 @@ Failed validation must prevent the raw operation and produce a managed exception
 
 With these guarantees, the opt-in need not require `unsafe`: an incorrect assertion fails safely instead of permitting memory corruption. The annotation establishes only reference containment and total managed size; it grants no unchecked assumptions about internal field offsets, alignment, or field accessibility. The compiler can copy values opaquely, or separately establish any additional layout facts it needs. Checked reference extraction and the tearing guarantees above continue to apply.
 
-The annotation makes the versioning trade-off explicit. A dependency update can cause validation of an annotated type or consuming enum to fail even if its ordinary typed API would still work. The conservative default avoids introducing that hidden layout dependency. Neither the annotation nor its byte-size assertion promises a particular layout for the enum itself. Whether to add this optimization contract remains an LDM decision supported by performance measurements.
+The annotation makes the versioning trade-off explicit. A dependency update can cause validation of an annotated type or consuming enum to fail even if its ordinary typed API would still work. The conservative default avoids introducing that hidden layout dependency. Neither the annotation nor its byte-size assertion promises a particular layout for the enum itself. Whether to add this optimization contract remains a joint decision for LDM and the runtime team, supported by performance measurements.
 
 ## 6. Pattern Matching and Behaviors
 
