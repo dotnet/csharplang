@@ -1,5 +1,8 @@
 # Data-Carrying Enums
 
+Champion issue: <https://github.com/dotnet/csharplang/issues/10378>
+Discussion: <https://github.com/dotnet/csharplang/discussions/10379>
+
 This proposal brings discriminated unions to C# through the familiar enum model: a value is one of several named cases, and each case can carry data. The new `enum class` and `enum struct` forms provide reference-type and value-type representations with record-like behavior for their cases.
 
 It is a follow-up to the [type unions](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-15.0/unions.md) proposal. Type unions combine existing types; data-carrying enums declare a type and its cases together.
