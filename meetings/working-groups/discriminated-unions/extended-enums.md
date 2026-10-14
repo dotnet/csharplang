@@ -779,8 +779,8 @@ closed enum class Result<T, E>
 
     public Result<U, E> Map<U>(Func<T, U> mapper) => this switch
     {
-        Ok(var value) => Result<U, E>.Ok(mapper(value)),
-        Error(var err) => Result<U, E>.Error(err)
+        Ok(var value) => .Ok(mapper(value)),
+        Error(var err) => .Error(err)
     };
 }
 
@@ -796,6 +796,85 @@ closed enum struct Option<T>
     };
 }
 ```
+
+### Contextual Case Construction and Inference
+
+Shape enums should compose with [target-typed static member access](https://github.com/dotnet/csharplang/blob/main/proposals/target-typed-static-member-access.md) and the proposed inference improvements:
+
+- [Generalized generic type inference](https://github.com/dotnet/csharplang/pull/10311), which provides shared inference machinery and lets target types contribute bounds alongside arguments.
+- [Inference for constructor calls](https://github.com/dotnet/csharplang/blob/main/proposals/inference-for-constructor-calls.md), tracked by [#9627](https://github.com/dotnet/csharplang/issues/9627), including the [updated constructor inference proposal](https://github.com/dotnet/csharplang/pull/10312) and its [type-group lookup](https://github.com/dotnet/csharplang/pull/10310) foundation.
+- [Inference for type patterns](https://github.com/dotnet/csharplang/blob/main/proposals/inference-for-type-patterns.md).
+
+#### Use the Expected Enum Type
+
+With the [case construction rules](https://github.com/dotnet/csharplang/pull/10370), leading-dot lookup on an expected `Option<int>` supplies the qualifier for `.None` and `.Some(arguments)`:
+
+```csharp
+enum struct Option<T>
+{
+    None,
+    Some(T value)
+}
+
+void UseInt(Option<int> value) { /* ... */ }
+
+UseInt(.None);
+UseInt(.Some(42));
+
+Option<int> Empty() => .None;
+Option<int> Present(int value) => .Some(value);
+```
+
+In the `Map` example above, the return type supplies `Result<U, E>` to the switch arms, so `.Error(err)` selects the output enum's case even though `U` does not occur in its payload.
+
+#### Infer Generic Factory Results from Context
+
+Factories can infer missing type arguments from their target type:
+
+```csharp
+static class Option
+{
+    public static Option<T> CreateNone<T>() => Option<T>.None;
+    public static Option<T> CreateSome<T>(T value) => Option<T>.Some(value);
+}
+
+Option<int> empty = Option.CreateNone(); // infer T = int from the target
+UseInt(Option.CreateNone());             // infer T = int from the parameter
+UseInt(.CreateNone());                   // also omit the factory qualifier
+Func<Option<int>> noneFactory = Option.CreateNone; // infer T from the delegate result
+```
+
+`.CreateNone()` additionally uses [factory-container lookup](https://github.com/dotnet/csharplang/blob/main/proposals/target-typed-static-member-access.md#factory-containers) on the nongeneric sibling `Option`. These factories are illustrative; shape enums need not generate them.
+
+Arguments and target types contribute bounds, including delegate results. Ordinary constraints, applicability, result conversions, and overload selection still apply; the contexts and binding stages supplying target information remain part of the inference design.
+
+Inference of omitted containing-type arguments in a case construction such as `Option.Some(42)` remains open. Leading-dot lookup instead obtains `Option<int>` from the target.
+
+#### Case Patterns and Limits
+
+Target-typed member access also shortens case patterns, using the pattern input type:
+
+```csharp
+int GetOrDefault(Option<int> option, int fallback) => option switch
+{
+    .Some(var value) => value,
+    .None => fallback,
+    _ => fallback // no active case, if permitted by the default-value policy
+};
+```
+
+Leading-dot patterns follow [Case Pattern Matching](https://github.com/dotnet/csharplang/blob/main/meetings/working-groups/discriminated-unions/extended-enums.md#case-pattern-matching). Type-pattern inference addresses the related case of naming a generic case type with omitted type arguments; leading-dot lookup already supplies the containing arguments here.
+
+The expected type must come from somewhere. For example, another argument can first determine a generic method's type parameter, then provide the case argument's target:
+
+```csharp
+void Use<T>(Option<T> value, T fallback) { /* ... */ }
+
+Use(.None, 42);          // T = int from the second argument
+Use(.Some(42), 0);       // T = int from the second argument
+```
+
+`var value = .None` has no target type and remains an error. A call with only a context-dependent case argument cannot infer an otherwise unknown `T` merely from the name `None`. Likewise, overloads accepting different enum types do not become unambiguous merely because only one has a case with that name: target-typed member access does not use member existence to choose the overload. Qualification or explicit type arguments remain available where context is insufficient.
 
 ### State Machines
 
