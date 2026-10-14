@@ -651,7 +651,11 @@ The presence of the attribute would assert that the type follows this contract, 
 
 Class-based unions could also use the same predicate-and-extraction emit as struct-based unions if the runtime can optimize the class representation efficiently. The final choice should follow performance validation, including switches with many cases, different case distributions, guards, and both statement and expression forms.
 
-If these approaches do not produce satisfactory results, a final fallback is to expose a discriminator and have the compiler emit an integral switch over it directly. This would use the runtime's existing integral-switch optimizations without requiring it to recover a switch from a comparison chain. Class-based unions would also need a discriminator mapping for their cases. Case extraction must still preserve the conversion semantics, including reconstructing data from shared storage when necessary.
+If these approaches do not produce satisfactory results, a final fallback is to expose a discriminator and have the compiler emit an integral switch over it directly. This would use the runtime's existing integral-switch optimizations without requiring it to recover a switch from a comparison chain. Class-based unions would also need a discriminator mapping for their cases.
+
+We would prefer to avoid this fallback because an exposed discriminator would become part of the type's contract and require a stable API and ABI. Consumers compiled against one version could embed the numeric mapping between cases and discriminator values. Reordering cases or inserting a new case anywhere in the declaration would then require preserving existing mappings, rather than simply assigning values in declaration order. These changes currently need no public discriminator contract; exposing one would require a deeper design for case numbering, separate compilation, and library evolution.
+
+Case extraction must still preserve the conversion semantics, including reconstructing data from shared storage when necessary.
 
 ### Exhaustiveness
 
