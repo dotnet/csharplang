@@ -56,13 +56,7 @@ Enhanced enums address all these limitations while preserving conceptual simplic
 
 By extending the existing `enum` keyword, enhanced enums provide a grow-up story. Simple enums remain simple, while advanced scenarios become possible without abandoning familiar patterns.
 
-## 3. Type Unions and Shape Enums
-
-[Type unions](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-15.0/unions.md) can combine existing, possibly overlapping case types. Shape enums declare fresh, named cases together with the enum: `Left(int value)` and `Right(int value)` remain distinct even though both carry an `int`.
-
-Shape enums specify their own [class](https://github.com/dotnet/csharplang/blob/main/meetings/working-groups/discriminated-unions/extended-enums.md#enum-class-translation) and [struct](https://github.com/dotnet/csharplang/blob/main/meetings/working-groups/discriminated-unions/extended-enums.md#enum-struct-translation) representations, conversions, and patterns. Whether to implement the type-union pattern is a separate choice discussed in [Appendix B](https://github.com/dotnet/csharplang/blob/main/meetings/working-groups/discriminated-unions/extended-enums.md#appendix-b-possible-connections-to-type-unions).
-
-## 4. Enhanced Enums
+## 3. Enhanced Enums
 
 ### Syntax Extensions
 
@@ -87,11 +81,11 @@ enum class Result // or enum struct
 }
 ```
 
-Cases, including data-free cases, generate nested record types. Their class/struct form follows the enum declaration; [Readonly, Copying, and `with`](https://github.com/dotnet/csharplang/blob/main/meetings/working-groups/discriminated-unions/extended-enums.md#readonly-copying-and-with) specifies mutability.
+Cases, including data-free cases, conceptually generate nested record types with the corresponding record behaviors, subject to the construction rules below. Their class/struct form follows the enum declaration; [Readonly, Copying, and `with`](https://github.com/dotnet/csharplang/blob/main/meetings/working-groups/discriminated-unions/extended-enums.md#readonly-copying-and-with) specifies mutability.
 
 #### Case Construction Expressions
 
-Ordinary enums use `Color.Red` to obtain a value. Adding a payload adds arguments to that form, giving `E.Case(arguments)` without requiring `new`.
+Ordinary enums use `Color.Red` to obtain a value. Data-carrying cases extend this form to `E.Case(arguments)`.
 
 ```csharp
 enum struct Option<T>
@@ -122,11 +116,19 @@ var option = Option<int>.Some(42); // Option<int>
 option = Option<int>.None;
 ```
 
-The nested case type remains available in type contexts, including type patterns, declarations, casts, and `typeof`. Direct construction with `new E.Case(arguments)` retains ordinary object-creation behavior and produces the nested case type.
+The nested case types remain available in type contexts, including patterns, declarations, casts, and `typeof`. Case-typed values can be obtained through extraction.
 
-The compiler lowers enum construction through the case constructor and case-to-enum conversion. Metadata must identify these operations to consuming compilers; its encoding remains open.
+Object-creation expressions targeting an enhanced enum or one of its generated case types are errors. This includes explicit and target-typed `new`, with or without arguments:
 
-Generated implementation members can have distinct metadata names; no ordinary same-name factory is needed beside the nested type, which C# would forbid.
+```csharp
+var invalid = new Option<int>.Some(42); // error
+Option<int>.Some alsoInvalid = new(42); // error
+Option<int> stillInvalid = new();       // error
+```
+
+The compiler must emit a metadata marker identifying the enhanced enum, its declared cases, and their construction operations. Consuming C# compilers must recognize this marker and apply the same construction rules across assembly boundaries. The marker could be an attribute; its name, form, and encoding remain to be designed.
+
+Conceptually, enum construction creates the case record and converts it to the enclosing enum. The compiler may implement this using constructors or factories with distinct metadata names, avoiding the conflict between a nested type and an ordinary same-name factory.
 
 Target-typed access to these operations is discussed under [Contextual Case Construction and Inference](https://github.com/dotnet/csharplang/blob/main/meetings/working-groups/discriminated-unions/extended-enums.md#contextual-case-construction-and-inference).
 
@@ -239,7 +241,7 @@ The same declaration using `enum class` is permitted because its recursive paylo
 
 #### Default Values
 
-For an `enum class`, `default(E)` is `null` and represents no case, even if a data-free case is named `None`.
+For an `enum class`, `default(E)` is `null` and represents no case.
 
 For an `enum struct`, discriminator zero denotes an *uninitialized value* unless a default case is designated. All ordinary cases have nonzero discriminators, including data-free cases. This accommodates declarations in which every case requires state without inventing a case containing default payload values.
 
@@ -250,9 +252,9 @@ enum struct Option<T>
     Some(T value)
 }
 
-Option<int> uninitialized = default;       // no active case
-Option<int> none = new Option<int>.None(); // active None case
-Option<int> some = new Option<int>.Some(0); // active Some case, with value 0
+Option<int> uninitialized = default;   // no active case
+Option<int> none = Option<int>.None;   // active None case
+Option<int> some = Option<int>.Some(0); // active Some case, with value 0
 ```
 
 An author may instead designate one data-free case as the default:
@@ -302,9 +304,9 @@ Members are restricted to:
 - Static members
 - Nested types
 
-## 5. Translation Strategy
+## 4. Translation Strategy
 
-The translations illustrate the proposed API surface.
+The translations illustrate conceptual record behavior and candidate storage. Their constructors and `new` expressions represent compiler-generated operations; source construction follows [Case Construction Expressions](https://github.com/dotnet/csharplang/blob/main/meetings/working-groups/discriminated-unions/extended-enums.md#case-construction-expressions).
 
 ### `enum class` Translation
 
@@ -327,7 +329,7 @@ public abstract record class Result
 
 The enum is an abstract record base class, and its values hold the actual case reference.
 
-Only the declared case types may derive from an `enum class`. This restriction applies when consuming the type from another assembly as well. The private constructor in the illustration does not by itself enforce the restriction: record copy constructors also permit derivation in ordinary C#. Enum case metadata and consuming compiler checks must preserve the declared hierarchy, along the lines of the [closed-hierarchy proposal](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-15.0/closed-hierarchies.md#lowering). The exact metadata encoding remains open.
+Only the declared case types may derive from an `enum class`. This restriction applies when consuming the type from another assembly as well. The private constructor in the illustration does not by itself enforce the restriction: record copy constructors also permit derivation in ordinary C#. The [enum metadata](https://github.com/dotnet/csharplang/blob/main/meetings/working-groups/discriminated-unions/extended-enums.md#case-construction-expressions) and consuming compiler checks must preserve the declared hierarchy, along the lines of the [closed-hierarchy proposal](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-15.0/closed-hierarchies.md#lowering).
 
 Data-free cases generate types with shared instances:
 
@@ -506,8 +508,6 @@ public struct Option<T>
 }
 ```
 
-Emitted shape-enum metadata identifies the declared case types to consuming compilers; its encoding remains open.
-
 #### Fully Unmanaged Cases
 
 When all case data is unmanaged and the required layout facts are established, complete case values can overlap in one unmanaged region sized for the largest case, with the necessary padding and alignment and a separate discriminator. Preserving each case's representation lets construction and extraction copy complete values without swizzling individual fields.
@@ -590,12 +590,12 @@ The contract establishes only reference containment and total managed size. Fiel
 
 The proposed minimum API includes public nested case types, with effective accessibility bounded by the enclosing enum. Nested cases of a generic enum use the enclosing type parameters and constraints.
 
-Case constructors, payload properties, and deconstruction follow the generated record types' rules.
+Payload properties and deconstruction follow the generated record types' rules.
 
 Classes use ordinary reference conversions, including `as`: downcasting null returns null, while downcasting a non-null instance of another case throws `InvalidCastException`. For example:
 
 ```csharp
-Result result = new Result.Success("ok");
+Result result = Result.Success("ok");
 if (result is Result.Success success)
 {
     Console.WriteLine(success.value);
@@ -609,7 +609,7 @@ Result.Success? absent = (Result.Success?)missing; // null
 
 For structs, we propose generating the following members in addition to the case types:
 
-- A constructor and implicit conversion from each case type to the enum type.
+- An implicit conversion from each case type to the enum type, backed by a generated construction operation.
 - A boolean property named `Is` followed by the case name, such as `IsNone`, testing only case identity and returning false when no case is active.
 - `HasValue`, which is false for the uninitialized representation and true for any active case, including a designated default case.
 - A `TryGetValue(out Case value)` overload for each case. It returns true and supplies the case value when that case is active; otherwise it returns false and assigns `default(Case)` to the out parameter.
@@ -618,7 +618,7 @@ For structs, we propose generating the following members in addition to the case
 These case queries and conversions do not require boxing.
 
 ```csharp
-Option<int> option = new Option<int>.Some(42);
+Option<int> option = Option<int>.Some(42);
 if (option is Option<int>.Some some)
 {
     Console.WriteLine(some.value);
@@ -636,7 +636,7 @@ Generated members must agree on the active case. Extraction follows the [copy se
 
 User-declared members conflicting with generated members are errors, except for customization permitted by ordinary record rules. Final generated API names remain open; enum-valued construction is specified under [Case Construction Expressions](https://github.com/dotnet/csharplang/blob/main/meetings/working-groups/discriminated-unions/extended-enums.md#case-construction-expressions).
 
-## 6. Pattern Matching and Behaviors
+## 5. Pattern Matching and Behaviors
 
 ### Case Pattern Matching
 
@@ -800,7 +800,7 @@ var description = status switch
 
 ### Case State and Nullability
 
-Extraction preserves payload members' declared types and nullability annotations. A null payload does not remove case identity: `new Option<string?>.Some(null)` remains an active `Some` after conversion to the enum.
+Extraction preserves payload members' declared types and nullability annotations. A null payload does not remove case identity: `Option<string?>.Some(null)` remains an active `Some`.
 
 Classes follow ordinary reference nullability rules. For structs, active-case analysis is separate from payload nullability; construction from a case, successful case tests, and successful `TryGetValue` calls establish the active case.
 
@@ -818,7 +818,7 @@ A plain fallback handles future cases, but also hides omissions of cases already
 
 Such a fallback still matches all remaining values at runtime. The compiler would additionally warn when the preceding patterns do not fully cover a declared case known at compilation, using the existing exhaustiveness analysis. A guarded or partial payload pattern therefore does not necessarily cover an entire case. Recompiling against a library that adds a case would prompt the consumer to review it while retaining a working fallback. The exact opt-in syntax or mechanism remains an LDM decision.
 
-## 7. Examples and Use Cases
+## 6. Examples and Use Cases
 
 ### Migrating Traditional Enums
 
@@ -896,7 +896,7 @@ Option<int> Empty() => .None;
 Option<int> Present(int value) => .Some(value);
 ```
 
-In the `Map` example above, the return type supplies `Result<U, E>` to the switch arms, so `.Error(err)` selects the output enum's case even though `U` does not occur in its payload. The direct nested-type form `new .Some(42)` remains available as well.
+In the `Map` example above, the return type supplies `Result<U, E>` to the switch arms, so `.Error(err)` selects the output enum's case even though `U` does not occur in its payload.
 
 #### Infer Generic Factory Results from Context
 
@@ -905,8 +905,8 @@ Generalized generic type inference addresses a related problem: a generic factor
 ```csharp
 static class Option
 {
-    public static Option<T> CreateNone<T>() => new Option<T>.None();
-    public static Option<T> CreateSome<T>(T value) => new Option<T>.Some(value);
+    public static Option<T> CreateNone<T>() => Option<T>.None;
+    public static Option<T> CreateSome<T>(T value) => Option<T>.Some(value);
 }
 
 Option<int> empty = Option.CreateNone(); // infer T = int from the target
@@ -919,7 +919,7 @@ Func<Option<int>> noneFactory = Option.CreateNone; // infer T from the delegate 
 
 The result type `Option<T>` must fit the target `Option<int>`, supplying the missing bound for `T`. The delegate result similarly supplies a bound for `noneFactory`; arguments and targets can determine different type parameters. Constraints, applicability, result conversion, and overload selection still apply. The precise contexts and binding stages supplying target information remain part of the inference design.
 
-Constructor inference extends the shared machinery to `new` expressions, but inference for omitted *containing-type* arguments in names such as `new Option.Some(42)` remains an open issue. The leading-dot form avoids that issue by supplying the already constructed containing type `Option<int>`.
+Inference of omitted containing-type arguments in a case construction such as `Option.Some(42)` remains open. Leading-dot lookup instead obtains `Option<int>` from the target.
 
 #### Case Patterns and Limits
 
@@ -961,17 +961,17 @@ enum class ConnectionState
     public ConnectionState HandleTimeout() => this switch
     {
         Connecting(var started, var attempts) when attempts < 3 =>
-            new ConnectionState.Reconnecting(null, attempts + 1, DateTime.Now.AddSeconds(Math.Pow(2, attempts))),
+            ConnectionState.Reconnecting(null, attempts + 1, DateTime.Now.AddSeconds(Math.Pow(2, attempts))),
         Connecting(_, _) =>
-            new ConnectionState.Failed("Connection timeout", new TimeoutException()),
+            ConnectionState.Failed("Connection timeout", new TimeoutException()),
         Connected(var endpoint, _) =>
-            new ConnectionState.Reconnecting(endpoint, 1, DateTime.Now.AddSeconds(1)),
+            ConnectionState.Reconnecting(endpoint, 1, DateTime.Now.AddSeconds(1)),
         _ => this
     };
 }
 ```
 
-## 8. Open Questions
+## 7. Open Questions
 
 1. **Case accessibility**: Should individual cases support access modifiers in addition to the proposed public nested case types?
 2. **Partial support**: Should enhanced enums support `partial` for source generators?
