@@ -56,13 +56,7 @@ Enhanced enums address all these limitations while preserving conceptual simplic
 
 By extending the existing `enum` keyword, enhanced enums provide a grow-up story. Simple enums remain simple, while advanced scenarios become possible without abandoning familiar patterns.
 
-## 3. Type Unions and Shape Enums
-
-[Type unions](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-15.0/unions.md) can combine existing, possibly overlapping case types. Shape enums declare fresh, named cases together with the enum: `Left(int value)` and `Right(int value)` remain distinct even though both carry an `int`.
-
-Shape enums specify their own [class](https://github.com/dotnet/csharplang/blob/main/meetings/working-groups/discriminated-unions/extended-enums.md#enum-class-translation) and [struct](https://github.com/dotnet/csharplang/blob/main/meetings/working-groups/discriminated-unions/extended-enums.md#enum-struct-translation) representations, conversions, and patterns. Whether to implement the type-union pattern is a separate choice discussed in [Appendix B](https://github.com/dotnet/csharplang/blob/main/meetings/working-groups/discriminated-unions/extended-enums.md#appendix-b-possible-connections-to-type-unions).
-
-## 4. Enhanced Enums
+## 3. Enhanced Enums
 
 ### Syntax Extensions
 
@@ -87,9 +81,7 @@ enum class Result // or enum struct
 }
 ```
 
-Each case with a parameter list generates a nested record type. `enum class` generates `sealed record class` types; `enum struct` generates `readonly record struct` types.
-
-TODO: Should the structs be readonly?  Seems like that goes against normal structs (including `record struct`).  Seems like that could be opt in with `readonly enum struct X`.
+Cases, including data-free cases, conceptually generate nested record types: `sealed record class` for `enum class`, and `record struct` for `enum struct`. Their record behaviors apply subject to the [case construction rules](https://github.com/dotnet/csharplang/pull/10370).
 
 #### Combination Rules
 
@@ -128,16 +120,16 @@ Choose `enum class` for reference-type cases or `enum struct` for inline value s
 ```csharp
 // Allocation per construction
 enum class Result { Ok(int value), Error(string message) }
-Result r1 = new Result.Ok(42); // Heap allocation
+Result r1 = Result.Ok(42); // Heap allocation
 
 // No allocation
 enum struct Result { Ok(int value), Error(string message) }
-Result r2 = new Result.Ok(42); // Inline case storage; no allocation for construction
+Result r2 = Result.Ok(42); // Inline case storage; no allocation for construction
 ```
 
 #### Default Values
 
-For an `enum class`, `default(E)` is `null` and represents no case, even if a data-free case is named `None`.
+For an `enum class`, `default(E)` is `null` and represents no case.
 
 For an `enum struct`, discriminator zero denotes an *uninitialized value* unless a default case is designated. All ordinary cases have nonzero discriminators, including data-free cases. This accommodates declarations in which every case requires state without inventing a case containing default payload values.
 
@@ -148,9 +140,9 @@ enum struct Option<T>
     Some(T value)
 }
 
-Option<int> uninitialized = default;       // no active case
-Option<int> none = new Option<int>.None(); // active None case
-Option<int> some = new Option<int>.Some(0); // active Some case, with value 0
+Option<int> uninitialized = default;   // no active case
+Option<int> none = Option<int>.None;   // active None case
+Option<int> some = Option<int>.Some(0); // active Some case, with value 0
 ```
 
 An author may instead designate one data-free case as the default:
@@ -200,9 +192,9 @@ Members are restricted to:
 - Static members
 - Nested types
 
-## 5. Translation Strategy
+## 4. Translation Strategy
 
-The translations illustrate the proposed API surface.
+The translations illustrate conceptual record behavior and candidate storage. Their constructors and `new` expressions represent compiler-generated operations; source construction follows [Case Construction Expressions](https://github.com/dotnet/csharplang/pull/10370).
 
 ### `enum class` Translation
 
@@ -486,12 +478,12 @@ The contract establishes only reference containment and total managed size. Fiel
 
 The proposed minimum API includes public nested case types, with effective accessibility bounded by the enclosing enum. Nested cases of a generic enum use the enclosing type parameters and constraints.
 
-Case constructors, payload properties, and deconstruction follow the generated record types' rules. Data-free struct cases can be constructed with `new E.Case()`.
+Payload properties and deconstruction follow the generated record types' rules.
 
 Classes use ordinary reference conversions, including `as`: downcasting null returns null, while downcasting a non-null instance of another case throws `InvalidCastException`. For example:
 
 ```csharp
-Result result = new Result.Success("ok");
+Result result = Result.Success("ok");
 if (result is Result.Success success)
 {
     Console.WriteLine(success.value);
@@ -505,7 +497,7 @@ Result.Success? absent = (Result.Success?)missing; // null
 
 For structs, we propose generating the following members in addition to the case types:
 
-- A constructor and implicit conversion from each case type to the enum type.
+- An implicit conversion from each case type to the enum type, backed by a generated construction operation.
 - A boolean property named `Is` followed by the case name, such as `IsNone`, testing only case identity and returning false when no case is active.
 - `HasValue`, which is false for the uninitialized representation and true for any active case, including a designated default case.
 - A `TryGetValue(out Case value)` overload for each case. It returns true and supplies the case value when that case is active; otherwise it returns false and assigns `default(Case)` to the out parameter.
@@ -514,7 +506,7 @@ For structs, we propose generating the following members in addition to the case
 These case queries and conversions do not require boxing.
 
 ```csharp
-Option<int> option = new Option<int>.Some(42);
+Option<int> option = Option<int>.Some(42);
 if (option is Option<int>.Some some)
 {
     Console.WriteLine(some.value);
@@ -530,9 +522,9 @@ The `as` operator does not invoke the generated struct conversions; use `TryGetV
 
 Generated members must agree on the active case. Extraction produces a separate case value and preserves payload references.
 
-The proposed API uses ordinary constructor syntax, such as `new Result.Success("ok")`, rather than a generated same-name factory. Ordinary C# cannot declare a nested case type alongside a method or property with the same name. User-declared members that conflict with generated members are errors; additional construction shorthand and the final generated API names remain open questions.
+User-declared members conflicting with generated members are errors. Final generated API names remain open.
 
-## 6. Pattern Matching and Behaviors
+## 5. Pattern Matching and Behaviors
 
 ### Case Pattern Matching
 
@@ -698,11 +690,11 @@ var description = status switch
 
 ### Case State and Nullability
 
-Extraction preserves payload members' declared types and nullability annotations. A null payload does not remove case identity: `new Option<string?>.Some(null)` remains an active `Some` after conversion to the enum.
+Extraction preserves payload members' declared types and nullability annotations. A null payload does not remove case identity: `Option<string?>.Some(null)` remains an active `Some`.
 
 Classes follow ordinary reference nullability rules. For structs, active-case analysis is separate from payload nullability; construction from a case, successful case tests, and successful `TryGetValue` calls establish the active case.
 
-## 7. Examples and Use Cases
+## 6. Examples and Use Cases
 
 ### Migrating Traditional Enums
 
@@ -732,8 +724,8 @@ closed enum class Result<T, E>
 
     public Result<U, E> Map<U>(Func<T, U> mapper) => this switch
     {
-        Ok(var value) => new Result<U, E>.Ok(mapper(value)),
-        Error(var err) => new Result<U, E>.Error(err)
+        Ok(var value) => Result<U, E>.Ok(mapper(value)),
+        Error(var err) => Result<U, E>.Error(err)
     };
 }
 
@@ -764,25 +756,25 @@ enum class ConnectionState
     public ConnectionState HandleTimeout() => this switch
     {
         Connecting(var started, var attempts) when attempts < 3 =>
-            new ConnectionState.Reconnecting(null, attempts + 1, DateTime.Now.AddSeconds(Math.Pow(2, attempts))),
+            ConnectionState.Reconnecting(null, attempts + 1, DateTime.Now.AddSeconds(Math.Pow(2, attempts))),
         Connecting(_, _) =>
-            new ConnectionState.Failed("Connection timeout", new TimeoutException()),
+            ConnectionState.Failed("Connection timeout", new TimeoutException()),
         Connected(var endpoint, _) =>
-            new ConnectionState.Reconnecting(endpoint, 1, DateTime.Now.AddSeconds(1)),
+            ConnectionState.Reconnecting(endpoint, 1, DateTime.Now.AddSeconds(1)),
         _ => this
     };
 }
 ```
 
-## 8. Open Questions
+## 7. Open Questions
 
-1. **Case accessibility**: Should individual cases support access modifiers in addition to the proposed public nested case types?
-2. **Partial support**: Should enhanced enums support `partial` for source generators?
-3. **Optional type-union integration**: Should either representation implement the union pattern, as discussed in [Appendix B](https://github.com/dotnet/csharplang/blob/main/meetings/working-groups/discriminated-unions/extended-enums.md#appendix-b-possible-connections-to-type-unions)?
-4. **Serialization**: How should enhanced enums interact with System.Text.Json?
-5. **Additional state**: Should shape enums allow instance fields outside case data?
-6. **Custom constructors**: Should enums allow custom constructors that delegate to cases?
-7. **Construction shorthand**: Should `Result.Ok(42)` be supported in addition to `new Result.Ok(42)`, and how would it coexist with the nested case type name?
+1. **Readonly cases**: Should struct case records be readonly by default, or only for a `readonly enum struct`? The [value-semantics change](https://github.com/dotnet/csharplang/pull/10371) proposes the latter.
+2. **Case accessibility**: Should individual cases support access modifiers in addition to the proposed public nested case types?
+3. **Partial support**: Should enhanced enums support `partial` for source generators?
+4. **Optional type-union integration**: Should either representation implement the union pattern, as discussed in [Appendix B](https://github.com/dotnet/csharplang/blob/main/meetings/working-groups/discriminated-unions/extended-enums.md#appendix-b-possible-connections-to-type-unions)?
+5. **Serialization**: How should enhanced enums interact with System.Text.Json?
+6. **Additional state**: Should shape enums allow instance fields outside case data?
+7. **Custom constructors**: Should enums allow custom constructors that delegate to cases?
 8. **Generic cases**: Should cases support independent generic parameters?
 9. **Interface implementation**: Should enhanced enums automatically implement `IEquatable<T>`?
 10. **Exact lowering**: What names and shapes should the generated APIs and hierarchy metadata have, and are additional convenience APIs needed?
