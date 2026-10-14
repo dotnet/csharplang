@@ -660,9 +660,11 @@ The `null` pattern matches a null class reference. Whether it should also match 
 
 ### Switch Translation
 
-The emit strategy remains open. The candidates below aim to let the runtime optimize case tests. Validation should cover many cases, different distributions, guards, and both switch statements and expressions.
+The emit strategy remains open. The candidates below aim to let the runtime optimize case tests.
 
-In local .NET 11 RC1 checks on ARM64 with 16 sealed class cases and 16 struct cases, both exact-type and discriminator-predicate chains remained linear in fully optimized code and Tier 1 code with dynamic PGO. Struct predicates inlined, but the JIT did not recover a jump table or tree. The strategies would need additional runtime support.
+In local .NET 11 RC1 checks on ARM64 with 16 sealed class cases and 16 struct cases, both exact-type and discriminator-predicate chains remained linear in fully optimized code and Tier 1 code with dynamic PGO. Struct predicates inlined, but the JIT did not recover a jump table or tree. Recovering these dispatch optimizations would need additional runtime support.
+
+Preliminary local benchmarking on an M4 Mac indicates that linear dispatch performs well and appears sufficient for up to 32 cases in the tested patterns. Larger case sets may warrant better compiler emit or JIT optimizations, but these are already fairly extreme cases, so such improvements need not block an initial implementation. Further validation on x64 and other architectures, and with varied usage patterns and case distributions, is warranted; it should also cover guards and both switch statements and expressions.
 
 The switch input is evaluated once. The examples show distinct cases without guards; a full translation must also preserve null handling, source ordering where it affects behavior, guards, deconstruction, and the fallback behavior of the original statement or expression. Only case tests whose reordering preserves those semantics can be reorganized.
 
