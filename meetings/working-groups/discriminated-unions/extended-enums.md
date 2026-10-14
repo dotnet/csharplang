@@ -1,6 +1,6 @@
 # Discriminated Unions and Enhanced Enums for C#
 
-This proposal introduces enhanced enums as an elegant way to build discriminated unions in C#. Building on [type unions](https://raw.githubusercontent.com/dotnet/csharplang/refs/heads/main/proposals/unions.md), enhanced enums provide familiar, concise syntax for algebraic sum types where cases are known at declaration time.
+This proposal introduces enhanced enums as an elegant way to build discriminated unions in C#. Building on [type unions](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-15.0/unions.md), enhanced enums provide familiar, concise syntax for algebraic sum types where cases are known at declaration time.
 
 It consolidates design feedback from many years of repository discussions, especially [#113](https://github.com/dotnet/csharplang/issues/113) and related issues.
 
@@ -72,7 +72,7 @@ By extending the existing `enum` keyword, enhanced enums provide a grow-up story
 
 ## 3. Type Unions (Foundation)
 
-Type unions are fully specified in the [unions proposal](https://raw.githubusercontent.com/dotnet/csharplang/refs/heads/main/proposals/unions.md#summary). They provide:
+Type unions are fully specified in the [unions proposal](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-15.0/unions.md#summary). They provide:
 
 - Implicit conversions from case types to the union type
 - Pattern matching that unwraps union contents
@@ -432,11 +432,11 @@ enum struct Option<T>
 
 ### Contextual Case Construction and Inference
 
-Shape enums should compose with [target-typed static member access](../../../proposals/target-typed-static-member-access.md) and the proposed inference improvements:
+Shape enums should compose with [target-typed static member access](https://github.com/dotnet/csharplang/blob/main/proposals/target-typed-static-member-access.md) and the proposed inference improvements:
 
 - [Generalized generic type inference](https://github.com/dotnet/csharplang/pull/10311), which provides shared inference machinery and lets target types contribute bounds alongside arguments.
-- [Inference for constructor calls](../../../proposals/inference-for-constructor-calls.md), tracked by [#9627](https://github.com/dotnet/csharplang/issues/9627), including the [updated constructor inference proposal](https://github.com/dotnet/csharplang/pull/10312) and its [type-group lookup](https://github.com/dotnet/csharplang/pull/10310) foundation.
-- [Inference for type patterns](../../../proposals/inference-for-type-patterns.md).
+- [Inference for constructor calls](https://github.com/dotnet/csharplang/blob/main/proposals/inference-for-constructor-calls.md), tracked by [#9627](https://github.com/dotnet/csharplang/issues/9627), including the [updated constructor inference proposal](https://github.com/dotnet/csharplang/pull/10312) and its [type-group lookup](https://github.com/dotnet/csharplang/pull/10310) foundation.
+- [Inference for type patterns](https://github.com/dotnet/csharplang/blob/main/proposals/inference-for-type-patterns.md).
 
 These are proposed language features; the examples below describe their intended composition with shape enums. They are not available in current C# merely by declaring a shape enum.
 
@@ -485,7 +485,7 @@ UseInt(.CreateNone());                   // also omit the factory qualifier
 Func<Option<int>> noneFactory = Option.CreateNone; // infer T from the delegate result
 ```
 
-The last form additionally uses the target-typed member access proposal's [factory-container lookup](../../../proposals/target-typed-static-member-access.md#factory-containers) on the nongeneric sibling `Option`. These factories illustrate composition with the other proposals; shape enums do not need to generate them.
+The last form additionally uses the target-typed member access proposal's [factory-container lookup](https://github.com/dotnet/csharplang/blob/main/proposals/target-typed-static-member-access.md#factory-containers) on the nongeneric sibling `Option`. These factories illustrate composition with the other proposals; shape enums do not need to generate them.
 
 For `CreateNone<T>`, the result type `Option<T>` must fit the target `Option<int>`, supplying the missing bound for `T`. The generalized proposal also lets a method group use the destination delegate's result type, as in `noneFactory`, and allows arguments and targets to determine different type parameters in one inference operation. Constraints, applicability, result conversion, and overload selection still need to succeed; gathering target-derived bounds does not replace those checks. The precise contexts and binding stages that supply target information remain part of the inference design. These examples require that information to flow from assignments, returns, and resolved argument parameter types.
 
