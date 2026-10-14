@@ -277,25 +277,57 @@ public union State(Ready, Processing, Complete)
 
 ### `enum struct` Translation
 
-An `enum struct` stores a discriminant and shared inline storage for its case data. The goal is to use the smallest storage that can safely represent any case without boxing its data.
+The storage layout and emit strategy for an `enum struct` are compiler implementation details. They can, and likely will, change in future compiler versions, including to take advantage of new runtime capabilities. The compiler is free to change the representation and generated code while preserving the specified API surface and observable semantics. This proposal does not guarantee a particular size, field layout, native ABI, or byte representation suitable for persistence.
 
-The runtime does not allow a managed reference to overlap non-reference data. The garbage collector must be able to identify reference locations from the type's layout, independently of the current discriminant. Consequently, a single byte buffer large enough for the largest case cannot generally hold arbitrary case values that are reinterpreted on access.
+The following describes a conservative storage strategy and possible optimizations. The aim is compact, non-boxing case storage, with the cost of packing and reconstructing data balanced against storage size and the runtime's ability to optimize the generated code. These trade-offs require performance validation; minimum storage is not a requirement on every implementation.
 
-#### Shared Storage
+#### Tearing and Safety
 
-The compiler separates the case data into storage that can safely be shared:
+Enum structs follow the existing [atomicity rules for struct reads and writes](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/variables.md#96-atomicity-of-variable-references). Unsynchronized concurrent reads and writes may tear: the discriminator and payload need not come from the same write. Case and payload observations are unspecified in that situation, and generated accessors may throw. Copying the enum or marking it `readonly` does not make a concurrent read an atomic snapshot.
 
-1. **Unmanaged data**: An inline array of bytes large enough for the largest combined unmanaged payload of any one case, accounting for required alignment and padding. Unmanaged fields from different cases share this buffer; fields within the same case occupy distinct locations.
-2. **Managed references**: Reference fields shared across cases, with enough slots for the case containing the most references. Each slot is normally typed as `object`, but can have a more specific reference type when that type can represent every value assigned to the slot. For example, a slot used only for strings can be typed as `string`.
-3. **Generic data**: Strongly typed fields for type parameters whose constraints do not establish that they are reference types. For each such type parameter `T`, there are enough `T` slots for the maximum number of `T` values in any one case. Slots can be shared between cases, but slots for distinct type parameters cannot generally be combined. A type parameter known to be a reference type, such as `T where T : class`, can instead use the managed-reference slots.
+Tearing must not introduce memory or type unsafety in the conservative implementation. The garbage collector must be able to identify reference locations from the runtime type's layout independently of the discriminator, including during an assignment. No location may alternate between managed-reference storage and non-reference storage according to the active case. Arbitrary payload bits must never be interpreted as managed references.
 
-A `struct` constraint does not establish that a type parameter is unmanaged: a struct may contain references. Even an `unmanaged` constraint does not generally give the compiler a fixed byte size at declaration time, so generic data may still require typed slots.
+Reference-slot sharing must also preserve reference type safety. A reader might observe the discriminator for a string case while a shared `object` slot contains an array from another case. Extraction must check the reference it actually reads, or use an equivalent mechanism that preserves type safety; the discriminator alone cannot justify an unchecked reference reinterpretation. These guarantees concern the generated representation and accessors, within the usual safety assumptions for the payload types and user code.
 
-Value-type fields that themselves contain references also need a GC-safe representation. When the compiler can safely decompose and reconstruct such a value, its constituent data can use the same storage pools. Otherwise, it must remain in a strongly typed slot, shared with fields of the same type in other cases.
+#### Conservative Storage
 
-Each pool is sized for its maximum requirement across cases, rather than the sum of all cases' requirements. Those maxima may come from different cases, so the resulting payload can be larger than the largest individual case. Exact field ordering, alignment, and slot assignment are implementation details.
+A conservative implementation stores the discriminator and payload in compiler-generated fields, using opaque, strongly typed slots for value types whose representation cannot safely be assumed. Typed slots let the runtime determine their size and GC layout from the types actually loaded. This default strategy requires no user layout assertions and must remain safe across supported dependency updates, including a payload struct acquiring reference fields or changing size.
 
-For example:
+One candidate shares storage in the following pools:
+
+1. **Unmanaged data**: A byte region for primitive data whose size and reference-free representation are established as described below. It is large enough for the greatest combined requirement of any case, with the required padding and alignment. Data from different cases can share this region; components of the same case occupy distinct locations.
+2. **Managed references**: Reference fields shared across cases, with enough slots for the case containing the most references. Each slot is normally typed as `object`, but can have a more specific reference type when that type can represent every value assigned to it. For example, a slot used only for strings can be typed as `string`. Reconstruction obeys the reference type checks described above.
+3. **Typed values**: Strongly typed fields for arbitrary value-type payloads and type parameters not known to be reference types. Slots of the same type can be shared across cases, with enough slots for that type's maximum requirement in any case. Distinct types cannot generally share a typed slot. A type parameter known to be a reference type, such as `T where T : class`, can use the managed-reference pool.
+
+A `struct` constraint does not establish that a type parameter contains no references. An `unmanaged` constraint establishes that property to the C# compiler, but does not generally provide a fixed byte size at declaration time or a runtime-enforced layout contract. Such parameters can remain in typed slots even when constrained to `unmanaged`.
+
+Each pool is sized for its maximum requirement across cases. Those maxima may come from different cases, so the combined payload can be larger than the largest individual case. Separate complete-case fields or hybrid representations are also possible when their storage and copying costs are preferable.
+
+#### Primitive Types and Layout Assumptions
+
+The compiler may rely on the following predefined types being unmanaged and having the fixed managed sizes specified by the [existing `sizeof` rules](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/expressions.md#12818-the-sizeof-operator):
+
+| Types | Size in bytes |
+| --- | --- |
+| `bool`, `byte`, `sbyte` | 1 |
+| `char`, `short`, `ushort` | 2 |
+| `int`, `uint`, `float` | 4 |
+| `long`, `ulong`, `double` | 8 |
+| `decimal` | 16 |
+
+These assumptions require no unsafe opt-in. They describe managed storage, rather than interop marshaling representations. Native-sized integers (`nint`/`IntPtr` and `nuint`/`UIntPtr`) are also unmanaged, but their size depends on the execution platform. A representation must accommodate that dependency, for example with native-sized typed fields, instead of assuming one fixed size in portable output. No blanket layout assumption is made for other framework or user-defined structs.
+
+#### External Types and Decomposition
+
+By default, a struct from another assembly remains an opaque typed value, even when its compile-time definition satisfies `unmanaged`. The [`unmanaged` constraint is enforced by the language, not the CLR](../../../proposals/csharp-7.3/blittable.md#detailed-design). Recompiling a caller against a new reference-containing definition rejects an unmanaged-constrained use, but replacing the dependency of an existing binary does not necessarily reject that instantiation. The default enum representation must not turn that change into an unchecked copy of references into byte storage.
+
+The compiler can directly arrange the declared payload components of its generated case types. Decomposing a nested user-defined struct requires preserving all of its value state and reconstructing it without invoking user getters, setters, or constructors. It must also respect accessibility, type safety, and supported versioning. If those conditions cannot be established, the value remains in a typed slot. Being declared in the current assembly is not enough when layout-relevant dependencies cross an assembly boundary.
+
+Unmanagedness and byte layout are separate questions. Architecture, native-sized fields, alignment, and padding can prevent a fixed layout from being known even for a concrete unmanaged struct. Reference-assembly metadata used for compilation is not a promise that the execution-time type has one fixed size or layout. Any decomposition or raw packing must account for all of the assumptions it needs.
+
+#### Mixed-Data Example
+
+For example, the candidate pools above could represent:
 
 ```csharp
 enum struct Message<T>
@@ -309,7 +341,7 @@ enum struct Message<T>
 // Conceptual storage (generated case types and accessors omitted):
 public struct Message<T>
 {
-    private byte _discriminant;
+    private byte _discriminator;
 
     // Buffer has the largest unmanaged payload: two ints.
     private UnmanagedData _unmanaged;
@@ -333,11 +365,11 @@ public struct Message<T>
 
 #### Case Conversions
 
-Converting a case value to the union packs its constituent data into the assigned slots and sets the discriminant. Extracting a case checks the discriminant, reads the slots, and reconstructs the case value. These operations rearrange (or "swizzle") the data between the case's own layout and the union's shared layout; they cannot generally reinterpret the union's payload as the complete case type.
+Converting a case value to the enum packs its constituent data into the assigned slots and sets the discriminator. Extracting a case checks the discriminator, reads the slots, and reconstructs the case value. These operations rearrange (or "swizzle") the data between the case's own layout and the enum's shared layout; they cannot generally reinterpret the enum's payload as the complete case type.
 
-In the example above, constructing a union from `Buffer` stores its array in `_reference0` and its two integers in `_unmanaged`. Extracting `Buffer` reconstructs the case from those locations. Constructing from `Pair` instead uses both reference slots and needs no unmanaged data. Unused reference and typed slots are initialized or cleared to their default values, so the union does not retain references belonging to an inactive case.
+In the example above, constructing an enum from `Buffer` stores its array in `_reference0` and its two integers in `_unmanaged`. Extracting `Buffer` reconstructs the case from those locations. Constructing from `Pair` instead uses both reference slots and needs no unmanaged data. Unused reference and typed slots are initialized or cleared to their default values, so the enum does not retain references belonging to an inactive case.
 
-Storing every complete case in a separate field would avoid this rearrangement, but would make the union pay for the sum of the cases' sizes even though only one case is active. That cost is especially significant for structs, which are copied by value and stored inline in arrays and containing objects. Sharing storage and reconstructing cases is therefore the general strategy for compact, non-boxing storage of mixed case data.
+Storing every complete case in a separate field would avoid this rearrangement, but would pay for the sum of the cases' sizes even though only one case is active. That cost is especially significant for structs, which are copied by value and stored inline in arrays and containing objects. Shared storage reduces that cost at the expense of packing and reconstruction. The compiler may choose either strategy or a hybrid based on their storage and execution costs.
 
 For `Option<T>`, the shared storage is simply one typed `T` slot:
 
@@ -355,10 +387,10 @@ public struct Option<T> : IUnion
     public readonly record struct Some(T value);
 
     // None needs no payload; Some needs one typed T slot.
-    private byte _discriminant;
+    private byte _discriminator;
     private T _value;
     
-    object? IUnion.Value => _discriminant switch
+    object? IUnion.Value => _discriminator switch
     {
         1 => new None(),
         2 => new Some(_value),
@@ -369,12 +401,12 @@ public struct Option<T> : IUnion
     public bool TryGetValue(out None value)
     {
         value = default;
-        return _discriminant == 1;
+        return _discriminator == 1;
     }
 
     public bool TryGetValue(out Some value)
     {
-        if (_discriminant == 2)
+        if (_discriminator == 2)
         {
             value = new Some(_value);
             return true;
@@ -384,8 +416,8 @@ public struct Option<T> : IUnion
     }
     
     // Constructors and implicit case conversions
-    public Option(None _) => _discriminant = 1;
-    public Option(Some some) => (_discriminant, _value) = (2, some.value);
+    public Option(None _) => _discriminator = 1;
+    public Option(Some some) => (_discriminator, _value) = (2, some.value);
 
     public static implicit operator Option<T>(None value) => new(value);
     public static implicit operator Option<T>(Some value) => new(value);
@@ -396,9 +428,23 @@ The `TryGetValue` accessors reconstruct case values without boxing. Access throu
 
 #### Fully Unmanaged Cases
 
-When all case data is unmanaged and the case layouts are statically known, the compiler overlaps the complete case values in a single unmanaged storage region. The payload then requires only the size of the largest case, subject to alignment and padding, in addition to the discriminant.
+When all case data is unmanaged and the required layout facts can be established safely, overlapping complete case values in one unmanaged region is a possible optimization. The region can hold the largest case, subject to alignment and padding, in addition to the discriminator.
 
-This layout preserves each case's own representation, so constructing or extracting a case copies its complete value without swizzling individual fields. Authors who need minimal storage and no rearrangement of case data get that layout when their cases meet these requirements. Generic cases that still require typed slots remain subject to the constraints described above.
+Preserving each case's representation allows construction and extraction to copy complete values without swizzling individual fields. The compiler may use this strategy when it satisfies the safety and versioning requirements above. Unmanagedness alone does not guarantee this layout, a minimum enum size, or the absence of reconstruction. Generic cases and external structs may still require typed slots.
+
+#### Possible Unsafe Packing Opt-in
+
+We should consider an explicitly unsafe opt-in allowing an author to assert that selected payload types will remain unmanaged and have a specified byte size. This could use attributes on the consuming enum or individual case parameters, potentially in combination with the `unsafe` keyword. An annotation on a supplying type would instead express a broader contract by that type's author. The exact syntax, attribute placement, and interaction with unsafe contexts remain design questions; this proposal does not select an attribute name or extend the grammar for it.
+
+The compiler would first check that an asserted type satisfies the ordinary C# unmanaged rules at compilation. It could also check the size assertion when that size is statically known. The assertion would permit the implementation to place values of the type in unmanaged storage, introducing a dependency on that type's layout contract. It would not promise a particular layout for the enum itself.
+
+The compiler would emit validation in the enum's static constructor, once per constructed enum type, before any generated operation relies on those assumptions. Validation must check both that `RuntimeHelpers.IsReferenceOrContainsReferences<T>()` is false and that the runtime managed size, obtainable through `Unsafe.SizeOf<T>()`, matches the asserted byte size. A struct can remain unmanaged while growing beyond the reserved storage, so a reference-containment check alone is insufficient. Any additional assumptions about offsets or alignment must likewise be validated or explicitly identified as obligations of the unsafe contract. Whole-value copies can avoid depending on internal field offsets.
+
+Every path that packs or reconstructs raw data must be protected, including extraction from zero-initialized values. Default values and array initialization do not execute instance constructors, so validation cannot depend solely on those constructors. Failed validation must prevent the raw operation and produce a managed exception, such as a type-initialization failure. Process termination is not required. The checks in [`MemoryMarshal.Read` and `Write`](https://github.com/dotnet/runtime/blob/main/src/libraries/System.Private.CoreLib/src/System/Runtime/InteropServices/MemoryMarshal.cs) provide an existing model: they reject reference-containing types and check buffer capacity before copying.
+
+Complete, mandatory validation makes an incorrect assertion fail safely. Memory unsafety becomes possible if an assumption is unchecked, insufficiently checked, or its protections are bypassed. The opt-in would require explicit unsafe acknowledgment because placing values in raw storage relies on this layout contract; any obligations that validation cannot establish must be stated rather than treating the annotation as proof. An annotation must not disable the required checks or allow invalid reference representations. Tearing still does not justify reinterpreting arbitrary bits as references or using unchecked reference casts.
+
+The opt-in also makes the versioning trade-off explicit. A dependency update can cause validation of an annotated enum to fail even if its ordinary typed API would still work. The conservative default avoids introducing that hidden layout dependency. Whether this optimization is worth an additional unsafe contract remains an LDM decision supported by performance measurements.
 
 ## 6. Pattern Matching and Behaviors
 
@@ -557,10 +603,11 @@ The distinction between `enum class` and `enum struct` allows developers to choo
 - Singleton pattern for parameter-less cases
 
 **`enum struct`**:
-- Size includes the discriminant and the maximum storage needed in each shared pool, with required alignment and padding
+- Layout and size are compiler implementation details; shared pools, typed slots, and separate-case storage are candidate strategies
 - Inline storage, no heap allocation
-- Mixed case data is packed and reconstructed through the union's non-boxing accessors
-- Fully unmanaged cases with statically known layouts share space for the largest complete case, without swizzling
+- The conservative strategy preserves type and memory safety, including during torn reads and writes
+- Sharing mixed case storage can require packing and reconstruction through non-boxing accessors
+- Complete unmanaged cases may overlap when their layout assumptions can be established safely; external layout assertions would require the proposed unsafe opt-in
 
 ### Allocation Patterns
 
@@ -594,6 +641,7 @@ Shape enums benefit from all union optimizations:
 8. **Generic cases**: Should cases support independent generic parameters?
 9. **Interface implementation**: Should enhanced enums automatically implement `IEquatable<T>`?
 10. **Exact lowering**: Should the spec define exact names and shapes of generated types?
+11. **Unsafe packing**: Should an explicit unsafe opt-in permit assertions about payload unmanagedness and byte size, and what syntax and runtime validation should it require?
 
 ## Appendix A: Grammar Changes
 
