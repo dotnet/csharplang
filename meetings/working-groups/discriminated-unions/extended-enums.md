@@ -563,6 +563,7 @@ public struct Option<T>
     // Zero represents no case in this declaration.
     // None needs no payload; Some needs one typed T slot.
     private byte _discriminator;
+<<<<<<< HEAD
     // The payload slot may be unused and contain default(T).
     private T? _value;
 
@@ -572,6 +573,19 @@ public struct Option<T>
 
     // Non-boxing case access
     public readonly bool TryGetValue(out None value)
+=======
+    private T _value;
+    
+    object? IUnion.Value => _discriminator switch
+    {
+        1 => new None(),
+        2 => new Some(_value),
+        _ => null
+    };
+    
+    // Non-boxing access pattern
+    public bool TryGetValue(out None value)
+>>>>>>> extended-enums-struct-storage
     {
         value = default;
         return _discriminator == 1;
@@ -587,8 +601,13 @@ public struct Option<T>
         value = default;
         return false;
     }
+<<<<<<< HEAD
 
     // Construction and case-to-enum conversions
+=======
+    
+    // Constructors and implicit case conversions
+>>>>>>> extended-enums-struct-storage
     public Option(None _) => _discriminator = 1;
     public Option(Some some) => (_discriminator, _value) = (2, some.value);
 
@@ -626,6 +645,7 @@ Every path that packs or reconstructs raw data must be protected, including extr
 Complete, mandatory validation makes an incorrect assertion fail safely. Memory unsafety becomes possible if an assumption is unchecked, insufficiently checked, or its protections are bypassed. The opt-in would require explicit unsafe acknowledgment because placing values in raw storage relies on this layout contract; any obligations that validation cannot establish must be stated rather than treating the annotation as proof. An annotation must not disable the required checks or allow invalid reference representations. Tearing still does not justify reinterpreting arbitrary bits as references or using unchecked reference casts.
 
 The opt-in also makes the versioning trade-off explicit. A dependency update can cause validation of an annotated enum to fail even if its ordinary typed API would still work. The conservative default avoids introducing that hidden layout dependency. Whether this optimization is worth an additional unsafe contract remains an LDM decision supported by performance measurements.
+<<<<<<< HEAD
 
 ### Generated APIs and Conversions
 
@@ -676,6 +696,8 @@ Struct case type tests are recognized by the compiler when the input is statical
 Generated members must agree on the active case. Extracting a struct case produces a value, not a reference into the enum's storage. Its payload is reconstructed as needed by the storage strategy, and managed-reference payloads retain their original references.
 
 The proposed API supports explicit case-type construction, such as `new Result.Success("ok")`, as well as the enum-level [case construction expressions](#case-construction-expressions). Ordinary C# cannot declare a nested case type alongside a method or property with the same name, so enum-level construction is a compiler-recognized case operation. Matching record members follow ordinary record customization rules; other user-declared members that conflict with generated members are errors. The final generated API names remain an open question.
+=======
+>>>>>>> extended-enums-struct-storage
 
 ## 6. Pattern Matching and Behaviors
 
@@ -1065,7 +1087,10 @@ The distinction between `enum class` and `enum struct` allows developers to choo
 - The conservative strategy preserves type and memory safety, including during torn reads and writes
 - Sharing mixed case storage can require packing and reconstruction through non-boxing accessors
 - Complete unmanaged cases may overlap when their layout assumptions can be established safely; external layout assertions would require the proposed unsafe opt-in
+<<<<<<< HEAD
 - Generated predicates and extraction methods access cases without boxing
+=======
+>>>>>>> extended-enums-struct-storage
 
 ### Allocation Patterns
 
@@ -1095,10 +1120,17 @@ Potential optimizations include:
 4. **Serialization**: How should enhanced enums interact with System.Text.Json?
 5. **Additional state**: Should shape enums allow instance fields outside case data?
 6. **Custom constructors**: Should enums allow custom constructors that delegate to cases?
+<<<<<<< HEAD
 7. **Generic cases**: Should cases support independent generic parameters?
 8. **Exact lowering**: What names and shapes should the generated APIs and hierarchy metadata have, and are additional convenience APIs needed?
 9. **Uninitialized matching**: Should the `null` pattern match an uninitialized enum struct, or should this state be tested only through case-state APIs?
 10. **Future-case fallbacks**: What syntax or mechanism should opt into known-case coverage diagnostics while retaining a fallback for future cases?
+=======
+7. **Construction syntax**: `Result.Ok(42)` or `new Result.Ok(42)` or both?
+8. **Generic cases**: Should cases support independent generic parameters?
+9. **Interface implementation**: Should enhanced enums automatically implement `IEquatable<T>`?
+10. **Exact lowering**: Should the spec define exact names and shapes of generated types?
+>>>>>>> extended-enums-struct-storage
 11. **Unsafe packing**: Should an explicit unsafe opt-in permit assertions about payload unmanagedness and byte size, and what syntax and runtime validation should it require?
 
 ## Appendix A: Grammar Changes
