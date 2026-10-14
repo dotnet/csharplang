@@ -111,7 +111,7 @@ Data-carrying enum storage layout and switch emit are compiler implementation de
 
 ### `enum class` Translation
 
-An `enum class` is an abstract record base with sealed nested case records. A value holds the actual case reference:
+An `enum class` is an abstract record base with a private parameterless constructor, no copy constructor, and sealed nested case records. A value holds the actual case reference:
 
 ```csharp
 // Conceptual type model for Result:
@@ -124,15 +124,7 @@ public abstract record class Result
 }
 ```
 
-Only the declared cases may derive from the enum, including across assembly boundaries. Supporting compilers enforce this through the [enum metadata](https://github.com/dotnet/csharplang/blob/main/meetings/working-groups/discriminated-unions/extended-enums.md#construction-and-case-access). A private parameterless constructor blocks `base()`, but an ordinary nonsealed record also has a [protected copy constructor](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-9.0/records.md#copy-and-clone-members), allowing an outside record to call `base(existing)`:
-
-```csharp
-// Legal for an ordinary record Result; rejected for an enum class Result.
-public record Intruder : Result
-{
-    public Intruder(Result existing) : base(existing) { }
-}
-```
+The base has no instance state, so case copy constructors call `base()`. Only the declared cases may derive from the enum. The private constructor and sealed cases prevent external derivation, including across assembly boundaries.
 
 ### `enum struct` Translation
 
