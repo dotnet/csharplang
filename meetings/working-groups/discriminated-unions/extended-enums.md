@@ -56,17 +56,7 @@ Enhanced enums address all these limitations while preserving conceptual simplic
 
 By extending the existing `enum` keyword, enhanced enums provide a grow-up story. Simple enums remain simple, while advanced scenarios become possible without abandoning familiar patterns.
 
-## 3. Type Unions (Foundation)
-
-Type unions are fully specified in the [unions proposal](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-15.0/unions.md#summary). They provide:
-
-- Implicit conversions from case types to the union type
-- Pattern matching that unwraps union contents
-- Exhaustiveness checking in switch expressions
-- Enhanced nullability tracking
-- Flexible storage strategies (boxing or non-boxing)
-
-## 4. Enhanced Enums
+## 3. Enhanced Enums
 
 ### Syntax Extensions
 
@@ -91,9 +81,7 @@ enum class Result // or enum struct
 }
 ```
 
-Each case with a parameter list generates a nested record type. `enum class` generates `sealed record class` types; `enum struct` generates `readonly record struct` types.
-
-TODO: Should the structs be readonly?  Seems like that goes against normal structs (including `record struct`).  Seems like that could be opt in with `readonly enum struct X`.
+Cases, including data-free cases, conceptually generate nested record types: `sealed record class` for `enum class`, and `record struct` for `enum struct`. Their record behaviors apply subject to the [case construction rules](https://github.com/dotnet/csharplang/pull/10370).
 
 #### Combination Rules
 
@@ -168,7 +156,7 @@ Members are restricted to:
 - Static members
 - Nested types
 
-## 5. Translation Strategy
+## 4. Translation Strategy
 
 The following translations illustrate the generated case types and their enclosing union.
 
@@ -438,7 +426,7 @@ Here eight bytes is a claim about `DateTime`'s current managed size, not a langu
 
 The contract establishes only reference containment and total managed size. Field offsets, alignment, and accessibility require separate justification; the compiler can instead copy values opaquely. Whether to add this contract remains a joint decision for LDM and the runtime team, supported by performance measurements.
 
-## 6. Pattern Matching and Behaviors
+## 5. Pattern Matching and Behaviors
 
 ### Unified Pattern Matching
 
@@ -472,7 +460,7 @@ var description = status switch
 };
 ```
 
-## 7. Examples and Use Cases
+## 6. Examples and Use Cases
 
 ### Migrating Traditional Enums
 
@@ -550,7 +538,7 @@ Option<int> Empty() => .None;
 Option<int> Present(int value) => .Some(value);
 ```
 
-In the `Map` example above, the return type supplies `Result<U, E>` to the switch arms, so `.Error(err)` selects the output enum's case even though `U` does not occur in its payload. The direct nested-type form `new .Some(42)` remains available as well.
+In the `Map` example above, the return type supplies `Result<U, E>` to the switch arms, so `.Error(err)` selects the output enum's case even though `U` does not occur in its payload.
 
 #### Infer Generic Factory Results from Context
 
@@ -559,8 +547,8 @@ Generalized generic type inference addresses a related problem: a generic factor
 ```csharp
 static class Option
 {
-    public static Option<T> CreateNone<T>() => new Option<T>.None();
-    public static Option<T> CreateSome<T>(T value) => new Option<T>.Some(value);
+    public static Option<T> CreateNone<T>() => Option<T>.None;
+    public static Option<T> CreateSome<T>(T value) => Option<T>.Some(value);
 }
 
 Option<int> empty = Option.CreateNone(); // infer T = int from the target
@@ -573,7 +561,7 @@ Func<Option<int>> noneFactory = Option.CreateNone; // infer T from the delegate 
 
 The result type `Option<T>` must fit the target `Option<int>`, supplying the missing bound for `T`. The delegate result similarly supplies a bound for `noneFactory`; arguments and targets can determine different type parameters. Constraints, applicability, result conversion, and overload selection still apply. The precise contexts and binding stages supplying target information remain part of the inference design.
 
-Constructor inference extends the shared machinery to `new` expressions, but inference for omitted *containing-type* arguments in names such as `new Option.Some(42)` remains an open issue. The leading-dot form avoids that issue by supplying the already constructed containing type `Option<int>`.
+Inference of omitted containing-type arguments in a case construction such as `Option.Some(42)` remains open. Leading-dot lookup instead obtains `Option<int>` from the target.
 
 #### Case Patterns and Limits
 
@@ -625,20 +613,19 @@ enum class ConnectionState
 }
 ```
 
-## 8. Open Questions
+## 7. Open Questions
 
-1. **Nested type accessibility**: Should users reference generated case types directly?
+1. **Readonly cases**: Should struct case records be readonly by default, or only for a `readonly enum struct`? The [value-semantics change](https://github.com/dotnet/csharplang/pull/10371) proposes the latter.
 2. **Partial support**: Should enhanced enums support `partial` for source generators?
 3. **Default values**: What should `default(EnumType)` produce for shape enums?
 4. **Serialization**: How should enhanced enums interact with System.Text.Json?
 5. **Additional state**: Should shape enums allow instance fields outside case data?
 6. **Custom constructors**: Should enums allow custom constructors that delegate to cases?
-7. **Construction syntax**: `Result.Ok(42)` or `new Result.Ok(42)` or both?
-8. **Generic cases**: Should cases support independent generic parameters?
-9. **Interface implementation**: Should enhanced enums automatically implement `IEquatable<T>`?
-10. **Exact lowering**: Should the spec define exact names and shapes of generated types?
-11. **Checked packing**: Should a checked `[Unmanaged(size: ...)]` contract permit raw payload storage, and where should the annotation be placed?
-12. **Unmanaged classification**: What compatibility guarantee should apply when the compiler changes an enum struct's representation, as discussed under [Unmanaged Classification](https://github.com/dotnet/csharplang/blob/main/meetings/working-groups/discriminated-unions/extended-enums.md#unmanaged-classification)?
+7. **Generic cases**: Should cases support independent generic parameters?
+8. **Interface implementation**: Should enhanced enums automatically implement `IEquatable<T>`?
+9. **Exact lowering**: Should the spec define exact names and shapes of generated types?
+10. **Checked packing**: Should a checked `[Unmanaged(size: ...)]` contract permit raw payload storage, and where should the annotation be placed?
+11. **Unmanaged classification**: What compatibility guarantee should apply when the compiler changes an enum struct's representation, as discussed under [Unmanaged Classification](https://github.com/dotnet/csharplang/blob/main/meetings/working-groups/discriminated-unions/extended-enums.md#unmanaged-classification)?
 
 ## Appendix A: Grammar Changes
 
