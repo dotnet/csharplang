@@ -128,9 +128,9 @@ var option = Option<int>.Some(42); // Option<int>
 option = Option<int>.None;
 ```
 
-The nested case type remains available in type contexts, including type patterns, declarations, casts, and `typeof`. Direct construction with `new E.Case(arguments)` retains ordinary object-creation behavior and produces the nested case type. For example, `Option<int>.Some caseValue = new(42)` constructs the case value directly.
+The nested case type remains available in type contexts, including type patterns, declarations, casts, and `typeof`. Direct construction with `new E.Case(arguments)` retains ordinary object-creation behavior and produces the nested case type.
 
-The compiler binds the case name according to its type, value, invocation, or pattern context and lowers enum construction through the case constructor and case-to-enum conversion. Metadata must identify these operations to consuming compilers; its encoding remains open.
+The compiler lowers enum construction through the case constructor and case-to-enum conversion. Metadata must identify these operations to consuming compilers; its encoding remains open.
 
 Generated implementation members can have distinct metadata names; no ordinary same-name factory is needed beside the nested type, which C# would forbid. A user-declared member conflicting with a case name requires a diagnostic.
 
@@ -150,7 +150,7 @@ Option<int> Present(int value) => .Some(value);
 
 Target-typed lookup must bind enum case operations as well as ordinary static calls. This requires no general rule making type names callable or convertible to values.
 
-These leading-dot examples require the proposed target-typed member access feature. As with its other uses, a target type must be available, and the case name does not resolve an otherwise ambiguous overload. Generic inference can help provide that type, as discussed in the [separate construction and inference proposal change](https://github.com/dotnet/csharplang/pull/10369).
+A target type must be available, and the case name does not resolve an otherwise ambiguous overload. Generic inference can help provide that type, as discussed in the [separate construction and inference proposal change](https://github.com/dotnet/csharplang/pull/10369).
 
 #### Combination Rules
 
