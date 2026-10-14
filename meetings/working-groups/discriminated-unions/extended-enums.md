@@ -66,7 +66,7 @@ Data-carrying enum declarations have no base list and cannot assign constant val
 
 ### Partial Declarations
 
-Data-carrying enums support `partial` under the ordinary partial-type rules. Cases from all parts form one case set, with unique case names and at most one designated default case across the entire declaration.
+Data-carrying enums support `partial` under the ordinary partial-type rules. Cases from all parts form one case set, with unique case names and at most one designated `default` case across the entire declaration.
 
 Authors can separate cases and members into different parts. A part containing only members begins its body with the separating semicolon, for example `partial enum struct Option<T> { ; /* members */ }`.
 
@@ -202,11 +202,10 @@ Contextual case construction should compose with [generalized type inference](ht
 ```csharp
 void Use<T>(Option<T> value, T fallback) { /* ... */ }
 
-Use(.None, 42);    // T = int from the second argument
-Use(.Some(42), 0); // T = int from the second argument
+Use(.None, 42); // T = int from the second argument
 ```
 
-Ordinary applicability, conversions, constraints, and overload selection still apply. `var value = .None` has no target type and is an error. A case name alone cannot determine an unknown type argument or disambiguate overloads taking different enums. Inference for a form such as `Option.Some(42)` is a separate [open question](https://github.com/dotnet/csharplang/blob/main/meetings/working-groups/discriminated-unions/extended-enums.md#inference-of-containing-type-arguments).
+Ordinary applicability, conversions, constraints, and overload selection still apply. `var value = .None` has no target type and is an error. A case name alone cannot determine an unknown type argument or disambiguate overloads taking different enums. Inference from case arguments, including `Option.Some(42)` and `Use(.Some(42))`, is a separate [open question](https://github.com/dotnet/csharplang/blob/main/meetings/working-groups/discriminated-unions/extended-enums.md#inference-from-case-arguments).
 
 ### Generated APIs and Conversions
 
@@ -214,19 +213,45 @@ Ordinary applicability, conversions, constraints, and overload selection still a
 
 - An implicit conversion from each case type to the enum.
 - A boolean `IsCase` property for each case, such as `IsSome`, testing case identity.
-- `HasValue`, which is false when uninitialized and true for any active case, including a designated default case.
+- `HasValue`, which is false when uninitialized and true for any active case, including a designated `default` case.
 - A `TryGetValue(out Case value)` overload for each case, returning true with its value if active; otherwise returning false and assigning `default(Case)` to the out parameter.
 - An explicit conversion to each case type, returning its value if active or throwing `InvalidCastException` otherwise.
 
-## Defaults and Matching
+<details>
+<summary>Example: generated case-access API for Option&lt;T&gt;</summary>
 
-Constructing a data-free case and taking `default(E)` are separate operations: they need not produce the same value.
+Public signatures for the earlier `Option<T>` (bodies, storage, and ordinary record members omitted):
+
+```csharp
+public struct Option<T>
+{
+    public record struct None;
+    public record struct Some(T value);
+
+    public readonly bool IsNone { get; }
+    public readonly bool IsSome { get; }
+    public readonly bool HasValue { get; }
+
+    public readonly bool TryGetValue(out None value) { ... }
+    public readonly bool TryGetValue(out Some value) { ... }
+
+    public static implicit operator Option<T>(None value) { ... }
+    public static implicit operator Option<T>(Some value) { ... }
+
+    public static explicit operator None(Option<T> value) { ... }
+    public static explicit operator Some(Option<T> value) { ... }
+}
+```
+
+</details>
+
+## Defaults and Matching
 
 ### Default Values
 
 For an `enum class`, `default(E)` is `null` and represents no case.
 
-For an `enum struct`, discriminator zero denotes an *uninitialized value* unless a default case is designated. Cases not designated as default have nonzero discriminators, including data-free cases. For the earlier `Option<T>` declaration:
+For an `enum struct`, discriminator zero denotes an *uninitialized value* unless a `default` case is designated. Cases not designated as `default` have nonzero discriminators, including data-free cases. For the earlier `Option<T>` declaration:
 
 ```csharp
 Option<int> uninitialized = default;   // no active case
@@ -282,7 +307,7 @@ Data-carrying enums follow the case-set policy of [open/closed enums](https://gi
 
 Class null references follow the ordinary nullable-reference and switch rules. Whether exhaustiveness must account for an uninitialized struct, and whether `null` should match it, remain [open questions](https://github.com/dotnet/csharplang/blob/main/meetings/working-groups/discriminated-unions/extended-enums.md#uninitialized-values-in-matching).
 
-Renaming or removing public cases, changing payload parameters or properties, or changing between class and struct representations affects existing APIs. Changing the designated default case changes the meaning of zero-initialized storage and is a behavioral breaking change. Adding a struct case can increase storage or alignment requirements. Previously compiled switches retain their normal fallback or unmatched-switch behavior for newly added cases.
+Renaming or removing public cases, changing payload parameters or properties, or changing between class and struct representations affects existing APIs. Changing the designated `default` case changes the meaning of zero-initialized storage and is a behavioral breaking change. Adding a struct case can increase storage or alignment requirements. Previously compiled switches retain their normal fallback or unmatched-switch behavior for newly added cases.
 
 ## Value Semantics
 
@@ -311,7 +336,7 @@ Case types support ordinary record `with` expressions. On an `enum class` receiv
 
 Both enum forms expose strongly typed `Equals`, `IEquatable<E>`, `Equals(object)`, and `==`/`!=` for the enum type `E`. Struct hashing follows the active case's record hashing and may incorporate case identity; hash values and combining algorithms are implementation details.
 
-Two uninitialized values of the same `enum struct` are equal, have equal hashes, and are unequal to any active case. A designated default case participates as that active case.
+Two uninitialized values of the same `enum struct` are equal, have equal hashes, and are unequal to any active case. A designated `default` case participates as that active case.
 
 ### Recursive Payloads
 
@@ -457,7 +482,7 @@ private static void __ValidateSize<T>(int expectedSize) where T : struct
 
 Both checks use actual managed representation, not marshaling size. The illustrative helpers can be shared across types. Failure must prevent raw access with a managed exception, such as a type-initialization failure, and raw copies must remain in bounds, as with [`MemoryMarshal.Read` and `Write`](https://github.com/dotnet/runtime/blob/main/src/libraries/System.Private.CoreLib/src/System/Runtime/InteropServices/MemoryMarshal.cs). These guarantees would remove the need for `unsafe`.
 
-A packing enum must validate its own recorded claims once per constructed enum type through a generated static constructor. Constructors and case-to-enum conversions must trigger this before packing, under the [struct static-constructor rules](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/structs.md#16410-static-constructors). Extraction must likewise ensure validation has completed before reconstructing payloads from raw storage, including for a designated default case. Returning typed `default` payloads or a failed `TryGetValue` result requires no raw access.
+A packing enum must validate its own recorded claims once per constructed enum type through a generated static constructor. Constructors and case-to-enum conversions must trigger this before packing, under the [struct static-constructor rules](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/structs.md#16410-static-constructors). Extraction must likewise ensure validation has completed before reconstructing payloads from raw storage, including for a designated `default` case. Returning typed `default` payloads or a failed `TryGetValue` result requires no raw access.
 
 The payload initializer alone is insufficient: defaults, arrays, layout queries, and whole-value copies can bypass it. A later library could also remove the annotation or validate a different size. A consumer reserving eight bytes must validate its own eight-byte expectation, rejecting updates that ordinary typed storage could accept.
 
@@ -550,7 +575,7 @@ The costs and choices are:
 - `Value` boxes struct cases and requires object-convertible cases. Future ref-like cases would need a different contract.
 - Public protocol names can conflict with domain meanings: `Option<T>.Value` might mean its payload and `HasValue` might mean `Some`, whereas the protocol exposes the active case and recognizes `None` too. A member provider avoids name conflicts but adds interface metadata and would require deciding where the proposed public `HasValue` belongs.
 - Union type patterns inspect the contained case, while untyped property/positional patterns inspect the enum. Integration must preserve that distinction, following the [LDM decision on pattern targets](https://github.com/dotnet/csharplang/blob/main/meetings/2026/LDM-2026-08-12.md#union-pattern-matching-targets).
-- Union null patterns would select the open [uninitialized-null matching option](https://github.com/dotnet/csharplang/blob/main/meetings/working-groups/discriminated-unions/extended-enums.md#uninitialized-values-in-matching), with nullable `Value`. A designated default case could use non-nullable `Value`; annotations and access members must agree.
+- Union null patterns would select the open [uninitialized-null matching option](https://github.com/dotnet/csharplang/blob/main/meetings/working-groups/discriminated-unions/extended-enums.md#uninitialized-values-in-matching), with nullable `Value`. A designated `default` case could use non-nullable `Value`; annotations and access members must agree.
 - Union case-type exhaustiveness must accommodate the enum's separate open/closed evolution policy.
 
 `[Union]` permits arbitrary implementations and identifies no discriminator mapping; it would not by itself provide the stronger guarantees needed for the proposed JIT optimization contract.
@@ -563,11 +588,11 @@ The remaining choices below affect source behavior or compatibility. The rules a
 
 ### Uninitialized Values in Matching
 
-Should a switch covering every declared case of a `closed enum struct` count as exhaustive even when the type has an uninitialized default value?
+Should a switch covering every declared case of a `closed enum struct` count as exhaustive even when the type has an uninitialized `default` value?
 
 One option is to use the declared case set for exhaustiveness, as other language features use static information even when runtime values can differ. A switch expression without a matching arm would then throw if an uninitialized value reaches it. Another option is to require explicit handling through `HasValue` or a fallback. This is separate from handling future cases of an open enum.
 
-Should the `null` pattern match the uninitialized state, or should it remain specific to null references and nullable values? A designated default case already has an ordinary case pattern.
+Should the `null` pattern match the uninitialized state, or should it remain specific to null references and nullable values? A designated `default` case already has an ordinary case pattern.
 
 ### Always-Readonly `enum struct` Types
 
@@ -589,9 +614,11 @@ Should declarations such as `Empty()` be disallowed in favor of `Empty`, giving 
 
 Should a data-carrying enum be able to declare additional instance state or custom instance constructors? State outside the cases would need defined initialization, copying, equality, and `with` behavior. A custom constructor would need to select a valid case and preserve the case-construction model.
 
-### Inference of Containing Type Arguments
+### Inference from Case Arguments
 
 Should `Option.Some(42)` infer the containing type `Option<int>` without a target type? [Constructor-call inference](https://github.com/dotnet/csharplang/blob/main/proposals/inference-for-constructor-calls.md), tracked by [#9627](https://github.com/dotnet/csharplang/issues/9627), and the [updated proposal](https://github.com/dotnet/csharplang/pull/10312) with [type-group lookup](https://github.com/dotnet/csharplang/pull/10310) offer related machinery. Applying it to enum case syntax needs an explicit design; leading-dot access already works when context supplies the constructed enum type.
+
+We would also like `Use(.Some(42))`, for `Use<T>(Option<T> value)`, to infer `T` from the case argument. The [current nested-inference model](https://github.com/dotnet/csharplang/blob/madstorgersen-target-typing-proposal/proposals/target-typed-generic-type-inference.md#nested-inference) requires outer inference to complete before supplying a target to an inner expression that cannot bind independently. Supporting this scenario would require case lookup on a partially inferred enum type and gathering bounds from its arguments.
 
 ### Unmanaged Classification
 
