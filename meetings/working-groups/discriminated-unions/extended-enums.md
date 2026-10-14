@@ -28,7 +28,7 @@ It consolidates design feedback from many years of repository discussions, espec
 
 ## Declarations
 
-A declaration lists its cases first, then can provide members that operate on those cases. A semicolon separates the cases from the members:
+A data-carrying enum declaration lists its cases first, then can provide members that operate on those cases. A semicolon separates the cases from the members:
 
 ```csharp
 public enum class Result
