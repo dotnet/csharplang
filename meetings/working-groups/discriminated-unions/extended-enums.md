@@ -1,6 +1,6 @@
 # Discriminated Unions and Enhanced Enums for C#
 
-This proposal introduces enhanced enums as an elegant way to build discriminated unions in C#. Building on [type unions](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-15.0/unions.md), enhanced enums provide familiar, concise syntax for algebraic sum types where cases are known at declaration time.
+This proposal introduces enhanced enums as an elegant way to build discriminated unions in C#. It is a follow-up to the [type unions](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-15.0/unions.md) proposal. While type unions combine existing types, enhanced enums define the enum and its named, data-carrying cases together, providing familiar, concise syntax for algebraic sum types where cases are known at declaration time.
 
 It consolidates design feedback from many years of repository discussions, especially [#113](https://github.com/dotnet/csharplang/issues/113) and related issues.
 
@@ -12,10 +12,7 @@ It consolidates design feedback from many years of repository discussions, espec
   - [#7016](https://github.com/dotnet/csharplang/issues/7016) - Fast, efficient unions proposal focusing on struct-based implementations
   - [#3760](https://github.com/dotnet/csharplang/discussions/3760) - Community "shopping list" of desired discriminated union features
   - [#7544](https://github.com/dotnet/csharplang/issues/7544) - Simple encoding of unions exploring type unions vs tagged unions
-  - [#8804](https://github.com/dotnet/csharplang/discussions/8804) - String-based enums for cloud services with extensibility needs
-  - [#1860](https://github.com/dotnet/csharplang/issues/1860) - Long-running request for string enum support citing TypeScript/Java
   - [#9010](https://github.com/dotnet/csharplang/discussions/9010) - "Closed" enum types that guarantee exhaustiveness
-  - [#6927](https://github.com/dotnet/csharplang/discussions/6927) - Constant enums discussion around strict value enforcement
   - [#7854](https://github.com/dotnet/csharplang/issues/7854) - Exhaustiveness checking for ADT patterns using private constructors
   - [#8942](https://github.com/dotnet/csharplang/discussions/8942) - Track subtype exhaustiveness for closed hierarchies
   - [#8926](https://github.com/dotnet/csharplang/discussions/8926) - Extensive discussion on Option<T> as canonical DU use case
@@ -62,7 +59,6 @@ Today's C# enums have significant limitations:
 
 1. **No associated data**: Cases are merely integral values
 2. **Not truly exhaustive**: Any integer can be cast to an enum type
-3. **Limited to integers**: Cannot use strings or doubles
 
 Enhanced enums address all these limitations while preserving conceptual simplicity.
 
@@ -91,17 +87,7 @@ Type unions are fully specified in the [unions proposal](https://github.com/dotn
 
 ### Syntax Extensions
 
-Enhanced enums extend traditional enum syntax in three orthogonal ways:
-
-#### Extended Base Types
-
-Support any constant-bearing type:
-
-```csharp
-enum Traditional : int { A = 1, B = 2 }
-enum Priority : string { Low = "low", Medium = "medium", High = "high" }
-enum TranscendentalConstants : double { Pi = 3.14159, E = 2.71828 }
-```
+Enhanced enums extend traditional enum syntax with shape declarations and data-carrying cases:
 
 #### Shape Declarations
 
@@ -129,43 +115,21 @@ TODO: Should the structs be readonly?  Seems like that goes against normal struc
 
 #### Combination Rules
 
-- **Constant enums**: Can use extended base types but NOT have parameter lists
 - **Shape enums**: Can have parameter lists but NOT specify a base type
-- **Mixing cases**: Cannot mix constant values and parameterized cases
+- **Case initializers**: Cannot assign constant values to cases
 
 ```csharp
-// ✓ Valid - constant enum with string base
-enum Status : string { Active = "A", Inactive = "I" }
-
 // ✓ Valid - shape enum with data
 enum class Result { Ok(int value), Error(string msg) }
 
-// ✗ Invalid - cannot mix constants and shapes
+// ✗ Invalid - shape cases cannot have constant initializers
 enum class Bad { A = 1, B(string x) }
 
 // ✗ Invalid - shape enums cannot have base types
 enum struct Bad : int { A, B }
-
-// ✗ Invalid - Constant enums cannot have parameter lists
-enum Bad { A(), B() }
 ```
 
-For the complete formal grammar, see [Appendix A: Grammar Changes](#appendix-a-grammar-changes).
-
-### Constant Value Enums
-
-Enhanced constant enums support any primitive type with compile-time constants:
-
-```csharp
-enum Priority : string 
-{
-    Low = "low",
-    Medium = "medium", 
-    High = "high"
-}
-```
-
-These compile to `System.Enum` subclasses with the appropriate `value__` backing field. Non-integral constant enums require explicit values for each member.
+For the complete formal grammar, see [Appendix A: Grammar Changes](https://github.com/dotnet/csharplang/blob/main/meetings/working-groups/discriminated-unions/extended-enums.md#appendix-a-grammar-changes).
 
 ### Shape Enums: Discriminated Unions Made Elegant
 
@@ -321,7 +285,7 @@ These assumptions require no layout annotation. They describe managed storage, r
 
 By default, a struct from another assembly remains an opaque typed value, even when its compile-time definition satisfies `unmanaged`. The [`unmanaged` constraint is enforced by the language, not the CLR](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-7.3/blittable.md#detailed-design). Recompiling a caller against a new reference-containing definition rejects an unmanaged-constrained use, but replacing the dependency of an existing binary does not necessarily reject that instantiation. The default enum representation must not turn that change into an unchecked copy of references into byte storage.
 
-A possible user [opt-in described below](#possible-checked-packing-opt-in) would allow placing these values in unmanaged storage, subject to compile-time and runtime validation of their unmanagedness and size.
+A possible user [opt-in described below](https://github.com/dotnet/csharplang/blob/main/meetings/working-groups/discriminated-unions/extended-enums.md#possible-checked-packing-opt-in) would allow placing these values in unmanaged storage, subject to compile-time and runtime validation of their unmanagedness and size.
 
 The compiler can directly arrange the declared payload components of its generated case types. Decomposing a nested user-defined struct requires preserving all of its value state and reconstructing it without invoking user getters, setters, or constructors. It must also respect accessibility, type safety, and supported versioning. If those conditions cannot be established, the value remains in a typed slot. Being declared in the current assembly is not enough when layout-relevant dependencies cross an assembly boundary.
 
@@ -537,14 +501,12 @@ var message = operation switch
 
 ### Exhaustiveness
 
-The compiler tracks all declared cases. Both constant and shape enums can be open or closed (see [Closed Enums proposal](https://github.com/dotnet/csharplang/blob/main/proposals/closed-enums.md)).
+The compiler tracks all declared cases. Shape enums can be open or closed (see [Closed Enums proposal](https://github.com/dotnet/csharplang/blob/main/proposals/closed-enums.md)).
 
 Open enums can be used to signal that the enum author may add new cases in future versions—consumers must handle unknown cases defensively (e.g., with a default branch). Closed enums signal that there is no need to handle unknown cases, such as when the case set is complete and will never change—the compiler ensures exhaustive matching without requiring a default case.
 
-For constant enums, "open" also means values outside the declared set can be safely freely cast to the enum type.
-
 ```csharp
-closed enum Status { Active, Pending(DateTime since), Inactive }
+closed enum class Status { Active, Pending(DateTime since), Inactive }
 
 // Compiler knows this is exhaustive - no default needed
 var description = status switch
@@ -553,17 +515,6 @@ var description = status switch
     Pending(var date) => $"Pending since {date}",
     Inactive => "Not active"
 };
-
-enum Priority : string { Low = "low", Medium = "medium", High = "high" }
-
-// Default case is needed, other string values may be converted to Priority, or new cases may be added in the future:
-var value = priority switch
-{
-    Low => -1,
-    Medium => 0,
-    High => 1,
-    _ => /* fallback to low priority */ -1,
-}
 ```
 
 ### All Union Behaviors
@@ -715,40 +666,25 @@ Shape enums benefit from all union optimizations:
 9. **Interface implementation**: Should enhanced enums automatically implement `IEquatable<T>`?
 10. **Exact lowering**: Should the spec define exact names and shapes of generated types?
 11. **Checked packing**: Should a checked `[Unmanaged(size: ...)]` contract permit raw payload storage, and where should the annotation be placed?
-12. **Unmanaged classification**: What compatibility guarantee should apply when the compiler changes an enum struct's representation, as discussed under [Unmanaged Classification](#unmanaged-classification)?
+12. **Unmanaged classification**: What compatibility guarantee should apply when the compiler changes an enum struct's representation, as discussed under [Unmanaged Classification](https://github.com/dotnet/csharplang/blob/main/meetings/working-groups/discriminated-unions/extended-enums.md#unmanaged-classification)?
 
 ## Appendix A: Grammar Changes
 
 ```antlr
-enum_declaration
-    : attributes? enum_modifier* 'enum' ('class' | 'struct')? identifier enum_base? enum_body ';'?
+shape_enum_declaration
+    : attributes? enum_modifier* 'enum' ('class' | 'struct') identifier shape_enum_body ';'?
     ;
 
-enum_base
-    : ':' enum_underlying_type
+shape_enum_body
+    : '{' shape_enum_case_declarations? '}'
+    | '{' shape_enum_case_declarations ';' class_member_declarations '}'
     ;
 
-enum_underlying_type
-    : simple_type // all integral types, fp-types, decimal, bool and char
-    | 'string'
-    | type_name  // Must resolve to one of the above
+shape_enum_case_declarations
+    : shape_enum_case_declaration (',' shape_enum_case_declaration)*
     ;
 
-enum_body
-    : '{' enum_member_declarations? '}'
-    | '{' enum_member_declarations ';' class_member_declarations '}'
-    ;
-
-enum_member_declarations
-    : enum_member_declaration (',' enum_member_declaration)*
-    ;
-
-enum_member_declaration
-    : attributes? identifier enum_member_initializer?
-    ;
-
-enum_member_initializer
-    : '=' constant_expression
-    | parameter_list
+shape_enum_case_declaration
+    : attributes? identifier parameter_list?
     ;
 ```
