@@ -9,8 +9,8 @@ It consolidates design feedback from many years of repository discussions, espec
 <details>
   <summary>Key discussion threads...</summary>
 
-  - [#75](https://github.com/dotnet/csharplang/issues/75) - Early comprehensive discussion exploring DU syntax options including enum class
-  - [#2962](https://github.com/dotnet/csharplang/discussions/2962) - Major discussion on Andy Gocke's DU proposal, debating enum class vs enum struct
+  - [#75](https://github.com/dotnet/csharplang/issues/75) - Early comprehensive discussion exploring DU syntax options including `enum class`
+  - [#2962](https://github.com/dotnet/csharplang/discussions/2962) - Major discussion on Andy Gocke's DU proposal, debating `enum class` vs `enum struct`
   - [#7016](https://github.com/dotnet/csharplang/issues/7016) - Fast, efficient unions proposal focusing on struct-based implementations
   - [#3760](https://github.com/dotnet/csharplang/discussions/3760) - Community "shopping list" of desired discriminated union features
   - [#7544](https://github.com/dotnet/csharplang/issues/7544) - Simple encoding of unions exploring type unions vs tagged unions
@@ -62,7 +62,7 @@ The enum can expose behavior shared by all its cases. The initial design allows:
 
 User-declared instance fields, auto-properties requiring instance storage, field-like instance events, and instance constructors are not currently allowed. Whether to permit additional state or custom constructors is discussed under [Additional Members](https://github.com/dotnet/csharplang/blob/main/meetings/working-groups/discriminated-unions/extended-enums.md#additional-members).
 
-Declarations have no base list and cannot assign constant values to cases. An enum struct may designate a case with `= default`, as described under [Default Values](https://github.com/dotnet/csharplang/blob/main/meetings/working-groups/discriminated-unions/extended-enums.md#default-values). User members conflicting with generated members are errors, except for customization permitted by ordinary record rules.
+Declarations have no base list and cannot assign constant values to cases. An `enum struct` may designate a case with `= default`, as described under [Default Values](https://github.com/dotnet/csharplang/blob/main/meetings/working-groups/discriminated-unions/extended-enums.md#default-values). User members conflicting with generated members are errors, except for customization permitted by ordinary record rules.
 
 ### Partial Declarations
 
@@ -72,7 +72,7 @@ Authors can separate cases and members into different parts. A part containing o
 
 ### Grammar
 
-The grammar permits both a cases-only declaration and a body containing members. The `readonly` modifier applies only to enum structs; `closed` controls [case-set evolution](https://github.com/dotnet/csharplang/blob/main/meetings/working-groups/discriminated-unions/extended-enums.md#exhaustiveness-and-evolution).
+The grammar permits both a cases-only declaration and a body containing members. The `readonly` modifier applies only to `enum struct` types; `closed` controls [case-set evolution](https://github.com/dotnet/csharplang/blob/main/meetings/working-groups/discriminated-unions/extended-enums.md#exhaustiveness-and-evolution).
 
 ```antlr
 data_enum_declaration
@@ -112,7 +112,7 @@ Storage layout and switch emit are compiler implementation details. They can, an
 
 ### `enum class` Translation
 
-An enum class is an abstract record base with sealed nested case records. A value holds the actual case reference:
+An `enum class` is an abstract record base with sealed nested case records. A value holds the actual case reference:
 
 ```csharp
 // Conceptual type model for Result:
@@ -129,7 +129,7 @@ Only the declared cases may derive from the enum, including across assembly boun
 
 ### `enum struct` Translation
 
-An enum struct stores its active case's data inline. Its case types are separate record structs, with conversions between the cases and the enum:
+An `enum struct` stores its active case's data inline. Its case types are separate `record struct` types, with conversions between the cases and the enum:
 
 ```csharp
 // Conceptual type model and simple storage for Option<T>:
@@ -219,9 +219,9 @@ Constructing a data-free case and taking `default(E)` are separate operations: t
 
 ### Default Values
 
-For an enum class, `default(E)` is `null` and represents no case.
+For an `enum class`, `default(E)` is `null` and represents no case.
 
-For an enum struct, discriminator zero denotes an *uninitialized value* unless a default case is designated. Ordinary cases have nonzero discriminators, including data-free cases. For the earlier `Option<T>` declaration:
+For an `enum struct`, discriminator zero denotes an *uninitialized value* unless a default case is designated. Ordinary cases have nonzero discriminators, including data-free cases. For the earlier `Option<T>` declaration:
 
 ```csharp
 Option<int> uninitialized = default;   // no active case
@@ -229,7 +229,7 @@ Option<int> none = Option<int>.None;   // active None
 Option<int> some = Option<int>.Some(0); // active Some with payload 0
 ```
 
-An enum struct may designate one data-free case as its default:
+An `enum struct` may designate one data-free case as its default:
 
 ```csharp
 enum struct Option<T>
@@ -258,7 +258,7 @@ if (option is Option<int>.Some(var value))
 
 Payloads keep their declared types and nullability. For `Option<string?>.Some(null)`, the pattern `Option<string?>.Some(var value)` succeeds and binds `value` to null.
 
-Struct case patterns require an input statically known to be the enum type; they do not establish CLR inheritance. A boxed enum struct is still an enum, so testing an `object` input against a case type does not extract that case. Patterns on the enum's own members inspect the enum itself.
+Struct case patterns require an input statically known to be the enum type; they do not establish CLR inheritance. A boxed `enum struct` is still an enum, so testing an `object` input against a case type does not extract that case. Patterns on the enum's own members inspect the enum itself.
 
 Target-typed static member access also permits `.Some(var value)` and `.None` using the pattern input type. [Type-pattern inference](https://github.com/dotnet/csharplang/blob/main/proposals/inference-for-type-patterns.md) addresses naming generic case types with omitted type arguments.
 
@@ -276,7 +276,7 @@ Cases use the familiar record rules. The enum adds the behavior needed to repres
 
 ### Readonly, Copying, and `with`
 
-The current design follows ordinary [readonly struct rules](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/structs.md#1622-struct-modifiers): an unmodified enum struct is mutable, and `readonly enum struct` is readonly. Generated cases have the enum's readonlyness and follow [record-struct property rules](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-10.0/record-structs.md#properties), using `get`/`set` properties for mutable cases and `get`/`init` for readonly cases. Whether to make enum structs [always readonly](https://github.com/dotnet/csharplang/blob/main/meetings/working-groups/discriminated-unions/extended-enums.md#always-readonly-enum-structs) remains open. User-declared nested types follow ordinary rules. Generated queries, extraction methods, and equality members are readonly instance members.
+The current design follows ordinary [`readonly struct` rules](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/structs.md#1622-struct-modifiers): an unmodified `enum struct` is mutable, and `readonly enum struct` is readonly. Generated cases have the enum's readonlyness and follow [`record struct` property rules](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-10.0/record-structs.md#properties), using `get`/`set` properties for mutable cases and `get`/`init` for readonly cases. Whether to make `enum struct` types [always readonly](https://github.com/dotnet/csharplang/blob/main/meetings/working-groups/discriminated-unions/extended-enums.md#always-readonly-enum-struct-types) remains open. User-declared nested types follow ordinary rules. Generated queries, extraction methods, and equality members are `readonly` instance members.
 
 Assignment follows ordinary class and struct rules and copies payloads shallowly. Extracting a struct case produces an independent value; changing it does not update the enum:
 
@@ -289,7 +289,7 @@ running.count = 2; // progress still contains count = 1
 progress = running with { count = 3 }; // update a case copy, then convert back
 ```
 
-Case types support ordinary record `with` expressions. On an enum-class receiver, `e with { }` clones the runtime case record, preserving case identity. On an enum struct, ordinary [struct `with` rules](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-10.0/record-structs.md#allow-with-expression-on-structs) copy its active case or uninitialized state. Initializers bind against the receiver's static type, so case-specific payload updates require a case-typed receiver.
+Case types support ordinary record `with` expressions. On an `enum class` receiver, `e with { }` clones the runtime case record, preserving case identity. On an `enum struct`, ordinary [struct `with` rules](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-10.0/record-structs.md#allow-with-expression-on-structs) copy its active case or uninitialized state. Initializers bind against the receiver's static type, so case-specific payload updates require a case-typed receiver.
 
 ### Equality and Hashing
 
@@ -297,11 +297,11 @@ Class cases use record equality, including case type identity. Struct enum equal
 
 Both enum forms expose strongly typed `Equals`, `IEquatable<E>`, `Equals(object)`, and `==`/`!=` for the enum type `E`. Struct hashing follows the active case's record hashing and may incorporate case identity; hash values and combining algorithms are implementation details.
 
-Two uninitialized values of the same enum struct are equal, have equal hashes, and are unequal to any active case. A designated default case participates as that active case.
+Two uninitialized values of the same `enum struct` are equal, have equal hashes, and are unequal to any active case. A designated default case participates as that active case.
 
 ### Recursive Payloads
 
-Enum structs obey the existing [cyclic instance-field dependency rules](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/structs.md#1642-value-semantics). A case payload cannot create a direct or indirect recursive value-type layout, regardless of the storage strategy:
+`enum struct` types obey the existing [cyclic instance-field dependency rules](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/structs.md#1642-value-semantics). A case payload cannot create a direct or indirect recursive value-type layout, regardless of the storage strategy:
 
 ```csharp
 enum struct Expr
@@ -315,7 +315,7 @@ Using `enum class`, or introducing a class or array payload, breaks the layout d
 
 ### Concurrent Access
 
-Enum structs follow the existing [atomicity rules for struct reads and writes](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/variables.md#96-atomicity-of-variable-references). Unsynchronized accesses may tear, observing case identity and payload from different writes. Such observations are unspecified and accessors may throw, but must preserve memory and type safety under the usual safety assumptions for payload types and user code. Neither copying nor `readonly` makes a concurrent read atomic.
+`enum struct` types follow the existing [atomicity rules for struct reads and writes](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/variables.md#96-atomicity-of-variable-references). Unsynchronized accesses may tear, observing case identity and payload from different writes. Such observations are unspecified and accessors may throw, but must preserve memory and type safety under the usual safety assumptions for payload types and user code. Neither copying nor `readonly` makes a concurrent read atomic.
 
 ## Implementation Details
 
@@ -517,7 +517,7 @@ These are incomplete, exploratory thoughts, not requirements for the feature. Ne
 
 The [type-unions proposal](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-15.0/unions.md) permits custom union classes or structs recognized through `[Union]` and creation/access members. Its `union` declaration selects an object-backed struct implementation; the custom pattern would let data-carrying enums retain their own representation.
 
-[`IUnion`](https://github.com/dotnet/csharplang/blob/main/meetings/working-groups/discriminated-unions/union-patterns-update.md#marking-union-types-with-an-attribute) separately exposes contents to runtime consumers. An enum struct implementing it could participate in libraries and frameworks that add runtime union support, without requiring them to know its storage layout. Implementing it alone does not supply compiler union behavior.
+[`IUnion`](https://github.com/dotnet/csharplang/blob/main/meetings/working-groups/discriminated-unions/union-patterns-update.md#marking-union-types-with-an-attribute) separately exposes contents to runtime consumers. An `enum struct` implementing it could participate in libraries and frameworks that add runtime union support, without requiring them to know its storage layout. Implementing it alone does not supply compiler union behavior.
 
 ### Possible Integration for `enum class`
 
@@ -549,23 +549,23 @@ The remaining choices below affect source behavior or compatibility. The rules a
 
 ### Uninitialized Values in Matching
 
-Should a switch covering every declared case of a closed enum struct count as exhaustive even when the type has an uninitialized default value?
+Should a switch covering every declared case of a `closed enum struct` count as exhaustive even when the type has an uninitialized default value?
 
 One option is to use the declared case set for exhaustiveness, as other language features use static information even when runtime values can differ. A switch expression without a matching arm would then throw if an uninitialized value reaches it. Another option is to require explicit handling through `HasValue` or a fallback. This is separate from handling future cases of an open enum.
 
 Should the `null` pattern match the uninitialized state, or should it remain specific to null references and nullable values? A designated default case already has an ordinary case pattern.
 
-### Always-Readonly Enum Structs
+### Always-Readonly `enum struct` Types
 
-Should enum structs and their generated case records always be readonly, or should they follow the [modifier-based rules](https://github.com/dotnet/csharplang/blob/main/meetings/working-groups/discriminated-unions/extended-enums.md#readonly-copying-and-with) in this draft?
+Should `enum struct` types and their generated case records always be readonly, or should they follow the [modifier-based rules](https://github.com/dotnet/csharplang/blob/main/meetings/working-groups/discriminated-unions/extended-enums.md#readonly-copying-and-with) in this draft?
 
 ### Independent Generic Case Parameters
 
 Should a case be able to introduce its own type parameters, for example `X<T>(T value)` in a nongeneric enum?
 
-An enum class could represent this with a nested generic record deriving from the enum base: the enclosing value still holds a reference. However, `X` would describe a family of runtime types. The design would need to explain how to match or deconstruct all `X<T>` values without knowing `T`, infer the arguments, enforce constraints, and determine exhaustiveness. The [closed-hierarchy proposal](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-15.0/closed-hierarchies.md#type-parameter-restriction) currently restricts independent type parameters for this reason.
+An `enum class` could represent this with a nested generic record deriving from the enum base: the enclosing value still holds a reference. However, `X` would describe a family of runtime types. The design would need to explain how to match or deconstruct all `X<T>` values without knowing `T`, infer the arguments, enforce constraints, and determine exhaustiveness. The [closed-hierarchy proposal](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-15.0/closed-hierarchies.md#type-parameter-restriction) currently restricts independent type parameters for this reason.
 
-An enum struct cannot directly store an arbitrary independent `T` inline: its size and GC layout must be determined without that type argument. Boxing or another form of indirection would introduce a different storage tradeoff. We should establish the need for generic cases before adding that complexity.
+An `enum struct` cannot directly store an arbitrary independent `T` inline: its size and GC layout must be determined without that type argument. Boxing or another form of indirection would introduce a different storage tradeoff. We should establish the need for generic cases before adding that complexity.
 
 ### Empty Parameter Lists
 
@@ -581,7 +581,7 @@ Should `Option.Some(42)` infer `Option<int>` without a target type? [Constructor
 
 ### Unmanaged Classification
 
-An enum struct's unmanaged classification is observable through constraints, pointers, and `stackalloc`, even though its physical representation is an implementation detail. What compatibility guarantee should apply when a compiler changes that representation?
+An `enum struct`'s unmanaged classification is observable through constraints, pointers, and `stackalloc`, even though its physical representation is an implementation detail. What compatibility guarantee should apply when a compiler changes that representation?
 
 LDM could allow classification to change in either direction, accepting potential source breaks, or require an unmanaged enum to remain unmanaged when its cases, payload types, and constraints are unchanged. The latter still allows managed-to-unmanaged changes while restricting future storage choices. Changes to declared cases or payload dependencies are separate library-evolution concerns.
 
