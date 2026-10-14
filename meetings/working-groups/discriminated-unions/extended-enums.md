@@ -81,7 +81,7 @@ enum class Result // or enum struct
 }
 ```
 
-Cases, including data-free cases, conceptually generate nested record types: `sealed record class` for `enum class`, and `record struct` for `enum struct`. Their record behaviors apply subject to [Case Construction Expressions](https://github.com/dotnet/csharplang/blob/main/meetings/working-groups/discriminated-unions/extended-enums.md#case-construction-expressions).
+Cases, including data-free cases, conceptually generate nested record types with the corresponding record behaviors, subject to the construction rules below. Their class/struct form follows the enum declaration; [Readonly, Copying, and `with`](https://github.com/dotnet/csharplang/blob/main/meetings/working-groups/discriminated-unions/extended-enums.md#readonly-copying-and-with) specifies mutability.
 
 #### Case Construction Expressions
 
@@ -128,23 +128,7 @@ The compiler must emit a metadata marker identifying the enhanced enum, its decl
 
 Conceptually, enum construction creates the case record and converts it to the enclosing enum. The compiler may implement this using constructors or factories with distinct metadata names, avoiding the conflict between a nested type and an ordinary same-name factory.
 
-##### Target-Typed Case Construction
-
-With [target-typed static member access](https://github.com/dotnet/csharplang/blob/main/proposals/target-typed-static-member-access.md), the expected enum type supplies the qualifier for these same operations:
-
-```csharp
-void UseInt(Option<int> value) { /* ... */ }
-
-UseInt(.None);
-UseInt(.Some(42));
-
-Option<int> Empty() => .None;
-Option<int> Present(int value) => .Some(value);
-```
-
-Target-typed lookup must bind enum case operations as well as ordinary static calls. This requires no general rule making type names callable or convertible to values.
-
-For composition with generic inference and its limits, see the [construction and inference change](https://github.com/dotnet/csharplang/pull/10369).
+Target-typed access to these operations is discussed under [Contextual Case Construction and Inference](https://github.com/dotnet/csharplang/blob/main/meetings/working-groups/discriminated-unions/extended-enums.md#contextual-case-construction-and-inference).
 
 #### Combination Rules
 
@@ -183,12 +167,75 @@ Choose `enum class` for reference-type cases or `enum struct` for inline value s
 ```csharp
 // Allocation per construction
 enum class Result { Ok(int value), Error(string message) }
-Result r1 = Result.Ok(42); // Heap allocation
+var r1 = Result.Ok(42); // Heap allocation
 
 // No allocation
 enum struct Result { Ok(int value), Error(string message) }
-Result r2 = Result.Ok(42); // Inline case storage; no allocation for construction
+var r2 = Result.Ok(42); // Inline case storage; no allocation for construction
 ```
+
+#### Readonly, Copying, and `with`
+
+An unmodified enum struct is mutable; `readonly enum struct` follows the ordinary [readonly struct rules](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/structs.md#1622-struct-modifiers), including the usual constructor and initialization exceptions. The modifier constrains instance state, not reassignment of a variable.
+
+The generated case types follow the corresponding [record-struct rules](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-10.0/record-structs.md#properties): a mutable enum struct generates mutable record-struct cases with `get`/`set` payload properties; a readonly enum struct generates readonly record-struct cases with `get`/`init` payload properties. This choice applies to generated cases. User-declared nested types follow the ordinary rules for nested declarations. Generated case queries, extraction methods, and equality members are readonly instance members.
+
+Assignment follows ordinary class and struct rules: enum classes copy a reference; enum structs copy the discriminator and stored payload. Extracting a struct case produces a separate value whose mutation does not update the enum. Copies are shallow, preserving reference payload identity; `readonly` does not make referenced objects immutable.
+
+Case types support ordinary record `with` expressions; the resulting case can be converted back to the enum:
+
+```csharp
+enum struct Progress
+{
+    Waiting,
+    Running(int count)
+}
+
+Progress progress = Progress.Running(1);
+Progress.Running running = (Progress.Running)progress;
+running.count = 2; // changes the extracted case, not progress
+int originalCount = ((Progress.Running)progress).count; // 1
+progress = running with { count = 3 }; // assigns a new enum value
+```
+
+Readonly cases use init-only properties:
+
+```csharp
+readonly enum struct Snapshot
+{
+    Ready,
+    Running(int count)
+}
+
+Snapshot snapshot = Snapshot.Running(1);
+Snapshot.Running running = (Snapshot.Running)snapshot;
+// running.count = 2; // error: count is init-only
+snapshot = running with { count = 2 }; // allowed: update a copy, then reassign
+```
+
+For an `enum class` receiver, `e with { }` clones the runtime case record and preserves its case identity. An enum struct supports the ordinary [struct `with` expression](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-10.0/record-structs.md#allow-with-expression-on-structs), so `e with { }` copies the enum value, including its active case or uninitialized state. Member initializers are bound against the receiver's static type. Case-specific payload properties are members of the case type, so updating them requires a case-typed receiver as above; they are not projected onto the enclosing enum. Changing cases constructs a new enum value.
+
+#### Equality and Hashing
+
+Class cases use their generated record equality, including case type identity. For a struct enum, synthesized equality requires the same discriminator and, for an active case, that the corresponding case records consider themselves equal. Case-record equality follows the ordinary record rules, including `EqualityComparer<T>.Default` for payload members. Different cases therefore compare unequal under synthesized equality even when their payloads are equal.
+
+Both representations expose the ordinary record equality surface, including strongly typed `Equals`, `IEquatable<E>`, `Equals(object)`, and `==`/`!=` for the enum type `E`. Struct hashing follows the active case's record hashing and may incorporate case identity. These operations describe the logical case value: unused storage slots and padding do not participate, and an implementation need not reconstruct a case solely to perform them.
+
+With synthesized equality, two uninitialized values of the same enum struct are equal and have the same hash code; they are unequal to any active case. A designated default case instead participates as that active case. Class null comparisons follow ordinary record reference equality. Hash values and the precise hash-combining algorithm remain implementation details.
+
+#### Recursive Payloads
+
+Enum structs obey the existing [struct value-semantics rules for cyclic instance-field dependencies](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/structs.md#1642-value-semantics). An inline case payload cannot make the enum depend on itself, directly or indirectly through other value types or constructed generic value types. Choosing shared storage does not relax that rule.
+
+```csharp
+enum struct Expr
+{
+    Number(int value),
+    Add(Expr left, Expr right) // error: recursive value-type layout
+}
+```
+
+The same declaration using `enum class` is permitted because its recursive payloads are references. A struct enum can likewise use a reference type, such as a class wrapper or an array, to break the layout dependency. Wrapping the payload in another value type, including `Nullable<Expr>`, does not itself introduce indirection.
 
 #### Default Values
 
@@ -412,26 +459,28 @@ public enum struct Option<T>
 // Conceptually translates to:
 public struct Option<T>
 {
-    public readonly record struct None;
-    public readonly record struct Some(T value);
+    public record struct None;
+    public record struct Some(T value);
+    // Enum-level record equality members are omitted from this illustration.
 
     // Zero represents no case in this declaration.
+    // None needs no payload; Some needs one typed T slot.
     private byte _discriminator;
     // The payload slot may be unused and contain default(T).
     private T? _value;
 
-    public bool IsNone => _discriminator == 1;
-    public bool IsSome => _discriminator == 2;
-    public bool HasValue => _discriminator != 0;
+    public readonly bool IsNone => _discriminator == 1;
+    public readonly bool IsSome => _discriminator == 2;
+    public readonly bool HasValue => _discriminator != 0;
 
     // Non-boxing case access
-    public bool TryGetValue(out None value)
+    public readonly bool TryGetValue(out None value)
     {
         value = default;
         return _discriminator == 1;
     }
 
-    public bool TryGetValue(out Some value)
+    public readonly bool TryGetValue(out Some value)
     {
         if (_discriminator == 2)
         {
@@ -579,9 +628,7 @@ Option<int>.Some extracted = (Option<int>.Some)option;
 
 The `as` operator does not invoke the generated struct conversions; use `TryGetValue` for conditional extraction.
 
-Extraction produces a separate case value and preserves payload references.
-
-User-declared members conflicting with generated members are errors. Final generated API names remain open.
+User-declared members conflicting with generated members are errors, except for customization permitted by ordinary record rules. Final generated API names remain open.
 
 ## 5. Pattern Matching and Behaviors
 
@@ -673,9 +720,9 @@ For larger case sets, distinct type identities could support a balanced comparis
 For an `enum struct`, we expect generated case predicates along these lines:
 
 ```csharp
-public bool IsC1 => _discriminator == 1;
-public bool IsC2 => _discriminator == 2;
-public bool IsC3 => _discriminator == 3;
+public readonly bool IsC1 => _discriminator == 1;
+public readonly bool IsC2 => _discriminator == 2;
+public readonly bool IsC3 => _discriminator == 3;
 ```
 
 An initial translation of the corresponding switch uses these predicates followed by case extraction:
@@ -718,9 +765,7 @@ An attribute in `System.Runtime.CompilerServices` could instead opt a well-behav
 
 Class enums could also use predicate-and-extraction emit if the runtime can optimize that representation efficiently.
 
-If these approaches do not produce satisfactory results, a final fallback is to expose a discriminator and have the compiler emit an integral switch over it directly. This would use the runtime's existing integral-switch optimizations without requiring it to recover a switch from a comparison chain. Class enums would also need a discriminator mapping for their cases.
-
-We would prefer to avoid this fallback because an exposed discriminator creates a stable API and ABI contract. Reordering cases or inserting a new case anywhere would have to preserve numeric mappings embedded by existing consumers, rather than simply assigning values in declaration order. Case numbering, separate compilation, and library evolution would therefore require further design.
+If these approaches do not produce satisfactory results, a final fallback is to expose a discriminator and have the compiler emit an integral switch over it directly. This would use the runtime's existing integral-switch optimizations without requiring it to recover a switch from a comparison chain. Class enums would also need a discriminator mapping for their cases. We would prefer to avoid the [versioning contract this would expose](https://github.com/dotnet/csharplang/blob/main/meetings/working-groups/discriminated-unions/extended-enums.md#library-evolution).
 
 ### Exhaustiveness
 
@@ -748,6 +793,18 @@ var description = status switch
 Extraction preserves payload members' declared types and nullability annotations. A null payload does not remove case identity: `Option<string?>.Some(null)` remains an active `Some`.
 
 For structs, construction from a case, successful case tests, and successful `TryGetValue` calls establish an active case.
+
+### Library Evolution
+
+Renaming or removing a public case, changing its payload parameters or properties, or changing between class and struct representations affects existing APIs. Changing the designated default case changes the meaning of zero-initialized storage and is a behavioral breaking change. Adding a struct case can enlarge the unmanaged, reference, or typed storage pools and change alignment.
+
+If a consuming assembly embeds numeric tags for case tests, supported updates must preserve the mappings; alternatively, tests must obtain them from the defining type. Exposing a discriminator for switch lowering would make that mapping a stable API and ABI contract: reordering declarations or inserting a case anywhere could not simply assign new tags in declaration order. Storage tags are otherwise implementation details. Previously compiled switches retain their normal fallback or unmatched-switch behavior when encountering a case they did not know about.
+
+#### Known-Case Coverage with a Future-Case Fallback
+
+A plain fallback handles future cases, but also hides omissions of cases already known when the consumer is compiled. We would like an opt-in way to mark a fallback as intended for future cases, following the idea of Swift's [`@unknown default`](https://github.com/swiftlang/swift-evolution/blob/main/proposals/0192-non-exhaustive-enums.md#unknown).
+
+Such a fallback still matches all remaining values at runtime. The compiler would additionally warn when the preceding patterns do not fully cover a declared case known at compilation, using the existing exhaustiveness analysis. A guarded or partial payload pattern therefore does not necessarily cover an entire case. Recompiling against a library that adds a case would prompt the consumer to review it while retaining a working fallback. The exact opt-in syntax or mechanism remains an LDM decision.
 
 ## 6. Examples and Use Cases
 
@@ -807,7 +864,7 @@ Shape enums should compose with [target-typed static member access](https://gith
 
 #### Use the Expected Enum Type
 
-With the [case construction rules](https://github.com/dotnet/csharplang/pull/10370), leading-dot lookup on an expected `Option<int>` supplies the qualifier for `.None` and `.Some(arguments)`:
+With the [case construction rules](https://github.com/dotnet/csharplang/blob/main/meetings/working-groups/discriminated-unions/extended-enums.md#case-construction-expressions), leading-dot lookup on an expected `Option<int>` supplies the qualifier for `.None` and `.Some(arguments)`:
 
 ```csharp
 enum struct Option<T>
@@ -902,26 +959,30 @@ enum class ConnectionState
 
 ## 7. Open Questions
 
-1. **Readonly cases**: Should struct case records be readonly by default, or only for a `readonly enum struct`? The [value-semantics change](https://github.com/dotnet/csharplang/pull/10371) proposes the latter.
-2. **Case accessibility**: Should individual cases support access modifiers in addition to the proposed public nested case types?
-3. **Partial support**: Should enhanced enums support `partial` for source generators?
-4. **Optional type-union integration**: See [Appendix B](https://github.com/dotnet/csharplang/blob/main/meetings/working-groups/discriminated-unions/extended-enums.md#appendix-b-possible-connections-to-type-unions).
-5. **Serialization**: How should enhanced enums interact with System.Text.Json?
-6. **Additional state**: Should shape enums allow instance fields outside case data?
-7. **Custom constructors**: Should enums allow custom constructors that delegate to cases?
-8. **Generic cases**: Should cases support independent generic parameters?
-9. **Interface implementation**: Should enhanced enums automatically implement `IEquatable<T>`?
-10. **Exact lowering**: What names and shapes should the generated APIs and hierarchy metadata have, and are additional convenience APIs needed?
-11. **Uninitialized matching**: See [Case Pattern Matching](https://github.com/dotnet/csharplang/blob/main/meetings/working-groups/discriminated-unions/extended-enums.md#case-pattern-matching).
-12. **Checked packing**: See [Possible Checked Packing Opt-in](https://github.com/dotnet/csharplang/blob/main/meetings/working-groups/discriminated-unions/extended-enums.md#possible-checked-packing-opt-in).
-13. **Unmanaged classification**: See [Unmanaged Classification](https://github.com/dotnet/csharplang/blob/main/meetings/working-groups/discriminated-unions/extended-enums.md#unmanaged-classification).
+1. **Case accessibility**: Should individual cases support access modifiers in addition to the proposed public nested case types?
+2. **Partial support**: Should enhanced enums support `partial` for source generators?
+3. **Optional type-union integration**: See [Appendix B](https://github.com/dotnet/csharplang/blob/main/meetings/working-groups/discriminated-unions/extended-enums.md#appendix-b-possible-connections-to-type-unions).
+4. **Serialization**: How should enhanced enums interact with System.Text.Json?
+5. **Additional state**: Should shape enums allow instance fields outside case data?
+6. **Custom constructors**: Should enums allow custom constructors that delegate to cases?
+7. **Generic cases**: Should cases support independent generic parameters?
+8. **Exact lowering**: What names and shapes should the generated APIs and hierarchy metadata have, and are additional convenience APIs needed?
+9. **Uninitialized matching**: See [Case Pattern Matching](https://github.com/dotnet/csharplang/blob/main/meetings/working-groups/discriminated-unions/extended-enums.md#case-pattern-matching).
+10. **Future-case fallbacks**: See [Known-Case Coverage with a Future-Case Fallback](https://github.com/dotnet/csharplang/blob/main/meetings/working-groups/discriminated-unions/extended-enums.md#known-case-coverage-with-a-future-case-fallback).
+11. **Checked packing**: See [Possible Checked Packing Opt-in](https://github.com/dotnet/csharplang/blob/main/meetings/working-groups/discriminated-unions/extended-enums.md#possible-checked-packing-opt-in).
+12. **Unmanaged classification**: See [Unmanaged Classification](https://github.com/dotnet/csharplang/blob/main/meetings/working-groups/discriminated-unions/extended-enums.md#unmanaged-classification).
 
 ## Appendix A: Grammar Changes
 
 ```antlr
 shape_enum_declaration
-    : attributes? enum_modifier* 'enum' ('class' | 'struct') identifier type_parameter_list?
+    : attributes? shape_enum_modifier* 'enum' ('class' | 'struct') identifier type_parameter_list?
       type_parameter_constraints_clause* shape_enum_body ';'?
+    ;
+
+shape_enum_modifier
+    : enum_modifier
+    | 'readonly'
     ;
 
 shape_enum_body
@@ -939,7 +1000,7 @@ shape_enum_case_declaration
     ;
 ```
 
-For the `= default` restrictions, see [Default Values](https://github.com/dotnet/csharplang/blob/main/meetings/working-groups/discriminated-unions/extended-enums.md#default-values). Type parameter lists and constraints are permitted on shape enums.
+For the `= default` restrictions, see [Default Values](https://github.com/dotnet/csharplang/blob/main/meetings/working-groups/discriminated-unions/extended-enums.md#default-values). Type parameter lists and constraints are permitted on shape enums. The shape-enum modifiers additionally permit `readonly` for `enum struct`, with the restrictions described above; it is not permitted for `enum class`.
 
 ## Appendix B: Possible Connections to Type Unions
 
