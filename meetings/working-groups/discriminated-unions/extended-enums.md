@@ -528,11 +528,11 @@ Shape enums should compose with [target-typed static member access](https://gith
 - [Inference for constructor calls](https://github.com/dotnet/csharplang/blob/main/proposals/inference-for-constructor-calls.md), tracked by [#9627](https://github.com/dotnet/csharplang/issues/9627), including the [updated constructor inference proposal](https://github.com/dotnet/csharplang/pull/10312) and its [type-group lookup](https://github.com/dotnet/csharplang/pull/10310) foundation.
 - [Inference for type patterns](https://github.com/dotnet/csharplang/blob/main/proposals/inference-for-type-patterns.md).
 
-These are proposed language features; the examples below describe their intended composition with shape enums. They are not available in current C# merely by declaring a shape enum.
+The examples below depend on these proposed features.
 
 #### Use the Expected Enum Type
 
-The [case construction proposal change](https://github.com/dotnet/csharplang/pull/10370) defines `E.None` and `E.Some(arguments)` as enum construction expressions. When the expected type is `Option<int>`, a leading-dot case name can be looked up on that constructed type. There is no need to repeat either `Option` or `int`, or to introduce `new` when the case carries data:
+With the [case construction rules](https://github.com/dotnet/csharplang/pull/10370), leading-dot lookup on an expected `Option<int>` supplies the qualifier for `.None` and `.Some(arguments)`:
 
 ```csharp
 enum struct Option<T>
