@@ -518,7 +518,7 @@ else if (__type == typeof(E.C3))
 
 Because the case types are sealed, each exact type comparison identifies one case. The runtime can potentially replace `GetType()` and `typeof` equality with comparisons of method-table pointers, performing dispatch directly on the case reference's type identity. The successful comparison also establishes the case type for the subsequent extraction.
 
-For a large case set, the runtime could recognize the distinct type identities and choose a balanced comparison tree or another dispatch strategy. Its benefit relative to a linear chain or profile-guided ordering needs validation.
+For larger case sets, distinct type identities could support a balanced comparison tree or profile-guided ordering.
 
 #### `enum struct` Case Tests
 
@@ -564,7 +564,7 @@ The runtime could select a jump table for dense values, a tree for sparse values
 
 #### Runtime Recognition and Alternatives
 
-We should consider teaching the runtime to recognize exact-type comparison chains and discriminator predicates with distinct case bodies. The runtime already has a [limited switch-recognition pass](https://github.com/dotnet/runtime/blob/main/src/coreclr/jit/switchrecognition.cpp#L28) for constant-comparison chains whose successful tests all reach the same destination. It runs after inlining, but stops recognizing a chain when successful tests reach different destinations, as they do in these DU switches. Extending this recognition is one possible starting point.
+The runtime already has a [limited switch-recognition pass](https://github.com/dotnet/runtime/blob/main/src/coreclr/jit/switchrecognition.cpp#L28) for constant-comparison chains whose successful tests all reach the same destination. It runs after inlining, but stops recognizing a chain when successful tests reach different destinations, as they do in these DU switches. Extending this recognition is one possible starting point.
 
 An attribute in `System.Runtime.CompilerServices` could instead opt a well-behaved DU into optimization if general pattern recognition raises correctness concerns. Its contract would specify stable case identity during dispatch, side-effect-free predicates agreeing with the case mapping, and extraction after a successful test. Struct metadata could identify the discriminator field for direct runtime access. No attribute name or final contract is selected.
 
@@ -572,7 +572,7 @@ Class-based unions could also use predicate-and-extraction emit if the runtime c
 
 If these approaches do not produce satisfactory results, a final fallback is to expose a discriminator and have the compiler emit an integral switch over it directly. This would use the runtime's existing integral-switch optimizations without requiring it to recover a switch from a comparison chain. Class-based unions would also need a discriminator mapping for their cases.
 
-We would prefer to avoid this fallback because an exposed discriminator would become part of the type's contract and require a stable API and ABI. Consumers compiled against one version could embed the numeric mapping between cases and discriminator values. Reordering cases or inserting a new case anywhere in the declaration would then require preserving existing mappings, rather than simply assigning values in declaration order. These changes currently need no public discriminator contract; exposing one would require a deeper design for case numbering, separate compilation, and library evolution.
+We would prefer to avoid this fallback because an exposed discriminator creates a stable API and ABI contract. Reordering cases or inserting a new case anywhere would have to preserve numeric mappings embedded by existing consumers, rather than simply assigning values in declaration order. Case numbering, separate compilation, and library evolution would therefore require further design.
 
 ### Exhaustiveness
 
