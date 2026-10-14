@@ -624,7 +624,7 @@ Preserving each case's representation allows construction and extraction to copy
 
 #### Possible Checked Packing Opt-in
 
-We should consider a compiler-recognized attribute allowing a struct author to assert that the type will remain unmanaged and have a specified byte size. For example, using illustrative syntax:
+We should consider a compiler-recognized attribute asserting that a payload type will remain unmanaged and have a specified byte size. Both declaration-site and use-site assertions could be supported: a supplying library could annotate its struct declaration, or a consuming enum could annotate an individual case parameter without requiring the referenced type to be annotated. For example, a library could declare the contract using illustrative syntax:
 
 ```csharp
 // Defined by a referenced library:
@@ -639,17 +639,21 @@ enum struct Position
 }
 ```
 
-The compiler must verify at compilation that an annotated type is a struct satisfying the ordinary C# unmanaged rules. A reference-containing type is an error regardless of the supplied size; the compiler does not trust the attribute as evidence of unmanagedness. It may also diagnose a size mismatch when the managed size is statically known. The attribute name and syntax remain illustrative, and whether the annotation belongs on a supplying type, a consuming enum, or an individual payload remains a design question.
+For either placement, the compiler must verify at compilation that the asserted payload type is a struct satisfying the ordinary C# unmanaged rules. A reference-containing type is an error regardless of the supplied size; the compiler does not trust the attribute as evidence of unmanagedness. It may also diagnose a size mismatch when the managed size is statically known. The attribute name, syntax, and detailed placement rules remain design questions.
 
-For an annotation on a type, the compiler would inject checks at the beginning of its static constructor, preserving any user-written initialization. For `Point`, the generated validation would be conceptually equivalent to these members:
+For an annotation on a type, the compiler would inject checks at the beginning of its static constructor, preserving any user-written initialization. For `Point`, the generated validation would be conceptually equivalent to this constructor and these helpers:
 
 ```csharp
 static Point()
 {
-    if (RuntimeHelpers.IsReferenceOrContainsReferences<Point>())
-        throw new InvalidOperationException("Point must not contain references.");
-
+    __ValidateNoReferences<Point>();
     __ValidateSize<Point>(8);
+}
+
+private static void __ValidateNoReferences<T>() where T : struct
+{
+    if (RuntimeHelpers.IsReferenceOrContainsReferences<T>())
+        throw new InvalidOperationException("The unmanaged reference-containment assertion failed.");
 }
 
 private static void __ValidateSize<T>(int expectedSize) where T : struct
@@ -659,7 +663,7 @@ private static void __ValidateSize<T>(int expectedSize) where T : struct
 }
 ```
 
-The size helper is illustrative compiler-generated code, rather than a proposed public API. Both checks are mandatory: a type can remain unmanaged while growing beyond the reserved storage. The checks use its actual runtime managed representation, rather than its interop marshaling size, under the ordinary static-initialization rules for each constructed type.
+The validation helpers are illustrative compiler-generated code, rather than proposed public APIs; their placement can allow sharing across types. Both checks are mandatory: a type can remain unmanaged while growing beyond the reserved storage. The checks use its actual runtime managed representation, rather than its interop marshaling size, under the ordinary static-initialization rules for each constructed type.
 
 A consuming enum that chooses raw packing must validate its recorded layout assumptions once per constructed enum type, through a generated static constructor. Generated constructors and case-to-enum conversions must trigger that initialization before packing any payload, following the existing [struct static-constructor rules](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/structs.md#16410-static-constructors). Extraction from a non-default enum can then rely on the completed validation; it does not require another reference-containment or size check on each access. Any alternative lowering must preserve this guarantee.
 
@@ -667,7 +671,7 @@ An all-zero enum can be created by default values or array initialization withou
 
 Using a payload type does not by itself ensure that its own static constructor has run: default values, array initialization, layout queries, and whole-value copies can bypass it. The enum therefore performs its own validation using the size recorded when it was compiled. A later library version could also change or remove the annotation, or change its size from 8 to 16 and validate that new size successfully. The old consumer must still validate against its own expected size of 8. Calling only the current payload type's initializer is insufficient.
 
-An annotation on an individual case parameter could let a consumer make the same checked assertion about a framework type it cannot annotate directly:
+Alternatively, a consuming enum could make a use-site assertion about `DateTime`, even though the framework type is not annotated:
 
 ```csharp
 enum struct CompactMessage
