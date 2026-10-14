@@ -1,6 +1,6 @@
 # Discriminated Unions and Enhanced Enums for C#
 
-This proposal introduces enhanced enums as an elegant way to build discriminated unions in C#. Building on [type unions](https://raw.githubusercontent.com/dotnet/csharplang/refs/heads/main/proposals/unions.md), enhanced enums provide familiar, concise syntax for algebraic sum types where cases are known at declaration time.
+This proposal introduces enhanced enums as an elegant way to build discriminated unions in C#. Building on [type unions](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-15.0/unions.md), enhanced enums provide familiar, concise syntax for algebraic sum types where cases are known at declaration time.
 
 It consolidates design feedback from many years of repository discussions, especially [#113](https://github.com/dotnet/csharplang/issues/113) and related issues.
 
@@ -72,7 +72,7 @@ By extending the existing `enum` keyword, enhanced enums provide a grow-up story
 
 ## 3. Type Unions (Foundation)
 
-Type unions are fully specified in the [unions proposal](https://raw.githubusercontent.com/dotnet/csharplang/refs/heads/main/proposals/unions.md#summary). They provide:
+Type unions are fully specified in the [unions proposal](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-15.0/unions.md#summary). They provide:
 
 - Implicit conversions from case types to the union type
 - Pattern matching that unwraps union contents
