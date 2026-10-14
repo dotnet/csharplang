@@ -1,6 +1,6 @@
 # Discriminated Unions and Enhanced Enums for C#
 
-This proposal introduces enhanced enums as a way to express discriminated unions in C#. Like [type unions](../../../proposals/csharp-15.0/unions.md), they represent a value drawn from a set of possible case types. Enhanced enums define the enum and its named, data-carrying cases together, with a choice of class or struct representation.
+This proposal introduces enhanced enums as a way to express discriminated unions in C#. Like [type unions](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-15.0/unions.md), they represent a value drawn from a set of possible case types. Enhanced enums define the enum and its named, data-carrying cases together, with a choice of class or struct representation.
 
 It consolidates design feedback from many years of repository discussions, especially [#113](https://github.com/dotnet/csharplang/issues/113) and related issues.
 
@@ -72,7 +72,7 @@ By extending the existing `enum` keyword, enhanced enums provide a grow-up story
 
 ## 3. Type Unions and Shape Enums
 
-The [unions proposal](../../../proposals/csharp-15.0/unions.md) describes union types whose contents can be one of their case types. Those case types can be existing types, may overlap, and can carry data through their own members. A shape enum instead declares fresh case types together with the enum. For example, `Left(int value)` and `Right(int value)` remain different cases even though both carry an `int`.
+The [unions proposal](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-15.0/unions.md) describes union types whose contents can be one of their case types. Those case types can be existing types, may overlap, and can carry data through their own members. A shape enum instead declares fresh case types together with the enum. For example, `Left(int value)` and `Right(int value)` remain different cases even though both carry an `int`.
 
 The related behaviors include case-to-enclosing-type conversion, matching against case types, and exhaustiveness analysis. Shape enums specify those behaviors for their own representations:
 
@@ -307,7 +307,7 @@ public abstract record class Result
 
 The enum type is the base class, and a variable of that type holds the actual case reference. The base is abstract, so there is no separate base-class value that represents no case. Since the generated cases are record classes, the illustrative base is also a record class.
 
-Only the declared case types may derive from an `enum class`. This restriction applies when consuming the type from another assembly as well. The private constructor in the illustration does not by itself enforce the restriction: record copy constructors also permit derivation in ordinary C#. Enum case metadata and consuming compiler checks must preserve the declared hierarchy, along the lines of the [closed-hierarchy proposal](../../../proposals/csharp-15.0/closed-hierarchies.md#lowering). The exact metadata encoding remains open.
+Only the declared case types may derive from an `enum class`. This restriction applies when consuming the type from another assembly as well. The private constructor in the illustration does not by itself enforce the restriction: record copy constructors also permit derivation in ordinary C#. Enum case metadata and consuming compiler checks must preserve the declared hierarchy, along the lines of the [closed-hierarchy proposal](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-15.0/closed-hierarchies.md#lowering). The exact metadata encoding remains open.
 
 Data-free cases generate types with shared instances:
 
@@ -461,7 +461,7 @@ For an `enum class`, the `null` pattern matches a null enum reference. For an `e
 
 ### Exhaustiveness
 
-The compiler tracks all declared cases. Both constant and shape enums can be open or closed. Constant enums follow the [Closed Enums proposal](../../../proposals/closed-enums.md); class shape enums also require the hierarchy information described above.
+The compiler tracks all declared cases. Both constant and shape enums can be open or closed. Constant enums follow the [Closed Enums proposal](https://github.com/dotnet/csharplang/blob/main/proposals/closed-enums.md); class shape enums also require the hierarchy information described above.
 
 Open enums can be used to signal that the enum author may add new cases in future versions—consumers must handle unknown cases defensively (e.g., with a default branch). Closed enums signal that there is no need to handle unknown cases, such as when the case set is complete and will never change—the compiler ensures exhaustive matching without requiring a default case.
 
@@ -699,7 +699,7 @@ The `= default` form is permitted only in an `enum struct`, at most once per dec
 
 ## Appendix B: Possible Connections to Type Unions
 
-Shape enums and [type unions](../../../proposals/csharp-15.0/unions.md) both describe a value drawn from a set of possible case types. Shape enums declare fresh, named case types together with the enum and preserve their case identity, even when different cases carry the same payload types. This makes connections between the features possible, but does not require the same implementation or all of the same language behaviors.
+Shape enums and [type unions](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-15.0/unions.md) both describe a value drawn from a set of possible case types. Shape enums declare fresh, named case types together with the enum and preserve their case identity, even when different cases carry the same payload types. This makes connections between the features possible, but does not require the same implementation or all of the same language behaviors.
 
 The design above does not require either representation to implement the union pattern, carry `[Union]`, or implement `IUnion`. Whether to generate union-pattern implementations for structs, classes, both, or neither is an LDM decision. The following discusses possible integration rather than specifying additional requirements.
 
@@ -707,11 +707,11 @@ The design above does not require either representation to implement the union p
 
 The unions proposal distinguishes a *union type* from a *union declaration*. A custom union type can be a class or struct. Compiler recognition uses `[Union]` and a pattern of creation and access members. The `union` declaration syntax chooses a particular struct implementation that stores its contents in an object reference. Implementing the custom-union pattern would therefore allow shape enums to retain their own representation and storage strategy.
 
-The `IUnion` interface is a separate option for runtime access to a value's contents. Implementing it alone does not opt a type into compiler union behavior. This distinction is described in the [union patterns update](union-patterns-update.md#marking-union-types-with-an-attribute).
+The `IUnion` interface is a separate option for runtime access to a value's contents. Implementing it alone does not opt a type into compiler union behavior. This distinction is described in the [union patterns update](https://github.com/dotnet/csharplang/blob/main/meetings/working-groups/discriminated-unions/union-patterns-update.md#marking-union-types-with-an-attribute).
 
 ### Possible Integration for `enum class`
 
-An enum class could implement the union pattern while remaining a base class with sealed case types. Using a [union member provider](../../../proposals/csharp-15.0/unions.md#union-member-providers), generated `Create` methods could return the supplied case reference unchanged, and the provider's `Value` property could return `this`. An optional `IUnion` implementation could expose that same reference to runtime consumers. None of these members would require a wrapper allocation.
+An enum class could implement the union pattern while remaining a base class with sealed case types. Using a [union member provider](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-15.0/unions.md#union-member-providers), generated `Create` methods could return the supplied case reference unchanged, and the provider's `Value` property could return `this`. An optional `IUnion` implementation could expose that same reference to runtime consumers. None of these members would require a wrapper allocation.
 
 This could give class enums a common access protocol with other union types and allow code that understands that protocol to consume them uniformly.
 
@@ -736,7 +736,7 @@ The costs and semantic choices include:
 
 - The mandatory `Value` property would box struct cases when accessed and would require every case to be convertible to `object`. Future support for ref-like cases would require changes to that contract or a different integration strategy.
 - Exposing protocol members directly would reserve public API names. A member provider could hide those members from the enum's direct public surface, but would add generated interface metadata.
-- Union type patterns target the contained case value, while untyped property and positional patterns inspect the enum itself. These rules would need to be reconciled with patterns intended to test or examine the enum struct itself. The distinction is described in the [LDM decision on pattern targets](../../2026/LDM-2026-08-12.md#union-pattern-matching-targets).
+- Union type patterns target the contained case value, while untyped property and positional patterns inspect the enum itself. These rules would need to be reconciled with patterns intended to test or examine the enum struct itself. The distinction is described in the [LDM decision on pattern targets](https://github.com/dotnet/csharplang/blob/main/meetings/2026/LDM-2026-08-12.md#union-pattern-matching-targets).
 - Union null patterns would make an uninitialized struct match `null`, through its null `Value`. This is a possible choice for enum structs, but does not follow just from reserving discriminant zero. A designated default case would instead have a non-null case value, and a case with a null payload would remain an active case.
 - Union exhaustiveness treats the declared case types as exhaustive. The enum proposal's separate open/closed policy, including handling future cases, would need to be preserved explicitly.
 
