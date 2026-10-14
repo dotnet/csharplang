@@ -313,11 +313,11 @@ An enum class is itself a record base, so `e with { }` clones the runtime case r
 
 #### Equality and Hashing
 
-Equality and hashing follow the record nature of the cases. Class cases use their generated record equality, including case type identity. For a struct enum, the generated equality members compare case identity and then use the corresponding case record's equality. Thus two values of the same case compare their payloads using the ordinary record rules, including `EqualityComparer<T>.Default` for payload members; different cases remain unequal even when their payloads are equal.
+Equality and hashing follow the record nature of the cases. Class cases use their generated record equality, including case type identity. For a struct enum, synthesized equality requires the same discriminator and, for an active case, that the corresponding case records consider themselves equal. Case-record equality follows the ordinary record rules, including `EqualityComparer<T>.Default` for payload members. Different cases therefore compare unequal under synthesized equality even when their payloads are equal.
 
-Both representations expose the ordinary record equality surface, including strongly typed `Equals`, `IEquatable<E>`, `Equals(object)`, and `==`/`!=` for the enum type `E`. Struct hashing follows the active case's record hashing and may incorporate case identity. These operations describe the logical case value: unused storage slots and padding do not participate, and an implementation need not reconstruct a case solely to perform them. Ordinary record customization rules apply where matching members can be declared.
+Both representations expose the ordinary record equality surface, including strongly typed `Equals`, `IEquatable<E>`, `Equals(object)`, and `==`/`!=` for the enum type `E`. Struct hashing follows the active case's record hashing and may incorporate case identity. These operations describe the logical case value: unused storage slots and padding do not participate, and an implementation need not reconstruct a case solely to perform them. As with other records, user declarations can replace matching synthesized equality members under the ordinary record customization rules.
 
-Two uninitialized values of the same enum struct are equal and have the same hash code; they are unequal to any active case. A designated default case instead participates as that active case. Class null comparisons follow ordinary record reference equality. A null payload remains part of its active case, so `Some(null)` is distinct from `None` and from a no-case value. Hash values and the precise hash-combining algorithm remain implementation details.
+With synthesized equality, two uninitialized values of the same enum struct are equal and have the same hash code; they are unequal to any active case. A designated default case instead participates as that active case. Class null comparisons follow ordinary record reference equality. A null payload remains part of its active case, so `Some(null)` is distinct from `None` and from a no-case value. Hash values and the precise hash-combining algorithm remain implementation details.
 
 #### Recursive Payloads
 
@@ -621,6 +621,17 @@ If this declaration instead uses `None = default`, the `None` constructor sets t
 When all case data is unmanaged and the required layout facts can be established safely, overlapping complete case values in one unmanaged region is a possible optimization. The region can hold the largest case, subject to alignment and padding, in addition to the discriminator.
 
 Preserving each case's representation allows construction and extraction to copy complete values without swizzling individual fields. The compiler may use this strategy when it satisfies the safety and versioning requirements above. Unmanagedness alone does not guarantee this layout, a minimum enum size, or the absence of reconstruction. Generic cases and external structs may still require typed slots.
+
+#### Unmanaged Classification
+
+An enum struct's classification as an unmanaged type is observable through `where T : unmanaged`, pointers, and `stackalloc`, even though its storage layout is an implementation detail. A future compiler could otherwise change that classification by choosing a different representation for the same declared cases.
+
+LDM needs to decide what compatibility guarantee applies to changes in the compiler's representation. Options include:
+
+- Allowing classification to change in either direction, accepting that a change from unmanaged to managed can break code that depended on the previous classification.
+- Requiring a constructed enum type that was unmanaged to remain unmanaged when its declared cases, payload types, and constraints are unchanged, while allowing changes from managed to unmanaged. This would constrain future representations to remain reference-free for those types.
+
+This question concerns the enum type's own language-level classification. Changes to its declared cases or payload dependencies raise separate compatibility concerns. The checked packing opt-in below instead concerns assumptions about individual payload types.
 
 #### Possible Checked Packing Opt-in
 
@@ -1162,6 +1173,7 @@ Potential optimizations include:
 9. **Uninitialized matching**: Should the `null` pattern match an uninitialized enum struct, or should this state be tested only through case-state APIs?
 10. **Future-case fallbacks**: What syntax or mechanism should opt into known-case coverage diagnostics while retaining a fallback for future cases?
 11. **Checked packing**: Should a checked `[Unmanaged(size: ...)]` contract permit raw payload storage, and where should the annotation be placed?
+12. **Unmanaged classification**: What compatibility guarantee should apply when the compiler changes an enum struct's representation, as discussed under [Unmanaged Classification](#unmanaged-classification)?
 
 ## Appendix A: Grammar Changes
 
