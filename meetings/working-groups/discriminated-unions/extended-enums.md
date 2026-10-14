@@ -4,6 +4,28 @@ This proposal brings discriminated unions to C# through the familiar enum model:
 
 It is a follow-up to the [type unions](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-15.0/unions.md) proposal. Type unions combine existing types; data-carrying enums declare a type and its cases together.
 
+It consolidates design feedback from many years of repository discussions, especially [#113](https://github.com/dotnet/csharplang/issues/113) and related issues.
+
+<details>
+  <summary>Key discussion threads...</summary>
+
+  - [#75](https://github.com/dotnet/csharplang/issues/75) - Early comprehensive discussion exploring DU syntax options including enum class
+  - [#2962](https://github.com/dotnet/csharplang/discussions/2962) - Major discussion on Andy Gocke's DU proposal, debating enum class vs enum struct
+  - [#7016](https://github.com/dotnet/csharplang/issues/7016) - Fast, efficient unions proposal focusing on struct-based implementations
+  - [#3760](https://github.com/dotnet/csharplang/discussions/3760) - Community "shopping list" of desired discriminated union features
+  - [#7544](https://github.com/dotnet/csharplang/issues/7544) - Simple encoding of unions exploring type unions vs tagged unions
+  - [#9010](https://github.com/dotnet/csharplang/discussions/9010) - "Closed" enum types that guarantee exhaustiveness
+  - [#7854](https://github.com/dotnet/csharplang/issues/7854) - Exhaustiveness checking for ADT patterns using private constructors
+  - [#8942](https://github.com/dotnet/csharplang/discussions/8942) - Track subtype exhaustiveness for closed hierarchies
+  - [#8926](https://github.com/dotnet/csharplang/discussions/8926) - Extensive discussion on Option<T> as canonical DU use case
+  - [#7010](https://github.com/dotnet/csharplang/discussions/7010) - Union types discussion heavily featuring Option<T> and Result<T>
+  - [#274](https://github.com/dotnet/csharplang/discussions/274) - Java-style class-level enums with methods and constructors
+  - [#8987](https://github.com/dotnet/csharplang/discussions/8987) - Champion "permit methods in enum declarations"
+  - [#5937](https://github.com/dotnet/csharplang/discussions/5937) - Smart Enums In C# Like Java" (extra state!)
+  - [#782](https://github.com/dotnet/csharplang/discussions/782) Sealed enums (completeness checking in switch statements)
+  - [#2669](https://github.com/dotnet/csharplang/discussions/2669) Feature request: Partial enums
+</details>
+
 ## Declarations
 
 A declaration lists its cases first, then can provide members that operate on those cases. A semicolon separates the cases from the members:
@@ -483,19 +505,6 @@ The [existing switch-recognition pass](https://github.com/dotnet/runtime/blob/ma
 If general recognition raises correctness concerns, an attribute in `System.Runtime.CompilerServices` could opt well-behaved data-carrying enums into optimization. Its contract would cover stable case identity during dispatch, side-effect-free predicates agreeing with the case mapping, and extraction after a successful test. It could identify a struct's discriminator field for direct runtime access. This optional optimization contract is distinct from the required source-semantics marker; neither its name nor final contract is selected. Class enums could also use predicates and extraction if optimized efficiently.
 
 A final fallback is exposing a discriminator and emitting an integral switch, using existing runtime optimizations directly. Classes would need a case-to-discriminator mapping too. We would prefer to avoid this: the mapping would become a stable API and ABI contract. Reordering cases or inserting a case anywhere could no longer simply renumber them in declaration order; case numbering and library evolution would need a durable design. Extraction must still follow the specified conversions, including reconstruction from shared storage.
-
-## Background
-
-<details>
-<summary>Related discussions</summary>
-
-- Syntax and earlier designs: [#113](https://github.com/dotnet/csharplang/issues/113), [#75](https://github.com/dotnet/csharplang/issues/75), [#2962](https://github.com/dotnet/csharplang/discussions/2962), [#7544](https://github.com/dotnet/csharplang/issues/7544).
-- Struct representation: [#7016](https://github.com/dotnet/csharplang/issues/7016).
-- Cases and exhaustiveness: [#9010](https://github.com/dotnet/csharplang/discussions/9010), [#7854](https://github.com/dotnet/csharplang/issues/7854), [#8942](https://github.com/dotnet/csharplang/discussions/8942), [#782](https://github.com/dotnet/csharplang/discussions/782).
-- Generic use cases: [#8926](https://github.com/dotnet/csharplang/discussions/8926), [#7010](https://github.com/dotnet/csharplang/discussions/7010), [#3760](https://github.com/dotnet/csharplang/discussions/3760).
-- Enum members and partial declarations: [#274](https://github.com/dotnet/csharplang/discussions/274), [#8987](https://github.com/dotnet/csharplang/discussions/8987), [#5937](https://github.com/dotnet/csharplang/discussions/5937), [#2669](https://github.com/dotnet/csharplang/discussions/2669).
-
-</details>
 
 ## Possible Connections to Type Unions
 
