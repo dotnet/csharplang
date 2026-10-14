@@ -277,6 +277,111 @@ public union State(Ready, Processing, Complete)
 
 ### `enum struct` Translation
 
+The storage layout and emit strategy for an `enum struct` are compiler implementation details. They can, and likely will, change in future compiler versions, including to take advantage of new runtime capabilities. The compiler is free to change the representation and generated code while preserving the specified API surface and observable semantics. This proposal does not guarantee a particular size, field layout, native ABI, or byte representation suitable for persistence.
+
+The following describes a conservative storage strategy and possible optimizations. The aim is compact, non-boxing case storage, with the cost of packing and reconstructing data balanced against storage size and the runtime's ability to optimize the generated code. These trade-offs require performance validation; minimum storage is not a requirement on every implementation.
+
+#### Tearing and Safety
+
+Enum structs follow the existing [atomicity rules for struct reads and writes](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/variables.md#96-atomicity-of-variable-references). Unsynchronized concurrent reads and writes may tear: the discriminator and payload need not come from the same write. Case and payload observations are unspecified in that situation, and generated accessors may throw. Copying the enum or marking it `readonly` does not make a concurrent read an atomic snapshot.
+
+Tearing must not introduce memory or type unsafety in the conservative implementation. The garbage collector must be able to identify reference locations from the runtime type's layout independently of the discriminator, including during an assignment. No location may alternate between managed-reference storage and non-reference storage according to the active case. Arbitrary payload bits must never be interpreted as managed references.
+
+Reference-slot sharing must also preserve reference type safety. A reader might observe the discriminator for a string case while a shared `object` slot contains an array from another case. Extraction must check the reference it actually reads, or use an equivalent mechanism that preserves type safety; the discriminator alone cannot justify an unchecked reference reinterpretation. These guarantees concern the generated representation and accessors, within the usual safety assumptions for the payload types and user code.
+
+#### Conservative Storage
+
+A conservative implementation stores the discriminator and payload in compiler-generated fields, using opaque, strongly typed slots for value types whose representation cannot safely be assumed. Typed slots let the runtime determine their size and GC layout from the types actually loaded. This default strategy requires no user layout assertions and must remain safe across supported dependency updates, including a payload struct acquiring reference fields or changing size.
+
+One candidate shares storage in the following pools:
+
+1. **Unmanaged data**: A byte region for primitive data whose size and reference-free representation are established as described below. It is large enough for the greatest combined requirement of any case, with the required padding and alignment. Data from different cases can share this region; components of the same case occupy distinct locations.
+2. **Managed references**: Reference fields shared across cases, with enough slots for the case containing the most references. Each slot is normally typed as `object`, but can have a more specific reference type when that type can represent every value assigned to it. For example, a slot used only for strings can be typed as `string`. Reconstruction obeys the reference type checks described above.
+3. **Typed values**: Strongly typed fields for arbitrary value-type payloads and type parameters not known to be reference types. Slots of the same type can be shared across cases, with enough slots for that type's maximum requirement in any case. Distinct types cannot generally share a typed slot. A type parameter known to be a reference type, such as `T where T : class`, can use the managed-reference pool.
+
+A `struct` constraint does not establish that a type parameter contains no references. An `unmanaged` constraint establishes that property to the C# compiler, but does not generally provide a fixed byte size at declaration time or a runtime-enforced layout contract. Such parameters can remain in typed slots even when constrained to `unmanaged`.
+
+Each pool is sized for its maximum requirement across cases. Those maxima may come from different cases, so the combined payload can be larger than the largest individual case. Separate complete-case fields or hybrid representations are also possible when their storage and copying costs are preferable.
+
+#### Primitive Types and Layout Assumptions
+
+The compiler may rely on the following predefined types being unmanaged and having the fixed managed sizes specified by the [existing `sizeof` rules](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/expressions.md#12818-the-sizeof-operator):
+
+| Types | Size in bytes |
+| --- | --- |
+| `bool`, `byte`, `sbyte` | 1 |
+| `char`, `short`, `ushort` | 2 |
+| `int`, `uint`, `float` | 4 |
+| `long`, `ulong`, `double` | 8 |
+| `decimal` | 16 |
+
+These assumptions require no layout annotation. They describe managed storage, rather than interop marshaling representations. Native-sized integers (`nint`/`IntPtr` and `nuint`/`UIntPtr`) are also unmanaged, but their size depends on the execution platform. A representation must accommodate that dependency, for example with native-sized typed fields, instead of assuming one fixed size in portable output. No blanket layout assumption is made for other framework or user-defined structs.
+
+#### External Types and Decomposition
+
+By default, a struct from another assembly remains an opaque typed value, even when its compile-time definition satisfies `unmanaged`. The [`unmanaged` constraint is enforced by the language, not the CLR](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-7.3/blittable.md#detailed-design). Recompiling a caller against a new reference-containing definition rejects an unmanaged-constrained use, but replacing the dependency of an existing binary does not necessarily reject that instantiation. The default enum representation must not turn that change into an unchecked copy of references into byte storage.
+
+A possible user [opt-in described below](#possible-checked-packing-opt-in) would allow placing these values in unmanaged storage, subject to compile-time and runtime validation of their unmanagedness and size.
+
+The compiler can directly arrange the declared payload components of its generated case types. Decomposing a nested user-defined struct requires preserving all of its value state and reconstructing it without invoking user getters, setters, or constructors. It must also respect accessibility, type safety, and supported versioning. If those conditions cannot be established, the value remains in a typed slot. Being declared in the current assembly is not enough when layout-relevant dependencies cross an assembly boundary.
+
+Unmanagedness and byte layout are separate questions. Architecture, native-sized fields, alignment, and padding can prevent a fixed layout from being known even for a concrete unmanaged struct. Reference-assembly metadata used for compilation is not a promise that the execution-time type has one fixed size or layout. Any decomposition or raw packing must account for all of the assumptions it needs.
+
+#### Mixed-Data Example
+
+For example, the candidate pools above could represent:
+
+```csharp
+enum struct Message<T>
+{
+    Text(string text, int code),
+    Buffer(byte[] data, int offset, int count),
+    Pair(string first, string second),
+    Timestamp(DateTime value),
+    Values(T first, T second)
+}
+
+// Conceptual storage (generated case types and accessors omitted):
+public struct Message<T>
+{
+    private byte _discriminator;
+
+    // Buffer has the largest unmanaged payload: two ints.
+    private UnmanagedData _unmanaged;
+
+    // Pair needs two references. The first slot also stores Text's string
+    // or Buffer's byte array; the second is used only for a string.
+    private object? _reference0;
+    private string? _reference1;
+
+    // DateTime has no guaranteed size or reference layout across versions.
+    // Keep Timestamp's payload in a typed slot.
+    private DateTime _timestamp;
+
+    // Values needs two T slots. T may be a value type containing references.
+    private T _value0;
+    private T _value1;
+
+    [InlineArray(8)]
+    private struct UnmanagedData
+    {
+        private byte _element0;
+    }
+}
+```
+
+`Timestamp` keeps its `DateTime` in a typed slot. Although its current implementation is unmanaged and eight bytes, `DateTime` is outside the predefined-type guarantees above. Its current representation is not a permanent layout contract, so the conservative strategy does not put it in `_unmanaged`.
+
+#### Case Conversions
+
+Converting a case value to the enum packs its constituent data into the assigned slots and sets the discriminator. Extracting a case checks the discriminator, reads the slots, and reconstructs the case value. These operations rearrange (or "swizzle") the data between the case's own layout and the enum's shared layout; they cannot generally reinterpret the enum's payload as the complete case type.
+
+In the example above, constructing an enum from `Buffer` stores its array in `_reference0` and its two integers in `_unmanaged`. Extracting `Buffer` reconstructs the case from those locations. Constructing from `Pair` instead uses both reference slots and needs no unmanaged data. Unused reference and typed slots are initialized or cleared to their default values, so the enum does not retain references belonging to an inactive case.
+
+Storing every complete case in a separate field would avoid this rearrangement, but would pay for the sum of the cases' sizes even though only one case is active. That cost is especially significant for structs, which are copied by value and stored inline in arrays and containing objects. Shared storage reduces that cost at the expense of packing and reconstruction. The compiler may choose either strategy or a hybrid based on their storage and execution costs.
+
+For `Option<T>`, the shared storage is simply one typed `T` slot:
+
 ```csharp
 enum struct Option<T>
 {
@@ -290,11 +395,11 @@ public struct Option<T> : IUnion
     public readonly struct None { }
     public readonly record struct Some(T value);
 
-    // Optimized layout: discriminator + space for largest case
-    private byte _discriminant;
+    // None needs no payload; Some needs one typed T slot.
+    private byte _discriminator;
     private T _value;
     
-    object? IUnion.Value => _discriminant switch
+    object? IUnion.Value => _discriminator switch
     {
         1 => new None(),
         2 => new Some(_value),
@@ -305,12 +410,12 @@ public struct Option<T> : IUnion
     public bool TryGetValue(out None value)
     {
         value = default;
-        return _discriminant == 1;
+        return _discriminator == 1;
     }
 
     public bool TryGetValue(out Some value)
     {
-        if (_discriminant == 2)
+        if (_discriminator == 2)
         {
             value = new Some(_value);
             return true;
@@ -319,14 +424,100 @@ public struct Option<T> : IUnion
         return false;
     }
     
-    // Constructors and factories
-    public Option(None _) => _discriminant = 1;
-    public Option(Some some) => (_discriminant, _value) = (2, some.value);
-    
-    public static Option<T> None => new Option<T>(new None());
-    public static Option<T> Some(T value) => new Option<T>(new Some(value));
+    // Constructors and implicit case conversions
+    public Option(None _) => _discriminator = 1;
+    public Option(Some some) => (_discriminator, _value) = (2, some.value);
+
+    public static implicit operator Option<T>(None value) => new(value);
+    public static implicit operator Option<T>(Some value) => new(value);
 }
 ```
+
+The `TryGetValue` accessors reconstruct case values without boxing. Access through the `object`-typed `IUnion.Value` property boxes the returned case struct.
+
+#### Fully Unmanaged Cases
+
+When all case data is unmanaged and the required layout facts can be established safely, overlapping complete case values in one unmanaged region is a possible optimization. The region can hold the largest case, subject to alignment and padding, in addition to the discriminator.
+
+Preserving each case's representation allows construction and extraction to copy complete values without swizzling individual fields. The compiler may use this strategy when it satisfies the safety and versioning requirements above. Unmanagedness alone does not guarantee this layout, a minimum enum size, or the absence of reconstruction. Generic cases and external structs may still require typed slots.
+
+#### Unmanaged Classification
+
+An enum struct's classification as an unmanaged type is observable through `where T : unmanaged`, pointers, and `stackalloc`, even though its storage layout is an implementation detail. A future compiler could otherwise change that classification by choosing a different representation for the same declared cases.
+
+LDM needs to decide what compatibility guarantee applies to changes in the compiler's representation. Options include:
+
+- Allowing classification to change in either direction, accepting that a change from unmanaged to managed can break code that depended on the previous classification.
+- Requiring a constructed enum type that was unmanaged to remain unmanaged when its declared cases, payload types, and constraints are unchanged, while allowing changes from managed to unmanaged. This would constrain future representations to remain reference-free for those types.
+
+This question concerns the enum type's own language-level classification. Changes to its declared cases or payload dependencies raise separate compatibility concerns. The checked packing opt-in below instead concerns assumptions about individual payload types.
+
+#### Possible Checked Packing Opt-in
+
+We should consider a compiler-recognized attribute asserting that a payload type will remain unmanaged and have a specified byte size. Both declaration-site and use-site assertions could be supported: a supplying library could annotate its struct declaration, or a consuming enum could annotate an individual case parameter without requiring the referenced type to be annotated. For example, a library could declare the contract using illustrative syntax:
+
+```csharp
+// Defined by a referenced library:
+[Unmanaged(size: 8)]
+public readonly record struct Point(int X, int Y);
+
+// Consuming code:
+enum struct Position
+{
+    Unknown,
+    At(Point point)
+}
+```
+
+For either placement, the compiler must verify at compilation that the asserted payload type is a struct satisfying the ordinary C# unmanaged rules. A reference-containing type is an error regardless of the supplied size; the compiler does not trust the attribute as evidence of unmanagedness. It may also diagnose a size mismatch when the managed size is statically known. The attribute name, syntax, and detailed placement rules remain design questions.
+
+For an annotation on a type, the compiler would inject checks at the beginning of its static constructor, preserving any user-written initialization. For `Point`, the generated validation would be conceptually equivalent to this constructor and these helpers:
+
+```csharp
+static Point()
+{
+    __ValidateNoReferences<Point>();
+    __ValidateSize<Point>(8);
+}
+
+private static void __ValidateNoReferences<T>() where T : struct
+{
+    if (RuntimeHelpers.IsReferenceOrContainsReferences<T>())
+        throw new InvalidOperationException("The unmanaged reference-containment assertion failed.");
+}
+
+private static void __ValidateSize<T>(int expectedSize) where T : struct
+{
+    if (Unsafe.SizeOf<T>() != expectedSize)
+        throw new InvalidOperationException("The unmanaged size assertion failed.");
+}
+```
+
+The validation helpers are illustrative compiler-generated code, rather than proposed public APIs; their placement can allow sharing across types. Both checks are mandatory: a type can remain unmanaged while growing beyond the reserved storage. The checks use its actual runtime managed representation, rather than its interop marshaling size, under the ordinary static-initialization rules for each constructed type.
+
+A consuming enum that chooses raw packing must validate its recorded layout assumptions once per constructed enum type, through a generated static constructor. Generated constructors and case-to-enum conversions must trigger that initialization before packing any payload, following the existing [struct static-constructor rules](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/structs.md#16410-static-constructors). Extraction from a non-default enum can then rely on the completed validation; it does not require another reference-containment or size check on each access. Any alternative lowering must preserve this guarantee.
+
+An all-zero enum can be created by default values or array initialization without running an instance constructor. This is safe: zero denotes no case or a designated data-free default case, and no packed payload needs to be reconstructed. A failed extraction may assign a typed `default` to its out parameter. Merely creating or copying such a value requires no additional layout validation.
+
+Using a payload type does not by itself ensure that its own static constructor has run: default values, array initialization, layout queries, and whole-value copies can bypass it. The enum therefore performs its own validation using the size recorded when it was compiled. A later library version could also change or remove the annotation, or change its size from 8 to 16 and validate that new size successfully. The old consumer must still validate against its own expected size of 8. Calling only the current payload type's initializer is insufficient.
+
+Alternatively, a consuming enum could make a use-site assertion about `DateTime`, even though the framework type is not annotated:
+
+```csharp
+enum struct CompactMessage
+{
+    Timestamp([Unmanaged(size: 8)] DateTime value),
+    Count(long value)
+}
+```
+
+Here, `8` is `DateTime`'s current managed size, rather than a language guarantee. The compiler must verify its unmanagedness at compilation. If the enum uses raw packing, its generated static initialization must also check that `RuntimeHelpers.IsReferenceOrContainsReferences<DateTime>()` is false and that `Unsafe.SizeOf<DateTime>()` is 8 as part of that one-time validation. These checks would permit the two cases to share an eight-byte unmanaged payload region, with the discriminator stored separately. The annotation permits that packing without requiring it; its placement on the parameter is illustrative.
+
+Failed validation must prevent the raw operation and produce a managed exception, such as a type-initialization failure. Process termination is not required. Raw copies must remain within their storage bounds. The checks in [`MemoryMarshal.Read` and `Write`](https://github.com/dotnet/runtime/blob/main/src/libraries/System.Private.CoreLib/src/System/Runtime/InteropServices/MemoryMarshal.cs) provide an existing model: they reject reference-containing types and check buffer capacity before copying.
+
+With these guarantees, the opt-in need not require `unsafe`: an incorrect assertion fails safely instead of permitting memory corruption. The annotation establishes only reference containment and total managed size; it grants no unchecked assumptions about internal field offsets, alignment, or field accessibility. The compiler can copy values opaquely, or separately establish any additional layout facts it needs. Checked reference extraction and the tearing guarantees above continue to apply.
+
+The annotation makes the versioning trade-off explicit. A dependency update can cause validation of an annotated type or consuming enum to fail even if its ordinary typed API would still work. The conservative default avoids introducing that hidden layout dependency. Neither the annotation nor its byte-size assertion promises a particular layout for the enum itself. Whether to add this optimization contract remains a joint decision for LDM and the runtime team, supported by performance measurements.
 
 ## 6. Pattern Matching and Behaviors
 
@@ -348,7 +539,7 @@ var message = operation switch
 
 The emit strategy for `switch` statements and expressions over shape enums remains open. The following strategies are candidates to validate through benchmarks and inspection of generated code. We believe the compiler should be able to emit case tests that the runtime can optimize efficiently.
 
-Current JIT code generation does not yet produce the intended dispatch optimizations for the patterns below. In local .NET 11 RC1 checks on ARM64 with 16 sealed class cases and 16 struct cases, both exact-type comparison chains and discriminant-predicate chains remained linear in fully optimized code and Tier 1 code with dynamic PGO. Struct predicates inlined into discriminant comparisons, but those comparisons did not become a jump table or comparison tree. We believe these transformations should be possible with additional runtime support; performance validation is still needed to choose the default strategy.
+Current JIT code generation does not yet produce the intended dispatch optimizations for the patterns below. In local .NET 11 RC1 checks on ARM64 with 16 sealed class cases and 16 struct cases, both exact-type comparison chains and discriminator-predicate chains remained linear in fully optimized code and Tier 1 code with dynamic PGO. Struct predicates inlined into discriminator comparisons, but those comparisons did not become a jump table or comparison tree. We believe these transformations should be possible with additional runtime support; performance validation is still needed to choose the default strategy.
 
 The switch input is evaluated once. The examples show distinct cases without guards; a full translation must also preserve null handling, source ordering where it affects behavior, guards, deconstruction, and the fallback behavior of the original statement or expression. Only case tests whose reordering preserves those semantics can be reorganized.
 
@@ -413,9 +604,9 @@ Although the emitted tests form a linear chain, they compare one runtime type ag
 For an `enum struct`, we expect generated case predicates along these lines:
 
 ```csharp
-public bool IsC1 => _discriminant == 1;
-public bool IsC2 => _discriminant == 2;
-public bool IsC3 => _discriminant == 3;
+public bool IsC1 => _discriminator == 1;
+public bool IsC2 => _discriminator == 2;
+public bool IsC3 => _discriminator == 3;
 ```
 
 An initial translation of the corresponding switch uses these predicates followed by case extraction:
@@ -443,24 +634,24 @@ else if (__value.IsC3)
 Inlining the predicates should expose a sequence equivalent to:
 
 ```csharp
-if (__value._discriminant == 1) { /* C1 body */ }
-else if (__value._discriminant == 2) { /* C2 body */ }
-else if (__value._discriminant == 3) { /* C3 body */ }
+if (__value._discriminator == 1) { /* C1 body */ }
+else if (__value._discriminator == 2) { /* C2 body */ }
+else if (__value._discriminator == 3) { /* C3 body */ }
 ```
 
-These are comparisons of the same integral discriminant against distinct constants. We believe the runtime could select a jump table for dense case values, a comparison tree for sparse values, or a linear chain when that is more efficient. It should also be able to eliminate redundant discriminant checks in case extraction after a successful predicate. In the local checks, marking the struct conversions for inlining allowed their redundant checks to be removed, but the dispatch chain remained linear. Predicate inlining alone does not establish that the comparison chain will become a jump table or tree.
+These are comparisons of the same integral discriminator against distinct constants. We believe the runtime could select a jump table for dense case values, a comparison tree for sparse values, or a linear chain when that is more efficient. It should also be able to eliminate redundant discriminator checks in case extraction after a successful predicate. In the local checks, marking the struct conversions for inlining allowed their redundant checks to be removed, but the dispatch chain remained linear. Predicate inlining alone does not establish that the comparison chain will become a jump table or tree.
 
 #### Runtime Recognition and Alternatives
 
-We should consider teaching the runtime to recognize exact-type comparison chains and discriminant predicates with distinct case bodies. The runtime already has a [limited switch-recognition pass](https://github.com/dotnet/runtime/blob/main/src/coreclr/jit/switchrecognition.cpp#L28) for constant-comparison chains whose successful tests all reach the same destination. It runs after inlining, but stops recognizing a chain when successful tests reach different destinations, as they do in these DU switches. Extending this recognition is one possible starting point.
+We should consider teaching the runtime to recognize exact-type comparison chains and discriminator predicates with distinct case bodies. The runtime already has a [limited switch-recognition pass](https://github.com/dotnet/runtime/blob/main/src/coreclr/jit/switchrecognition.cpp#L28) for constant-comparison chains whose successful tests all reach the same destination. It runs after inlining, but stops recognizing a chain when successful tests reach different destinations, as they do in these DU switches. Extending this recognition is one possible starting point.
 
 Another option is an attribute in `System.Runtime.CompilerServices` identifying a well-behaved discriminated union and describing its case mapping and representation. If optimizing these patterns in arbitrary user code raises correctness concerns, the attribute could provide an explicit opt-in with a well-defined contract. That contract would specify how case identity remains stable during dispatch, that case predicates are side-effect-free and agree with the case mapping, and how extraction behaves after a successful test.
 
-The presence of the attribute would assert that the type follows this contract, giving the runtime a basis for DU-specific optimization. For a struct, the metadata could identify the discriminant field, allowing the runtime to read it directly when optimizing case dispatch. These optimizations must preserve the observable semantics of the switch, including its guards and case bodies. No attribute name or contract is selected here.
+The presence of the attribute would assert that the type follows this contract, giving the runtime a basis for DU-specific optimization. For a struct, the metadata could identify the discriminator field, allowing the runtime to read it directly when optimizing case dispatch. These optimizations must preserve the observable semantics of the switch, including its guards and case bodies. No attribute name or contract is selected here.
 
 Class-based unions could also use the same predicate-and-extraction emit as struct-based unions if the runtime can optimize the class representation efficiently. The final choice should follow performance validation, including switches with many cases, different case distributions, guards, and both statement and expression forms.
 
-If these approaches do not produce satisfactory results, a final fallback is to expose a discriminant and have the compiler emit an integral switch over it directly. This would use the runtime's existing integral-switch optimizations without requiring it to recover a switch from a comparison chain. Class-based unions would also need a discriminant mapping for their cases. Case extraction must still preserve the conversion semantics, including reconstructing data from shared storage when necessary.
+If these approaches do not produce satisfactory results, a final fallback is to expose a discriminator and have the compiler emit an integral switch over it directly. This would use the runtime's existing integral-switch optimizations without requiring it to recover a switch from a comparison chain. Class-based unions would also need a discriminator mapping for their cases. Case extraction must still preserve the conversion semantics, including reconstructing data from shared storage when necessary.
 
 ### Exhaustiveness
 
@@ -603,9 +794,11 @@ The distinction between `enum class` and `enum struct` allows developers to choo
 - Singleton pattern for parameter-less cases
 
 **`enum struct`**:
-- Size equals discriminator plus space for largest case
+- Layout and size are compiler implementation details; shared pools, typed slots, and separate-case storage are candidate strategies
 - Inline storage, no heap allocation
-- Optimized layout per union's non-boxing pattern
+- The conservative strategy preserves type and memory safety, including during torn reads and writes
+- Sharing mixed case storage can require packing and reconstruction through non-boxing accessors
+- Complete unmanaged cases may overlap when their layout assumptions can be established safely; packing external value types into raw storage would require the proposed checked opt-in
 
 ### Allocation Patterns
 
@@ -616,7 +809,7 @@ var r1 = Result.Ok(42);  // Heap allocation
 
 // No allocation
 enum struct Result { Ok(int value), Error(string message) }  
-var r2 = Result.Ok(42);  // Stack only
+var r2 = Result.Ok(42);  // No allocation for case construction
 ```
 
 ### Optimization Opportunities
@@ -639,6 +832,8 @@ Shape enums benefit from all union optimizations:
 8. **Generic cases**: Should cases support independent generic parameters?
 9. **Interface implementation**: Should enhanced enums automatically implement `IEquatable<T>`?
 10. **Exact lowering**: Should the spec define exact names and shapes of generated types?
+11. **Checked packing**: Should a checked `[Unmanaged(size: ...)]` contract permit raw payload storage, and where should the annotation be placed?
+12. **Unmanaged classification**: What compatibility guarantee should apply when the compiler changes an enum struct's representation, as discussed under [Unmanaged Classification](#unmanaged-classification)?
 
 ## Appendix A: Grammar Changes
 
