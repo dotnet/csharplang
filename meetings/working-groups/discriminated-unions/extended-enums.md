@@ -1,6 +1,6 @@
 # Data-Carrying Enums
 
-This proposal brings discriminated unions to C# through the familiar enum model: a value is one of several named cases, and each case can carry data. The new `enum class` and `enum struct` forms provide reference-type and value-type representations with record behavior for their cases.
+This proposal brings discriminated unions to C# through the familiar enum model: a value is one of several named cases, and each case can carry data. The new `enum class` and `enum struct` forms provide reference-type and value-type representations with record-like behavior for their cases.
 
 It is a follow-up to the [type unions](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-15.0/unions.md) proposal. Type unions combine existing types; data-carrying enums declare a type and its cases together.
 
@@ -107,7 +107,7 @@ The grammar uses the ordinary `parameter_list`; whether to permit an [empty para
 
 Each data-carrying enum case is exposed as a public nested record type, usable in signatures, casts, patterns, and `typeof`. Its effective accessibility is bounded by the enclosing enum. Record behavior supplies payload properties, deconstruction, and case equality; [construction](https://github.com/dotnet/csharplang/blob/main/meetings/working-groups/discriminated-unions/extended-enums.md#construction-and-case-access) has special source-language rules.
 
-Data-carrying enum storage layout and switch emit are compiler implementation details. They can, and likely will, change, including to use new runtime capabilities, while preserving the specified API and observable semantics. No particular size, field layout, native ABI, or persistent byte representation is guaranteed. [Implementation Details](https://github.com/dotnet/csharplang/blob/main/meetings/working-groups/discriminated-unions/extended-enums.md#implementation-details) discusses candidate strategies.
+Data-carrying enum storage layout and switch emit are compiler implementation details. These strategies are expected to evolve with future compilers and runtime capabilities. Changes must preserve the specified API and observable semantics. No particular size, field layout, native ABI, or persistent byte representation is guaranteed. [Implementation Details](https://github.com/dotnet/csharplang/blob/main/meetings/working-groups/discriminated-unions/extended-enums.md#implementation-details) discusses candidate strategies.
 
 ### `enum class` Translation
 
@@ -171,11 +171,11 @@ Option<int> stillInvalid = new();       // error
 
 The compiler emits a marker identifying the enum, its cases, and their construction operations. Supporting C# compilers use it to apply these rules when consuming another assembly. The [metadata encoding](https://github.com/dotnet/csharplang/blob/main/meetings/working-groups/discriminated-unions/extended-enums.md#metadata-encoding) remains to be designed.
 
-The enum and its generated case types also carry a nonoptional [`System.Runtime.CompilerServices.CompilerFeatureRequiredAttribute`](https://learn.microsoft.com/en-us/dotnet/api/system.runtime.compilerservices.compilerfeaturerequiredattribute), using a feature name such as `"DataCarryingEnums"` (TBD). Compilers that recognize the attribute but lack feature support reject use of these types, preventing acceptance of `new E.Case(...)` that would become invalid after a compiler upgrade. To cover compilers predating the attribute, the compiler also emits an error-level `ObsoleteAttribute` compatibility guard that supporting compilers ignore, following the [required-members pattern](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-11.0/required-members.md#metadata-representation).
+The enum and its generated case types also carry a nonoptional [CompilerFeatureRequired](https://learn.microsoft.com/en-us/dotnet/api/system.runtime.compilerservices.compilerfeaturerequiredattribute) attribute with a feature name such as `"DataCarryingEnums"` (TBD). Compilers that recognize the attribute but lack feature support reject use of these types, preventing acceptance of `new E.Case(...)` that would become invalid after a compiler upgrade. To cover compilers predating the attribute, the compiler also emits an error-level `ObsoleteAttribute` compatibility guard that supporting compilers ignore, following the [required-members pattern](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-11.0/required-members.md#metadata-representation).
 
 ### Contextual Construction and Inference
 
-[Target-typed static member access](https://github.com/dotnet/csharplang/blob/main/proposals/target-typed-static-member-access.md) lets the expected enum type supply the qualifier for case construction; the case-to-enum conversion then satisfies that context:
+[Target-typed static member access](https://github.com/dotnet/csharplang/blob/main/proposals/target-typed-static-member-access.md) lets the expected enum type supply the qualifier for case construction; the [case-to-enum conversion](https://github.com/dotnet/csharplang/blob/main/meetings/working-groups/discriminated-unions/extended-enums.md#generated-apis-and-conversions) then satisfies that context:
 
 ```csharp
 void UseInt(Option<int> value) { /* ... */ }
@@ -209,13 +209,13 @@ Ordinary applicability, conversions, constraints, and overload selection still a
 
 ### Generated APIs and Conversions
 
-`enum class` cases use ordinary reference conversions and type tests, including `as`. For `enum struct` types, the proposed minimum API adds:
+Case-to-enum conversions use existing C# conversion rules. `enum class` cases have implicit reference conversions to their base enum and explicit reference conversions back, with ordinary type tests and `as`. For `enum struct`, the compiler generates operators governed by the existing user-defined conversion rules. The proposed minimum API adds:
 
-- An implicit conversion from each case type to the enum.
+- An `implicit operator` from each case type to the enum.
 - A boolean `IsCase` property for each case, such as `IsSome`, testing case identity.
 - `HasValue`, which is false when uninitialized and true for any active case, including a designated `default` case.
 - A `TryGetValue(out Case value)` overload for each case, returning true with its value if active; otherwise returning false and assigning `default(Case)` to the out parameter.
-- An explicit conversion to each case type, returning its value if active or throwing `InvalidCastException` otherwise.
+- An `explicit operator` from the enum to each case type, returning its value if active or throwing `InvalidCastException` otherwise.
 
 <details>
 <summary>Example: generated case-access API for Option&lt;T&gt;</summary>
@@ -364,7 +364,11 @@ Data-free `enum class` cases use shared instances.
 
 ### Struct Storage
 
-A conservative `enum struct` layout aims for compact, non-boxing storage. Its size, packing, and copying costs require performance validation; minimum size is not a requirement.
+The simplest layout is a discriminator followed by a separate field for each case type. The enum's size is roughly the sum of all case sizes plus the discriminator and padding. Conversions can copy the selected case directly into or out of its field.
+
+Our initial expectation is that this approach would often make `enum struct` types too large to be practical. Even a handful of cases could substantially increase storage and copying costs. This assessment needs performance validation and sign-off from LDM and the runtime team. The compact layout below aims to minimize storage safely with only a small runtime cost for rearranging data during case conversions.
+
+An attribute or other mechanism could let authors prefer separate case fields when they accept larger enum values for faster conversions. Whether that choice is valuable enough to expose remains open. The compiler could also choose a hybrid layout.
 
 #### Safety Requirements
 
@@ -437,7 +441,7 @@ public struct Message<T>
 
 In the shared-pool layout, case-to-enum conversion packs components into their assigned slots and sets the discriminator. Extraction checks case identity and reconstructs the value. Mixed layouts require rearranging, or "swizzling," components rather than reinterpreting the shared storage as a complete case. For example, `Buffer` uses `_reference0` and both integers in `_unmanaged`; `Pair` uses both reference slots. Unused reference and typed slots are defaulted so inactive cases retain no references.
 
-Keeping a separate complete field for every case avoids swizzling but costs their combined size, significant for inline, copied values. The compiler can choose shared pools, separate fields, or a hybrid. When every case is unmanaged and the required layout facts are established, complete case values can safely overlap in one region sized and aligned for the largest case, with a separate discriminator, avoiding field swizzling.
+When every case is unmanaged and the required layout facts are established, complete case values can safely overlap in one region sized and aligned for the largest case, with a separate discriminator, avoiding field swizzling.
 
 #### Possible Checked Packing Opt-in
 
