@@ -12,10 +12,7 @@ It consolidates design feedback from many years of repository discussions, espec
   - [#7016](https://github.com/dotnet/csharplang/issues/7016) - Fast, efficient unions proposal focusing on struct-based implementations
   - [#3760](https://github.com/dotnet/csharplang/discussions/3760) - Community "shopping list" of desired discriminated union features
   - [#7544](https://github.com/dotnet/csharplang/issues/7544) - Simple encoding of unions exploring type unions vs tagged unions
-  - [#8804](https://github.com/dotnet/csharplang/discussions/8804) - String-based enums for cloud services with extensibility needs
-  - [#1860](https://github.com/dotnet/csharplang/issues/1860) - Long-running request for string enum support citing TypeScript/Java
   - [#9010](https://github.com/dotnet/csharplang/discussions/9010) - "Closed" enum types that guarantee exhaustiveness
-  - [#6927](https://github.com/dotnet/csharplang/discussions/6927) - Constant enums discussion around strict value enforcement
   - [#7854](https://github.com/dotnet/csharplang/issues/7854) - Exhaustiveness checking for ADT patterns using private constructors
   - [#8942](https://github.com/dotnet/csharplang/discussions/8942) - Track subtype exhaustiveness for closed hierarchies
   - [#8926](https://github.com/dotnet/csharplang/discussions/8926) - Extensive discussion on Option<T> as canonical DU use case
@@ -52,7 +49,6 @@ Today's C# enums have significant limitations:
 
 1. **No associated data**: Cases are merely integral values
 2. **Not truly exhaustive**: Any integer can be cast to an enum type
-3. **Limited to integers**: Cannot use strings or doubles
 
 Enhanced enums address all these limitations while preserving conceptual simplicity.
 
@@ -70,19 +66,7 @@ Shape enums specify their own [class](https://github.com/dotnet/csharplang/blob/
 
 ### Syntax Extensions
 
-Enhanced enums extend traditional enum syntax in three orthogonal ways:
-
-#### Extended Base Types
-
-Support any constant-bearing type:
-
-```csharp
-enum Traditional : int { A = 1, B = 2 }
-enum Priority : string { Low = "low", Medium = "medium", High = "high" }
-enum TranscendentalConstants : double { Pi = 3.14159, E = 2.71828 }
-```
-
-These compile to `System.Enum` subclasses with the appropriate `value__` backing field. Non-integral constant enums require explicit values for each member.
+Enhanced enums extend traditional enum syntax with shape declarations and data-carrying cases:
 
 #### Shape Declarations
 
@@ -148,25 +132,18 @@ Target-typed access to these operations is discussed under [Contextual Case Cons
 
 #### Combination Rules
 
-- **Constant enums**: Can use extended base types but NOT have parameter lists
 - **Shape enums**: Can have parameter lists but NOT specify a base type
-- **Mixing cases**: Cannot mix constant values and parameterized cases. For the `= default` form, see [Default Values](https://github.com/dotnet/csharplang/blob/main/meetings/working-groups/discriminated-unions/extended-enums.md#default-values).
+- **Case initializers**: Cannot assign constant values to cases. For the `= default` form, see [Default Values](https://github.com/dotnet/csharplang/blob/main/meetings/working-groups/discriminated-unions/extended-enums.md#default-values).
 
 ```csharp
-// ✓ Valid - constant enum with string base
-enum Status : string { Active = "A", Inactive = "I" }
-
 // ✓ Valid - shape enum with data
 enum class Result { Ok(int value), Error(string msg) }
 
-// ✗ Invalid - cannot mix constants and shapes
+// ✗ Invalid - shape cases cannot have constant initializers
 enum class Bad { A = 1, B(string x) }
 
 // ✗ Invalid - shape enums cannot have base types
 enum struct Bad : int { A, B }
-
-// ✗ Invalid - Constant enums cannot have parameter lists
-enum Bad { A(), B() }
 ```
 
 For the complete formal grammar, see [Appendix A: Grammar Changes](https://github.com/dotnet/csharplang/blob/main/meetings/working-groups/discriminated-unions/extended-enums.md#appendix-a-grammar-changes).
@@ -798,15 +775,13 @@ If these approaches do not produce satisfactory results, a final fallback is to 
 
 ### Exhaustiveness
 
-The compiler tracks all declared cases. Both constant and shape enums can be open or closed. Constant enums follow the [Closed Enums proposal](https://github.com/dotnet/csharplang/blob/main/proposals/closed-enums.md); class shape enums also require the hierarchy information described above.
+The compiler tracks all declared cases. Shape enums can be open or closed (see [Closed Enums proposal](https://github.com/dotnet/csharplang/blob/main/proposals/closed-enums.md)). Class shape enums also require the hierarchy information described above.
 
 Open enums can be used to signal that the enum author may add new cases in future versions—consumers must handle unknown cases defensively (e.g., with a default branch). Closed enums signal that there is no need to handle unknown cases, such as when the case set is complete and will never change—the compiler ensures exhaustive matching without requiring a default case.
 
 For shape enums, this open/closed distinction concerns evolution of the declared case set. It does not permit arbitrary user-defined subclasses or arbitrary discriminator values.
 
 Covering all declared cases does not cover the no-case state. A possibly-null class input needs a `null` arm or a fallback to handle null. A struct without a designated default case likewise needs to handle its uninitialized representation, for example with a `{ HasValue: false }` arm or a fallback, unless analysis establishes that a case is active. A struct with a designated default case has no additional uninitialized state: covering that case also covers zero-initialized values. Diagnostics should account for these states even when every case type is non-nullable; the no-case state is distinct from payload nullability.
-
-For constant enums, "open" also means values outside the declared set can be safely freely cast to the enum type.
 
 ```csharp
 closed enum class Status { Active, Pending(DateTime since), Inactive }
@@ -821,17 +796,6 @@ var description = status switch
     Status.Inactive => "Not active",
     null => "No status"
 };
-
-enum Priority : string { Low = "low", Medium = "medium", High = "high" }
-
-// Default case is needed, other string values may be converted to Priority, or new cases may be added in the future:
-var value = priority switch
-{
-    Low => -1,
-    Medium => 0,
-    High => 1,
-    _ => /* fallback to low priority */ -1,
-}
 ```
 
 ### Case State and Nullability
@@ -1025,42 +989,14 @@ enum class ConnectionState
 ## Appendix A: Grammar Changes
 
 ```antlr
-enum_declaration
-    : attributes? enum_modifier* 'enum' identifier enum_base? enum_body ';'?
-    | attributes? shape_enum_modifier* 'enum' ('class' | 'struct') identifier type_parameter_list?
+shape_enum_declaration
+    : attributes? shape_enum_modifier* 'enum' ('class' | 'struct') identifier type_parameter_list?
       type_parameter_constraints_clause* shape_enum_body ';'?
     ;
 
 shape_enum_modifier
     : enum_modifier
     | 'readonly'
-    ;
-
-enum_base
-    : ':' enum_underlying_type
-    ;
-
-enum_underlying_type
-    : simple_type // all integral types, fp-types, decimal, bool and char
-    | 'string'
-    | type_name  // Must resolve to one of the above
-    ;
-
-enum_body
-    : '{' enum_member_declarations? '}'
-    | '{' enum_member_declarations ';' class_member_declarations '}'
-    ;
-
-enum_member_declarations
-    : enum_member_declaration (',' enum_member_declaration)*
-    ;
-
-enum_member_declaration
-    : attributes? identifier enum_member_initializer?
-    ;
-
-enum_member_initializer
-    : '=' constant_expression
     ;
 
 shape_enum_body
@@ -1078,7 +1014,7 @@ shape_enum_case_declaration
     ;
 ```
 
-For the `= default` restrictions, see [Default Values](https://github.com/dotnet/csharplang/blob/main/meetings/working-groups/discriminated-unions/extended-enums.md#default-values). Type parameter lists and constraints are permitted on shape enums; constant enums retain their non-generic declarations. The shape-enum modifiers additionally permit `readonly` for `enum struct`, with the restrictions described above; it is not permitted for `enum class` or constant enums.
+For the `= default` restrictions, see [Default Values](https://github.com/dotnet/csharplang/blob/main/meetings/working-groups/discriminated-unions/extended-enums.md#default-values). Type parameter lists and constraints are permitted on shape enums. The shape-enum modifiers additionally permit `readonly` for `enum struct`, with the restrictions described above; it is not permitted for `enum class`.
 
 ## Appendix B: Possible Connections to Type Unions
 
