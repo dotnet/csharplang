@@ -202,7 +202,7 @@ Members are restricted to:
 
 ## 5. Translation Strategy
 
-The translations illustrate the proposed API surface; exact metadata names remain open.
+The translations illustrate the proposed API surface.
 
 ### `enum class` Translation
 
@@ -402,9 +402,7 @@ public struct Option<T>
 }
 ```
 
-The compiler recognizes the struct as a shape enum through its declaration and emitted case metadata. The generated predicates and `TryGetValue` methods provide non-boxing case access; the constructor and conversion operators provide construction and checked extraction. The exact metadata encoding remains open.
-
-If this declaration instead uses `None = default`, the `None` constructor sets the discriminator to zero, and `IsNone` and `TryGetValue(out None)` test for zero. `HasValue` is then always true for values produced by the generated APIs, including `default(Option<T>)`.
+Emitted shape-enum metadata identifies the declared case types to consuming compilers; its encoding remains open.
 
 #### Fully Unmanaged Cases
 
@@ -486,7 +484,7 @@ The contract establishes only reference containment and total managed size. Fiel
 
 ### Generated APIs and Conversions
 
-The proposed minimum API exposes the nested case types so that source code can construct, test, and extract them. Case types are public within the enclosing enum, so their effective accessibility is bounded by that enum's accessibility. Nested cases of a generic enum use the enclosing type parameters and constraints.
+The proposed minimum API includes public nested case types, with effective accessibility bounded by the enclosing enum. Nested cases of a generic enum use the enclosing type parameters and constraints.
 
 Case constructors, payload properties, and deconstruction follow the generated record types' rules. Data-free struct cases can be constructed with `new E.Case()`.
 
@@ -530,7 +528,7 @@ Option<int>.Some extracted = (Option<int>.Some)option;
 
 The `as` operator does not invoke the generated struct conversions; use `TryGetValue` for conditional extraction.
 
-Generated members must agree on the active case. Extracting a struct case produces a value, not a reference into the enum's storage. Its payload is reconstructed as needed by the storage strategy, and managed-reference payloads retain their original references.
+Generated members must agree on the active case. Extraction produces a separate case value and preserves payload references.
 
 The proposed API uses ordinary constructor syntax, such as `new Result.Success("ok")`, rather than a generated same-name factory. Ordinary C# cannot declare a nested case type alongside a method or property with the same name. User-declared members that conflict with generated members are errors; additional construction shorthand and the final generated API names remain open questions.
 
@@ -712,9 +710,7 @@ The `IUnion` interface is a separate option for runtime access to a value's cont
 
 An enum class could implement the union pattern while remaining a base class with sealed case types. Using a [union member provider](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-15.0/unions.md#union-member-providers), generated `Create` methods could return the supplied case reference unchanged, and the provider's `Value` property could return `this`. An optional `IUnion` implementation could expose that same reference to runtime consumers. None of these members would require a wrapper allocation.
 
-This could give class enums a common access protocol with other union types and allow code that understands that protocol to consume them uniformly.
-
-The language benefits are limited: the [class representation and APIs](https://github.com/dotnet/csharplang/blob/main/meetings/working-groups/discriminated-unions/extended-enums.md#enum-class-translation) already supply most of these behaviors. Integration mainly adds interoperability, at the cost of extra APIs or provider metadata. It must preserve the enum's reference semantics and declared-hierarchy restriction, which the union pattern alone does not enforce.
+The benefit is interoperability with other union types; the [class representation and APIs](https://github.com/dotnet/csharplang/blob/main/meetings/working-groups/discriminated-unions/extended-enums.md#enum-class-translation) already supply most of the language behavior. Integration adds APIs or provider metadata. It must preserve the enum's reference semantics and declared-hierarchy restriction, which the union pattern alone does not enforce.
 
 Runtime consumers must account for this self-reference when recursively inspecting contents.
 
@@ -738,6 +734,6 @@ The costs and semantic choices include:
 
 ### Scope of an LDM Decision
 
-LDM could choose full union-pattern integration, reuse selected compiler machinery without generating the pattern, or keep the features independent. Such a decision should determine which representations participate, whether protocol members are exposed directly or through a provider, whether `IUnion` is useful for runtime interoperability, and how pattern targets, uninitialized matching, and open/closed exhaustiveness interact.
+LDM could choose full union-pattern integration, reuse selected compiler machinery without generating the pattern, or keep the features independent.
 
 A JIT optimization contract would need stronger case and representation guarantees than `[Union]`, which supports arbitrary custom implementations and identifies no discriminator field or mapping.
