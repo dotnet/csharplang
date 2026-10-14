@@ -315,7 +315,7 @@ The compiler may rely on the following predefined types being unmanaged and havi
 | `long`, `ulong`, `double` | 8 |
 | `decimal` | 16 |
 
-These assumptions require no unsafe opt-in. They describe managed storage, rather than interop marshaling representations. Native-sized integers (`nint`/`IntPtr` and `nuint`/`UIntPtr`) are also unmanaged, but their size depends on the execution platform. A representation must accommodate that dependency, for example with native-sized typed fields, instead of assuming one fixed size in portable output. No blanket layout assumption is made for other framework or user-defined structs.
+These assumptions require no layout annotation. They describe managed storage, rather than interop marshaling representations. Native-sized integers (`nint`/`IntPtr` and `nuint`/`UIntPtr`) are also unmanaged, but their size depends on the execution platform. A representation must accommodate that dependency, for example with native-sized typed fields, instead of assuming one fixed size in portable output. No blanket layout assumption is made for other framework or user-defined structs.
 
 #### External Types and Decomposition
 
@@ -432,19 +432,52 @@ When all case data is unmanaged and the required layout facts can be established
 
 Preserving each case's representation allows construction and extraction to copy complete values without swizzling individual fields. The compiler may use this strategy when it satisfies the safety and versioning requirements above. Unmanagedness alone does not guarantee this layout, a minimum enum size, or the absence of reconstruction. Generic cases and external structs may still require typed slots.
 
-#### Possible Unsafe Packing Opt-in
+#### Possible Checked Packing Opt-in
 
-We should consider an explicitly unsafe opt-in allowing an author to assert that selected payload types will remain unmanaged and have a specified byte size. This could use attributes on the consuming enum or individual case parameters, potentially in combination with the `unsafe` keyword. An annotation on a supplying type would instead express a broader contract by that type's author. The exact syntax, attribute placement, and interaction with unsafe contexts remain design questions; this proposal does not select an attribute name or extend the grammar for it.
+We should consider a compiler-recognized attribute allowing a struct author to assert that the type will remain unmanaged and have a specified byte size. For example, using illustrative syntax:
 
-The compiler would first check that an asserted type satisfies the ordinary C# unmanaged rules at compilation. It could also check the size assertion when that size is statically known. The assertion would permit the implementation to place values of the type in unmanaged storage, introducing a dependency on that type's layout contract. It would not promise a particular layout for the enum itself.
+```csharp
+// Defined by a referenced library:
+[Unmanaged(size: 8)]
+public readonly record struct Point(int X, int Y);
 
-The compiler would emit validation in the enum's static constructor, once per constructed enum type, before any generated operation relies on those assumptions. Validation must check both that `RuntimeHelpers.IsReferenceOrContainsReferences<T>()` is false and that the runtime managed size, obtainable through `Unsafe.SizeOf<T>()`, matches the asserted byte size. A struct can remain unmanaged while growing beyond the reserved storage, so a reference-containment check alone is insufficient. Any additional assumptions about offsets or alignment must likewise be validated or explicitly identified as obligations of the unsafe contract. Whole-value copies can avoid depending on internal field offsets.
+// Consuming code:
+enum struct Position
+{
+    Unknown,
+    At(Point point)
+}
+```
 
-Every path that packs or reconstructs raw data must be protected, including extraction from zero-initialized values. Default values and array initialization do not execute instance constructors, so validation cannot depend solely on those constructors. Failed validation must prevent the raw operation and produce a managed exception, such as a type-initialization failure. Process termination is not required. The checks in [`MemoryMarshal.Read` and `Write`](https://github.com/dotnet/runtime/blob/main/src/libraries/System.Private.CoreLib/src/System/Runtime/InteropServices/MemoryMarshal.cs) provide an existing model: they reject reference-containing types and check buffer capacity before copying.
+The compiler must verify at compilation that an annotated type is a struct satisfying the ordinary C# unmanaged rules. A reference-containing type is an error regardless of the supplied size; the compiler does not trust the attribute as evidence of unmanagedness. It may also diagnose a size mismatch when the managed size is statically known. The attribute name and syntax remain illustrative, and whether the annotation belongs on a supplying type, a consuming enum, or an individual payload remains a design question.
 
-Complete, mandatory validation makes an incorrect assertion fail safely. Memory unsafety becomes possible if an assumption is unchecked, insufficiently checked, or its protections are bypassed. The opt-in would require explicit unsafe acknowledgment because placing values in raw storage relies on this layout contract; any obligations that validation cannot establish must be stated rather than treating the annotation as proof. An annotation must not disable the required checks or allow invalid reference representations. Tearing still does not justify reinterpreting arbitrary bits as references or using unchecked reference casts.
+For an annotation on a type, the compiler would inject checks at the beginning of its static constructor, preserving any user-written initialization. For `Point`, the generated validation would be conceptually equivalent to these members:
 
-The opt-in also makes the versioning trade-off explicit. A dependency update can cause validation of an annotated enum to fail even if its ordinary typed API would still work. The conservative default avoids introducing that hidden layout dependency. Whether this optimization is worth an additional unsafe contract remains an LDM decision supported by performance measurements.
+```csharp
+static Point()
+{
+    if (RuntimeHelpers.IsReferenceOrContainsReferences<Point>())
+        throw new InvalidOperationException("Point must not contain references.");
+
+    __ValidateSize<Point>(8);
+}
+
+private static void __ValidateSize<T>(int expectedSize) where T : struct
+{
+    if (Unsafe.SizeOf<T>() != expectedSize)
+        throw new InvalidOperationException("The unmanaged size assertion failed.");
+}
+```
+
+The size helper is illustrative compiler-generated code, rather than a proposed public API. Both checks are mandatory: a type can remain unmanaged while growing beyond the reserved storage. The checks use its actual runtime managed representation, rather than its interop marshaling size, under the ordinary static-initialization rules for each constructed type.
+
+A consuming enum that chooses raw packing must also protect every generated operation that relies on the assertion. Its static initialization must perform equivalent validation using the size recorded when the enum was compiled. Default values, array initialization, and raw copies do not ensure that the payload type's own static constructor has run. A later library version could also change or remove the annotation, or change its size from 8 to 16 and validate that new size successfully. The old consumer must still validate against its own expected size of 8 before packing or reconstructing data. Calling only the current payload type's initializer is insufficient.
+
+Failed validation must prevent the raw operation and produce a managed exception, such as a type-initialization failure. Process termination is not required. Raw copies must remain within their storage bounds. The checks in [`MemoryMarshal.Read` and `Write`](https://github.com/dotnet/runtime/blob/main/src/libraries/System.Private.CoreLib/src/System/Runtime/InteropServices/MemoryMarshal.cs) provide an existing model: they reject reference-containing types and check buffer capacity before copying.
+
+With these guarantees, the opt-in need not require `unsafe`: an incorrect assertion fails safely instead of permitting memory corruption. The annotation establishes only reference containment and total managed size; it grants no unchecked assumptions about internal field offsets, alignment, or field accessibility. The compiler can copy values opaquely, or separately establish any additional layout facts it needs. Checked reference extraction and the tearing guarantees above continue to apply.
+
+The annotation makes the versioning trade-off explicit. A dependency update can cause validation of an annotated type or consuming enum to fail even if its ordinary typed API would still work. The conservative default avoids introducing that hidden layout dependency. Neither the annotation nor its byte-size assertion promises a particular layout for the enum itself. Whether to add this optimization contract remains an LDM decision supported by performance measurements.
 
 ## 6. Pattern Matching and Behaviors
 
@@ -607,7 +640,7 @@ The distinction between `enum class` and `enum struct` allows developers to choo
 - Inline storage, no heap allocation
 - The conservative strategy preserves type and memory safety, including during torn reads and writes
 - Sharing mixed case storage can require packing and reconstruction through non-boxing accessors
-- Complete unmanaged cases may overlap when their layout assumptions can be established safely; external layout assertions would require the proposed unsafe opt-in
+- Complete unmanaged cases may overlap when their layout assumptions can be established safely; packing external value types into raw storage would require the proposed checked opt-in
 
 ### Allocation Patterns
 
@@ -641,7 +674,7 @@ Shape enums benefit from all union optimizations:
 8. **Generic cases**: Should cases support independent generic parameters?
 9. **Interface implementation**: Should enhanced enums automatically implement `IEquatable<T>`?
 10. **Exact lowering**: Should the spec define exact names and shapes of generated types?
-11. **Unsafe packing**: Should an explicit unsafe opt-in permit assertions about payload unmanagedness and byte size, and what syntax and runtime validation should it require?
+11. **Checked packing**: Should a checked `[Unmanaged(size: ...)]` contract permit raw payload storage, and where should the annotation be placed?
 
 ## Appendix A: Grammar Changes
 
