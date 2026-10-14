@@ -151,11 +151,15 @@ These sketches describe the type relationships and use ordinary nested record co
 Ordinary enums use `Color.Red`. Data-carrying enums extend this to `E.Case(arguments)`:
 
 ```csharp
-var option = Option<int>.Some(42); // Option<int>
+var some = Option<int>.Some(42); // Option<int>.Some
+Option<int> option = some;
 option = Option<int>.None;
+
+void UseSome(Option<int>.Some value) { /* ... */ }
+UseSome(Option<int>.Some(42));
 ```
 
-A case without a parameter list is a value expression in a value context. A case with a parameter list is invoked with arguments bound under the corresponding record constructor's rules. Both forms produce an active case with the specified payload and have the enclosing enum type.
+A case without a parameter list is a value expression in a value context. A case with a parameter list is invoked with arguments bound under the corresponding record constructor's rules. Both forms produce a value of the case type.
 
 Object-creation expressions targeting a data-carrying enum or a generated case type are errors, including explicit and target-typed `new`, with or without arguments:
 
@@ -169,7 +173,7 @@ The compiler emits a marker identifying the enum, its cases, and their construct
 
 ### Contextual Construction and Inference
 
-[Target-typed static member access](https://github.com/dotnet/csharplang/blob/main/proposals/target-typed-static-member-access.md) lets the expected enum type supply the qualifier for case construction:
+[Target-typed static member access](https://github.com/dotnet/csharplang/blob/main/proposals/target-typed-static-member-access.md) lets the expected enum type supply the qualifier for case construction; the case-to-enum conversion then satisfies that context:
 
 ```csharp
 void UseInt(Option<int> value) { /* ... */ }
@@ -266,7 +270,7 @@ if (option is Option<int>.Some(var value))
 
 Payloads keep their declared types and nullability. For `Option<string?>.Some(null)`, the pattern `Option<string?>.Some(var value)` succeeds and binds `value` to null.
 
-`enum struct` case patterns require an input statically known to be the enum type; they do not establish CLR inheritance. A boxed `enum struct` is still an enum, so testing an `object` input against a case type does not extract that case. Patterns on the enum's own members inspect the enum itself.
+Patterns that extract a case from an `enum struct` require an input statically known to be that enum type; they do not establish CLR inheritance. A boxed `enum struct` is still an enum, so testing an `object` input against a case type does not extract that case. Patterns on the enum's own members inspect the enum itself.
 
 Target-typed static member access also permits `.Some(var value)` and `.None` using the pattern input type. [Type-pattern inference](https://github.com/dotnet/csharplang/blob/main/proposals/inference-for-type-patterns.md) addresses naming generic case types with omitted type arguments.
 
@@ -585,7 +589,7 @@ Should a data-carrying enum be able to declare additional instance state or cust
 
 ### Inference of Containing Type Arguments
 
-Should `Option.Some(42)` infer `Option<int>` without a target type? [Constructor-call inference](https://github.com/dotnet/csharplang/blob/main/proposals/inference-for-constructor-calls.md), tracked by [#9627](https://github.com/dotnet/csharplang/issues/9627), and the [updated proposal](https://github.com/dotnet/csharplang/pull/10312) with [type-group lookup](https://github.com/dotnet/csharplang/pull/10310) offer related machinery. Applying it to enum case syntax needs an explicit design; leading-dot access already works when context supplies the constructed enum type.
+Should `Option.Some(42)` infer the containing type `Option<int>` without a target type? [Constructor-call inference](https://github.com/dotnet/csharplang/blob/main/proposals/inference-for-constructor-calls.md), tracked by [#9627](https://github.com/dotnet/csharplang/issues/9627), and the [updated proposal](https://github.com/dotnet/csharplang/pull/10312) with [type-group lookup](https://github.com/dotnet/csharplang/pull/10310) offer related machinery. Applying it to enum case syntax needs an explicit design; leading-dot access already works when context supplies the constructed enum type.
 
 ### Unmanaged Classification
 
