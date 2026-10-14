@@ -335,6 +335,7 @@ enum struct Message<T>
     Text(string text, int code),
     Buffer(byte[] data, int offset, int count),
     Pair(string first, string second),
+    Timestamp(DateTime value),
     Values(T first, T second)
 }
 
@@ -351,6 +352,10 @@ public struct Message<T>
     private object? _reference0;
     private string? _reference1;
 
+    // DateTime has no guaranteed size or reference layout across versions.
+    // Keep Timestamp's payload in a typed slot.
+    private DateTime _timestamp;
+
     // Values needs two T slots. T may be a value type containing references.
     private T _value0;
     private T _value1;
@@ -362,6 +367,8 @@ public struct Message<T>
     }
 }
 ```
+
+`Timestamp` keeps its `DateTime` in a typed slot. Although its current implementation is unmanaged and eight bytes, `DateTime` is outside the predefined-type guarantees above. Its current representation is not a permanent layout contract, so the conservative strategy does not put it in `_unmanaged`.
 
 #### Case Conversions
 
@@ -472,6 +479,18 @@ private static void __ValidateSize<T>(int expectedSize) where T : struct
 The size helper is illustrative compiler-generated code, rather than a proposed public API. Both checks are mandatory: a type can remain unmanaged while growing beyond the reserved storage. The checks use its actual runtime managed representation, rather than its interop marshaling size, under the ordinary static-initialization rules for each constructed type.
 
 A consuming enum that chooses raw packing must also protect every generated operation that relies on the assertion. Its static initialization must perform equivalent validation using the size recorded when the enum was compiled. Default values, array initialization, and raw copies do not ensure that the payload type's own static constructor has run. A later library version could also change or remove the annotation, or change its size from 8 to 16 and validate that new size successfully. The old consumer must still validate against its own expected size of 8 before packing or reconstructing data. Calling only the current payload type's initializer is insufficient.
+
+An annotation on an individual case parameter could let a consumer make the same checked assertion about a framework type it cannot annotate directly:
+
+```csharp
+enum struct CompactMessage
+{
+    Timestamp([Unmanaged(size: 8)] DateTime value),
+    Count(long value)
+}
+```
+
+Here, `8` is `DateTime`'s current managed size, rather than a language guarantee. The compiler must verify its unmanagedness at compilation. If the enum uses raw packing, its generated static initialization must also check that `RuntimeHelpers.IsReferenceOrContainsReferences<DateTime>()` is false and that `Unsafe.SizeOf<DateTime>()` is 8 before any affected operation. These checks would permit the two cases to share an eight-byte unmanaged payload region, with the discriminator stored separately. The annotation permits that packing without requiring it; its placement on the parameter is illustrative.
 
 Failed validation must prevent the raw operation and produce a managed exception, such as a type-initialization failure. Process termination is not required. Raw copies must remain within their storage bounds. The checks in [`MemoryMarshal.Read` and `Write`](https://github.com/dotnet/runtime/blob/main/src/libraries/System.Private.CoreLib/src/System/Runtime/InteropServices/MemoryMarshal.cs) provide an existing model: they reject reference-containing types and check buffer capacity before copying.
 
