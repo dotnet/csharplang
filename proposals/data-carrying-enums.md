@@ -29,17 +29,11 @@ It consolidates design feedback from many years of repository discussions, espec
   - [#2669](https://github.com/dotnet/csharplang/discussions/2669) Feature request: Partial enums
 </details>
 
-## Declarations
+## Walkthrough
 
-A data-carrying enum declaration lists its named cases, optionally with payload parameters:
+An `Option<T>` represents either a value (`Some`) or its absence (`None`). Declare the cases together, followed by any members that operate on the enum:
 
 ```csharp
-public enum class Result
-{
-    Success(string Value),
-    Failure(int Code)
-}
-
 public enum struct Option<T>
 {
     None,
@@ -53,7 +47,36 @@ public enum struct Option<T>
 }
 ```
 
-For user-declared functionality (like `GetValueOrDefault` in the above example), this proposal builds on [Members in Enum Declarations](https://github.com/dotnet/csharplang/blob/main/proposals/enum-members.md). That proposal defines the syntax and rules for adding members. It is not required for the members that the compiler generates under this proposal.
+A method can return either case without `new`. `Some` takes its associated value as an argument, while the data-free `None` case is accessed like an ordinary enum value:
+
+```csharp
+static Option<int> ParseInt(string text)
+    => int.TryParse(text, out var value)
+        ? Option<int>.Some(value)
+        : Option<int>.None;
+```
+
+Callers can match the cases and extract their data, or use members declared on the enum:
+
+```csharp
+Option<int> result = ParseInt("42");
+
+string message = result switch
+{
+    Option<int>.Some(var value) => $"Parsed {value}",
+    Option<int>.None => "Not an integer",
+    _ => "No value"
+};
+
+Console.WriteLine(message); // Parsed 42
+Console.WriteLine(result.GetValueOrDefault(0)); // 42
+```
+
+This example uses `enum struct` for value-type semantics. [`enum class`](https://github.com/dotnet/csharplang/blob/main/proposals/data-carrying-enums.md#enum-class-translation) provides reference-type semantics with the same case declaration, construction, and pattern syntax.
+
+## Declarations
+
+For user-declared functionality (like `GetValueOrDefault` in the walkthrough), this proposal builds on [Members in Enum Declarations](https://github.com/dotnet/csharplang/blob/main/proposals/enum-members.md). That proposal defines the syntax and rules for adding members. It is not required for the members that the compiler generates under this proposal.
 
 Data-carrying enum cases use their enclosing enum's type parameters and constraints. Whether a case can declare [independent type parameters](https://github.com/dotnet/csharplang/blob/main/proposals/data-carrying-enums.md#independent-generic-case-parameters) is an open question.
 
@@ -130,95 +153,6 @@ The grammar uses the ordinary `parameter_list`. Whether to permit an [empty para
 
 Whether the semicolon between cases and members is required remains an [open question in Members in Enum Declarations](https://github.com/dotnet/csharplang/blob/main/proposals/enum-members.md#separating-values-from-members).
 
-## Type Model
-
-Each data-carrying enum case declares a public nested type that can be used like any other type. Its effective accessibility is bounded by the enclosing enum. Case types are records except in the [ref-like form](https://github.com/dotnet/csharplang/blob/main/proposals/data-carrying-enums.md#ref-like-enums). Record behavior supplies payload properties, deconstruction, and case equality. See [Construction and Case Access](https://github.com/dotnet/csharplang/blob/main/proposals/data-carrying-enums.md#construction-and-case-access) for restrictions on `new`.
-
-Data-carrying enum storage layout and switch emit are compiler implementation details. These strategies are expected to evolve with future compilers and runtime capabilities. Changes must preserve the specified API and observable semantics. No particular size, field layout, native ABI, or persistent byte representation is guaranteed. [Implementation Details](https://github.com/dotnet/csharplang/blob/main/proposals/data-carrying-enums.md#implementation-details) discusses candidate strategies.
-
-### `enum class` Translation
-
-An `enum class` is an abstract record base with a private parameterless constructor, no copy constructor, and sealed nested case records. A value holds the actual case reference:
-
-```csharp
-// Conceptual type model for Result:
-public abstract record class Result
-{
-    private Result() { }
-
-    public sealed record class Success(string Value) : Result;
-    public sealed record class Failure(int Code) : Result;
-}
-```
-
-The base has no instance state, so case copy constructors call `base()`. Only the declared cases may derive from the enum. The private constructor and sealed cases prevent external derivation, including across assembly boundaries.
-
-### `enum struct` Translation
-
-An `enum struct` stores its active case's data inline. Its case types are separate `record struct` types, with conversions between the cases and the enum:
-
-```csharp
-// Conceptual type model and simple storage for Option<T>:
-public struct Option<T>
-{
-    public record struct None;
-    public record struct Some(T Value);
-
-    private byte _discriminator;
-    private T _value; // Some's payload, when active
-
-    // Generated APIs omitted. General storage strategies are discussed later.
-}
-```
-
-These sketches describe the type relationships and use ordinary nested record constructors in emitted code. The struct case types' mutability is described under [Readonly, Copying, and `with`](https://github.com/dotnet/csharplang/blob/main/proposals/data-carrying-enums.md#readonly-copying-and-with).
-
-### Ref-Like Enums
-
-The `ref` modifier on `enum struct` makes both the enclosing enum and every generated case type a `ref struct`, including data-free cases. Payloads may therefore be ref-like types or type parameters declared with `allows ref struct`:
-
-```csharp
-public ref enum struct RefOption<T> where T : allows ref struct
-{
-    None,
-    Some(T Value)
-}
-
-Span<int> buffer = stackalloc int[16];
-RefOption<Span<int>> option = RefOption<Span<int>>.Some(buffer);
-```
-
-Its conceptual expansion uses ordinary `ref struct` types with generated payload properties and deconstruction:
-
-```csharp
-public ref struct RefOption<T> where T : allows ref struct
-{
-    public ref struct None { }
-
-    public ref struct Some
-    {
-        public T Value { get; set; }
-
-        public Some(T Value) => this.Value = Value;
-
-        public readonly void Deconstruct(out T Value) => Value = this.Value;
-    }
-
-    private byte _discriminator;
-    private T _value;
-
-    // Generated case-access APIs and metadata omitted.
-}
-```
-
-The existing [ref-safety and anti-constraint rules](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-13.0/ref-struct-interfaces.md#ref-struct-generic-parameters) apply to case construction, conversions, pattern extraction, and `TryGetValue`. Ref-like payloads remain in typed fields. Case types retain the applicable record-like payload properties, deconstruction, and copying behavior.
-
-#### Equality, Hashing, and Printing
-
-Ref-like enums and their cases do not receive synthesized record equality, hashing, or printing. The [equality and hashing rules](https://github.com/dotnet/csharplang/blob/main/proposals/data-carrying-enums.md#equality-and-hashing) below apply only to non-ref-like enums.
-
-By default, the compiler emits `Equals(object)` and `GetHashCode()` overrides that throw `NotSupportedException`, following [`Span<T>`](https://github.com/dotnet/runtime/blob/main/src/libraries/System.Private.CoreLib/src/System/Span.cs) and [`ReadOnlySpan<T>`](https://github.com/dotnet/runtime/blob/main/src/libraries/System.Private.CoreLib/src/System/ReadOnlySpan.cs). Authors provide any custom equality, hashing, or formatting on the enclosing enum, rather than on individual case types. For example, they may declare `==`/`!=` or override `ToString()`.
-
 ## Construction and Case Access
 
 An ordinary enum value can be obtained using the syntactic form `E.Case`, such as `Color.Red`. Data-carrying enums extend this syntax to `E.Case(arguments)`:
@@ -241,10 +175,6 @@ var invalid = new Option<int>.Some(42); // error
 Option<int>.Some alsoInvalid = new(42); // error
 Option<int> stillInvalid = new();       // error
 ```
-
-The compiler emits a marker identifying the enum, its cases, and their construction operations. Supporting C# compilers use it to apply these rules when consuming another assembly. The [metadata encoding](https://github.com/dotnet/csharplang/blob/main/proposals/data-carrying-enums.md#metadata-encoding) remains to be designed.
-
-The enum and its generated case types also carry a nonoptional [CompilerFeatureRequired](https://learn.microsoft.com/en-us/dotnet/api/system.runtime.compilerservices.compilerfeaturerequiredattribute) attribute with a feature name such as `"DataCarryingEnums"` (TBD). Compilers that recognize the attribute but lack feature support reject use of these types, preventing acceptance of `new E.Case(...)` that would become invalid after a compiler upgrade. To cover compilers predating the attribute, the compiler also emits an error-level `ObsoleteAttribute` compatibility guard that supporting compilers ignore, following the [required-members pattern](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-11.0/required-members.md#metadata-representation).
 
 ### Contextual Construction and Inference
 
@@ -381,6 +311,110 @@ Data-carrying enums follow the case-set policy of [open/closed enums](https://gi
 Class null references follow the ordinary nullable-reference and switch rules. Whether exhaustiveness must account for an uninitialized struct, and whether `null` should match it, remain [open questions](https://github.com/dotnet/csharplang/blob/main/proposals/data-carrying-enums.md#uninitialized-values-in-matching).
 
 Renaming or removing public cases, changing payload parameters or properties, or changing between class and struct representations affects existing APIs. Changing the designated `default` case changes the meaning of zero-initialized storage and is a behavioral breaking change. Adding a struct case can increase storage or alignment requirements. Previously compiled switches retain their normal fallback or unmatched-switch behavior for newly added cases.
+
+## Type Model
+
+Each data-carrying enum case declares a public nested type that can be used like any other type. Its effective accessibility is bounded by the enclosing enum. Case types are records except in the [ref-like form](https://github.com/dotnet/csharplang/blob/main/proposals/data-carrying-enums.md#ref-like-enums). Record behavior supplies payload properties, deconstruction, and case equality. See [Construction and Case Access](https://github.com/dotnet/csharplang/blob/main/proposals/data-carrying-enums.md#construction-and-case-access) for restrictions on `new`.
+
+Data-carrying enum storage layout and switch emit are compiler implementation details. These strategies are expected to evolve with future compilers and runtime capabilities. Changes must preserve the specified API and observable semantics. No particular size, field layout, native ABI, or persistent byte representation is guaranteed. [Implementation Details](https://github.com/dotnet/csharplang/blob/main/proposals/data-carrying-enums.md#implementation-details) discusses candidate strategies.
+
+### `enum class` Translation
+
+An `enum class` is an abstract record base with a private parameterless constructor, no copy constructor, and sealed nested case records. A value holds the actual case reference. For example:
+
+```csharp
+public enum class Result
+{
+    Success(string Value),
+    Failure(int Code)
+}
+```
+
+Its conceptual type model is:
+
+```csharp
+public abstract record class Result
+{
+    private Result() { }
+
+    public sealed record class Success(string Value) : Result;
+    public sealed record class Failure(int Code) : Result;
+}
+```
+
+The base has no instance state, so case copy constructors call `base()`. Only the declared cases may derive from the enum. The private constructor and sealed cases prevent external derivation, including across assembly boundaries.
+
+### `enum struct` Translation
+
+An `enum struct` stores its active case's data inline. Its case types are separate `record struct` types, with conversions between the cases and the enum:
+
+```csharp
+// Conceptual type model and simple storage for Option<T>:
+public struct Option<T>
+{
+    public record struct None;
+    public record struct Some(T Value);
+
+    private byte _discriminator;
+    private T _value; // Some's payload, when active
+
+    // Generated APIs omitted. General storage strategies are discussed later.
+}
+```
+
+These sketches describe the type relationships and use ordinary nested record constructors in emitted code. The struct case types' mutability is described under [Readonly, Copying, and `with`](https://github.com/dotnet/csharplang/blob/main/proposals/data-carrying-enums.md#readonly-copying-and-with).
+
+### Ref-Like Enums
+
+The `ref` modifier on `enum struct` makes both the enclosing enum and every generated case type a `ref struct`, including data-free cases. Payloads may therefore be ref-like types or type parameters declared with `allows ref struct`:
+
+```csharp
+public ref enum struct RefOption<T> where T : allows ref struct
+{
+    None,
+    Some(T Value)
+}
+
+Span<int> buffer = stackalloc int[16];
+RefOption<Span<int>> option = RefOption<Span<int>>.Some(buffer);
+```
+
+Its conceptual expansion uses ordinary `ref struct` types with generated payload properties and deconstruction:
+
+```csharp
+public ref struct RefOption<T> where T : allows ref struct
+{
+    public ref struct None { }
+
+    public ref struct Some
+    {
+        public T Value { get; set; }
+
+        public Some(T Value) => this.Value = Value;
+
+        public readonly void Deconstruct(out T Value) => Value = this.Value;
+    }
+
+    private byte _discriminator;
+    private T _value;
+
+    // Generated case-access APIs and metadata omitted.
+}
+```
+
+The existing [ref-safety and anti-constraint rules](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-13.0/ref-struct-interfaces.md#ref-struct-generic-parameters) apply to case construction, conversions, pattern extraction, and `TryGetValue`. Ref-like payloads remain in typed fields. Case types retain the applicable record-like payload properties, deconstruction, and copying behavior.
+
+#### Equality, Hashing, and Printing
+
+Ref-like enums and their cases do not receive synthesized record equality, hashing, or printing. The [equality and hashing rules](https://github.com/dotnet/csharplang/blob/main/proposals/data-carrying-enums.md#equality-and-hashing) apply only to non-ref-like enums.
+
+By default, the compiler emits `Equals(object)` and `GetHashCode()` overrides that throw `NotSupportedException`, following [`Span<T>`](https://github.com/dotnet/runtime/blob/main/src/libraries/System.Private.CoreLib/src/System/Span.cs) and [`ReadOnlySpan<T>`](https://github.com/dotnet/runtime/blob/main/src/libraries/System.Private.CoreLib/src/System/ReadOnlySpan.cs). Authors provide any custom equality, hashing, or formatting on the enclosing enum, rather than on individual case types. For example, they may declare `==`/`!=` or override `ToString()`.
+
+### Metadata and Compatibility
+
+The compiler emits a marker identifying the enum, its cases, and their construction operations. Supporting C# compilers use it to enforce the [construction rules](https://github.com/dotnet/csharplang/blob/main/proposals/data-carrying-enums.md#construction-and-case-access) when consuming another assembly. The [metadata encoding](https://github.com/dotnet/csharplang/blob/main/proposals/data-carrying-enums.md#metadata-encoding) remains to be designed.
+
+The enum and its generated case types also carry a nonoptional [CompilerFeatureRequired](https://learn.microsoft.com/en-us/dotnet/api/system.runtime.compilerservices.compilerfeaturerequiredattribute) attribute with a feature name such as `"DataCarryingEnums"` (TBD). Compilers that recognize the attribute but lack feature support reject use of these types, preventing acceptance of `new E.Case(...)` that would become invalid after a compiler upgrade. To cover compilers predating the attribute, the compiler also emits an error-level `ObsoleteAttribute` compatibility guard that supporting compilers ignore, following the [required-members pattern](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-11.0/required-members.md#metadata-representation).
 
 ## Value Semantics
 
