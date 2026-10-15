@@ -241,9 +241,7 @@ The [shared design](https://github.com/dotnet/csharplang/blob/main/proposals/dis
 
 ### Readonly, Copying, and `with`
 
-Generated reference-type cases follow record-class rules. Generated value-type cases follow record-struct rules and the containing union's readonlyness: mutable cases have `get`/`set` payload properties, while readonly cases have `get`/`init`. Whether `union struct` types should always be readonly remains an [open question](#always-readonly-union-struct-types).
-
-Assignment copies the enclosing struct shallowly. Bare unions copy a case reference. `union struct` values copy their stored payload. Extracting a struct case gives an independent value, and changing it does not update the union. Case values support the corresponding record `with` expressions.
+The [shared design](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/union-enum-common.md#readonly-copying-and-with) defines readonlyness, copying, and `with` behavior.
 
 ### Equality and Hashing
 
@@ -299,7 +297,7 @@ Should `union class` be an explicit synonym for bare `union`, as `record class` 
 
 ### Always-Readonly `union struct` Types
 
-Should `union struct` and its generated case records always be readonly, or follow the modifier-based rules in this draft?
+Should `union struct` and its generated case records always be readonly, or follow the [modifier-based rules](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/union-enum-common.md#readonly-copying-and-with) in this draft?
 
 ### Equality API Compatibility
 

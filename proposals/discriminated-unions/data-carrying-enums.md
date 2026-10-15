@@ -320,7 +320,7 @@ public struct Option<T>
 }
 ```
 
-These sketches describe the type relationships and use ordinary nested record constructors in emitted code. The struct case types' mutability is described under [Readonly, Copying, and `with`](https://github.com/dotnet/csharplang/blob/main/proposals/data-carrying-enums.md#readonly-copying-and-with).
+These sketches describe the type relationships and use ordinary nested record constructors in emitted code. The struct case types' mutability is described under [Readonly, Copying, and `with`](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/union-enum-common.md#readonly-copying-and-with).
 
 ### Metadata and Compatibility
 
@@ -332,20 +332,7 @@ Data-carrying enum cases use the familiar record rules. The enclosing enum adds 
 
 ### Readonly, Copying, and `with`
 
-`enum struct` types currently follow ordinary [`readonly struct` rules](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/structs.md#1622-struct-modifiers): an unmodified `enum struct` is mutable, and `readonly enum struct` is readonly. Generated cases have the enum's readonlyness and follow [`record struct` property rules](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-10.0/record-structs.md#properties), using `get`/`set` properties for mutable cases and `get`/`init` for readonly cases. Whether to make `enum struct` types [always readonly](https://github.com/dotnet/csharplang/blob/main/proposals/data-carrying-enums.md#always-readonly-enum-struct-types) remains open. Generated queries, extraction methods, and equality members are `readonly` instance members.
-
-Assignment follows ordinary class and struct rules and copies payloads shallowly. Extracting a struct case produces an independent value, so changing it does not update the enum:
-
-```csharp
-enum struct Progress { Waiting, Running(int Count) }
-
-Progress progress = Progress.Running(1);
-Progress.Running running = (Progress.Running)progress;
-running.Count = 2; // progress still contains Count = 1
-progress = running with { Count = 3 }; // update a case copy, then convert back
-```
-
-Case types support ordinary record `with` expressions. On an `enum class` receiver, `e with { }` clones the runtime case record, preserving case identity. On an `enum struct`, ordinary [struct `with` rules](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-10.0/record-structs.md#allow-with-expression-on-structs) copy its active case or uninitialized state. Initializers bind against the receiver's static type, so case-specific payload updates require a case-typed receiver.
+The [shared design](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/union-enum-common.md#readonly-copying-and-with) defines readonlyness, copying, and `with` behavior.
 
 ### Equality and Hashing
 
@@ -457,7 +444,7 @@ Should the `null` pattern match the uninitialized state, or should it remain spe
 
 ### Always-Readonly `enum struct` Types
 
-Should `enum struct` types and their generated case records always be readonly, or should they follow the [modifier-based rules](https://github.com/dotnet/csharplang/blob/main/proposals/data-carrying-enums.md#readonly-copying-and-with) in this draft?
+Should `enum struct` types and their generated case records always be readonly, or should they follow the [modifier-based rules](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/union-enum-common.md#readonly-copying-and-with) in this draft?
 
 ### Independent Generic Case Parameters
 

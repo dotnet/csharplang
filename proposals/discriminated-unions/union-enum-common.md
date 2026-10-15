@@ -92,3 +92,22 @@ The compiler adds a nonoptional [CompilerFeatureRequired](https://learn.microsof
 - Generated union case types, with a feature name such as `"DiscriminatedUnionCases"` (TBD).
 
 Compilers that recognize the attribute but lack feature support reject use of these types. This prevents acceptance of `new E.Case(...)` that would become invalid after a compiler upgrade. An error-level `ObsoleteAttribute` guard covers compilers predating `CompilerFeatureRequired`, following the [required-members compatibility pattern](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-11.0/required-members.md#metadata-representation). Supporting compilers ignore that guard.
+
+## Readonly, Copying, and `with`
+
+Generated reference-type cases follow record-class rules. Generated value-type cases follow the containing declaration's readonlyness and the [`record struct` property rules](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-10.0/record-structs.md#properties): mutable cases have `get`/`set` payload properties, while readonly cases have `get`/`init`.
+
+`enum struct` and `union struct` follow ordinary [`readonly struct` rules](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/structs.md#1622-struct-modifiers): unmodified declarations are mutable, and the `readonly` modifier makes them readonly. Whether to make these types always readonly remains open in the [enum-based](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/data-carrying-enums.md#always-readonly-enum-struct-types) and [union-based](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/discriminated-unions.md#always-readonly-union-struct-types) designs. Generated queries, extraction methods, and equality members on `enum struct` are `readonly` instance members.
+
+Assignment follows ordinary class and struct rules. An `enum class` assignment copies the case reference, while a bare `union` assignment copies a struct holding that reference. Assignments of `enum struct` and `union struct` values copy their stored payloads shallowly. Extracting a struct case produces an independent value, so changing it does not update the enclosing enum or union. For example:
+
+```csharp
+enum struct Progress { Waiting, Running(int Count) }
+
+Progress progress = Progress.Running(1);
+Progress.Running running = (Progress.Running)progress;
+running.Count = 2; // progress still contains Count = 1
+progress = running with { Count = 3 }; // update a case copy, then convert back
+```
+
+Generated case types support ordinary record `with` expressions. On an `enum class` receiver, `e with { }` clones the runtime case record, preserving case identity. On an `enum struct`, `union struct`, or bare `union` receiver, ordinary [struct `with` rules](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-10.0/record-structs.md#allow-with-expression-on-structs) copy the enclosing struct, preserving its active case or uninitialized state. Initializers bind against the receiver's static type, so case-specific payload updates require a case-typed receiver.
