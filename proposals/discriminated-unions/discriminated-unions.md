@@ -96,7 +96,7 @@ union Result(Result.Success, Result.Failure)
 }
 ```
 
-The generated types follow the [case-construction rules](#construction-and-case-access).
+These types are not instantiated with `new`. See [Construction and Case Access](#construction-and-case-access).
 
 Each case declares a public nested type, with effective accessibility bounded by its containing union. Cases use the containing union's type parameters and constraints. Independent case type parameters are an [open question](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/union-enum-common.md#independent-generic-case-parameters).
 
