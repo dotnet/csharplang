@@ -59,9 +59,35 @@ Data-carrying enum cases use their enclosing enum's type parameters and constrai
 
 ### Declaration Rules
 
-Data-carrying enum declarations have no [base list](https://github.com/dotnet/csharplang/blob/main/proposals/data-carrying-enums.md#deriving-enum-class-from-a-record) and cannot assign constant values to cases. An `enum struct` may designate a case with `= default`, as described under [Default Values](https://github.com/dotnet/csharplang/blob/main/proposals/data-carrying-enums.md#default-values).
+Data-carrying enum declarations may list interfaces, but cannot specify a [base class](https://github.com/dotnet/csharplang/blob/main/proposals/data-carrying-enums.md#deriving-enum-class-from-a-record). Interfaces are implemented by the enclosing type under ordinary interface-implementation rules.
+
+Cases cannot be assigned constant values. An `enum struct` may designate a case with `= default`, as described under [Default Values](https://github.com/dotnet/csharplang/blob/main/proposals/data-carrying-enums.md#default-values).
 
 User-declared members may customize generated members where ordinary record rules allow it; other conflicts with generated members or case type names are errors. Whether to permit additional instance state or custom constructors is discussed under [Additional Members](https://github.com/dotnet/csharplang/blob/main/proposals/data-carrying-enums.md#additional-members).
+
+For example, a data-carrying enum can implement [`ISpanFormattable`](https://learn.microsoft.com/en-us/dotnet/api/system.ispanformattable) to format either distance case in meters:
+
+```csharp
+public closed enum class Distance : ISpanFormattable
+{
+    Meters(double value),
+    Kilometers(double value);
+
+    private double InMeters => this switch
+    {
+        Meters(var value) => value,
+        Kilometers(var value) => value * 1000
+    };
+
+    public string ToString(string? format, IFormatProvider? formatProvider)
+        => InMeters.ToString(format, formatProvider);
+
+    public bool TryFormat(
+        Span<char> destination, out int charsWritten,
+        ReadOnlySpan<char> format = default, IFormatProvider? provider = null)
+        => InMeters.TryFormat(destination, out charsWritten, format, provider);
+}
+```
 
 ### Partial Declarations
 
@@ -76,7 +102,7 @@ The `readonly` and `ref` modifiers apply only to `enum struct` types; `closed` c
 ```antlr
 data_enum_declaration
     : attributes? data_enum_modifier* 'enum' ('class' | 'struct') identifier type_parameter_list?
-      type_parameter_constraints_clause* data_enum_body ';'?
+      (':' interface_type_list)? type_parameter_constraints_clause* data_enum_body ';'?
     ;
 
 data_enum_modifier
