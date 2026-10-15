@@ -74,6 +74,8 @@ Console.WriteLine(result.GetValueOrDefault(0)); // 42
 
 This example uses `enum struct` for value-type semantics. [`enum class`](https://github.com/dotnet/csharplang/blob/main/proposals/data-carrying-enums.md#enum-class-translation) provides reference-type semantics with the same case declaration, construction, and pattern syntax.
 
+The [contextual construction syntax extensions](https://github.com/dotnet/csharplang/blob/main/proposals/data-carrying-enums.md#contextual-construction-and-inference) would also allow `.Some(value)` and `.None` when the enum type is known from context. These forms keep code brief by avoiding repeated qualifiers such as `Option<int>`.
+
 ## Declarations
 
 For user-declared functionality (like `GetValueOrDefault` in the walkthrough), this proposal builds on [Members in Enum Declarations](https://github.com/dotnet/csharplang/blob/main/proposals/enum-members.md). That proposal defines the syntax and rules for adding members. It is not required for the members that the compiler generates under this proposal.
