@@ -41,11 +41,11 @@ Console.WriteLine(message); // Parsed 42
 Console.WriteLine(result.GetValueOrDefault(0)); // 42
 ```
 
-Unions already treat their declared case types as [exhaustive](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-15.0/unions.md#union-exhaustiveness). Designating `None` as the [`default` case](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/discriminated-unions.md#default-values) also accounts for zero-initialized values.
+Unions already treat their declared case types as [exhaustive](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-15.0/unions.md#union-exhaustiveness). Designating `None` as the [`default` case](#default-values) also accounts for zero-initialized values.
 
-The `struct` keyword selects inline storage and value-type cases. Bare [`union`](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/discriminated-unions.md#union-translation) keeps the existing object-backed struct representation and uses reference-type cases.
+The `struct` keyword selects inline storage and value-type cases. Bare [`union`](#union-translation) keeps the existing object-backed struct representation and uses reference-type cases.
 
-`Parse("42")` relies on [target-typed generic type inference](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/discriminated-unions.md#inference-from-an-assignment-target). The `.Some(...)` and `.None` forms depend on the [contextual syntax extensions](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/discriminated-unions.md#contextual-construction-and-inference), avoiding the need to repeat the enclosing union type.
+`Parse("42")` relies on [target-typed generic type inference](#inference-from-an-assignment-target). The `.Some(...)` and `.None` forms depend on the [contextual syntax extensions](#contextual-construction-and-inference), avoiding the need to repeat the enclosing union type.
 
 ## Declarations
 
@@ -78,7 +78,7 @@ union_case_declaration
 
 The `case_types` production is unchanged. A nonempty explicit type list and `case` declarations cannot occur in the same union, including across partial declarations. Omitting the type list is equivalent to writing `()`. The complete union must have at least one case type.
 
-The `ref` modifier requires `union struct`. Its [protocol implications](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/discriminated-unions.md#ref-like-unions) remain unresolved. Whether to permit an explicit `union class` synonym is an [open question](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/discriminated-unions.md#explicit-union-class-spelling).
+The `ref` modifier requires `union struct`. Its [protocol implications](#ref-like-unions) remain unresolved. Whether to permit an explicit `union class` synonym is an [open question](#explicit-union-class-spelling).
 
 ### Case Declarations
 
@@ -102,11 +102,11 @@ union Result(Result.Success, Result.Failure)
 }
 ```
 
-The expansion explains the type relationships. The generated types also have the special [case-construction rules](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/discriminated-unions.md#construction-and-case-access).
+The expansion explains the type relationships. The generated types also have the special [case-construction rules](#construction-and-case-access).
 
-Each case declares a public nested type, with effective accessibility bounded by its containing union. Cases use the containing union's type parameters and constraints. Independent case type parameters are an [open question](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/discriminated-unions.md#independent-generic-case-parameters).
+Each case declares a public nested type, with effective accessibility bounded by its containing union. Cases use the containing union's type parameters and constraints. Independent case type parameters are an [open question](#independent-generic-case-parameters).
 
-Case names must be unique and must not conflict with other members. Cases cannot specify numeric values. A `union struct` case can instead designate the [`default` case](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/discriminated-unions.md#default-values).
+Case names must be unique and must not conflict with other members. Cases cannot specify numeric values. A `union struct` case can instead designate the [`default` case](#default-values).
 
 ### Other Members and Partial Declarations
 
@@ -213,7 +213,7 @@ Null patterns and nullable analysis retain the [union rules](https://github.com/
 
 ### Exhaustiveness and Evolution
 
-The declared case set is exhaustive under the existing union rules. Any additional handling of null contents follows union nullability analysis. Whether unions should support an explicitly open case set is an [open question](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/discriminated-unions.md#open-unions).
+The declared case set is exhaustive under the existing union rules. Any additional handling of null contents follows union nullability analysis. Whether unions should support an explicitly open case set is an [open question](#open-unions).
 
 Renaming or removing public cases, changing their payloads, or changing between bare `union` and `union struct` affects public APIs. Changing the designated `default` case changes the meaning of zero-initialized storage. Adding an inline case can increase storage or alignment requirements. Previously compiled switches retain their normal fallback or unmatched-switch behavior if they encounter a new case.
 
@@ -223,7 +223,7 @@ Generated case types provide record-like payload properties, deconstruction, cop
 
 ### `union` Translation
 
-Bare `union` continues to produce an ordinary struct with one object-valued field. Its generated cases are sealed record classes, so creating a case stores its reference without a second allocation for the wrapper. The conceptual expansion under [Case Declarations](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/discriminated-unions.md#case-declarations) then uses the existing union lowering.
+Bare `union` continues to produce an ordinary struct with one object-valued field. Its generated cases are sealed record classes, so creating a case stores its reference without a second allocation for the wrapper. The conceptual expansion under [Case Declarations](#case-declarations) then uses the existing union lowering.
 
 ### `union struct` Translation
 
@@ -285,7 +285,7 @@ Ordinary [ref-safety and anti-constraint rules](https://github.com/dotnet/csharp
 
 ### Metadata and Compatibility
 
-The compiler emits metadata identifying generated case types and their construction operations. Supporting compilers use it to enforce the restriction on `new` across assembly boundaries. The encoding remains an [open question](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/discriminated-unions.md#metadata-encoding).
+The compiler emits metadata identifying generated case types and their construction operations. Supporting compilers use it to enforce the restriction on `new` across assembly boundaries. The encoding remains an [open question](#metadata-encoding).
 
 Generated case types carry nonoptional [CompilerFeatureRequired](https://learn.microsoft.com/en-us/dotnet/api/system.runtime.compilerservices.compilerfeaturerequiredattribute) metadata with a feature name such as `"DiscriminatedUnionCases"` (TBD). An error-level `ObsoleteAttribute` guard covers older compilers, following the [required-members compatibility pattern](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-11.0/required-members.md#metadata-representation). Supporting compilers ignore that guard. These restrictions target the generated cases and do not prohibit ordinary construction of the union wrapper.
 
@@ -293,7 +293,7 @@ Generated case types carry nonoptional [CompilerFeatureRequired](https://learn.m
 
 ### Readonly, Copying, and `with`
 
-Generated reference-type cases follow record-class rules. Generated value-type cases follow record-struct rules and the containing union's readonlyness: mutable cases have `get`/`set` payload properties, while readonly cases have `get`/`init`. Whether inline forms should always be readonly remains an [open question](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/discriminated-unions.md#always-readonly-inline-unions).
+Generated reference-type cases follow record-class rules. Generated value-type cases follow record-struct rules and the containing union's readonlyness: mutable cases have `get`/`set` payload properties, while readonly cases have `get`/`init`. Whether inline forms should always be readonly remains an [open question](#always-readonly-inline-unions).
 
 Assignment copies the enclosing struct shallowly. Bare unions copy a case reference. Inline unions copy their stored payload. Extracting a struct case gives an independent value, and changing it does not update the union. A case-typed receiver supports ordinary record `with` expressions. A union-typed receiver follows ordinary struct `with` rules, whose initializers bind against the union's members rather than its contained case.
 
@@ -301,7 +301,7 @@ Assignment copies the enclosing struct shallowly. Bare unions copy a case refere
 
 Current union declarations inherit `Equals(object)` and `GetHashCode()` from `System.ValueType`. Because they contain one object field, equality already compares that field using the contained value's equality. They do not generate a strongly typed `Equals` or implement `IEquatable<U>`.
 
-We propose generating `IEquatable<U>`, a strongly typed `Equals(U)`, and overrides of `Equals(object)` and `GetHashCode()` for non-ref-like union declarations, including existing type-list declarations. The synthesized `Equals(object)` checks the union type and delegates to the typed implementation. This gives an efficient implementation without relying on runtime field inspection or boxing the union for typed equality. The [public shape of the typed member](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/discriminated-unions.md#equality-api-compatibility) remains a compatibility question.
+We propose generating `IEquatable<U>`, a strongly typed `Equals(U)`, and overrides of `Equals(object)` and `GetHashCode()` for non-ref-like union declarations, including existing type-list declarations. The synthesized `Equals(object)` checks the union type and delegates to the typed implementation. This gives an efficient implementation without relying on runtime field inspection or boxing the union for typed equality. The [public shape of the typed member](#equality-api-compatibility) remains a compatibility question.
 
 Bare unions with user-defined equality or hashing members, or a user-provided `IEquatable<U>` implementation, retain their existing behavior without default equality synthesis. An inline union that customizes equality must provide `Equals(U)`, `Equals(object)`, and `GetHashCode()` together. An explicit `IEquatable<U>.Equals` implementation can supply the typed member. Incomplete customization is an error, so inline equality never falls back to comparing implementation storage.
 
@@ -451,7 +451,7 @@ We recommend disallowing empty parameter lists in case declarations and requirin
 
 We do not expect `Option.Some(42)` or `Use(.Some(42))`, for `Use<T>(Option<T> value)`, to work under the current drafts. The former needs lookup and inference of the containing type's omitted arguments. The latter needs case lookup on a partially inferred target and bounds from the case arguments. Related work includes [constructor-call inference](https://github.com/dotnet/csharplang/blob/main/proposals/inference-for-constructor-calls.md), [#9627](https://github.com/dotnet/csharplang/issues/9627), and the [revised nested-inference model](https://github.com/dotnet/csharplang/blob/madstorgersen-target-typing-proposal/proposals/target-typed-generic-type-inference.md#nested-inference).
 
-These forms differ from [inference from a known case type](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/discriminated-unions.md#inference-from-a-known-case-type): the case type is not yet available when inference needs to select it.
+These forms differ from [inference from a known case type](#inference-from-a-known-case-type): the case type is not yet available when inference needs to select it.
 
 ### Metadata Encoding
 
