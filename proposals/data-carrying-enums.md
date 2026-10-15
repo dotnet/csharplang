@@ -47,7 +47,9 @@ public enum struct Option<T>
 }
 ```
 
-Case instances are created without `new`. `Some` takes its associated value as an argument, while the data-free `None` case is accessed like an ordinary enum value:
+Case instances are created without `new`. `Some` takes its associated value as an argument, while the data-free `None` case is accessed like an ordinary enum value.
+
+For example:
 
 ```csharp
 static Option<int> ParseInt(string text)
