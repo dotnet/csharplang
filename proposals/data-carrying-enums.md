@@ -416,6 +416,16 @@ Two uninitialized values of the same `enum struct` are equal, have equal hashes,
 
 An `enum struct` follows the normal [value-type layout rules](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/structs.md#1642-value-semantics), and a [`ref enum struct`](https://github.com/dotnet/csharplang/blob/main/proposals/data-carrying-enums.md#ref-like-enums) follows the corresponding rules for `ref struct` types. Recursive payloads are permitted wherever those rules allow them.
 
+For example:
+
+```csharp
+enum struct Expr
+{
+    Number(int Value),
+    Add(Expr Left, Expr Right) // error
+}
+```
+
 ### Concurrent Access
 
 `enum struct` types follow the existing [atomicity rules for struct reads and writes](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/variables.md#96-atomicity-of-variable-references). Unsynchronized accesses may tear, observing case identity and payload from different writes. Such observations are unspecified and accessors may throw, but must preserve memory and type safety under the usual safety assumptions for payload types and user code. Neither copying nor `readonly` makes a concurrent read atomic.
