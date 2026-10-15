@@ -114,9 +114,9 @@ This already supports methods and computed properties without new enum syntax. C
 
 Should the semicolon be required, or could the final comma after the values separate them from member declarations?
 
-The semicolon gives a clear visual boundary, but does not appear necessary for parsing the permitted members. An enum value is `N` or `N = expression`; methods, properties, fields, and nested types have distinguishable declaration syntax. Instance constructors are excluded, and static constructors start with `static`.
+The semicolon gives a clear visual boundary. An enum value is `N` or `N = expression`; methods, properties, fields, and nested types have distinguishable declaration syntax. Instance constructors are excluded, and static constructors start with `static`.
 
-An alternative would require values to precede members, with a final comma after the last value:
+An alternative would require values to precede members. When both are present, a comma after the last value would be mandatory:
 
 ```csharp
 enum Color
@@ -126,5 +126,7 @@ enum Color
     public bool IsRed => this == Red;
 }
 ```
+
+The comma terminates a value initializer before any attributes on the next member. Without it, `[Foo]` following `Z = X.Y` could be parsed as element access.
 
 Member declarations would retain their ordinary syntax, with no extra separators between them. This reuses the existing comma instead of introducing a section delimiter in enum bodies. Mixed separators do have C# precedent: `for` headers use semicolons between clauses and commas within their initializer and iterator lists.
