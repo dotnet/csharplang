@@ -165,6 +165,29 @@ Span<int> buffer = stackalloc int[16];
 RefOption<Span<int>> option = RefOption<Span<int>>.Some(buffer);
 ```
 
+Its conceptual expansion uses ordinary `ref struct` types with generated payload properties and deconstruction:
+
+```csharp
+public ref struct RefOption<T> where T : allows ref struct
+{
+    public ref struct None { }
+
+    public ref struct Some
+    {
+        public T value { get; set; }
+
+        public Some(T value) => this.value = value;
+
+        public readonly void Deconstruct(out T value) => value = this.value;
+    }
+
+    private byte _discriminator;
+    private T _value;
+
+    // Generated case-access APIs and metadata omitted.
+}
+```
+
 The existing [ref-safety and anti-constraint rules](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-13.0/ref-struct-interfaces.md#ref-struct-generic-parameters) apply to case construction, conversions, pattern extraction, and `TryGetValue`. Ref-like payloads remain in typed fields; they are neither boxed nor stored as raw bytes. Case types retain the applicable record-like payload properties, deconstruction, and copying behavior.
 
 ## Construction and Case Access
