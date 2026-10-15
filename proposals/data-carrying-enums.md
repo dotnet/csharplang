@@ -440,28 +440,29 @@ Inference starting from case arguments, including `Use(.Some(42))` without anoth
 
 ### Case Access with a Known Target
 
-A known enum target supplies the qualifier before case lookup:
+We expect these forms to work with target-typed static member access and this proposal's case-construction rules:
 
 ```csharp
 Option<int> none = .None;
 Option<int> some = .Some(42);
 ```
 
-The [target-typed member binding conversion](https://github.com/dotnet/csharplang/blob/main/proposals/target-typed-static-member-access.md#basic-expression) binds `.None` as `Option<int>.None`. The [invocation target-typing conversion](https://github.com/dotnet/csharplang/blob/main/proposals/target-typed-static-member-access.md#target-typing-with-invocations) similarly binds `.Some(42)` as `Option<int>.Some(42)`. This proposal supplies the [case-construction rules](https://github.com/dotnet/csharplang/blob/main/proposals/data-carrying-enums.md#construction-and-case-access) for those qualified expressions, including their lack of `new`. Each result has its case type and then uses the [case-to-enum conversion](https://github.com/dotnet/csharplang/blob/main/proposals/data-carrying-enums.md#generated-apis-and-conversions) to satisfy the target.
+1. Each initializer has the target type `Option<int>`.
+2. The [target-typed member binding conversion](https://github.com/dotnet/csharplang/blob/main/proposals/target-typed-static-member-access.md#basic-expression) qualifies `.None` as `Option<int>.None`. The [invocation target-typing conversion](https://github.com/dotnet/csharplang/blob/main/proposals/target-typed-static-member-access.md#target-typing-with-invocations) similarly qualifies `.Some(42)` as `Option<int>.Some(42)`.
+3. Lookup finds the nested case types on the already constructed `Option<int>`. Its type arguments are known, just as they would be for lookup of a static property on that type. No inference through the nested member is needed.
+4. This proposal's [case-construction rules](https://github.com/dotnet/csharplang/blob/main/proposals/data-carrying-enums.md#construction-and-case-access) produce the corresponding case values without `new`. Each result then uses the [case-to-enum conversion](https://github.com/dotnet/csharplang/blob/main/proposals/data-carrying-enums.md#generated-apis-and-conversions) to satisfy the target.
 
-Here `None` is a nested case type. Its containing type arguments come from `Option<int>`, just as they would for lookup of a static property on that constructed type. No inference through the nested member is needed. Without a target, `var value = .None` is an error.
+Without a target, `var value = .None` is an error.
 
 ### Inference from Another Argument
 
-An argument can determine the enum target needed by another argument:
+We expect this call to work with target-typed static member access and ordinary argument inference. It needs no target-derived generic inference:
 
 ```csharp
 void Use<T>(Option<T> value, T fallback) { /* ... */ }
 
 Use(.None, 42);
 ```
-
-Binding proceeds as follows:
 
 1. Method lookup finds `Use<T>`. Type inference starts with `T` unfixed.
 2. `.None` has no independent type, so [input type inference](https://github.com/dotnet/csharpstandard/blob/alpha-v12/standard/expressions.md#12637-input-type-inferences) gathers no bound from it.
@@ -470,28 +471,25 @@ Binding proceeds as follows:
 5. The target-typed member binding conversion makes `.None` acceptable for the first parameter without using the member name to select an overload. The second argument has an identity conversion. With this sole overload, `Use<int>` is selected.
 6. The first parameter supplies the target `Option<int>`. Binding `.None` then follows the known-target lookup above, producing the case value and converting it to the enum.
 
-This example needs no target-derived generic inference. It follows the ordering described by the revised draft's [nested-inference rules](https://github.com/dotnet/csharplang/blob/madstorgersen-target-typing-proposal/proposals/target-typed-generic-type-inference.md#nested-inference): outer inference completes using independently typed arguments before supplying a resolved target to a dependent argument.
+This ordering agrees with the revised draft's [nested-inference rules](https://github.com/dotnet/csharplang/blob/madstorgersen-target-typing-proposal/proposals/target-typed-generic-type-inference.md#nested-inference).
 
 ### Inference from an Assignment Target
 
-The walkthrough's `Parse<T>(string)` has no argument from which to infer `T`:
+We expect this call to work under the revised target-typed generic inference draft. The assignment target supplies the type argument for the walkthrough's `Parse<T>(string)`:
 
 ```csharp
 Option<int> result = Parse("42");
 ```
 
-This call uses the revised target-typed generic inference draft:
-
 1. Ordinary binding cannot infer `T` from the `string` argument, so the invocation is classified as a target-dependent expression.
 2. Conversion to the assignment target `Option<int>` triggers target-aware binding of the invocation.
 3. [Upper-bound inference](https://github.com/dotnet/csharpstandard/blob/alpha-v12/standard/expressions.md#126312-upper-bound-inferences) from the target `Option<int>` to the result type `Option<T>` recurses through the invariant struct type parameter, contributing an exact bound of `int` for `T`.
 4. Fixing selects `T = int`. The `IParsable<T>` constraint is satisfied, `Parse<int>` is selected, and its result converts to `Option<int>` by identity.
-
-The body of `Parse<T>` is checked independently of inference at its call sites. Its declared return type `Option<T>` target-types the conditional expression and its branches. That is already a usable constructed type: `T` is an in-scope type parameter. Lookup finds `Option<T>.Some`, whose payload parameter accepts the `T` value from `TryParse`, or `Option<T>.None`, followed by the respective case-to-enum conversion.
+5. The generic body is checked independently of callers. Its declared return type `Option<T>` target-types the conditional branches, so their case construction follows the [known-target steps](https://github.com/dotnet/csharplang/blob/main/proposals/data-carrying-enums.md#case-access-with-a-known-target) using the in-scope `T`. The value from `TryParse` already has type `T`.
 
 ### Target-Typed Patterns and Switch Arms
 
-The pattern input and result context can supply different enum types:
+We expect these patterns and case constructions to work with target-typed static member access. The type parameters are declared on `Map`, so its body needs no generic inference:
 
 ```csharp
 closed enum class Result<T, E> { Ok(T Value), Error(E Value) }
@@ -504,7 +502,10 @@ Result<U, E> Map<T, U, E>(Result<T, E> result, Func<T, U> mapper)
     };
 ```
 
-The [target-typed pattern rules](https://github.com/dotnet/csharplang/blob/main/proposals/target-typed-static-member-access.md#pattern-matching) use the input `Result<T, E>` to qualify the pattern case names. The method's return type `Result<U, E>` target-types the switch arms and qualifies the construction expressions. The `Ok` pattern therefore extracts a `T`, while the `Ok` construction accepts the mapper's `U`. All type parameters are already declared on `Map`, so no new generic inference is needed here.
+1. The [target-typed pattern rules](https://github.com/dotnet/csharplang/blob/main/proposals/target-typed-static-member-access.md#pattern-matching) use the input `Result<T, E>` to qualify the pattern case names.
+2. The `Ok` pattern extracts a `T`, while the `Error` pattern extracts an `E`.
+3. The method's return type `Result<U, E>` target-types the switch arms and qualifies their construction expressions.
+4. `mapper(value)` supplies a `U` for `Result<U, E>.Ok`, while `error` supplies an `E` for `Result<U, E>.Error`. Each case value converts to the result enum type.
 
 [Type-pattern inference](https://github.com/dotnet/csharplang/blob/main/proposals/inference-for-type-patterns.md) separately addresses written type names with omitted generic arguments.
 
@@ -791,11 +792,11 @@ These options add substantial design surface around constructor binding, inherit
 
 ### Inference from Case Arguments
 
-Should `Option.Some(42)` infer the containing type `Option<int>` without a target type? [Constructor-call inference](https://github.com/dotnet/csharplang/blob/main/proposals/inference-for-constructor-calls.md), tracked by [#9627](https://github.com/dotnet/csharplang/issues/9627), and the [updated proposal](https://github.com/dotnet/csharplang/pull/10312) with [type-group lookup](https://github.com/dotnet/csharplang/pull/10310) offer related machinery. Applying it to enum case syntax needs an explicit design.
+We do not expect the following forms to infer their omitted type arguments under the current drafts. Each needs additional rules:
 
-We would also like `Use(.Some(42))`, for `Use<T>(Option<T> value)`, to infer `T` from the case argument. The [current nested-inference model](https://github.com/dotnet/csharplang/blob/madstorgersen-target-typing-proposal/proposals/target-typed-generic-type-inference.md#nested-inference) requires outer inference to complete before supplying a target to an inner expression that cannot bind independently. Supporting this scenario would require case lookup on a partially inferred enum type and gathering bounds from its arguments.
-
-For an `enum struct`, even `Use(Option<int>.Some(42))` cannot infer `T` under the existing rules, because method inference does not follow user-defined conversions. `Use<int>(Option<int>.Some(42))` or passing a value already typed as `Option<int>` works. Should inference also recognize this generated case-to-enum relationship?
+- `Option.Some(42)` needs lookup and inference of the containing type's omitted arguments. [Constructor-call inference](https://github.com/dotnet/csharplang/blob/main/proposals/inference-for-constructor-calls.md), tracked by [#9627](https://github.com/dotnet/csharplang/issues/9627), and the [updated proposal](https://github.com/dotnet/csharplang/pull/10312) with [type-group lookup](https://github.com/dotnet/csharplang/pull/10310) offer related machinery. Applying it to enum case syntax needs an explicit design.
+- `Use(.Some(42))`, for `Use<T>(Option<T> value)`, needs case lookup on a partially inferred enum type and gathering bounds from the case arguments. The [current nested-inference model](https://github.com/dotnet/csharplang/blob/madstorgersen-target-typing-proposal/proposals/target-typed-generic-type-inference.md#nested-inference) instead requires outer inference to complete before supplying a target to an inner expression that cannot bind independently.
+- For an `enum struct`, `Use(Option<int>.Some(42))` needs inference to recognize the generated case-to-enum relationship. Existing method inference does not follow user-defined conversions. `Use<int>(Option<int>.Some(42))` or passing a value already typed as `Option<int>` works without that addition.
 
 ### Unmanaged Classification
 
