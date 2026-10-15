@@ -2,7 +2,7 @@
 
 This proposal brings discriminated unions to C# by extending the [type-union feature](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-15.0/unions.md) with nested case declarations. Each `case` introduces a fresh type and adds it to the union's case set. Existing [union conversions](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-15.0/unions.md#union-conversions), matching, members, and exhaustiveness then apply.
 
-An [alternative approach](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/data-carrying-enums.md) builds on familiar C# enums. Both proposals can use the [shared non-boxed layout](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/non-boxed-union-enum-layout.md) when declared with `struct`.
+An [alternative approach](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/data-carrying-enums.md) builds on familiar C# enums. Both proposals can use the [shared non-boxed layout](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/union-enum-non-boxed-layout.md) when declared with `struct`.
 
 ## Example Walkthrough
 
@@ -63,7 +63,6 @@ union_declaration
 union_modifier
     : struct_modifier
     | 'partial'
-    | 'ref'
     ;
 
 union_member_declaration
@@ -78,7 +77,7 @@ union_case_declaration
 
 A union with `case` declarations must omit the parenthesized type list in every partial declaration. Allowing a type list to add existing types alongside declared cases is an [open question](#mixing-existing-types-and-declared-cases). When no type list is supplied, at least one `case` declaration is required across all partial declarations.
 
-The `ref` modifier applies only to `union struct`. Supporting [ref-like case types](#ref-like-unions) requires changes to the union pattern. Whether to permit an explicit `union class` synonym is an [open question](#explicit-union-class-spelling).
+The `ref` modifier is excluded from this proposal. A [separate proposal](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/union-enum-ref-like-types.md) explores `ref union struct` and its open design questions. Whether to permit an explicit `union class` synonym is an [open question](#explicit-union-class-spelling).
 
 ### Case Declarations
 
@@ -143,9 +142,9 @@ Whether unions with declared cases should also [restrict direct construction](#d
 
 ### Access APIs for `union struct`
 
-A non-ref-like `union struct` generates the [non-boxing access pattern](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-15.0/unions.md#non-boxing-access-members): `HasValue` and a `TryGetValue(out Case value)` overload for each case. These queries are `readonly` instance members.
+A `union struct` generates the [non-boxing access pattern](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-15.0/unions.md#non-boxing-access-members): `HasValue` and a `TryGetValue(out Case value)` overload for each case. These queries are `readonly` instance members.
 
-For generated struct cases, object-valued `Value` returns a boxed copy. Repeated reads may return different boxes, and mutating a returned box does not update the union. Bare `union` instead retains its stored object. `union struct` declarations with only a type list may need reference-backed storage to preserve existing union semantics, as discussed in the [shared layout proposal](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/non-boxed-union-enum-layout.md#scope).
+For generated struct cases, object-valued `Value` returns a boxed copy. Repeated reads may return different boxes, and mutating a returned box does not update the union. Bare `union` instead retains its stored object. `union struct` declarations with only a type list may need reference-backed storage to preserve existing union semantics, as discussed in the [shared layout proposal](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/union-enum-non-boxed-layout.md#scope).
 
 <details>
 <summary>Example: generated access API for Option&lt;T&gt;</summary>
@@ -207,7 +206,7 @@ Renaming or removing public cases, changing their payloads, or changing between 
 
 ## Type Model
 
-Generated case types provide record-like payload properties, deconstruction, copying, and equality, except in the ref-like form.
+Generated case types provide record-like payload properties, deconstruction, copying, and equality.
 
 ### `union` Translation
 
@@ -215,7 +214,7 @@ Bare `union` generates sealed record class cases and uses the [existing object-b
 
 ### `union struct` Translation
 
-The `struct` keyword selects an opinionated inline representation from the [shared layout proposal](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/non-boxed-union-enum-layout.md), which also discusses possible configuration. Generated cases are separate record structs:
+The `struct` keyword selects an opinionated inline representation from the [shared layout proposal](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/union-enum-non-boxed-layout.md), which also discusses possible configuration. Generated cases are separate record structs:
 
 ```csharp
 // Conceptual type model and simple storage for Option<T>:
@@ -233,10 +232,6 @@ public struct Option<T> : IUnion
 ```
 
 Type-list-only declarations can also use `union struct`. Their existing case types keep their declared class or struct kind.
-
-### Ref-Like Unions
-
-The [shared ref-like design](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/union-enum-common.md#ref-like-enums-and-unions) describes `ref union struct` and the changes needed to support ref-like case types.
 
 ### Metadata and Compatibility
 
@@ -256,9 +251,9 @@ Assignment copies the enclosing struct shallowly. Bare unions copy a case refere
 
 Current union declarations inherit `Equals(object)` and `GetHashCode()` from `System.ValueType`. Because they contain one object field, equality already compares that field using the contained value's equality. They do not generate a strongly typed `Equals` or implement `IEquatable<U>`.
 
-We propose generating `IEquatable<U>`, a strongly typed `Equals(U)`, and overrides of `Equals(object)` and `GetHashCode()` for non-ref-like union declarations, including existing type-list declarations. The synthesized `Equals(object)` checks the union type and delegates to the typed implementation. This gives an efficient implementation without relying on runtime field inspection or boxing the union for typed equality. The [public shape of the typed member](#equality-api-compatibility) remains a compatibility question.
+We propose generating `IEquatable<U>`, a strongly typed `Equals(U)`, and overrides of `Equals(object)` and `GetHashCode()` for union declarations, including existing type-list declarations. The synthesized `Equals(object)` checks the union type and delegates to the typed implementation. This gives an efficient implementation without relying on runtime field inspection or boxing the union for typed equality. The [public shape of the typed member](#equality-api-compatibility) remains a compatibility question.
 
-Bare unions with user-defined equality or hashing members, or a user-provided `IEquatable<U>` implementation, retain their existing behavior without default equality synthesis. A non-ref-like `union struct` that customizes equality must provide `Equals(U)`, `Equals(object)`, and `GetHashCode()` together. An explicit `IEquatable<U>.Equals` implementation can supply the typed member. Incomplete customization is an error, so equality never falls back to comparing implementation storage.
+Bare unions with user-defined equality or hashing members, or a user-provided `IEquatable<U>` implementation, retain their existing behavior without default equality synthesis. A `union struct` that customizes equality must provide `Equals(U)`, `Equals(object)`, and `GetHashCode()` together. An explicit `IEquatable<U>.Equals` implementation can supply the typed member. Incomplete customization is an error, so equality never falls back to comparing implementation storage.
 
 For declarations with generated cases, synthesized equality requires the same case and equal contents under that case's record rules. Two values with no active case are equal and are unequal to active cases. A designated `default` case participates as its ordinary case. Unused storage and padding never participate. Hashing follows the active case's equality, with equal values producing equal hashes. Hash values and combining algorithms remain implementation details.
 
@@ -266,9 +261,9 @@ For type-list-only unions, synthesis preserves the existing contained-value equa
 
 ### Recursive Payloads and Concurrent Access
 
-Bare unions can represent recursion through their reference-type cases. `union struct` declarations follow the ordinary value-type layout and ref-safety rules. A case cannot recursively contain its enclosing `union struct` by value when that would require infinite storage.
+Bare unions can represent recursion through their reference-type cases. `union struct` declarations follow the ordinary value-type layout rules. A case cannot recursively contain its enclosing `union struct` by value when that would require infinite storage.
 
-Torn accesses follow the [shared concurrency and safety requirements](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/non-boxed-union-enum-layout.md#concurrent-access-and-safety).
+Torn accesses follow the [shared concurrency and safety requirements](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/union-enum-non-boxed-layout.md#concurrent-access-and-safety).
 
 ## Contextual Construction and Inference
 

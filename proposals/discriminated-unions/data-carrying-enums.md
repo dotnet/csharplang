@@ -86,7 +86,6 @@ data_enum_modifier
     : enum_modifier
     | 'partial'
     | 'readonly'
-    | 'ref'
     | 'closed'
     ;
 
@@ -103,7 +102,7 @@ data_enum_case_declaration
     ;
 ```
 
-The `readonly` and `ref` modifiers apply only to `enum struct` types.
+The `readonly` modifier applies only to `enum struct` types. The `ref` modifier is excluded from this proposal. A [separate proposal](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/union-enum-ref-like-types.md) explores `ref enum struct` and its open design questions.
 
 The body grammar is subject to these rules: a cases-only body may have a trailing comma, and a members-only body needs no leading separator. A semicolon is required between cases and members and is permitted only when both are present. No comma is permitted immediately before it.
 
@@ -273,9 +272,9 @@ Renaming or removing public cases, changing payload parameters or properties, or
 
 ## Type Model
 
-Each data-carrying enum case declares a public nested type that can be used like any other type. Its effective accessibility is bounded by the enclosing enum. Case types are records except in the [ref-like form](https://github.com/dotnet/csharplang/blob/main/proposals/data-carrying-enums.md#ref-like-enums). Record behavior supplies payload properties, deconstruction, and case equality. See [Construction and Case Access](https://github.com/dotnet/csharplang/blob/main/proposals/data-carrying-enums.md#construction-and-case-access) for restrictions on `new`.
+Each data-carrying enum case declares a public nested type that can be used like any other type. Its effective accessibility is bounded by the enclosing enum. Case types are records. Record behavior supplies payload properties, deconstruction, and case equality. See [Construction and Case Access](https://github.com/dotnet/csharplang/blob/main/proposals/data-carrying-enums.md#construction-and-case-access) for restrictions on `new`.
 
-The type sketches below describe relationships between the enum and its cases. Storage and switch emit remain implementation details. Candidate strategies are discussed in the [shared layout proposal](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/non-boxed-union-enum-layout.md) and [Implementation Details](https://github.com/dotnet/csharplang/blob/main/proposals/data-carrying-enums.md#implementation-details).
+The type sketches below describe relationships between the enum and its cases. Storage and switch emit remain implementation details. Candidate strategies are discussed in the [shared layout proposal](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/union-enum-non-boxed-layout.md) and [Implementation Details](https://github.com/dotnet/csharplang/blob/main/proposals/data-carrying-enums.md#implementation-details).
 
 ### `enum class` Translation
 
@@ -323,10 +322,6 @@ public struct Option<T>
 
 These sketches describe the type relationships and use ordinary nested record constructors in emitted code. The struct case types' mutability is described under [Readonly, Copying, and `with`](https://github.com/dotnet/csharplang/blob/main/proposals/data-carrying-enums.md#readonly-copying-and-with).
 
-### Ref-Like Enums
-
-The [shared ref-like design](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/union-enum-common.md#ref-like-enums-and-unions) describes `ref enum struct` and its generated case types.
-
 ### Metadata and Compatibility
 
 The compiler emits a marker identifying the enum, its cases, and their construction operations. Supporting C# compilers use it to enforce the [construction rules](https://github.com/dotnet/csharplang/blob/main/proposals/data-carrying-enums.md#construction-and-case-access) when consuming another assembly. The [metadata encoding](https://github.com/dotnet/csharplang/blob/main/proposals/data-carrying-enums.md#metadata-encoding) remains to be designed.
@@ -356,8 +351,6 @@ Case types support ordinary record `with` expressions. On an `enum class` receiv
 
 ### Equality and Hashing
 
-These rules apply to non-ref-like enums.
-
 `enum class` cases use record equality, including case type identity. For active `enum struct` values, equality requires the same case and equality of the corresponding case records. Payload comparisons follow ordinary record rules, including `EqualityComparer<T>.Default`. Unused storage and padding do not participate.
 
 Both enum forms expose strongly typed `Equals`, `IEquatable<E>`, `Equals(object)`, and `==`/`!=` for the enum type `E`. Struct hashing follows the active case's record hashing and may incorporate case identity. Hash values and combining algorithms are implementation details.
@@ -366,7 +359,7 @@ Two uninitialized values of the same `enum struct` are equal, have equal hashes,
 
 ### Recursive Payloads
 
-An `enum struct` follows the normal [value-type layout rules](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/structs.md#1642-value-semantics), and a [`ref enum struct`](https://github.com/dotnet/csharplang/blob/main/proposals/data-carrying-enums.md#ref-like-enums) follows the corresponding rules for `ref struct` types. Recursive payloads are permitted wherever those rules allow them.
+An `enum struct` follows the normal [value-type layout rules](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/structs.md#1642-value-semantics). Recursive payloads are permitted wherever those rules allow them.
 
 For example:
 
@@ -380,7 +373,7 @@ enum struct Expr
 
 ### Concurrent Access
 
-`enum struct` values follow the shared layout proposal's [concurrency and safety requirements](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/non-boxed-union-enum-layout.md#concurrent-access-and-safety).
+`enum struct` values follow the shared layout proposal's [concurrency and safety requirements](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/union-enum-non-boxed-layout.md#concurrent-access-and-safety).
 
 ## Contextual Construction and Inference
 
@@ -413,7 +406,7 @@ Because the case types are sealed, the runtime can reduce these `is` tests to me
 
 #### `enum struct` Case Tests
 
-The shared layout proposal covers [case dispatch](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/non-boxed-union-enum-layout.md#case-dispatch), [current measurements](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/non-boxed-union-enum-layout.md#performance-and-current-runtime-behavior), and [runtime-recognition alternatives](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/non-boxed-union-enum-layout.md#runtime-recognition-and-alternatives).
+The shared layout proposal covers [case dispatch](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/union-enum-non-boxed-layout.md#case-dispatch), [current measurements](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/union-enum-non-boxed-layout.md#performance-and-current-runtime-behavior), and [runtime-recognition alternatives](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/union-enum-non-boxed-layout.md#runtime-recognition-and-alternatives).
 
 ## Possible Connections to Type Unions
 
@@ -448,7 +441,7 @@ The costs and choices are:
 - Union null patterns would select the open [uninitialized-null matching option](https://github.com/dotnet/csharplang/blob/main/proposals/data-carrying-enums.md#uninitialized-values-in-matching), with nullable `Value`. A designated `default` case could use non-nullable `Value`. Annotations and access members must agree.
 - Union case-type exhaustiveness must accommodate the enum's separate open/closed evolution policy.
 
-`[Union]` alone would not provide the stronger [JIT optimization contract](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/non-boxed-union-enum-layout.md#runtime-recognition-and-alternatives).
+`[Union]` alone would not provide the stronger [JIT optimization contract](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/union-enum-non-boxed-layout.md#runtime-recognition-and-alternatives).
 
 </details>
 

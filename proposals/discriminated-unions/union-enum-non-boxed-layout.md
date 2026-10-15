@@ -8,7 +8,7 @@ The layout is an implementation detail. Compilers may change it, including to us
 
 Bare `union` retains the existing object-backed struct representation. `enum class` retains its case-reference representation. Neither uses the inline storage described here.
 
-For a non-ref-like `union struct`, the union pattern's object-valued `Value` property can box a value-type case. Typed creation, `HasValue`, and `TryGetValue` avoid that access. Ref-like forms require typed storage for ref-like payloads and remain subject to ordinary ref-safety rules. The [shared ref-like design](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/union-enum-common.md#union-pattern-for-ref-like-cases) covers the unresolved `Value` requirement for `ref union struct`.
+For a `union struct`, the union pattern's object-valued `Value` property can box a value-type case. Typed creation, `HasValue`, and `TryGetValue` avoid that access. Support for ref-like values is explored in the [separate ref-like proposal](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/union-enum-ref-like-types.md).
 
 Existing type-list cases can require reference-backed or hybrid storage. For example, a struct case may overlap an interface case implemented by that struct. Preserving the [union creation-equivalence rules](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-15.0/unions.md#well-formedness) and the identity of an incoming interface reference can require retaining a box. The non-boxing goal for generated cases does not override these requirements.
 
@@ -34,11 +34,11 @@ Shared reference slots require checked extraction: a reader testing a string cas
 
 A candidate inline layout uses a discriminator and three shared pools:
 
-1. **Unmanaged data**: A byte region for the [predefined types](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/non-boxed-union-enum-layout.md#primitive-types-and-layout-assumptions) below, sized for the greatest combined requirement of any case, including padding and alignment. Cases share the region, with distinct locations for components within each case.
+1. **Unmanaged data**: A byte region for the [predefined types](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/union-enum-non-boxed-layout.md#primitive-types-and-layout-assumptions) below, sized for the greatest combined requirement of any case, including padding and alignment. Cases share the region, with distinct locations for components within each case.
 2. **Managed references**: Enough slots for the case containing the most references. A slot is normally `object`, but can be more specific when that type accommodates every value assigned to it, such as a slot used only for strings.
 3. **Typed values**: Slots for arbitrary value types and type parameters not known to be reference types. Each type needs enough slots for its maximum count in any case. Distinct types cannot generally share a slot. Reference-constrained type parameters can use the reference pool.
 
-Compatibility of a container's own unmanaged classification is an [open question](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/non-boxed-union-enum-layout.md#unmanaged-classification).
+Compatibility of a container's own unmanaged classification is an [open question](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/union-enum-non-boxed-layout.md#unmanaged-classification).
 
 A `struct` constraint does not rule out references. Even `where T : unmanaged` need not provide a declaration-time byte size, so such parameters can remain in typed slots. The pool maxima can come from different cases, making their combined size greater than any individual case.
 
@@ -58,7 +58,7 @@ These require no annotation and describe managed storage, rather than interop ma
 
 ### External Types and Decomposition
 
-In the conservative layout, structs from referenced assemblies remain opaque typed values. The runtime determines their size and GC layout, keeping storage safe if a dependency grows or acquires references. Compile-time `unmanaged` classification is insufficient: C# enforces that constraint but the [CLR does not](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-7.3/blittable.md#detailed-design). Recompilation against a reference-containing definition rejects an unmanaged-constrained use. Replacing a binary dependency need not reject the instantiation. The [checked packing opt-in](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/non-boxed-union-enum-layout.md#possible-checked-packing-opt-in) could permit raw storage for such types.
+In the conservative layout, structs from referenced assemblies remain opaque typed values. The runtime determines their size and GC layout, keeping storage safe if a dependency grows or acquires references. Compile-time `unmanaged` classification is insufficient: C# enforces that constraint but the [CLR does not](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-7.3/blittable.md#detailed-design). Recompilation against a reference-containing definition rejects an unmanaged-constrained use. Replacing a binary dependency need not reject the instantiation. The [checked packing opt-in](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/union-enum-non-boxed-layout.md#possible-checked-packing-opt-in) could permit raw storage for such types.
 
 The compiler can arrange generated cases' declared payload components directly. Decomposing a nested user struct must preserve all value state without invoking user getters, setters, or constructors, and respect accessibility, safety, and supported versioning. Otherwise it remains typed. Being in the current assembly is insufficient when layout dependencies cross assembly boundaries.
 
