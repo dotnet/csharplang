@@ -36,14 +36,14 @@ A data-carrying enum declaration lists its named cases, optionally with payload 
 ```csharp
 public enum class Result
 {
-    Success(string value),
-    Failure(int code)
+    Success(string Value),
+    Failure(int Code)
 }
 
 public enum struct Option<T>
 {
     None,
-    Some(T value);
+    Some(T Value);
 
     public T GetValueOrDefault(T fallback) => this switch
     {
@@ -70,8 +70,8 @@ For example, a data-carrying enum can implement [`ISpanFormattable`](https://lea
 ```csharp
 public closed enum class Distance : ISpanFormattable
 {
-    Meters(double value),
-    Kilometers(double value);
+    Meters(double Value),
+    Kilometers(double Value);
 
     private double InMeters => this switch
     {
@@ -147,8 +147,8 @@ public abstract record class Result
 {
     private Result() { }
 
-    public sealed record class Success(string value) : Result;
-    public sealed record class Failure(int code) : Result;
+    public sealed record class Success(string Value) : Result;
+    public sealed record class Failure(int Code) : Result;
 }
 ```
 
@@ -163,7 +163,7 @@ An `enum struct` stores its active case's data inline. Its case types are separa
 public struct Option<T>
 {
     public record struct None;
-    public record struct Some(T value);
+    public record struct Some(T Value);
 
     private byte _discriminator;
     private T _value; // Some's payload, when active
@@ -182,7 +182,7 @@ The `ref` modifier on `enum struct` makes both the enclosing enum and every gene
 public ref enum struct RefOption<T> where T : allows ref struct
 {
     None,
-    Some(T value)
+    Some(T Value)
 }
 
 Span<int> buffer = stackalloc int[16];
@@ -198,11 +198,11 @@ public ref struct RefOption<T> where T : allows ref struct
 
     public ref struct Some
     {
-        public T value { get; set; }
+        public T Value { get; set; }
 
-        public Some(T value) => this.value = value;
+        public Some(T Value) => this.Value = Value;
 
-        public readonly void Deconstruct(out T value) => value = this.value;
+        public readonly void Deconstruct(out T Value) => Value = this.Value;
     }
 
     private byte _discriminator;
@@ -262,7 +262,7 @@ Option<int> Empty() => .None;
 The same lookup applies in target-typed switch arms:
 
 ```csharp
-closed enum class Result<T, E> { Ok(T value), Error(E error) }
+closed enum class Result<T, E> { Ok(T Value), Error(E Value) }
 
 Result<U, E> Map<T, U, E>(Result<T, E> result, Func<T, U> mapper) => result switch
 {
@@ -300,7 +300,7 @@ Public signatures for the earlier `Option<T>` (bodies, storage, and ordinary rec
 public struct Option<T>
 {
     public record struct None;
-    public record struct Some(T value);
+    public record struct Some(T Value);
 
     public readonly bool IsNone { get; }
     public readonly bool IsSome { get; }
@@ -339,7 +339,7 @@ An `enum struct` may designate at most one case with `= default`, with or withou
 enum struct Option<T>
 {
     None = default,
-    Some(T value)
+    Some(T Value)
 }
 
 Option<int> option = default;
@@ -349,7 +349,7 @@ bool hasValue = option.HasValue;          // true
 enum struct Measurement
 {
     Missing,
-    Reading(double value, string? unit) = default
+    Reading(double Value, string? Unit) = default
 }
 
 Measurement measurement = default;
@@ -394,12 +394,12 @@ Data-carrying enum cases use the familiar record rules. The enclosing enum adds 
 Assignment follows ordinary class and struct rules and copies payloads shallowly. Extracting a struct case produces an independent value, so changing it does not update the enum:
 
 ```csharp
-enum struct Progress { Waiting, Running(int count) }
+enum struct Progress { Waiting, Running(int Count) }
 
 Progress progress = Progress.Running(1);
 Progress.Running running = (Progress.Running)progress;
-running.count = 2; // progress still contains count = 1
-progress = running with { count = 3 }; // update a case copy, then convert back
+running.Count = 2; // progress still contains Count = 1
+progress = running with { Count = 3 }; // update a case copy, then convert back
 ```
 
 Case types support ordinary record `with` expressions. On an `enum class` receiver, `e with { }` clones the runtime case record, preserving case identity. On an `enum struct`, ordinary [struct `with` rules](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-10.0/record-structs.md#allow-with-expression-on-structs) copy its active case or uninitialized state. Initializers bind against the receiver's static type, so case-specific payload updates require a case-typed receiver.
@@ -419,8 +419,8 @@ Two uninitialized values of the same `enum struct` are equal, have equal hashes,
 ```csharp
 enum struct Expr
 {
-    Number(int value),
-    Add(Expr left, Expr right) // error
+    Number(int Value),
+    Add(Expr Left, Expr Right) // error
 }
 ```
 
@@ -489,11 +489,11 @@ Unmanagedness alone does not establish byte layout. Raw packing must account for
 ```csharp
 enum struct Message<T>
 {
-    Text(string text, int code),
-    Buffer(byte[] data, int offset, int count),
-    Pair(string first, string second),
-    Timestamp(DateTime value),
-    Values(T first, T second)
+    Text(string Content, int Code),
+    Buffer(byte[] Data, int Offset, int Count),
+    Pair(string First, string Second),
+    Timestamp(DateTime Value),
+    Values(T First, T Second)
 }
 
 // Candidate storage; case types and APIs omitted:
@@ -529,8 +529,8 @@ public readonly record struct Point(int X, int Y);
 // Consumer assertions can also cover unannotated external types:
 enum struct Position
 {
-    At(Point point),
-    Timestamp([Unmanaged(size: 8)] DateTime value)
+    At(Point Point),
+    Timestamp([Unmanaged(size: 8)] DateTime Value)
 }
 ```
 
@@ -579,9 +579,9 @@ For an `enum class` with cases `E.C1`, `E.C2`, and `E.C3`, compare the exact run
 ```csharp
 var __case = e;
 var __type = __case?.GetType();
-if (__type == typeof(E.C1)) { HandleC1(((E.C1)__case).value); }
-else if (__type == typeof(E.C2)) { HandleC2(((E.C2)__case).value); }
-else if (__type == typeof(E.C3)) { HandleC3(((E.C3)__case).value); }
+if (__type == typeof(E.C1)) { HandleC1(((E.C1)__case).Value); }
+else if (__type == typeof(E.C2)) { HandleC2(((E.C2)__case).Value); }
+else if (__type == typeof(E.C3)) { HandleC3(((E.C3)__case).Value); }
 ```
 
 The runtime can compare method-table pointers for exact-type tests. Distinct case identities could support a balanced tree or profile-guided ordering, and a successful comparison establishes the type for extraction.
@@ -592,9 +592,9 @@ For an `enum struct`, test case predicates before extracting the payload:
 
 ```csharp
 var __value = e;
-if (__value.IsC1) { HandleC1(((E.C1)__value).value); }
-else if (__value.IsC2) { HandleC2(((E.C2)__value).value); }
-else if (__value.IsC3) { HandleC3(((E.C3)__value).value); }
+if (__value.IsC1) { HandleC1(((E.C1)__value).Value); }
+else if (__value.IsC2) { HandleC2(((E.C2)__value).Value); }
+else if (__value.IsC3) { HandleC3(((E.C3)__value).Value); }
 ```
 
 Inlining predicates such as `IsC1 => _discriminator == 1` exposes integral comparisons:
@@ -678,7 +678,7 @@ Should `enum struct` types and their generated case records always be readonly, 
 
 ### Independent Generic Case Parameters
 
-Should a case be able to introduce its own type parameters, for example `X<T>(T value)` in a nongeneric enum?
+Should a case be able to introduce its own type parameters, for example `X<T>(T Value)` in a nongeneric enum?
 
 An `enum class` could represent this with a nested generic record deriving from the enum base: the enclosing value still holds a reference. However, `X` would describe a family of runtime types. The design would need to explain how to match or deconstruct all `X<T>` values without knowing `T`, infer the arguments, enforce constraints, and determine exhaustiveness. The [closed-hierarchy proposal](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-15.0/closed-hierarchies.md#type-parameter-restriction) currently restricts independent type parameters for this reason.
 
@@ -701,11 +701,11 @@ Parameterized cases use `N(...)` or `N(...) = default`. The former shares its pr
 An `enum class` could derive from another record with an accessible parameterless constructor, or provide arguments to its base constructor directly in the base list. A further option is an enum primary constructor whose parameters are all forwarded to the base record, with cases supplying arguments to that constructor. For example, possible future syntax could be:
 
 ```csharp
-record BaseRecord(int x);
+record BaseRecord(int X);
 
-enum class Outer(int x) : BaseRecord(x)
+enum class Outer(int X) : BaseRecord(X)
 {
-    A(int x, int y) : base(x)
+    A(int X, int Y) : base(X)
 }
 ```
 

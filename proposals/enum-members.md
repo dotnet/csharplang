@@ -43,7 +43,7 @@ For [data-carrying enums](https://github.com/dotnet/csharplang/blob/main/proposa
 public enum struct Option<T>
 {
     None,
-    Some(T value);
+    Some(T Value);
 
     public T GetValueOrDefault(T fallback) => this switch
     {
