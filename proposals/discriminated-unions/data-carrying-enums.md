@@ -103,7 +103,7 @@ data_enum_case_declaration
     ;
 ```
 
-The `readonly` and `ref` modifiers apply only to `enum struct` types. The `closed` modifier controls [case-set evolution](https://github.com/dotnet/csharplang/blob/main/proposals/data-carrying-enums.md#exhaustiveness-and-evolution).
+The `readonly` and `ref` modifiers apply only to `enum struct` types.
 
 The body grammar is subject to these rules: a cases-only body may have a trailing comma, and a members-only body needs no leading separator. A semicolon is required between cases and members and is permitted only when both are present. No comma is permitted immediately before it.
 
@@ -119,7 +119,7 @@ Data-carrying enum cases use their enclosing enum's type parameters and constrai
 
 Data-carrying enum declarations may list interfaces, but cannot specify a base class. Whether to allow [record inheritance for `enum class`](https://github.com/dotnet/csharplang/blob/main/proposals/data-carrying-enums.md#deriving-enum-class-from-a-record) remains an open question. Interfaces are implemented by the enclosing type under ordinary interface-implementation rules.
 
-Cases cannot be assigned constant values. An `enum struct` may designate a case with `= default`, as described under [Default Values](https://github.com/dotnet/csharplang/blob/main/proposals/data-carrying-enums.md#default-values).
+Cases cannot be assigned constant values.
 
 User-declared members may customize generated members where ordinary record rules allow it. Other conflicts with generated members or case type names are errors. Whether to permit additional instance state or custom constructors is discussed under [Additional Members](https://github.com/dotnet/csharplang/blob/main/proposals/data-carrying-enums.md#additional-members).
 
@@ -148,7 +148,7 @@ public closed enum class Distance : ISpanFormattable
 
 ### Partial Declarations
 
-Data-carrying enums support `partial` under the ordinary partial-type rules. Cases from all parts form one case set, with unique case names and at most one designated `default` case across the entire declaration.
+Data-carrying enums support `partial` under the ordinary partial-type rules. Cases from all parts form one case set, with unique case names.
 
 Authors can separate cases and members into different parts. A members-only part can be written as `partial enum struct Option<T> { /* members */ }`.
 
@@ -227,7 +227,7 @@ Option<int> none = Option<int>.None;   // active None
 Option<int> some = Option<int>.Some(0); // active Some with payload 0
 ```
 
-An `enum struct` may designate at most one case with `= default`, with or without payload parameters. This maps discriminator zero to that case, with each payload field receiving its type's default value in a zero-initialized enum:
+An `enum struct` may designate at most one case with `= default` across all partial declarations, with or without payload parameters. This maps discriminator zero to that case, with each payload field receiving its type's default value in a zero-initialized enum:
 
 ```csharp
 Option<int> option = default;
@@ -264,8 +264,6 @@ if (option is Option<int>.Some(var value))
 Payloads keep their declared types and nullability. For `Option<string?>.Some(null)`, the pattern `Option<string?>.Some(var value)` succeeds and binds `value` to null.
 
 Patterns that extract a case from an `enum struct` require an input statically known to be that enum type. They do not establish CLR inheritance. A boxed `enum struct` is still an enum, so testing an `object` input against a case type does not extract that case. Patterns on the enum's own members inspect the enum itself.
-
-Shorter pattern forms are discussed under [Target-Typed Patterns and Switch Arms](https://github.com/dotnet/csharplang/blob/main/proposals/data-carrying-enums.md#target-typed-patterns-and-switch-arms).
 
 ### Exhaustiveness and Evolution
 
@@ -309,7 +307,7 @@ The base has no instance state, so case copy constructors call `base()`. Only th
 
 ### `enum struct` Translation
 
-The `struct` keyword selects an opinionated inline representation described in [Non-Boxed Storage for Unions and Data-Carrying Enums](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/non-boxed-union-enum-layout.md). That proposal covers candidate storage strategies and possible configuration. Case types are separate `record struct` types, with conversions between the cases and the enum:
+The `struct` keyword selects an opinionated inline representation. Case types are separate `record struct` types, with conversions between the cases and the enum:
 
 ```csharp
 // Conceptual type model and simple storage for Option<T>:
@@ -321,7 +319,7 @@ public struct Option<T>
     private byte _discriminator;
     private T _value; // Some's payload, when active
 
-    // Generated APIs omitted. See the shared layout proposal for storage details.
+    // Generated APIs omitted.
 }
 ```
 
@@ -503,7 +501,7 @@ Result<U, E> Map<T, U, E>(Result<T, E> result, Func<T, U> mapper)
 
 ## Implementation Details
 
-The following are candidate switch translations. They may change with compiler and runtime improvements while preserving the specified API and observable behavior. Inline storage is covered by the [shared layout proposal](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/non-boxed-union-enum-layout.md).
+The following are candidate switch translations. They may change with compiler and runtime improvements while preserving the specified API and observable behavior.
 
 Data-free `enum class` cases use shared instances.
 

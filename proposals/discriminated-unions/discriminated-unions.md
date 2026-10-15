@@ -106,7 +106,7 @@ The generated types follow the [case-construction rules](#construction-and-case-
 
 Each case declares a public nested type, with effective accessibility bounded by its containing union. Cases use the containing union's type parameters and constraints. Independent case type parameters are an [open question](#independent-generic-case-parameters).
 
-Case names must be unique and must not conflict with other members. A `union struct` case can designate the [`default` case](#default-values).
+Case names must be unique and must not conflict with other members.
 
 ### User-Declared Constructors
 
@@ -145,12 +145,12 @@ Whether unions with declared cases should also [restrict direct construction](#d
 
 A non-ref-like `union struct` generates the [non-boxing access pattern](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-15.0/unions.md#non-boxing-access-members): `HasValue` and a `TryGetValue(out Case value)` overload for each case. These queries are `readonly` instance members.
 
-For generated struct cases, object-valued `Value` returns a boxed copy. Repeated reads may return different boxes, and mutating a returned box does not update the union. Bare `union` instead retains its stored object. Type-list-only inline unions may need reference-backed storage to preserve existing union semantics, as discussed in the [shared layout proposal](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/non-boxed-union-enum-layout.md#scope).
+For generated struct cases, object-valued `Value` returns a boxed copy. Repeated reads may return different boxes, and mutating a returned box does not update the union. Bare `union` instead retains its stored object. `union struct` declarations with only a type list may need reference-backed storage to preserve existing union semantics, as discussed in the [shared layout proposal](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/non-boxed-union-enum-layout.md#scope).
 
 <details>
 <summary>Example: generated access API for Option&lt;T&gt;</summary>
 
-Public signatures for the walkthrough's inline union, with storage and ordinary record members omitted:
+Public signatures for the walkthrough's `Option<T>`, with storage and ordinary record members omitted:
 
 ```csharp
 [Union]
@@ -192,7 +192,7 @@ bool isReading = measurement is Measurement.Reading(0, null); // true
 
 At most one case may be designated, across all partial declarations. Zero-initialization gives its payload fields their type defaults, without executing case constructors or applying optional parameter defaults. Explicit construction preserves the supplied payload, including non-default values. Apart from the meaning of zero, numeric discriminator values are implementation details.
 
-The designated `default` case is active even when its payload contains nulls. Accessing `Value` on a non-ref-like union returns a boxed instance of that case.
+The designated `default` case is active even when its payload contains nulls.
 
 Nullable analysis checks the designation as if each payload property were initialized with `default` of its declared type. `Reading(double Value, string Unit) = default` therefore produces a warning. Writing `= default!` suppresses these warnings without changing the payload defaults. The designation is permitted only on `union struct`.
 
@@ -229,7 +229,7 @@ public struct Option<T> : IUnion
 }
 ```
 
-The sketches use ordinary constructors to describe emitted types. Source construction of generated cases follows the rules above. Type-list-only declarations can also use `union struct`. Their existing case types keep their declared class or struct kind.
+Type-list-only declarations can also use `union struct`. Their existing case types keep their declared class or struct kind.
 
 ### Ref-Like Unions
 
@@ -298,7 +298,7 @@ For type-list-only unions, synthesis preserves the existing contained-value equa
 
 Bare unions can represent recursion through their reference-type cases. Inline and ref-like unions follow the ordinary value-type layout and ref-safety rules. An inline case cannot recursively contain its enclosing union by value when that would require infinite storage.
 
-Torn accesses follow the [shared concurrency and safety requirements](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/non-boxed-union-enum-layout.md#concurrent-access-and-safety). The compact layout must preserve memory safety independently of the discriminator.
+Torn accesses follow the [shared concurrency and safety requirements](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/non-boxed-union-enum-layout.md#concurrent-access-and-safety).
 
 ## Contextual Construction and Inference
 
@@ -381,10 +381,6 @@ Result<U, E> Map<T, U, E>(Result<T, E> result, Func<T, U> mapper)
 2. Union matching extracts a `T` or an `E` from the corresponding case.
 3. The return type `Result<U, E>` target-types the construction in each arm.
 4. The resulting case values use union conversions to satisfy that return type.
-
-## Implementation Details
-
-Inline storage and dispatch candidates are described in the [shared layout proposal](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/non-boxed-union-enum-layout.md). Optimizations must preserve the specified conversions, case matching, and access behavior.
 
 ## Open Questions
 

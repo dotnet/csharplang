@@ -189,7 +189,7 @@ else if (__value._discriminator == 2) { /* C2 body */ }
 else if (__value._discriminator == 3) { /* C3 body */ }
 ```
 
-With additional recognition, the runtime could select a dense jump table, sparse tree, or chain and eliminate redundant extraction checks. These are candidate optimizations, not guarantees about current JIT behavior. The [runtime-recognition discussion](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/non-boxed-union-enum-layout.md#runtime-recognition-and-alternatives) covers possible contracts and the API cost of exposing a discriminator.
+With additional recognition, the runtime could select a dense jump table, sparse tree, or chain and eliminate redundant extraction checks. These are candidate optimizations, not guarantees about current JIT behavior.
 
 The input must be evaluated once. Optimization must preserve guards, deconstruction, null handling, observable source ordering, and fallback behavior. For type-list unions, existing [union well-formedness](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-15.0/unions.md#well-formedness) and matching rules still apply, including when case types overlap. A storage discriminator cannot make matching depend on which creation overload was called. Reference-type cases remain references, preserving the identity of the contained object.
 
