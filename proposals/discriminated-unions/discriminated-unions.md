@@ -110,7 +110,15 @@ Case names must be unique and must not conflict with other members. A `union str
 
 ### Other Members and Partial Declarations
 
-User-declared members, implemented interfaces, and constructor restrictions follow the [existing union-declaration rules](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-15.0/unions.md#union-declarations). Generated cases introduce no additional instance state on the union beyond its case storage.
+User-declared members and implemented interfaces follow the [existing union-declaration rules](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-15.0/unions.md#union-declarations). Generated cases introduce no additional instance state on the union beyond its case storage.
+
+User-declared instance constructors must use a `this(...)` initializer to delegate, directly or indirectly, to a generated case constructor. Public single-parameter constructors are reserved for those generated constructors, which identify the union's case types. For example, the earlier `Result` could declare a parameterless constructor that selects `Failure(-1)`:
+
+```csharp
+public Result() : this(Result.Failure(-1)) { }
+```
+
+For declarations with generated cases and for `union struct` declarations, user code cannot assign to the generated `Value` property, including inside constructors. This keeps initialization within the declared case set and independent of the storage representation.
 
 Partial declarations contribute to a single case set under the ordinary partial-type rules. A part can contain only members.
 
