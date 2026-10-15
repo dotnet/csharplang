@@ -422,7 +422,7 @@ enum struct Expr
 
 ### Concurrent Access
 
-Inline enum values follow the shared layout proposal's [concurrency and safety requirements](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/non-boxed-union-enum-layout.md#concurrent-access-and-safety).
+`enum struct` values follow the shared layout proposal's [concurrency and safety requirements](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/non-boxed-union-enum-layout.md#concurrent-access-and-safety).
 
 ## Contextual Construction and Inference
 
@@ -526,7 +526,7 @@ Because the case types are sealed, the runtime can reduce these `is` tests to me
 
 #### `enum struct` Case Tests
 
-The shared layout proposal covers [inline dispatch](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/non-boxed-union-enum-layout.md#case-dispatch), [current measurements](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/non-boxed-union-enum-layout.md#performance-and-current-runtime-behavior), and [runtime-recognition alternatives](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/non-boxed-union-enum-layout.md#runtime-recognition-and-alternatives).
+The shared layout proposal covers [case dispatch](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/non-boxed-union-enum-layout.md#case-dispatch), [current measurements](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/non-boxed-union-enum-layout.md#performance-and-current-runtime-behavior), and [runtime-recognition alternatives](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/non-boxed-union-enum-layout.md#runtime-recognition-and-alternatives).
 
 ## Possible Connections to Type Unions
 

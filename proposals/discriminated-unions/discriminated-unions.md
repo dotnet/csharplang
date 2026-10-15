@@ -141,7 +141,7 @@ Result.Success alsoInvalid = new("Complete"); // error
 
 Whether unions with declared cases should also [restrict direct construction](#direct-construction-of-the-enclosing-union) remains open.
 
-### Inline Access APIs
+### Access APIs for `union struct`
 
 A non-ref-like `union struct` generates the [non-boxing access pattern](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-15.0/unions.md#non-boxing-access-members): `HasValue` and a `TryGetValue(out Case value)` overload for each case. These queries are `readonly` instance members.
 
@@ -200,7 +200,7 @@ Nullable analysis checks the designation as if each payload property were initia
 
 Whether unions should support an explicitly open case set is an [open question](#open-unions).
 
-Renaming or removing public cases, changing their payloads, or changing between bare `union` and `union struct` affects public APIs. Changing the designated `default` case changes the meaning of zero-initialized storage. Adding an inline case can increase storage or alignment requirements. Previously compiled switches retain their normal fallback or unmatched-switch behavior if they encounter a new case.
+Renaming or removing public cases, changing their payloads, or changing between bare `union` and `union struct` affects public APIs. Changing the designated `default` case changes the meaning of zero-initialized storage. Adding a case to a `union struct` can increase its storage or alignment requirements. Previously compiled switches retain their normal fallback or unmatched-switch behavior if they encounter a new case.
 
 ## Type Model
 
@@ -278,9 +278,9 @@ Generated case types carry nonoptional [CompilerFeatureRequired](https://learn.m
 
 ### Readonly, Copying, and `with`
 
-Generated reference-type cases follow record-class rules. Generated value-type cases follow record-struct rules and the containing union's readonlyness: mutable cases have `get`/`set` payload properties, while readonly cases have `get`/`init`. Whether inline forms should always be readonly remains an [open question](#always-readonly-inline-unions).
+Generated reference-type cases follow record-class rules. Generated value-type cases follow record-struct rules and the containing union's readonlyness: mutable cases have `get`/`set` payload properties, while readonly cases have `get`/`init`. Whether `union struct` types should always be readonly remains an [open question](#always-readonly-union-struct-types).
 
-Assignment copies the enclosing struct shallowly. Bare unions copy a case reference. Inline unions copy their stored payload. Extracting a struct case gives an independent value, and changing it does not update the union. Case values support the corresponding record `with` expressions.
+Assignment copies the enclosing struct shallowly. Bare unions copy a case reference. `union struct` values copy their stored payload. Extracting a struct case gives an independent value, and changing it does not update the union. Case values support the corresponding record `with` expressions.
 
 ### Equality and Hashing
 
@@ -288,7 +288,7 @@ Current union declarations inherit `Equals(object)` and `GetHashCode()` from `Sy
 
 We propose generating `IEquatable<U>`, a strongly typed `Equals(U)`, and overrides of `Equals(object)` and `GetHashCode()` for non-ref-like union declarations, including existing type-list declarations. The synthesized `Equals(object)` checks the union type and delegates to the typed implementation. This gives an efficient implementation without relying on runtime field inspection or boxing the union for typed equality. The [public shape of the typed member](#equality-api-compatibility) remains a compatibility question.
 
-Bare unions with user-defined equality or hashing members, or a user-provided `IEquatable<U>` implementation, retain their existing behavior without default equality synthesis. An inline union that customizes equality must provide `Equals(U)`, `Equals(object)`, and `GetHashCode()` together. An explicit `IEquatable<U>.Equals` implementation can supply the typed member. Incomplete customization is an error, so inline equality never falls back to comparing implementation storage.
+Bare unions with user-defined equality or hashing members, or a user-provided `IEquatable<U>` implementation, retain their existing behavior without default equality synthesis. A non-ref-like `union struct` that customizes equality must provide `Equals(U)`, `Equals(object)`, and `GetHashCode()` together. An explicit `IEquatable<U>.Equals` implementation can supply the typed member. Incomplete customization is an error, so equality never falls back to comparing implementation storage.
 
 For declarations with generated cases, synthesized equality requires the same case and equal contents under that case's record rules. Two values with no active case are equal and are unequal to active cases. A designated `default` case participates as its ordinary case. Unused storage and padding never participate. Hashing follows the active case's equality, with equal values producing equal hashes. Hash values and combining algorithms remain implementation details.
 
@@ -296,7 +296,7 @@ For type-list-only unions, synthesis preserves the existing contained-value equa
 
 ### Recursive Payloads and Concurrent Access
 
-Bare unions can represent recursion through their reference-type cases. Inline and ref-like unions follow the ordinary value-type layout and ref-safety rules. An inline case cannot recursively contain its enclosing union by value when that would require infinite storage.
+Bare unions can represent recursion through their reference-type cases. `union struct` declarations follow the ordinary value-type layout and ref-safety rules. A case cannot recursively contain its enclosing `union struct` by value when that would require infinite storage.
 
 Torn accesses follow the [shared concurrency and safety requirements](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/non-boxed-union-enum-layout.md#concurrent-access-and-safety).
 
@@ -412,7 +412,7 @@ Current unions treat their declared type set as exhaustive. Should `open union` 
 
 Should `union class` be an explicit synonym for bare `union`, as `record class` is for `record`? We would like this symmetry when adding `union struct`. However, bare `union` is itself an object-backed struct, so the word `class` would describe neither the containing CLR type nor the kind of every explicitly listed case. That potential confusion remains a reason to omit the synonym.
 
-### Always-Readonly Inline Unions
+### Always-Readonly `union struct` Types
 
 Should `union struct` and its generated case records always be readonly, or follow the modifier-based rules in this draft?
 

@@ -8,7 +8,7 @@ The layout is an implementation detail. Compilers may change it, including to us
 
 Bare `union` retains the existing object-backed struct representation. `enum class` retains its case-reference representation. Neither uses the inline storage described here.
 
-For a non-ref-like `union struct`, the union protocol's object-valued `Value` property can box an inline case. Typed creation, `HasValue`, and `TryGetValue` avoid that access. Ref-like forms require typed storage for ref-like payloads and remain subject to ordinary ref-safety rules. The union proposal separately identifies the unresolved object-valued `Value` requirement for `ref union struct`.
+For a non-ref-like `union struct`, the union protocol's object-valued `Value` property can box a value-type case. Typed creation, `HasValue`, and `TryGetValue` avoid that access. Ref-like forms require typed storage for ref-like payloads and remain subject to ordinary ref-safety rules. The union proposal separately identifies the unresolved object-valued `Value` requirement for `ref union struct`.
 
 Existing type-list cases can require reference-backed or hybrid storage. For example, a struct case may overlap an interface case implemented by that struct. Preserving the [union creation-equivalence rules](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-15.0/unions.md#well-formedness) and the identity of an incoming interface reference can require retaining a box. The non-boxing goal for generated cases does not override these requirements.
 
@@ -18,13 +18,13 @@ Packing and extraction below implement the creation and access operations define
 
 The simplest layout is a discriminator followed by a separate field for each case type. The containing struct's size is roughly the sum of all case sizes plus the discriminator and padding. Conversions can copy the selected case directly into or out of its field.
 
-Our initial expectation is that this approach would often make inline union and enum types too large to be practical. Even a handful of cases could substantially increase storage and copying costs. This assessment needs performance validation and sign-off from LDM and the runtime team. The compact layout below aims to minimize storage safely with only a small runtime cost for rearranging data during case creation and extraction.
+Our initial expectation is that this approach would often make `union struct` and `enum struct` types too large to be practical. Even a handful of cases could substantially increase storage and copying costs. This assessment needs performance validation and sign-off from LDM and the runtime team. The compact layout below aims to minimize storage safely with only a small runtime cost for rearranging data during case creation and extraction.
 
 We aim to provide a default that balances space and speed. We are also open to letting authors configure that balance, most likely through attributes, similar to existing .NET layout controls such as [StructLayout](https://learn.microsoft.com/en-us/dotnet/api/system.runtime.interopservices.structlayoutattribute). Whether to offer customization, its form and scope, and its availability in the initial feature are all undecided.
 
 ### Concurrent Access and Safety
 
-Inline union and enum values follow the existing [atomicity rules for struct reads and writes](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/variables.md#96-atomicity-of-variable-references). Unsynchronized accesses may tear, observing case identity and payload from different writes. Such observations are unspecified and accessors may throw, but must preserve memory and type safety under the usual safety assumptions for payload types and user code. Neither copying nor `readonly` makes a concurrent read atomic.
+`union struct` and `enum struct` values follow the existing [atomicity rules for struct reads and writes](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/variables.md#96-atomicity-of-variable-references). Unsynchronized accesses may tear, observing case identity and payload from different writes. Such observations are unspecified and accessors may throw, but must preserve memory and type safety under the usual safety assumptions for payload types and user code. Neither copying nor `readonly` makes a concurrent read atomic.
 
 To preserve memory safety, GC reference locations must be determined by the runtime layout independently of the discriminator, including during assignment. No location may alternate between managed references and unmanaged data, and arbitrary bits must never become references.
 
@@ -163,7 +163,7 @@ The `DateTime` assertion uses its current eight-byte managed size. The language 
 
 ## Case Dispatch
 
-An inline container can expose a case test backed by its discriminator, allowing the runtime to optimize dispatch after inlining. The enum proposal uses `IsCase` predicates and case conversions:
+A `union struct` or `enum struct` can expose a case test backed by its discriminator, allowing the runtime to optimize dispatch after inlining. The enum proposal uses `IsCase` predicates and case conversions:
 
 ```csharp
 var __value = value;
@@ -213,6 +213,6 @@ A final fallback is exposing a discriminator and emitting an integral switch, us
 
 ### Unmanaged Classification
 
-An inline union or enum's unmanaged classification is observable through constraints, pointers, and `stackalloc`, even though its physical representation is an implementation detail. What compatibility guarantee should apply when a compiler changes that representation?
+The unmanaged classification of a `union struct` or `enum struct` is observable through constraints, pointers, and `stackalloc`, even though its physical representation is an implementation detail. What compatibility guarantee should apply when a compiler changes that representation?
 
 LDM could allow classification to change in either direction, accepting potential source breaks, or require an unmanaged container to remain unmanaged when its cases, payload types, and constraints are unchanged. The latter still allows managed-to-unmanaged changes while restricting future storage choices. Changes to declared cases or payload dependencies are separate library-evolution concerns.
