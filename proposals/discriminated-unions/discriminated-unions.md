@@ -76,7 +76,7 @@ union_case_declaration
     ;
 ```
 
-A union with `case` declarations must omit the parenthesized type list in every partial declaration. The complete union must have at least one case type.
+A union with `case` declarations must omit the parenthesized type list in every partial declaration. Allowing a type list to add existing types alongside declared cases is an [open question](#mixing-existing-types-and-declared-cases). The complete union must have at least one case type.
 
 The `ref` modifier requires `union struct`. Its [protocol implications](#ref-like-unions) remain unresolved. Whether to permit an explicit `union class` synonym is an [open question](#explicit-union-class-spelling).
 
