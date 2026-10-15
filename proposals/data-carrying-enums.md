@@ -355,17 +355,7 @@ Two uninitialized values of the same `enum struct` are equal, have equal hashes,
 
 ### Recursive Payloads
 
-An `enum struct` follows the normal [value-type layout rules](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/structs.md#1642-value-semantics). Recursive payloads are permitted wherever those rules allow them.
-
-For example:
-
-```csharp
-enum struct Expr
-{
-    Number(int Value),
-    Add(Expr Left, Expr Right) // error
-}
-```
+The [shared rules for recursive payloads](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/union-enum-common.md#recursive-payloads) apply.
 
 ### Concurrent Access
 

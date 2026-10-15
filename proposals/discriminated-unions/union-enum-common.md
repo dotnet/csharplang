@@ -103,6 +103,20 @@ Nullable analysis checks a designated `default` case as if each payload property
 
 Writing `Reading(double Value, string Unit) = default!` suppresses these warnings without changing the default payload values.
 
+## Recursive Payloads
+
+Recursive payloads follow the normal [value-type layout rules](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/structs.md#1642-value-semantics). A value type cannot recursively contain itself by value when that would require infinite storage. Recursion through references is permitted.
+
+For example:
+
+```csharp
+enum struct Expr
+{
+    Number(int Value),
+    Add(Expr Left, Expr Right) // error
+}
+```
+
 ## Library Evolution
 
 Renaming or removing public cases, changing their payload parameters or properties, or changing a declaration to or from its `struct` form affects existing APIs. Changing the designated `default` case changes the meaning of zero-initialized storage and is a behavioral breaking change. Adding a case to a declaration with inline storage can increase its storage or alignment requirements. Previously compiled switches retain their normal fallback or unmatched-switch behavior if they encounter a new case.

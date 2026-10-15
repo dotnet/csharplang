@@ -255,7 +255,7 @@ For type-list-only unions, synthesis preserves the existing contained-value equa
 
 ### Recursive Payloads and Concurrent Access
 
-Bare unions can represent recursion through their reference-type cases. `union struct` declarations follow the ordinary value-type layout rules. A case cannot recursively contain its enclosing `union struct` by value when that would require infinite storage.
+The [shared rules for recursive payloads](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/union-enum-common.md#recursive-payloads) apply.
 
 Torn accesses follow the [shared concurrency and safety requirements](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/union-enum-non-boxed-layout.md#concurrent-access-and-safety).
 
@@ -269,7 +269,7 @@ Questions common to both proposals are listed in the [shared design](https://git
 
 ### Direct Construction of the Enclosing Union
 
-Should a union with declared cases prohibit explicit and target-typed object creation of the enclosing union, so users construct a case and use its union conversion? If so, the design would need to preserve constructors for union conversions and specify how user-declared constructors could still be invoked. Zero-initialization through `default` and arrays would remain possible.
+Should a union with declared cases prohibit explicit and target-typed object creation of the enclosing union, so users construct a case and use its union conversion? If so, the design would need to preserve constructors for union conversions and specify how user-declared constructors could still be invoked.
 
 ### Mixing Existing Types and Declared Cases
 
@@ -289,7 +289,7 @@ Allowing `object` in such a list would overlap every generated case. A naked typ
 
 ### Open Unions
 
-Current unions treat their declared type set as exhaustive. Should `open union` indicate that cases may be added in later versions, requiring consumers to account for future cases? The intent would be library evolution, not permission to store arbitrary unlisted types. The contract must be available to downstream compilers through metadata. The design should consider alignment with the [open/closed enum proposal](https://github.com/dotnet/csharplang/blob/main/proposals/closed-enums.md).
+Should unions have a way to indicate that their case set is non-exhaustive, for example `open union`? This would let authors add cases in later versions while requiring consumers to account for future cases. The indication must be available to downstream compilers through metadata. The design should consider alignment with the [open/closed enum proposal](https://github.com/dotnet/csharplang/blob/main/proposals/closed-enums.md).
 
 ### Explicit `union class` Spelling
 
