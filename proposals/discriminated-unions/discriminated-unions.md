@@ -143,7 +143,7 @@ var invalid = new Result.Success("Complete"); // error
 Result.Success alsoInvalid = new("Complete"); // error
 ```
 
-The enclosing union retains its existing construction operations, including `new Result(success)` and zero-initialization. Ordinary types listed in a type-list-only union retain their ordinary construction syntax.
+The enclosing union currently retains its existing construction operations, including `new Result(success)` and zero-initialization. Whether unions with declared cases should also [restrict direct construction](#direct-construction-of-the-enclosing-union) remains open. Ordinary types listed in a type-list-only union retain their ordinary construction syntax.
 
 ### Generated APIs and Conversions
 
@@ -412,6 +412,10 @@ Existing union matching already specifies how to access the contained case. Comp
 Inline storage and dispatch candidates are described in the [shared layout proposal](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/non-boxed-union-enum-layout.md). Optimizations must preserve the specified conversions, case matching, and access behavior.
 
 ## Open Questions
+
+### Direct Construction of the Enclosing Union
+
+Should a union with declared cases prohibit explicit and target-typed object creation of the enclosing union, so users construct a case and use its union conversion? If so, the design would need to preserve constructors for union conversions and specify how user-declared constructors could still be invoked. Zero-initialization through `default` and arrays would remain possible.
 
 ### Mixing Existing Types and Declared Cases
 
