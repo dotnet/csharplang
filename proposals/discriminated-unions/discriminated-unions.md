@@ -246,7 +246,9 @@ Assignment copies the enclosing struct shallowly. Bare unions copy a case refere
 
 ### Equality and Hashing
 
-For a union with declared cases, the conceptual model is a value containing one of a set of record types. The enclosing union therefore exposes record-like equality and hashing that delegate to the active case. It implements `IEquatable<U>` and provides `Equals(U)`, `Equals(object)`, `GetHashCode()`, `==`, and `!=`, with synthesis and customization following the [record-struct equality rules](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-10.0/record-structs.md#equality-members).
+Every declared case is a record, so we lift record equality and hashing to the union itself. This gives callers familiar record semantics when comparing union instances directly or using them as collection keys.
+
+The union implements `IEquatable<U>` and provides `Equals(U)`, `Equals(object)`, `GetHashCode()`, `==`, and `!=`, with synthesis and customization following the [record-struct equality rules](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-10.0/record-structs.md#equality-members).
 
 Synthesized equality requires the same case and equality of the corresponding case records. Unused storage and padding never participate. Hashing follows the active case's record hashing, with equal values producing equal hashes. Hash values and combining algorithms remain implementation details.
 
