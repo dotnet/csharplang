@@ -1,5 +1,8 @@
 # Members in Enum Declarations
 
+Champion issue: <https://github.com/dotnet/csharplang/issues/8989>
+Discussion: <https://github.com/dotnet/csharplang/discussions/8987>
+
 ## Summary
 
 Allow users to declare methods, properties, and other members inside an enum, after a semicolon separating them from the enum's values.
@@ -33,7 +36,7 @@ public enum Color
 
 ## Motivation
 
-Behavior belonging to an enum can live alongside its values and be available wherever the type is used. This follows the earlier discussion of [methods in enum declarations](https://github.com/dotnet/csharplang/discussions/8987).
+Behavior belonging to an enum can live alongside its values and be available wherever the type is used.
 
 For [data-carrying enums](https://github.com/dotnet/csharplang/blob/main/proposals/data-carrying-enums.md), these members can operate on the active case:
 
