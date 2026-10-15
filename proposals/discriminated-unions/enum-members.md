@@ -19,17 +19,18 @@ public closed enum Color
     Black,
     White;
 
-    public int ToRGB() => this switch
-    {
-        Red => 0xFF0000,
-        Green => 0x00FF00,
-        Blue => 0x0000FF,
-        Yellow => 0xFFFF00,
-        Cyan => 0x00FFFF,
-        Magenta => 0xFF00FF,
-        Black => 0x000000,
-        White => 0xFFFFFF
-    };
+    public int ToRGB()
+        => this switch
+        {
+            Red => 0xFF0000,
+            Green => 0x00FF00,
+            Blue => 0x0000FF,
+            Yellow => 0xFFFF00,
+            Cyan => 0x00FFFF,
+            Magenta => 0xFF00FF,
+            Black => 0x000000,
+            White => 0xFFFFFF
+        };
 }
 ```
 
@@ -37,7 +38,7 @@ public closed enum Color
 
 Behavior belonging to an enum can live alongside its values and be available wherever the type is used.
 
-For [data-carrying enums](https://github.com/dotnet/csharplang/blob/main/proposals/data-carrying-enums.md), these members can operate on the active case:
+For [data-carrying enums](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/data-carrying-enums.md), these members can operate on the active case:
 
 ```csharp
 public enum struct Option<T>
@@ -45,11 +46,12 @@ public enum struct Option<T>
     None,
     Some(T Value);
 
-    public T GetValueOrDefault(T fallback) => this switch
-    {
-        Some(var value) => value,
-        _ => fallback
-    };
+    public T GetValueOrDefault(T fallback)
+        => this switch
+        {
+            Some(var value) => value,
+            _ => fallback
+        };
 }
 ```
 
@@ -96,11 +98,12 @@ public static class ColorExtensions
 {
     extension(Color color)
     {
-        public int ToRGB() => color switch
-        {
-            Color.Red => 0xFF0000,
-            ...
-        };
+        public int ToRGB()
+            => color switch
+            {
+                Color.Red => 0xFF0000,
+                ...
+            };
     }
 }
 ```
