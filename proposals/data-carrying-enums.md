@@ -414,17 +414,7 @@ Two uninitialized values of the same `enum struct` are equal, have equal hashes,
 
 ### Recursive Payloads
 
-`enum struct` types obey the existing [cyclic instance-field dependency rules](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/structs.md#1642-value-semantics). A case payload cannot create a direct or indirect recursive value-type layout, regardless of the storage strategy:
-
-```csharp
-enum struct Expr
-{
-    Number(int Value),
-    Add(Expr Left, Expr Right) // error
-}
-```
-
-Using `enum class`, or introducing a class or array payload, breaks the layout dependency through reference indirection. Another value type does not itself provide indirection.
+An `enum struct` follows the normal [value-type layout rules](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/structs.md#1642-value-semantics), and a [`ref enum struct`](https://github.com/dotnet/csharplang/blob/main/proposals/data-carrying-enums.md#ref-like-enums) follows the corresponding rules for `ref struct` types. Recursive payloads are permitted wherever those rules allow them.
 
 ### Concurrent Access
 
@@ -646,23 +636,22 @@ The `DateTime` assertion uses its current eight-byte managed size. The language 
 
 ### Switch Translation
 
-Switches over data-carrying enums identify the active case before extracting its payload. The candidate translations below use a chain of exact-type tests for `enum class` or case predicates for `enum struct`, which the runtime could optimize.
+Switches over data-carrying enums identify the active case before extracting its payload. The candidate translations below use a chain of `is` tests for `enum class` or case predicates for `enum struct`, which the runtime could optimize.
 
 The input is evaluated once. Reordering tests must preserve null handling, guards, deconstruction, source ordering where observable, and the original fallback behavior. The sketches below omit those details and use distinct unguarded cases.
 
 #### `enum class` Case Tests
 
-For an `enum class` with cases `E.C1`, `E.C2`, and `E.C3`, compare the exact runtime type against each sealed case type, then extract the payload:
+For an `enum class` with cases `E.C1`, `E.C2`, and `E.C3`, use `is` to test each case type and bind the case value:
 
 ```csharp
 var __case = e;
-var __type = __case?.GetType();
-if (__type == typeof(E.C1)) { HandleC1(((E.C1)__case).Value); }
-else if (__type == typeof(E.C2)) { HandleC2(((E.C2)__case).Value); }
-else if (__type == typeof(E.C3)) { HandleC3(((E.C3)__case).Value); }
+if (__case is E.C1 c1) { HandleC1(c1.Value); }
+else if (__case is E.C2 c2) { HandleC2(c2.Value); }
+else if (__case is E.C3 c3) { HandleC3(c3.Value); }
 ```
 
-The runtime can compare method-table pointers for exact-type tests. Distinct case identities could support a balanced tree or profile-guided ordering, and a successful comparison establishes the type for extraction.
+Because the case types are sealed, the runtime can reduce these `is` tests to method-table pointer comparisons. Distinct case identities could support a balanced tree or profile-guided ordering.
 
 #### `enum struct` Case Tests
 
@@ -687,7 +676,7 @@ With additional recognition, the runtime could choose a dense jump table, sparse
 
 #### Performance and Current Runtime Behavior
 
-Local .NET 11 RC1 ARM64 checks with 16 sealed class cases and 16 struct cases found that exact-type and discriminator-predicate chains remained linear in fully optimized code and Tier 1 with dynamic PGO, even after predicate inlining.
+Earlier local .NET 11 RC1 ARM64 checks with 16 sealed class cases and 16 struct cases found that exact-type and discriminator-predicate chains remained linear in fully optimized code and Tier 1 with dynamic PGO, even after predicate inlining.
 
 Preliminary M4 Mac benchmarks indicate that linear dispatch performs well and appears sufficient through 32 cases in the tested patterns. Larger case sets may warrant better emit or JIT optimization without blocking initial implementation. Validation on x64 and other architectures, varied usage patterns and case distributions, guards, and both switch statements and expressions remains warranted.
 
