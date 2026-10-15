@@ -82,9 +82,7 @@ public closed enum class Distance : ISpanFormattable
     public string ToString(string? format, IFormatProvider? formatProvider)
         => InMeters.ToString(format, formatProvider);
 
-    public bool TryFormat(
-        Span<char> destination, out int charsWritten,
-        ReadOnlySpan<char> format = default, IFormatProvider? provider = null)
+    public bool TryFormat(Span<char> destination, out int charsWritten, ReadOnlySpan<char> format = default, IFormatProvider? provider = null)
         => InMeters.TryFormat(destination, out charsWritten, format, provider);
 }
 ```
