@@ -1,6 +1,8 @@
 # Common Design for Discriminated Unions and Data-Carrying Enums
 
-This document is not intended to be read on its own. It holds design material referenced by the [union-based discriminated-union proposal](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/discriminated-unions.md) and the [data-carrying enum proposal](https://github.com/dotnet/csharplang/blob/main/proposals/data-carrying-enums.md) to avoid repetition. Differences between the two approaches are called out where they affect the shared analysis.
+This document is not intended to be read on its own. It holds design material referenced by the [union-based discriminated-union proposal](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/discriminated-unions.md) and the [data-carrying enum proposal](https://github.com/dotnet/csharplang/blob/main/proposals/data-carrying-enums.md) to avoid repetition.
+
+This file is for design material that is identical or very nearly identical in both proposals. Any differences are called out explicitly.
 
 ## Contextual Construction and Inference
 
@@ -8,7 +10,7 @@ Qualified case construction and patterns work without target-typed access or imp
 
 [Target-typed static member access](https://github.com/dotnet/csharplang/blob/main/proposals/target-typed-static-member-access.md) defines leading-dot lookup and its conversions. [Generalized generic type inference](https://github.com/dotnet/csharplang/blob/madstorgersen-generalized-type-inference/proposals/generalized-type-inference.md) describes target-derived bounds. The [revised target-typed generic inference draft](https://github.com/dotnet/csharplang/blob/madstorgersen-target-typing-proposal/proposals/target-typed-generic-type-inference.md) specifies when binding retries with a target and how nested inference proceeds. These drafts remain in progress. The analysis below uses the revised draft's rule that successful ordinary binding takes precedence.
 
-Inference starting from case arguments, including `Use(.Some(42))` without another source for the outer type argument, remains an open question in both the [enum-based](https://github.com/dotnet/csharplang/blob/main/proposals/data-carrying-enums.md#inference-from-case-arguments) and [union-based](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/discriminated-unions.md#inference-from-case-arguments) designs.
+Inference starting from case arguments, including `Use(.Some(42))` without another source for the outer type argument, remains an [open question](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/union-enum-common.md#inference-from-case-arguments).
 
 ### Case Access with a Known Target
 
@@ -24,7 +26,7 @@ Option<int> some = .Some(42);
 3. Lookup finds the nested case types on the already constructed `Option<int>`. Its type arguments are known, just as they would be for lookup of a static property on that type. No inference through the nested member is needed.
 4. Case construction produces the corresponding case values without `new`. Each result then uses the [case-to-enum conversion](https://github.com/dotnet/csharplang/blob/main/proposals/data-carrying-enums.md#generated-apis-and-conversions) or the existing [union conversion](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-15.0/unions.md#union-conversions) to satisfy the target.
 
-Without a target, `var value = .None` is an error. The leading-dot rules need to recognize generated cases under the construction rules of the [enum-based](https://github.com/dotnet/csharplang/blob/main/proposals/data-carrying-enums.md#construction-and-case-access) and [union-based](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/discriminated-unions.md#construction-and-case-access) designs, rather than requiring a static factory with the same name as the nested type.
+Without a target, `var value = .None` is an error. The leading-dot rules need to recognize generated cases under the construction rules of the [enum-based](https://github.com/dotnet/csharplang/blob/main/proposals/data-carrying-enums.md#construction-and-case-access) and [union-based](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/discriminated-unions.md#construction-and-case-access) designs.
 
 ### Inference from Another Argument
 
@@ -47,15 +49,17 @@ This ordering agrees with the revised draft's [nested-inference rules](https://g
 
 ### Inference from a Known Case Type
 
-We expect this call to infer `T = int` for both `union` and `union struct` if [union-case type inference](https://github.com/dotnet/csharplang/pull/10355) is adopted.
+We expect this call to infer `T = int` for both `union` and `union struct` if [union-case type inference](https://github.com/dotnet/csharplang/pull/10355) is adopted. For `enum class`, ordinary inference through the case's `Option<int>` base type already supplies `T = int`.
 
-For `enum struct`, the corresponding inference remains an [open question](https://github.com/dotnet/csharplang/blob/main/proposals/data-carrying-enums.md#inference-from-case-arguments). Existing method inference does not follow its generated user-defined conversion.
+For `enum struct`, the corresponding inference remains an [open question](https://github.com/dotnet/csharplang/blob/main/proposals/data-carrying-enums.md#inference-from-a-known-case-type) because existing method inference does not follow its generated user-defined conversion.
 
 ```csharp
 void Use<T>(Option<T> value) { /* ... */ }
 
 Use(Option<int>.Some(42));
 ```
+
+For the union-based design, inference proceeds as follows:
 
 1. Qualified construction produces an `Option<int>.Some`, independently of the parameter's target type.
 2. Lower-bound inference against `Option<T>` finds the unique matching case, `Option<T>.Some`.
@@ -84,7 +88,7 @@ Result<U, E> Map<T, U, E>(Result<T, E> result, Func<T, U> mapper)
 
 ## Metadata and Compatibility
 
-The compiler emits metadata identifying generated case types and their construction operations. For data-carrying enums, it also identifies the enclosing enum. Supporting C# compilers use it to enforce the [enum-based](https://github.com/dotnet/csharplang/blob/main/proposals/data-carrying-enums.md#construction-and-case-access) and [union-based](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/discriminated-unions.md#construction-and-case-access) construction rules across assembly boundaries. The encoding remains an open question in the [enum-based](https://github.com/dotnet/csharplang/blob/main/proposals/data-carrying-enums.md#metadata-encoding) and [union-based](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/discriminated-unions.md#metadata-encoding) designs.
+The compiler emits metadata identifying generated case types and their construction operations. For data-carrying enums, it also identifies the enclosing enum. Supporting C# compilers use it to enforce the [enum-based](https://github.com/dotnet/csharplang/blob/main/proposals/data-carrying-enums.md#construction-and-case-access) and [union-based](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/discriminated-unions.md#construction-and-case-access) construction rules across assembly boundaries. The [encoding](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/union-enum-common.md#metadata-encoding) remains an open question.
 
 The compiler adds a nonoptional [CompilerFeatureRequired](https://learn.microsoft.com/en-us/dotnet/api/system.runtime.compilerservices.compilerfeaturerequiredattribute) attribute to:
 
@@ -92,3 +96,44 @@ The compiler adds a nonoptional [CompilerFeatureRequired](https://learn.microsof
 - Generated union case types, with a feature name such as `"DiscriminatedUnionCases"` (TBD).
 
 Compilers that recognize the attribute but lack feature support reject use of these types. This prevents acceptance of `new E.Case(...)` that would become invalid after a compiler upgrade. An error-level `ObsoleteAttribute` guard covers compilers predating `CompilerFeatureRequired`, following the [required-members compatibility pattern](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-11.0/required-members.md#metadata-representation). Supporting compilers ignore that guard.
+
+## Nullability of Default Cases
+
+Nullable analysis checks a designated `default` case as if each payload property were initialized with `default` of its declared type. `Reading(double Value, string Unit) = default` produces a warning at the designation because zero-initialization leaves `Unit` null despite its non-nullable declaration. Declaring `string? Unit` permits that value.
+
+Writing `Reading(double Value, string Unit) = default!` suppresses these warnings without changing the default payload values.
+
+## Library Evolution
+
+Renaming or removing public cases, changing their payload parameters or properties, or changing a declaration to or from its `struct` form affects existing APIs. Changing the designated `default` case changes the meaning of zero-initialized storage and is a behavioral breaking change. Adding a case to a declaration with inline storage can increase its storage or alignment requirements. Previously compiled switches retain their normal fallback or unmatched-switch behavior if they encounter a new case.
+
+## Open Questions
+
+### Always-Readonly Struct Types
+
+Should declarations using the `struct` keyword and their generated case records always be readonly, or should authors opt in with the `readonly` modifier?
+
+### Independent Generic Case Parameters
+
+Should a case introduce its own type parameters, for example `X<T>(T Value)` in a nongeneric declaration?
+
+Reference-type cases could represent this as a family of record types. The design would need to explain how to match or deconstruct all `X<T>` values without knowing `T`, infer the arguments, enforce constraints, and determine exhaustiveness. The [closed-hierarchy proposal](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-15.0/closed-hierarchies.md#type-parameter-restriction) currently restricts independent type parameters for this reason.
+
+Inline storage cannot directly hold an arbitrary independent `T`: the enclosing type's size and GC layout must be determined without that type argument. Boxing or another form of indirection would introduce a different storage tradeoff. We should establish the need for generic cases before adding that complexity.
+
+### Empty Parameter Lists
+
+We recommend disallowing empty parameter lists in case declarations and requiring cases declared without parameters to be used without parentheses. This keeps the syntax consistent with ordinary enums: data-free cases have no parameters or parentheses, while data-carrying cases declare parameters and use parentheses for construction. Parentheses remain required when optional or `params` parameters allow zero arguments, so such calls still use `()`.
+
+### Inference from Case Arguments
+
+We do not expect the following forms to infer their omitted type arguments under the current drafts. Each needs additional rules:
+
+- `Option.Some(42)` needs lookup and inference of the containing type's omitted arguments. [Constructor-call inference](https://github.com/dotnet/csharplang/blob/main/proposals/inference-for-constructor-calls.md), tracked by [#9627](https://github.com/dotnet/csharplang/issues/9627), and the [updated proposal](https://github.com/dotnet/csharplang/pull/10312) with [type-group lookup](https://github.com/dotnet/csharplang/pull/10310) offer related machinery. Applying it to generated case syntax needs an explicit design.
+- `Use(.Some(42))`, for `Use<T>(Option<T> value)`, needs case lookup on a partially inferred target and gathering bounds from the case arguments. The [current nested-inference model](https://github.com/dotnet/csharplang/blob/madstorgersen-target-typing-proposal/proposals/target-typed-generic-type-inference.md#nested-inference) instead requires outer inference to complete before supplying a target to an inner expression that cannot bind independently.
+
+These forms differ from [inference from a known case type](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/union-enum-common.md#inference-from-a-known-case-type): the case type is not yet available when inference needs to select it.
+
+### Metadata Encoding
+
+How should metadata identify the declaration, its generated cases, and their construction operations? The attribute or other metadata form and final generated API names remain to be designed. The enum-based encoding must also describe hierarchy restrictions.

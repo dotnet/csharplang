@@ -43,7 +43,7 @@ Console.WriteLine(result.GetValueOrDefault(0)); // 42
 
 Designating `None` as the [`default` case](#default-values) accounts for zero-initialized values.
 
-The `struct` keyword selects inline storage and value-type cases. Bare [`union`](#union-translation) keeps the existing object-backed struct representation and uses reference-type cases.
+The [`struct` keyword](#union-struct-translation) selects inline storage and value-type cases. Bare [`union`](#union-translation) keeps the existing object-backed struct representation and uses reference-type cases.
 
 `Parse("42")` relies on [target-typed generic type inference](https://github.com/dotnet/csharplang/blob/madstorgersen-target-typing-proposal/proposals/target-typed-generic-type-inference.md). The `.Some(...)` and `.None` forms depend on the [contextual syntax extensions](#contextual-construction-and-inference), avoiding the need to repeat the enclosing union type.
 
@@ -103,17 +103,13 @@ union Result(Result.Success, Result.Failure)
 
 The generated types follow the [case-construction rules](#construction-and-case-access).
 
-Each case declares a public nested type, with effective accessibility bounded by its containing union. Cases use the containing union's type parameters and constraints. Independent case type parameters are an [open question](#independent-generic-case-parameters).
+Each case declares a public nested type, with effective accessibility bounded by its containing union. Cases use the containing union's type parameters and constraints. Independent case type parameters are an [open question](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/union-enum-common.md#independent-generic-case-parameters).
 
 Case names must be unique and must not conflict with other members.
 
 ### User-Declared Constructors
 
-Under the [union constructor rules](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-15.0/unions.md#union-declarations), user-declared instance constructors must use a `this(...)` initializer to delegate, directly or indirectly, to a generated case constructor. Public single-parameter constructors are reserved for those generated constructors, which identify the union's case types. For example, the earlier `Result` could declare a parameterless constructor that selects `Failure(-1)`:
-
-```csharp
-public Result() : this(Result.Failure(-1)) { }
-```
+User-declared constructors follow the [existing union constructor rules](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-15.0/unions.md#union-declarations).
 
 For declarations with generated cases and for `union struct` declarations, user code cannot assign to the generated `Value` property, including inside constructors. This keeps initialization within the declared case set and independent of the storage representation.
 
@@ -129,7 +125,7 @@ void UseSuccess(Result.Success value) { /* ... */ }
 UseSuccess(Result.Success("Complete"));
 ```
 
-A case without a parameter list is a value expression in a value context. Arguments for a parameterized case bind under the corresponding record constructor's rules. A data-free reference-type case can use a shared instance, but matching and equality depend on its case type rather than reference identity.
+A case without a parameter list is a value expression in a value context. Arguments for a parameterized case bind under the corresponding record constructor's rules.
 
 Explicit and target-typed object-creation expressions for generated case types are errors:
 
@@ -142,7 +138,7 @@ Whether unions with declared cases should also [restrict direct construction](#d
 
 ### Access APIs for `union struct`
 
-A `union struct` generates the [non-boxing access pattern](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-15.0/unions.md#non-boxing-access-members): `HasValue` and a `TryGetValue(out Case value)` overload for each case. These queries are `readonly` instance members.
+A `union struct` generates the [non-boxing access pattern](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-15.0/unions.md#non-boxing-access-members): `HasValue` and a `TryGetValue(out Case value)` overload for each case. All of these are `readonly` instance members.
 
 For generated struct cases, object-valued `Value` returns a boxed copy. Repeated reads may return different boxes, and mutating a returned box does not update the union. Bare `union` instead retains its stored object. `union struct` declarations with only a type list may need reference-backed storage to preserve existing union semantics, as discussed in the [shared layout proposal](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/union-enum-non-boxed-layout.md#scope).
 
@@ -196,13 +192,13 @@ bool isReading = measurement is Measurement.Reading(0, null); // true
 bool gotReading = measurement.TryGetValue(out Measurement.Reading reading); // true
 ```
 
-Nullable analysis checks the designation as if each payload property were initialized with `default` of its declared type. `Reading(double Value, string Unit) = default` therefore produces a warning. Writing `= default!` suppresses these warnings without changing the payload defaults. The designation is permitted only on `union struct`.
+Nullability warnings and `default!` suppression follow the [shared rules for default cases](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/union-enum-common.md#nullability-of-default-cases). The designation is permitted only on `union struct`.
 
 ### Library Evolution
 
 Whether unions should support an explicitly open case set is an [open question](#open-unions).
 
-Renaming or removing public cases, changing their payloads, or changing between bare `union` and `union struct` affects public APIs. Changing the designated `default` case changes the meaning of zero-initialized storage. Adding a case to a `union struct` can increase its storage or alignment requirements. Previously compiled switches retain their normal fallback or unmatched-switch behavior if they encounter a new case.
+The [shared library-evolution rules](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/union-enum-common.md#library-evolution) cover compatibility when declarations change.
 
 ## Type Model
 
@@ -241,7 +237,7 @@ The [shared design](https://github.com/dotnet/csharplang/blob/main/proposals/dis
 
 ### Readonly, Copying, and `with`
 
-Generated reference-type cases follow record-class rules. Generated value-type cases follow record-struct rules and the containing union's readonlyness: mutable cases have `get`/`set` payload properties, while readonly cases have `get`/`init`. Whether `union struct` types should always be readonly remains an [open question](#always-readonly-union-struct-types).
+Generated reference-type cases follow record-class rules. Generated value-type cases follow record-struct rules and the containing union's readonlyness: mutable cases have `get`/`set` payload properties, while readonly cases have `get`/`init`. Whether `union struct` types should always be readonly remains an [open question](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/union-enum-common.md#always-readonly-struct-types).
 
 Assignment copies the enclosing struct shallowly. Bare unions copy a case reference. `union struct` values copy their stored payload. Extracting a struct case gives an independent value, and changing it does not update the union. Case values support the corresponding record `with` expressions.
 
@@ -268,6 +264,8 @@ Torn accesses follow the [shared concurrency and safety requirements](https://gi
 The [shared design](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/union-enum-common.md#contextual-construction-and-inference) describes how case construction and patterns compose with target-typed access and generic inference.
 
 ## Open Questions
+
+Questions common to both proposals are listed in the [shared design](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/union-enum-common.md#open-questions).
 
 ### Direct Construction of the Enclosing Union
 
@@ -297,30 +295,8 @@ Current unions treat their declared type set as exhaustive. Should `open union` 
 
 Should `union class` be an explicit synonym for bare `union`, as `record class` is for `record`? We would like this symmetry when adding `union struct`. However, bare `union` is itself an object-backed struct, so the word `class` would describe neither the containing CLR type nor the kind of every explicitly listed case. That potential confusion remains a reason to omit the synonym.
 
-### Always-Readonly `union struct` Types
-
-Should `union struct` and its generated case records always be readonly, or follow the modifier-based rules in this draft?
-
 ### Equality API Compatibility
 
 A public `Equals(U)` overload can change source binding through union conversions. For `union U(int)`, `value.Equals(42)` currently calls `Equals(object)` and compares the union with a boxed integer, yielding false. With the typed overload, it can convert `42` to `U` and compare two unions, yielding true.
 
 Should the strongly typed method instead be an explicit `IEquatable<U>` implementation? That would retain efficient generic comparisons without adding a public overload. Synthesis is an API change whose source compatibility needs evaluation, beyond optimizing the comparison itself.
-
-### Independent Generic Case Parameters
-
-Should a case introduce independent type parameters, such as `case X<T>(T Value)` in a nongeneric union? Reference-type cases could represent this family of types, but matching, inference, constraints, and exhaustiveness would need further design. Inline storage cannot directly reserve space for an arbitrary independent `T` without boxing or other indirection. We should establish the need before adding that complexity.
-
-### Empty Parameter Lists
-
-We recommend disallowing empty parameter lists in case declarations and requiring data-free cases to be constructed without parentheses. A parameterized case still requires `()` when optional or `params` parameters allow zero supplied arguments.
-
-### Inference from Case Arguments
-
-We do not expect `Option.Some(42)` or `Use(.Some(42))`, for `Use<T>(Option<T> value)`, to work under the current drafts. The former needs lookup and inference of the containing type's omitted arguments. The latter needs case lookup on a partially inferred target and bounds from the case arguments. Related work includes [constructor-call inference](https://github.com/dotnet/csharplang/blob/main/proposals/inference-for-constructor-calls.md), [#9627](https://github.com/dotnet/csharplang/issues/9627), and the [revised nested-inference model](https://github.com/dotnet/csharplang/blob/madstorgersen-target-typing-proposal/proposals/target-typed-generic-type-inference.md#nested-inference).
-
-These forms differ from [inference from a known case type](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/union-enum-common.md#inference-from-a-known-case-type): the case type is not yet available when inference needs to select it.
-
-### Metadata Encoding
-
-How should metadata identify generated cases and their construction operations? The design must preserve the case types as ordinary usable types while preventing older compilers from accepting construction syntax that a supporting compiler rejects.

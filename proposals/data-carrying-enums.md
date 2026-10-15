@@ -226,7 +226,7 @@ Option<int> none = Option<int>.None;   // active None
 Option<int> some = Option<int>.Some(0); // active Some with payload 0
 ```
 
-An `enum struct` may designate at most one case with `= default` across all partial declarations. The designated case may have payload parameters. A zero-initialized enum then represents that case, with each payload field holding its type's default value:
+An `enum struct` may designate at most one case with `= default` across all partial declarations. The designated case may have payload parameters. A zero-initialized enum then represents that case, with each payload property holding its type's default value:
 
 ```csharp
 Option<int> option = default;
@@ -243,9 +243,7 @@ Measurement measurement = default;
 bool isReading = measurement is Measurement.Reading(0, null); // true
 ```
 
-Nullable analysis checks a designated `default` case as if each payload property were initialized with `default` of its declared type. For example, `Reading(double Value, string Unit) = default` produces a warning at the designation because zero-initialization leaves `Unit` null despite its non-nullable declaration. The `string? Unit` in the example above permits that value.
-
-Writing `Reading(double Value, string Unit) = default!` suppresses these nullability warnings for the designated case. The suppression does not change the default payload values.
+Nullability warnings and `default!` suppression follow the [shared rules for default cases](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/union-enum-common.md#nullability-of-default-cases).
 
 ### Case Patterns
 
@@ -268,7 +266,7 @@ Data-carrying enums follow the case-set policy of [open/closed enums](https://gi
 
 Class null references follow the ordinary nullable-reference and switch rules. Whether exhaustiveness must account for an uninitialized struct, and whether `null` should match it, remain [open questions](https://github.com/dotnet/csharplang/blob/main/proposals/data-carrying-enums.md#uninitialized-values-in-matching).
 
-Renaming or removing public cases, changing payload parameters or properties, or changing between class and struct representations affects existing APIs. Changing the designated `default` case changes the meaning of zero-initialized storage and is a behavioral breaking change. Adding a struct case can increase storage or alignment requirements. Previously compiled switches retain their normal fallback or unmatched-switch behavior for newly added cases.
+The [shared library-evolution rules](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/union-enum-common.md#library-evolution) cover compatibility when declarations change.
 
 ## Type Model
 
@@ -457,19 +455,15 @@ Should the `null` pattern match the uninitialized state, or should it remain spe
 
 ### Always-Readonly `enum struct` Types
 
-Should `enum struct` types and their generated case records always be readonly, or should they follow the [modifier-based rules](https://github.com/dotnet/csharplang/blob/main/proposals/data-carrying-enums.md#readonly-copying-and-with) in this draft?
+The [shared question](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/union-enum-common.md#always-readonly-struct-types) considers whether the struct form should always be readonly.
 
 ### Independent Generic Case Parameters
 
-Should a case be able to introduce its own type parameters, for example `X<T>(T Value)` in a nongeneric enum?
-
-An `enum class` could represent this with a nested generic record deriving from the enum base: the enclosing value still holds a reference. However, `X` would describe a family of runtime types. The design would need to explain how to match or deconstruct all `X<T>` values without knowing `T`, infer the arguments, enforce constraints, and determine exhaustiveness. The [closed-hierarchy proposal](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-15.0/closed-hierarchies.md#type-parameter-restriction) currently restricts independent type parameters for this reason.
-
-An `enum struct` cannot directly store an arbitrary independent `T` inline: its size and GC layout must be determined without that type argument. Boxing or another form of indirection would introduce a different storage tradeoff. We should establish the need for generic cases before adding that complexity.
+The [shared question](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/union-enum-common.md#independent-generic-case-parameters) considers type parameters declared on individual cases.
 
 ### Empty Parameter Lists
 
-We recommend disallowing empty parameter lists in case declarations and requiring cases declared without parameters to be used without parentheses. This keeps the syntax consistent with ordinary enums: data-free cases have no parameters or parentheses, while data-carrying cases declare parameters and use parentheses for construction. Parentheses remain required when optional or `params` parameters allow zero arguments, so such calls still use `()`.
+The [shared recommendation](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/union-enum-common.md#empty-parameter-lists) covers empty parameter lists and parentheses on data-free cases.
 
 ### Additional Members
 
@@ -494,14 +488,6 @@ enum class Outer(int X) : BaseRecord(X)
 
 These options add substantial design surface around constructor binding, inherited state, and record copying and equality. We recommend deferring record inheritance and enum primary constructors from the initial feature. The current design does not preclude adding them later. They are included here for completeness.
 
-### Inference from Case Arguments
+### Inference from a Known Case Type
 
-We do not expect the following forms to infer their omitted type arguments under the current drafts. Each needs additional rules:
-
-- `Option.Some(42)` needs lookup and inference of the containing type's omitted arguments. [Constructor-call inference](https://github.com/dotnet/csharplang/blob/main/proposals/inference-for-constructor-calls.md), tracked by [#9627](https://github.com/dotnet/csharplang/issues/9627), and the [updated proposal](https://github.com/dotnet/csharplang/pull/10312) with [type-group lookup](https://github.com/dotnet/csharplang/pull/10310) offer related machinery. Applying it to enum case syntax needs an explicit design.
-- `Use(.Some(42))`, for `Use<T>(Option<T> value)`, needs case lookup on a partially inferred enum type and gathering bounds from the case arguments. The [current nested-inference model](https://github.com/dotnet/csharplang/blob/madstorgersen-target-typing-proposal/proposals/target-typed-generic-type-inference.md#nested-inference) instead requires outer inference to complete before supplying a target to an inner expression that cannot bind independently.
-- For an `enum struct`, `Use(Option<int>.Some(42))` needs inference to recognize the generated case-to-enum relationship. Existing method inference does not follow user-defined conversions. `Use<int>(Option<int>.Some(42))` or passing a value already typed as `Option<int>` works without that addition.
-
-### Metadata Encoding
-
-What marker should identify data-carrying enums and their cases, and how should it encode the construction operations and hierarchy restrictions for supporting compilers? The public source behavior is specified above. The attribute or other metadata form and final generated API names remain to be designed.
+For a method `Use<T>(Option<T> value)`, inferring `T` from `Use(Option<int>.Some(42))` requires recognizing the generated case-to-enum relationship. Existing method inference does not follow an `enum struct`'s user-defined conversion. `Use<int>(Option<int>.Some(42))` or passing a value already typed as `Option<int>` works without that addition.
