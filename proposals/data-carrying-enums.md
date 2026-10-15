@@ -114,8 +114,7 @@ data_enum_modifier
     ;
 
 data_enum_body
-    : '{' data_enum_case_declarations? '}'
-    | '{' data_enum_case_declarations? ';' class_member_declaration* '}'
+    : '{' data_enum_case_declarations? (';' class_member_declaration*)? '}'
     ;
 
 data_enum_case_declarations
