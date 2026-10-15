@@ -5,7 +5,7 @@ Discussion: <https://github.com/dotnet/csharplang/discussions/8987>
 
 ## Summary
 
-Allow users to declare methods, properties, and other members inside an enum, after a semicolon separating them from the enum's values.
+Allow users to declare methods, properties, and other members inside an enum.
 
 ```csharp
 public closed enum Color
@@ -43,7 +43,7 @@ For [data-carrying enums](https://github.com/dotnet/csharplang/blob/main/proposa
 public enum struct Option<T>
 {
     None,
-    Some(T value);
+    Some(T Value);
 
     public T GetValueOrDefault(T fallback) => this switch
     {
@@ -57,16 +57,15 @@ public enum struct Option<T>
 
 ### Syntax
 
-The existing values-only form remains valid. A member section can be empty and can follow an empty value list or a list with a trailing comma.
+The body grammar below is subject to these rules: a values-only body may have a trailing comma, and a members-only body needs no leading separator. A semicolon is required between values and members and is permitted only when both are present. No comma is permitted immediately before it.
 
-The following extends `enum_body` in [C# specification §19.2, Enum declarations](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/enums.md#192-enum-declarations). In grammar diffs, `+` marks added alternatives:
+The following updates `enum_body` in [C# specification §19.2, Enum declarations](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/enums.md#192-enum-declarations). In grammar diffs, `-` marks removed lines and `+` marks added lines:
 
 ```diff
  enum_body
-     : '{' enum_member_declarations? '}'
-     | '{' enum_member_declarations ',' '}'
-+    | '{' enum_member_declarations? ';' class_member_declaration* '}'
-+    | '{' enum_member_declarations ',' ';' class_member_declaration* '}'
+-    : '{' enum_member_declarations? '}'
+-    | '{' enum_member_declarations ',' '}'
++    : '{' (enum_member_declarations ','?)? ';'? class_member_declaration* '}'
      ;
 ```
 
@@ -114,9 +113,9 @@ This already supports methods and computed properties without new enum syntax. C
 
 Should the semicolon be required, or could the final comma after the values separate them from member declarations?
 
-The semicolon gives a clear visual boundary, but does not appear necessary for parsing the permitted members. An enum value is `N` or `N = expression`; methods, properties, fields, and nested types have distinguishable declaration syntax. Instance constructors are excluded, and static constructors start with `static`.
+The semicolon gives a clear visual boundary. An enum value is `N` or `N = expression`. Methods, properties, fields, and nested types have distinguishable declaration syntax. Instance constructors are excluded, and static constructors start with `static`.
 
-An alternative would require values to precede members, with a final comma after the last value:
+The alternative uses a comma instead of a semicolon to separate values from members, just as commas separate values from each other:
 
 ```csharp
 enum Color
@@ -127,4 +126,16 @@ enum Color
 }
 ```
 
-Member declarations would retain their ordinary syntax, with no extra separators between them. This reuses the existing comma instead of introducing a section delimiter in enum bodies. Mixed separators do have C# precedent: `for` headers use semicolons between clauses and commas within their initializer and iterator lists.
+The comma terminates a value initializer before any attributes on the next member. Without it, `[Foo]` following `Z = X.Y` could be parsed as element access.
+
+```csharp
+enum Example
+{
+    Z = X.Y // Missing comma: [Foo] could be parsed as part of X.Y[Foo].
+
+    [Foo]
+    public void M() { }
+}
+```
+
+Member declarations would retain their ordinary syntax, with no extra separators between them. Mixed separators do have C# precedent: `for` headers use semicolons between clauses and commas within their initializer and iterator lists.
