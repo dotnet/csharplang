@@ -29,7 +29,7 @@ It consolidates design feedback from many years of repository discussions, espec
   - [#2669](https://github.com/dotnet/csharplang/discussions/2669) Feature request: Partial enums
 </details>
 
-## Walkthrough
+## Example Walkthrough
 
 An `Option<T>` represents either a value (`Some`) or its absence (`None`). Declare the cases together, followed by any members that operate on the enum:
 
