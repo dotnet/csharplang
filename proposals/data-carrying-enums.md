@@ -61,7 +61,7 @@ Data-carrying enums support `partial` under the ordinary partial-type rules. Cas
 
 ### Grammar
 
-The grammar below describes the cases-only form. The `readonly` modifier applies only to `enum struct` types; `closed` controls [case-set evolution](https://github.com/dotnet/csharplang/blob/main/proposals/data-carrying-enums.md#exhaustiveness-and-evolution).
+The `readonly` modifier applies only to `enum struct` types; `closed` controls [case-set evolution](https://github.com/dotnet/csharplang/blob/main/proposals/data-carrying-enums.md#exhaustiveness-and-evolution).
 
 ```antlr
 data_enum_declaration
@@ -78,6 +78,7 @@ data_enum_modifier
 
 data_enum_body
     : '{' data_enum_case_declarations? '}'
+    | '{' data_enum_case_declarations? ';' class_member_declaration* '}'
     ;
 
 data_enum_case_declarations

@@ -68,15 +68,6 @@ The following extends `enum_body` in [C# specification §19.2, Enum declarations
      ;
 ```
 
-The corresponding extension to the [data-carrying enum grammar](https://github.com/dotnet/csharplang/blob/main/proposals/data-carrying-enums.md#grammar) is:
-
-```diff
- data_enum_body
-     : '{' data_enum_case_declarations? '}'
-+    | '{' data_enum_case_declarations? ';' class_member_declaration* '}'
-     ;
-```
-
 ### Permitted Members
 
 The initial design permits:
