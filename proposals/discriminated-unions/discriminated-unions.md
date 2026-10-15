@@ -168,7 +168,7 @@ public struct Option<T> : IUnion
 }
 ```
 
-`Value` exposes the case instance. For this declaration, `default(Option<int>).Value` returns a boxed `Option<int>.None`, so the property's return type is non-nullable. Without a designated `default` case, zero-initialization leaves no active case and `Value` returns `null`.
+For this declaration, `Value` has a non-nullable return type because `None` is the designated `default` case.
 
 </details>
 
@@ -178,8 +178,8 @@ public struct Option<T> : IUnion
 
 A `union struct` may designate at most one case with `= default` across all partial declarations. A zero-initialized union value, such as `default(U)`, behaves as follows:
 
-- If a case is designated, the value represents that case, with each payload property holding its type's default value. `HasValue` is true, and `TryGetValue` for that case returns true.
-- Otherwise, the value represents no case. `HasValue` is false, and `TryGetValue` returns false for every declared case.
+- If a case is designated, `Value` returns a boxed instance of that case, with each payload property holding its type's default value. `HasValue` is `true`, and `TryGetValue` for that case returns `true`.
+- Otherwise, `Value` returns `null`. `HasValue` is `false`, and `TryGetValue` returns `false` for every declared case.
 
 For example:
 
