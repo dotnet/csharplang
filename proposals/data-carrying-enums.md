@@ -475,17 +475,13 @@ This ordering agrees with the revised draft's [nested-inference rules](https://g
 
 ### Inference from an Assignment Target
 
-We expect this call to work under the revised target-typed generic inference draft. The assignment target supplies the type argument for the walkthrough's `Parse<T>(string)`:
+We expect this line from the [walkthrough](https://github.com/dotnet/csharplang/blob/main/proposals/data-carrying-enums.md#example-walkthrough) to work if [target-typed generic type inference](https://github.com/dotnet/csharplang/blob/madstorgersen-target-typing-proposal/proposals/target-typed-generic-type-inference.md) is adopted:
 
 ```csharp
 Option<int> result = Parse("42");
 ```
 
-1. Ordinary binding cannot infer `T` from the `string` argument, so the invocation is classified as a target-dependent expression.
-2. Conversion to the assignment target `Option<int>` triggers target-aware binding of the invocation.
-3. [Upper-bound inference](https://github.com/dotnet/csharpstandard/blob/alpha-v12/standard/expressions.md#126312-upper-bound-inferences) from the target `Option<int>` to the result type `Option<T>` recurses through the invariant struct type parameter, contributing an exact bound of `int` for `T`.
-4. Fixing selects `T = int`. The `IParsable<T>` constraint is satisfied, `Parse<int>` is selected, and its result converts to `Option<int>` by identity.
-5. The generic body is checked independently of callers. Its declared return type `Option<T>` target-types the conditional branches, so their case construction follows the [known-target steps](https://github.com/dotnet/csharplang/blob/main/proposals/data-carrying-enums.md#case-access-with-a-known-target) using the in-scope `T`. The value from `TryParse` already has type `T`.
+Inferring `T` from the assignment target is a general method-inference feature, independent of enums. Without that proposal, users must supply the type argument explicitly as `Parse<int>("42")`.
 
 ### Target-Typed Patterns and Switch Arms
 
