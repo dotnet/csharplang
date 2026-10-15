@@ -7,8 +7,10 @@ Discussion: <https://github.com/dotnet/csharplang/discussions/8987>
 
 Allow users to declare methods, properties, and other members inside an enum, after a semicolon separating them from the enum's values.
 
+This example uses a [closed enum](https://github.com/dotnet/csharplang/blob/main/proposals/closed-enums.md) so its switch is exhaustive without a fallback arm.
+
 ```csharp
-public enum Color
+public closed enum Color
 {
     Red,
     Green,
@@ -28,8 +30,7 @@ public enum Color
         Cyan => 0x00FFFF,
         Magenta => 0xFF00FF,
         Black => 0x000000,
-        White => 0xFFFFFF,
-        _ => throw new InvalidOperationException("Unknown color.")
+        White => 0xFFFFFF
     };
 }
 ```
