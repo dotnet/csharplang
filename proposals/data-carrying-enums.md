@@ -31,11 +31,7 @@ It consolidates design feedback from many years of repository discussions, espec
 
 ## Example Walkthrough
 
-An `Option<T>` represents either a value (`Some`) or its absence (`None`). Declare the cases together, followed by any members that operate on the enum.
-
-Case instances are created without `new`. `Some` takes its associated value as an argument, while the data-free `None` case is accessed like an ordinary enum value.
-
-For example:
+An `Option<T>` represents either a value (`Some`) or its absence (`None`). The following example declares those cases, adds a helper method, and shows how to create and use values of the enum:
 
 ```csharp
 using System;
