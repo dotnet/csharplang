@@ -106,13 +106,13 @@ The expansion explains the type relationships. The generated types also have the
 
 Each case declares a public nested type, with effective accessibility bounded by its containing union. Cases use the containing union's type parameters and constraints. Independent case type parameters are an [open question](#independent-generic-case-parameters).
 
-Case names must be unique and must not conflict with other members. Cases cannot specify numeric values. A `union struct` case can instead designate the [`default` case](#default-values).
+Case names must be unique and must not conflict with other members. A `union struct` case can designate the [`default` case](#default-values).
 
 ### Other Members and Partial Declarations
 
-User-declared members, implemented interfaces, and constructor restrictions follow the [existing union-declaration rules](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-15.0/unions.md#union-declarations). This feature does not depend on allowing members in enums. Generated cases introduce no additional instance state on the union beyond its case storage.
+User-declared members, implemented interfaces, and constructor restrictions follow the [existing union-declaration rules](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-15.0/unions.md#union-declarations). Generated cases introduce no additional instance state on the union beyond its case storage.
 
-Partial declarations contribute to a single case set under the ordinary partial-type rules. A part can contain only members, without a separator or repeated cases.
+Partial declarations contribute to a single case set under the ordinary partial-type rules. A part can contain only members.
 
 ## Construction and Case Access
 
