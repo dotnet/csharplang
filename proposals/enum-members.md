@@ -129,4 +129,14 @@ enum Color
 
 The comma terminates a value initializer before any attributes on the next member. Without it, `[Foo]` following `Z = X.Y` could be parsed as element access.
 
+```csharp
+enum Example
+{
+    Z = X.Y // Missing comma: [Foo] could be parsed as part of X.Y[Foo].
+
+    [Foo]
+    public void M() { }
+}
+```
+
 Member declarations would retain their ordinary syntax, with no extra separators between them. This reuses the existing comma instead of introducing a section delimiter in enum bodies. Mixed separators do have C# precedent: `for` headers use semicolons between clauses and commas within their initializer and iterator lists.
