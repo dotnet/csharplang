@@ -45,7 +45,7 @@ Designating `None` as the [`default` case](#default-values) accounts for zero-in
 
 The `struct` keyword selects inline storage and value-type cases. Bare [`union`](#union-translation) keeps the existing object-backed struct representation and uses reference-type cases.
 
-`Parse("42")` relies on [target-typed generic type inference](#inference-from-an-assignment-target). The `.Some(...)` and `.None` forms depend on the [contextual syntax extensions](#contextual-construction-and-inference), avoiding the need to repeat the enclosing union type.
+`Parse("42")` relies on [target-typed generic type inference](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/union-enum-common.md#inference-from-an-assignment-target). The `.Some(...)` and `.None` forms depend on the [contextual syntax extensions](#contextual-construction-and-inference), avoiding the need to repeat the enclosing union type.
 
 ## Declarations
 
@@ -302,85 +302,7 @@ Torn accesses follow the [shared concurrency and safety requirements](https://gi
 
 ## Contextual Construction and Inference
 
-Qualified construction and patterns work without target-typed access or improved generic inference. Shorter forms depend on the linked proposals below. The traces identify the required steps so the proposals can be checked together as they evolve.
-
-### Case Access with a Known Target
-
-We expect these forms to work with [target-typed static member access](https://github.com/dotnet/csharplang/blob/main/proposals/target-typed-static-member-access.md) and this proposal's case-construction rules:
-
-```csharp
-Option<int> none = .None;
-Option<int> some = .Some(42);
-```
-
-1. Each initializer has the target type `Option<int>`.
-2. Leading-dot lookup qualifies the expression with that constructed type. No inference through the nested case is needed.
-3. Case construction produces an `Option<int>.None` or `Option<int>.Some` value.
-4. The existing union conversion supplies the enclosing union value.
-
-Without a target, `var value = .None` is an error. The leading-dot rules need to recognize generated cases as described here, rather than requiring a static factory with the same name as the nested type.
-
-### Inference from Another Argument
-
-We expect this call to work with target-typed static member access and ordinary argument inference:
-
-```csharp
-void Use<T>(Option<T> value, T fallback) { /* ... */ }
-
-Use(.None, 42);
-```
-
-1. `.None` has no independent type and contributes no input bound.
-2. The second argument contributes a lower bound of `int` for `T`.
-3. Fixing `T` supplies the first parameter's target type, `Option<int>`.
-4. Binding `.None` proceeds as in the known-target example, followed by the union conversion.
-
-This order agrees with the revised generic-inference draft's [nested-inference rules](https://github.com/dotnet/csharplang/blob/madstorgersen-target-typing-proposal/proposals/target-typed-generic-type-inference.md#nested-inference).
-
-### Inference from a Known Case Type
-
-We expect this call to infer `T = int` if [union-case type inference](https://github.com/dotnet/csharplang/pull/10355) is adopted. It does not require target-typed member access:
-
-```csharp
-void Use<T>(Option<T> value) { /* ... */ }
-
-Use(Option<int>.Some(42));
-```
-
-1. Qualified construction produces an `Option<int>.Some`, independently of the parameter's target type.
-2. Lower-bound inference against `Option<T>` finds the unique matching case, `Option<T>.Some`.
-3. The proposed rule recurses from `Option<int>.Some` to `Option<T>.Some`. Ordinary inference through the nested type's containing generic type supplies `T = int`.
-4. The argument then has a union conversion to the fixed parameter type, `Option<int>`.
-
-### Inference from an Assignment Target
-
-We expect `Option<int> result = Parse("42")` in the walkthrough to work if [target-typed generic type inference](https://github.com/dotnet/csharplang/blob/madstorgersen-target-typing-proposal/proposals/target-typed-generic-type-inference.md) is adopted. This is a general inference feature, independent of unions. Without it, callers must write `Parse<int>("42")`.
-
-The broader [generalized type-inference proposal](https://github.com/dotnet/csharplang/blob/madstorgersen-generalized-type-inference/proposals/generalized-type-inference.md) also addresses information flowing from context. These drafts remain in progress.
-
-### Target-Typed Patterns and Switch Arms
-
-We expect this to work with target-typed static member access:
-
-```csharp
-union Result<T, E>
-{
-    case Ok(T Value);
-    case Error(E Value);
-}
-
-Result<U, E> Map<T, U, E>(Result<T, E> result, Func<T, U> mapper)
-    => result switch
-    {
-        .Ok(var value) => .Ok(mapper(value)),
-        .Error(var error) => .Error(error)
-    };
-```
-
-1. The input type `Result<T, E>` qualifies the pattern case names under the proposed [pattern rules](https://github.com/dotnet/csharplang/blob/main/proposals/target-typed-static-member-access.md#pattern-matching).
-2. Union matching extracts a `T` or an `E` from the corresponding case.
-3. The return type `Result<U, E>` target-types the construction in each arm.
-4. The resulting case values use union conversions to satisfy that return type.
+The [shared design](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/union-enum-common.md#contextual-construction-and-inference) describes how case construction and patterns compose with target-typed access and generic inference.
 
 ## Open Questions
 
@@ -434,7 +356,7 @@ We recommend disallowing empty parameter lists in case declarations and requirin
 
 We do not expect `Option.Some(42)` or `Use(.Some(42))`, for `Use<T>(Option<T> value)`, to work under the current drafts. The former needs lookup and inference of the containing type's omitted arguments. The latter needs case lookup on a partially inferred target and bounds from the case arguments. Related work includes [constructor-call inference](https://github.com/dotnet/csharplang/blob/main/proposals/inference-for-constructor-calls.md), [#9627](https://github.com/dotnet/csharplang/issues/9627), and the [revised nested-inference model](https://github.com/dotnet/csharplang/blob/madstorgersen-target-typing-proposal/proposals/target-typed-generic-type-inference.md#nested-inference).
 
-These forms differ from [inference from a known case type](#inference-from-a-known-case-type): the case type is not yet available when inference needs to select it.
+These forms differ from [inference from a known case type](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/union-enum-common.md#inference-from-a-known-case-type): the case type is not yet available when inference needs to select it.
 
 ### Metadata Encoding
 
