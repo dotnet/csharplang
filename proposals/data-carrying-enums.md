@@ -52,16 +52,18 @@ Case instances are created without `new`. `Some` takes its associated value as a
 For example:
 
 ```csharp
-static Option<int> ParseInt(string text)
-    => int.TryParse(text, out var value)
-        ? Option<int>.Some(value)
-        : Option<int>.None;
+static Option<T> Parse<T>(string text) where T : IParsable<T>
+    => T.TryParse(text, provider: null, out var value)
+        ? Option<T>.Some(value)
+        : Option<T>.None;
 ```
+
+The [`IParsable<T>`](https://learn.microsoft.com/en-us/dotnet/api/system.iparsable-1) constraint makes `T.TryParse` available. With [target-typed generic type inference](https://github.com/dotnet/csharplang/blob/main/proposals/target-typed-generic-type-inference.md), the caller's `Option<int>` would supply `T`.
 
 Callers can match the cases and extract their data, or use members declared on the enum:
 
 ```csharp
-Option<int> result = ParseInt("42");
+Option<int> result = Parse("42");
 
 string message = result switch
 {
