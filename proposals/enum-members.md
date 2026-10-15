@@ -82,7 +82,7 @@ The usual accessibility, lookup, and overload rules apply. In an instance member
 
 ## Implementation Considerations
 
-The [CLI restrictions on enums](https://github.com/dotnet/csharplang/discussions/8987#discussioncomment-11754496) prohibit methods, properties, events, and nonliteral static fields. Direct emission would require runtime support; a translation through helper types is another possibility. The encoding and supported runtime targets remain to be determined.
+The latest published CLI standard is ECMA-335, 6th edition (June 2012). [§I.8.5.2](https://ecma-international.org/wp-content/uploads/ECMA-335_6th_edition_june_2012.pdf#page=52) still prohibits enums from declaring methods, properties, events, or nonliteral static fields. We do not expect relaxing these restrictions to be a problem, but doing so requires runtime-team approval. The encoding and supported runtime targets remain to be determined.
 
 ## Alternative: Sibling Extension Blocks
 
