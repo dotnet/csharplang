@@ -104,7 +104,15 @@ Case names must be unique and must not conflict with other members.
 
 ### User-Declared Constructors
 
-User-declared constructors follow the [existing union constructor rules](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-15.0/unions.md#union-declarations).
+User-declared constructors follow the [existing union constructor rules](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-15.0/unions.md#union-declarations). For example, the earlier `Result` could declare:
+
+```csharp
+public Result(bool success, string message) : this(Result.Success(message))
+{
+    if (!success)
+        this = Result.Failure(-1);
+}
+```
 
 For declarations with generated cases and for `union struct` declarations, user code cannot assign to the generated `Value` property, including inside constructors. This keeps initialization within the declared case set and independent of the storage representation.
 
@@ -135,7 +143,7 @@ Whether unions with declared cases should also [restrict direct construction](#d
 
 A `union struct` generates the [non-boxing access pattern](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-15.0/unions.md#non-boxing-access-members): `HasValue` and a `TryGetValue(out Case value)` overload for each case. All of these are `readonly` instance members.
 
-For generated struct cases, object-valued `Value` returns a boxed copy. Repeated reads may return different boxes, and mutating a returned box does not update the union. Bare `union` instead retains its stored object. `union struct` declarations with only a type list may need reference-backed storage to preserve existing union semantics, as discussed in the [shared layout proposal](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/union-enum-non-boxed-layout.md#scope).
+When a `union struct` declares cases with `case`, `Value` returns a boxed copy of the case instance. Repeated reads may return different boxes, and mutating a returned box does not update the union. Bare `union` instead retains its stored object. `union struct` declarations with only a type list may need reference-backed storage to preserve existing union semantics, as discussed in the [shared layout proposal](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/union-enum-non-boxed-layout.md#scope).
 
 <details>
 <summary>Example: generated access API for Option&lt;T&gt;</summary>
