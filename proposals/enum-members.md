@@ -105,3 +105,24 @@ public static class ColorExtensions
 ```
 
 This already supports methods and computed properties without new enum syntax. Consumers must still bring the extension namespace into scope, such as with `using Example.Extensions;`.
+
+## Open Questions
+
+### Separating Values from Members
+
+Should the semicolon be required, or could the final comma after the values separate them from member declarations?
+
+The semicolon gives a clear visual boundary, but does not appear necessary for parsing the permitted members. An enum value is `N` or `N = expression`; methods, properties, fields, and nested types have distinguishable declaration syntax. Instance constructors are excluded, and static constructors start with `static`.
+
+An alternative would require values to precede members, with a final comma after the last value:
+
+```csharp
+enum Color
+{
+    Red, Green, Blue,
+
+    public bool IsRed => this == Red;
+}
+```
+
+Member declarations would retain their ordinary syntax, with no extra separators between them. This reuses the existing comma instead of introducing a section delimiter in enum bodies. Mixed separators do have C# precedent: `for` headers use semicolons between clauses and commas within their initializer and iterator lists.

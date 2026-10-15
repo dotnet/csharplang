@@ -617,6 +617,8 @@ Should declarations such as `Empty()` be disallowed in favor of `Empty`, giving 
 
 Should data-carrying enums permit additional instance state or custom instance constructors? State outside the cases would need defined initialization, copying, equality, and `with` behavior. A custom constructor would need to select a valid case and preserve the case-construction model.
 
+Parameterized cases use `N(...)` or `N(...) = default`; the former shares its prefix with an instance constructor. That overlap would need consideration if constructors were allowed and the [comma-only separator alternative](https://github.com/dotnet/csharplang/blob/main/proposals/enum-members.md#separating-values-from-members) were selected.
+
 ### Inference from Case Arguments
 
 Should `Option.Some(42)` infer the containing type `Option<int>` without a target type? [Constructor-call inference](https://github.com/dotnet/csharplang/blob/main/proposals/inference-for-constructor-calls.md), tracked by [#9627](https://github.com/dotnet/csharplang/issues/9627), and the [updated proposal](https://github.com/dotnet/csharplang/pull/10312) with [type-group lookup](https://github.com/dotnet/csharplang/pull/10310) offer related machinery. Applying it to enum case syntax needs an explicit design; leading-dot access already works when context supplies the constructed enum type.
