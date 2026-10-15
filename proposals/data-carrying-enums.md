@@ -31,7 +31,7 @@ It consolidates design feedback from many years of repository discussions, espec
 
 ## Declarations
 
-A data-carrying enum declaration lists its cases first, then can provide members that operate on those cases. A semicolon separates the cases from the members:
+A data-carrying enum declaration lists its named cases, optionally with payload parameters:
 
 ```csharp
 public enum class Result
@@ -53,19 +53,15 @@ public enum struct Option<T>
 }
 ```
 
+For user-declared functionality (like `GetValueOrDefault` in the above example), this proposal builds on [Members in Enum Declarations](https://github.com/dotnet/csharplang/blob/main/proposals/enum-members.md). That proposal defines the syntax and rules for adding members; it is not required for the members that the compiler generates under this proposal.
+
 Data-carrying enum cases use their enclosing enum's type parameters and constraints. Whether a case can declare [independent type parameters](https://github.com/dotnet/csharplang/blob/main/proposals/data-carrying-enums.md#independent-generic-case-parameters) is an open question.
 
-### Members and Declaration Rules
+### Declaration Rules
 
-A data-carrying enum can expose behavior shared by all its cases. The initial design allows:
+Data-carrying enum declarations have no base list and cannot assign constant values to cases. An `enum struct` may designate a case with `= default`, as described under [Default Values](https://github.com/dotnet/csharplang/blob/main/proposals/data-carrying-enums.md#default-values).
 
-- Instance methods, computed properties and indexers, and events with explicit accessors, without additional instance storage.
-- Static members, including fields and static constructors.
-- Nested types.
-
-User-declared instance fields, auto-properties requiring instance storage, field-like instance events, and instance constructors are not currently allowed. Whether to permit additional state or custom constructors is discussed under [Additional Members](https://github.com/dotnet/csharplang/blob/main/proposals/data-carrying-enums.md#additional-members).
-
-Data-carrying enum declarations have no base list and cannot assign constant values to cases. An `enum struct` may designate a case with `= default`, as described under [Default Values](https://github.com/dotnet/csharplang/blob/main/proposals/data-carrying-enums.md#default-values). User members conflicting with generated members are errors, except for customization permitted by ordinary record rules.
+User-declared members may customize generated members where ordinary record rules allow it; other conflicts with generated members or case type names are errors. Whether to permit additional instance state or custom constructors is discussed under [Additional Members](https://github.com/dotnet/csharplang/blob/main/proposals/data-carrying-enums.md#additional-members).
 
 ### Partial Declarations
 
@@ -75,7 +71,7 @@ Authors can separate cases and members into different parts. A part containing o
 
 ### Grammar
 
-The data-carrying enum grammar permits both a cases-only declaration and a body containing members. The `readonly` modifier applies only to `enum struct` types; `closed` controls [case-set evolution](https://github.com/dotnet/csharplang/blob/main/proposals/data-carrying-enums.md#exhaustiveness-and-evolution).
+The `readonly` modifier applies only to `enum struct` types; `closed` controls [case-set evolution](https://github.com/dotnet/csharplang/blob/main/proposals/data-carrying-enums.md#exhaustiveness-and-evolution).
 
 ```antlr
 data_enum_declaration
@@ -92,7 +88,7 @@ data_enum_modifier
 
 data_enum_body
     : '{' data_enum_case_declarations? '}'
-    | '{' data_enum_case_declarations? ';' class_member_declarations? '}'
+    | '{' data_enum_case_declarations? ';' class_member_declaration* '}'
     ;
 
 data_enum_case_declarations
@@ -143,7 +139,7 @@ public struct Option<T>
     private byte _discriminator;
     private T _value; // Some's payload, when active
 
-    // Members and generated APIs omitted. General storage strategies are discussed later.
+    // Generated APIs omitted. General storage strategies are discussed later.
 }
 ```
 
@@ -318,7 +314,7 @@ Data-carrying enum cases use the familiar record rules. The enclosing enum adds 
 
 ### Readonly, Copying, and `with`
 
-`enum struct` types currently follow ordinary [`readonly struct` rules](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/structs.md#1622-struct-modifiers): an unmodified `enum struct` is mutable, and `readonly enum struct` is readonly. Generated cases have the enum's readonlyness and follow [`record struct` property rules](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-10.0/record-structs.md#properties), using `get`/`set` properties for mutable cases and `get`/`init` for readonly cases. Whether to make `enum struct` types [always readonly](https://github.com/dotnet/csharplang/blob/main/proposals/data-carrying-enums.md#always-readonly-enum-struct-types) remains open. User-declared nested types follow ordinary rules. Generated queries, extraction methods, and equality members are `readonly` instance members.
+`enum struct` types currently follow ordinary [`readonly struct` rules](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/structs.md#1622-struct-modifiers): an unmodified `enum struct` is mutable, and `readonly enum struct` is readonly. Generated cases have the enum's readonlyness and follow [`record struct` property rules](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-10.0/record-structs.md#properties), using `get`/`set` properties for mutable cases and `get`/`init` for readonly cases. Whether to make `enum struct` types [always readonly](https://github.com/dotnet/csharplang/blob/main/proposals/data-carrying-enums.md#always-readonly-enum-struct-types) remains open. Generated queries, extraction methods, and equality members are `readonly` instance members.
 
 Assignment follows ordinary class and struct rules and copies payloads shallowly. Extracting a struct case produces an independent value; changing it does not update the enum:
 
@@ -619,7 +615,9 @@ Should declarations such as `Empty()` be disallowed in favor of `Empty`, giving 
 
 ### Additional Members
 
-Should a data-carrying enum be able to declare additional instance state or custom instance constructors? State outside the cases would need defined initialization, copying, equality, and `with` behavior. A custom constructor would need to select a valid case and preserve the case-construction model.
+Should data-carrying enums permit additional instance state or custom instance constructors? State outside the cases would need defined initialization, copying, equality, and `with` behavior. A custom constructor would need to select a valid case and preserve the case-construction model.
+
+Parameterized cases use `N(...)` or `N(...) = default`; the former shares its prefix with an instance constructor. That overlap would need consideration if constructors were allowed and the [comma-only separator alternative](https://github.com/dotnet/csharplang/blob/main/proposals/enum-members.md#separating-values-from-members) were selected.
 
 ### Inference from Case Arguments
 
