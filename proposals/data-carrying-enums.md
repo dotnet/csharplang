@@ -31,9 +31,15 @@ It consolidates design feedback from many years of repository discussions, espec
 
 ## Example Walkthrough
 
-An `Option<T>` represents either a value (`Some`) or its absence (`None`). Declare the cases together, followed by any members that operate on the enum:
+An `Option<T>` represents either a value (`Some`) or its absence (`None`). Declare the cases together, followed by any members that operate on the enum.
+
+Case instances are created without `new`. `Some` takes its associated value as an argument, while the data-free `None` case is accessed like an ordinary enum value.
+
+For example:
 
 ```csharp
+using System;
+
 public enum struct Option<T>
 {
     None,
@@ -41,44 +47,38 @@ public enum struct Option<T>
 
     public T GetValueOrDefault(T fallback) => this switch
     {
-        Some(var value) => value,
+        .Some(var value) => value,
         _ => fallback
     };
 }
-```
 
-Case instances are created without `new`. `Some` takes its associated value as an argument, while the data-free `None` case is accessed like an ordinary enum value.
-
-For example:
-
-```csharp
-static Option<T> Parse<T>(string text) where T : IParsable<T>
-    => T.TryParse(text, provider: null, out var value)
-        ? Option<T>.Some(value)
-        : Option<T>.None;
-```
-
-The [`IParsable<T>`](https://learn.microsoft.com/en-us/dotnet/api/system.iparsable-1) constraint makes `T.TryParse` available. With [target-typed generic type inference](https://github.com/dotnet/csharplang/blob/main/proposals/target-typed-generic-type-inference.md), the caller's `Option<int>` would supply `T`.
-
-Callers can match the cases and extract their data, or use members declared on the enum:
-
-```csharp
-Option<int> result = Parse("42");
-
-string message = result switch
+static class Example
 {
-    Option<int>.Some(var value) => $"Parsed {value}",
-    Option<int>.None => "Not an integer",
-    _ => "No value"
-};
+    static Option<T> Parse<T>(string text) where T : IParsable<T>
+        => T.TryParse(text, provider: null, out var value)
+            ? .Some(value)
+            : .None;
 
-Console.WriteLine(message); // Parsed 42
-Console.WriteLine(result.GetValueOrDefault(0)); // 42
+    static void Main()
+    {
+        Option<int> result = Parse("42");
+
+        string message = result switch
+        {
+            .Some(var value) => $"Parsed {value}",
+            .None => "Not an integer",
+            _ => "No value"
+        };
+
+        Console.WriteLine(message); // Parsed 42
+        Console.WriteLine(result.GetValueOrDefault(0)); // 42
+    }
+}
 ```
 
 This example uses `enum struct` for value-type semantics. [`enum class`](https://github.com/dotnet/csharplang/blob/main/proposals/data-carrying-enums.md#enum-class-translation) provides reference-type semantics with the same case declaration, construction, and pattern syntax.
 
-The [contextual construction syntax extensions](https://github.com/dotnet/csharplang/blob/main/proposals/data-carrying-enums.md#contextual-construction-and-inference) would also allow `.Some(value)` and `.None` when the enum type is known from context. These forms keep code brief by avoiding repeated qualifiers such as `Option<int>`.
+`Parse("42")` relies on [target-typed generic type inference](https://github.com/dotnet/csharplang/blob/main/proposals/target-typed-generic-type-inference.md) to infer `T` from `Option<int>`. The `.Some(...)` and `.None` forms depend on the [contextual syntax extensions](https://github.com/dotnet/csharplang/blob/main/proposals/data-carrying-enums.md#contextual-construction-and-inference) and avoid repeating the enclosing enum type.
 
 ## Declarations
 
