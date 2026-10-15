@@ -31,11 +31,7 @@ It consolidates design feedback from many years of repository discussions, espec
 
 ## Example Walkthrough
 
-An `Option<T>` represents either a value (`Some`) or its absence (`None`). Declare the cases together, followed by any members that operate on the enum.
-
-Case instances are created without `new`. `Some` takes its associated value as an argument, while the data-free `None` case is accessed like an ordinary enum value.
-
-For example:
+An `Option<T>` represents either a value (`Some`) or its absence (`None`). The following example declares those cases, adds a helper method, and shows how to create and use values of the enum:
 
 ```csharp
 using System;
@@ -78,11 +74,48 @@ This example uses `enum struct` for value-type semantics. [`enum class`](https:/
 
 ## Declarations
 
+### Grammar
+
+```antlr
+data_enum_declaration
+    : attributes? data_enum_modifier* 'enum' ('class' | 'struct') identifier type_parameter_list?
+      (':' interface_type_list)? type_parameter_constraints_clause* data_enum_body ';'?
+    ;
+
+data_enum_modifier
+    : enum_modifier
+    | 'partial'
+    | 'readonly'
+    | 'ref'
+    | 'closed'
+    ;
+
+data_enum_body
+    : '{' (data_enum_case_declarations ','?)? ';'? class_member_declaration* '}'
+    ;
+
+data_enum_case_declarations
+    : data_enum_case_declaration (',' data_enum_case_declaration)*
+    ;
+
+data_enum_case_declaration
+    : attributes? identifier parameter_list? ('=' 'default' '!'?)?
+    ;
+```
+
+The `readonly` and `ref` modifiers apply only to `enum struct` types. The `closed` modifier controls [case-set evolution](https://github.com/dotnet/csharplang/blob/main/proposals/data-carrying-enums.md#exhaustiveness-and-evolution).
+
+The body grammar is subject to these rules: a cases-only body may have a trailing comma, and a members-only body needs no leading separator. A semicolon is required between cases and members and is permitted only when both are present. No comma is permitted immediately before it.
+
+The grammar uses the ordinary `parameter_list`. Whether to permit an [empty parameter list](https://github.com/dotnet/csharplang/blob/main/proposals/data-carrying-enums.md#empty-parameter-lists) remains open.
+
+Whether the semicolon between cases and members is required remains an [open question in Members in Enum Declarations](https://github.com/dotnet/csharplang/blob/main/proposals/enum-members.md#separating-values-from-members).
+
+### Declaration Rules
+
 For user-declared functionality (like `GetValueOrDefault` in the walkthrough), this proposal builds on [Members in Enum Declarations](https://github.com/dotnet/csharplang/blob/main/proposals/enum-members.md). That proposal defines the syntax and rules for adding members. It is not required for the members that the compiler generates under this proposal.
 
 Data-carrying enum cases use their enclosing enum's type parameters and constraints. Whether a case can declare [independent type parameters](https://github.com/dotnet/csharplang/blob/main/proposals/data-carrying-enums.md#independent-generic-case-parameters) is an open question.
-
-### Declaration Rules
 
 Data-carrying enum declarations may list interfaces, but cannot specify a base class. Whether to allow [record inheritance for `enum class`](https://github.com/dotnet/csharplang/blob/main/proposals/data-carrying-enums.md#deriving-enum-class-from-a-record) remains an open question. Interfaces are implemented by the enclosing type under ordinary interface-implementation rules.
 
@@ -118,43 +151,6 @@ public closed enum class Distance : ISpanFormattable
 Data-carrying enums support `partial` under the ordinary partial-type rules. Cases from all parts form one case set, with unique case names and at most one designated `default` case across the entire declaration.
 
 Authors can separate cases and members into different parts. A members-only part can be written as `partial enum struct Option<T> { /* members */ }`.
-
-### Grammar
-
-The `readonly` and `ref` modifiers apply only to `enum struct` types. The `closed` modifier controls [case-set evolution](https://github.com/dotnet/csharplang/blob/main/proposals/data-carrying-enums.md#exhaustiveness-and-evolution).
-
-The body grammar below is subject to these rules: a cases-only body may have a trailing comma, and a members-only body needs no leading separator. A semicolon is required between cases and members and is permitted only when both are present. No comma is permitted immediately before it.
-
-```antlr
-data_enum_declaration
-    : attributes? data_enum_modifier* 'enum' ('class' | 'struct') identifier type_parameter_list?
-      (':' interface_type_list)? type_parameter_constraints_clause* data_enum_body ';'?
-    ;
-
-data_enum_modifier
-    : enum_modifier
-    | 'partial'
-    | 'readonly'
-    | 'ref'
-    | 'closed'
-    ;
-
-data_enum_body
-    : '{' (data_enum_case_declarations ','?)? ';'? class_member_declaration* '}'
-    ;
-
-data_enum_case_declarations
-    : data_enum_case_declaration (',' data_enum_case_declaration)*
-    ;
-
-data_enum_case_declaration
-    : attributes? identifier parameter_list? ('=' 'default' '!'?)?
-    ;
-```
-
-The grammar uses the ordinary `parameter_list`. Whether to permit an [empty parameter list](https://github.com/dotnet/csharplang/blob/main/proposals/data-carrying-enums.md#empty-parameter-lists) remains open.
-
-Whether the semicolon between cases and members is required remains an [open question in Members in Enum Declarations](https://github.com/dotnet/csharplang/blob/main/proposals/enum-members.md#separating-values-from-members).
 
 ## Construction and Case Access
 
