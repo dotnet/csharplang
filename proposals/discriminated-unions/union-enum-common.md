@@ -47,7 +47,9 @@ This ordering agrees with the revised draft's [nested-inference rules](https://g
 
 ### Inference from a Known Case Type
 
-For the union-based design, we expect this call to infer `T = int` if [union-case type inference](https://github.com/dotnet/csharplang/pull/10355) is adopted. It does not require target-typed member access:
+We expect this call to infer `T = int` for both `union` and `union struct` if [union-case type inference](https://github.com/dotnet/csharplang/pull/10355) is adopted.
+
+For `enum struct`, the corresponding inference remains an [open question](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/data-carrying-enums.md#inference-from-case-arguments). Existing method inference does not follow its generated user-defined conversion.
 
 ```csharp
 void Use<T>(Option<T> value) { /* ... */ }
@@ -59,8 +61,6 @@ Use(Option<int>.Some(42));
 2. Lower-bound inference against `Option<T>` finds the unique matching case, `Option<T>.Some`.
 3. The proposed rule recurses from `Option<int>.Some` to `Option<T>.Some`. Ordinary inference through the nested type's containing generic type supplies `T = int`.
 4. The argument then has a union conversion to the fixed parameter type, `Option<int>`.
-
-For `enum struct`, the corresponding inference remains an [open question](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/data-carrying-enums.md#inference-from-case-arguments). Existing method inference does not follow its generated user-defined conversion.
 
 ### Inference from an Assignment Target
 
