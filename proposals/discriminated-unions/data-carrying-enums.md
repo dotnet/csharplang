@@ -244,8 +244,6 @@ Measurement measurement = default;
 bool isReading = measurement is Measurement.Reading(0, null); // true
 ```
 
-Constructing or converting the designated case preserves the supplied payload, including non-default values. Zero-initialization of fields and array elements follows the same rules and does not invoke case constructors or use optional parameter defaults.
-
 Nullable analysis checks a designated `default` case as if each payload property were initialized with `default` of its declared type. For example, `Reading(double Value, string Unit) = default` produces a warning at the designation because zero-initialization leaves `Unit` null despite its non-nullable declaration. The `string? Unit` in the example above permits that value.
 
 Writing `Reading(double Value, string Unit) = default!` suppresses these nullability warnings for the designated case. The suppression does not change the default payload values.

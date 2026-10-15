@@ -177,7 +177,12 @@ public struct Option<T> : IUnion
 
 ### Default Values
 
-Without a designated `default` case, `default(U)` for a `union struct` has no active case. Designating a case with `= default` makes `default(U)` represent that case, with each payload field holding its type's default value. For example:
+A `union struct` may designate at most one case with `= default` across all partial declarations. A zero-initialized union value, such as `default(U)`, behaves as follows:
+
+- If a case is designated, the value represents that case, with each payload property holding its type's default value. `HasValue` is true, and `TryGetValue` for that case returns true.
+- Otherwise, the value represents no case. `HasValue` is false, and `TryGetValue` returns false for every declared case.
+
+For example:
 
 ```csharp
 union struct Measurement
@@ -187,12 +192,10 @@ union struct Measurement
 }
 
 Measurement measurement = default;
+bool hasValue = measurement.HasValue; // true
 bool isReading = measurement is Measurement.Reading(0, null); // true
+bool gotReading = measurement.TryGetValue(out Measurement.Reading reading); // true
 ```
-
-At most one case may be designated, across all partial declarations. Zero-initialized fields and array elements follow the same rules. Zero-initialization does not execute case constructors or apply optional parameter defaults. Explicit construction preserves the supplied payload, including non-default values.
-
-The designated `default` case is active even when its payload contains nulls.
 
 Nullable analysis checks the designation as if each payload property were initialized with `default` of its declared type. `Reading(double Value, string Unit) = default` therefore produces a warning. Writing `= default!` suppresses these warnings without changing the payload defaults. The designation is permitted only on `union struct`.
 
