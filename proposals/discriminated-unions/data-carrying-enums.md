@@ -524,27 +524,11 @@ else if (__case is E.C2 c2) { HandleC2(c2.Value); }
 else if (__case is E.C3 c3) { HandleC3(c3.Value); }
 ```
 
-Because the case types are sealed, the runtime can reduce these `is` tests to method-table pointer comparisons. Distinct case identities could support a balanced tree or profile-guided ordering.
+Because the case types are sealed, the runtime can reduce these `is` tests to method-table pointer comparisons. Distinct case identities could support a balanced tree or profile-guided ordering. Class enums could also use predicates and extraction if those optimize efficiently.
 
 #### `enum struct` Case Tests
 
-Dispatch over inline cases is described under [Case Dispatch](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/non-boxed-union-enum-layout.md#case-dispatch) in the shared layout proposal.
-
-#### Performance and Current Runtime Behavior
-
-Earlier local .NET 11 RC1 ARM64 checks with 16 sealed class cases and 16 struct cases found that exact-type and discriminator-predicate chains remained linear in fully optimized code and Tier 1 with dynamic PGO, even after predicate inlining.
-
-Preliminary M4 Mac benchmarks indicate that linear dispatch performs well and appears sufficient through 32 cases in the tested patterns. Larger case sets may warrant better emit or JIT optimization without blocking initial implementation. Validation on x64 and other architectures, varied usage patterns and case distributions, guards, and both switch statements and expressions remains warranted.
-
-Marking struct conversions for inlining removed redundant extraction checks in the local tests.
-
-#### Runtime Recognition and Alternatives
-
-The [existing switch-recognition pass](https://github.com/dotnet/runtime/blob/main/src/coreclr/jit/switchrecognition.cpp#L28) runs after inlining, but handles comparison chains whose successful tests share a destination. Different case bodies stop recognition. Extending it is one possible approach.
-
-If general recognition raises correctness concerns, an attribute in `System.Runtime.CompilerServices` could opt well-behaved data-carrying enums into optimization. Its contract would cover stable case identity during dispatch, side-effect-free predicates agreeing with the case mapping, and extraction after a successful test. It could identify a struct's discriminator field for direct runtime access. This optional optimization contract is distinct from the required source-semantics marker. Its name and final contract remain undecided. Class enums could also use predicates and extraction if optimized efficiently.
-
-A final fallback is exposing a discriminator and emitting an integral switch, using existing runtime optimizations directly. Classes would need a case-to-discriminator mapping too. We would prefer to avoid this: the mapping would become a stable API and ABI contract. Reordering cases or inserting a case anywhere could no longer simply renumber them in declaration order. Case numbering and library evolution would need a durable design. Extraction must still follow the specified conversions, including reconstruction from shared storage.
+The shared layout proposal covers [inline dispatch](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/non-boxed-union-enum-layout.md#case-dispatch), [current measurements](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/non-boxed-union-enum-layout.md#performance-and-current-runtime-behavior), and [runtime-recognition alternatives](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/non-boxed-union-enum-layout.md#runtime-recognition-and-alternatives).
 
 ## Possible Connections to Type Unions
 
@@ -579,7 +563,7 @@ The costs and choices are:
 - Union null patterns would select the open [uninitialized-null matching option](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/data-carrying-enums.md#uninitialized-values-in-matching), with nullable `Value`. A designated `default` case could use non-nullable `Value`. Annotations and access members must agree.
 - Union case-type exhaustiveness must accommodate the enum's separate open/closed evolution policy.
 
-`[Union]` permits arbitrary implementations and identifies no discriminator mapping. It would not by itself provide the stronger guarantees needed for the proposed JIT optimization contract.
+`[Union]` alone would not provide the stronger [JIT optimization contract](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/non-boxed-union-enum-layout.md#runtime-recognition-and-alternatives).
 
 </details>
 

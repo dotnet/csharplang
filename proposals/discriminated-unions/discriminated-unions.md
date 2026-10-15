@@ -112,14 +112,7 @@ Case names must be unique and must not conflict with other members. Cases cannot
 
 User-declared members, implemented interfaces, and constructor restrictions follow the [existing union-declaration rules](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-15.0/unions.md#union-declarations). This feature does not depend on allowing members in enums. Generated cases introduce no additional instance state on the union beyond its case storage.
 
-Partial declarations contribute to a single case set. Case names must be unique across all parts, and at most one case may be designated `default`. A part containing only members needs no separator or repeated cases:
-
-```csharp
-partial union struct Option<T>
-{
-    // Additional members.
-}
-```
+Partial declarations contribute to a single case set under the ordinary partial-type rules. A part can contain only members, without a separator or repeated cases.
 
 ## Construction and Case Access
 
@@ -148,7 +141,9 @@ The enclosing union retains its existing construction operations, including `new
 
 The [existing union conversion](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-15.0/unions.md#union-conversions) converts a case value to the union by calling its generated creation member. This proposal does not replace it with a generated implicit conversion operator. Case types do not derive from the union.
 
-Bare `union` retains its generated case constructors, `Value` property, `[Union]` metadata, and `IUnion` implementation. A non-ref-like `union struct` additionally generates the [non-boxing access pattern](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-15.0/unions.md#non-boxing-access-members): `HasValue` and a `TryGetValue(out Case value)` overload for each case. These queries are `readonly` instance members. Object-valued `Value` boxes an active struct case when accessed.
+Bare `union` retains its generated case constructors, `Value` property, `[Union]` metadata, and `IUnion` implementation. A non-ref-like `union struct` additionally generates the [non-boxing access pattern](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-15.0/unions.md#non-boxing-access-members): `HasValue` and a `TryGetValue(out Case value)` overload for each case. These queries are `readonly` instance members.
+
+For generated struct cases, object-valued `Value` returns a boxed copy. Repeated reads may return different boxes, and mutating a returned box does not update the union. Bare `union` instead retains its stored object. Type-list-only inline unions may need reference-backed storage to preserve existing union semantics, as discussed in the [shared layout proposal](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/non-boxed-union-enum-layout.md#scope).
 
 Case extraction uses union patterns or `TryGetValue`. This proposal adds no explicit conversion from the union to a case.
 
@@ -249,7 +244,7 @@ public struct Option<T> : IUnion
 }
 ```
 
-The sketches use ordinary constructors to describe emitted types. Source construction of generated cases follows the rules above. Type-list-only declarations can also use `union struct`; their existing case types keep their declared class or struct kind.
+The sketches use ordinary constructors to describe emitted types. Source construction of generated cases follows the rules above. Type-list-only declarations can also use `union struct`. Their existing case types keep their declared class or struct kind.
 
 ### Ref-Like Unions
 
@@ -306,9 +301,11 @@ Assignment copies the enclosing struct shallowly. Bare unions copy a case refere
 
 Current union declarations inherit `Equals(object)` and `GetHashCode()` from `System.ValueType`. Because they contain one object field, equality already compares that field using the contained value's equality. They do not generate a strongly typed `Equals` or implement `IEquatable<U>`.
 
-We propose generating `IEquatable<U>`, a strongly typed `Equals(U)`, and overrides of `Equals(object)` and `GetHashCode()` for non-ref-like union declarations, including existing type-list declarations. The compiler synthesizes missing members with these signatures. As with ordinary structs, user-provided equality and hashing must agree. This gives an efficient implementation without relying on runtime field inspection or boxing the union for typed equality.
+We propose generating `IEquatable<U>`, a strongly typed `Equals(U)`, and overrides of `Equals(object)` and `GetHashCode()` for non-ref-like union declarations, including existing type-list declarations. The synthesized `Equals(object)` checks the union type and delegates to the typed implementation. This gives an efficient implementation without relying on runtime field inspection or boxing the union for typed equality. The [public shape of the typed member](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/discriminated-unions.md#equality-api-compatibility) remains a compatibility question.
 
-For declarations with generated cases, equality requires the same case and equal contents under that case's record rules. Two values with no active case are equal and are unequal to active cases. A designated `default` case participates as its ordinary case. Unused storage and padding never participate. Hashing follows the active case's equality, with equal values producing equal hashes. Hash values and combining algorithms remain implementation details.
+Bare unions with user-defined equality or hashing members, or a user-provided `IEquatable<U>` implementation, retain their existing behavior without default equality synthesis. An inline union that customizes equality must provide `Equals(U)`, `Equals(object)`, and `GetHashCode()` together. An explicit `IEquatable<U>.Equals` implementation can supply the typed member. Incomplete customization is an error, so inline equality never falls back to comparing implementation storage.
+
+For declarations with generated cases, synthesized equality requires the same case and equal contents under that case's record rules. Two values with no active case are equal and are unequal to active cases. A designated `default` case participates as its ordinary case. Unused storage and padding never participate. Hashing follows the active case's equality, with equal values producing equal hashes. Hash values and combining algorithms remain implementation details.
 
 For type-list-only unions, synthesis preserves the existing contained-value equality semantics, including user-defined equality between different runtime types. A storage tag must not introduce a new inequality. This proposal does not add equality operators or formatting members to the enclosing union.
 
@@ -355,6 +352,21 @@ Use(.None, 42);
 
 This order agrees with the revised generic-inference draft's [nested-inference rules](https://github.com/dotnet/csharplang/blob/madstorgersen-target-typing-proposal/proposals/target-typed-generic-type-inference.md#nested-inference).
 
+### Inference from a Known Case Type
+
+We expect this call to infer `T = int` if [union-case type inference](https://github.com/dotnet/csharplang/pull/10355) is adopted. It does not require target-typed member access:
+
+```csharp
+void Use<T>(Option<T> value) { /* ... */ }
+
+Use(Option<int>.Some(42));
+```
+
+1. Qualified construction produces an `Option<int>.Some`, independently of the parameter's target type.
+2. Lower-bound inference against `Option<T>` finds the unique matching case, `Option<T>.Some`.
+3. The proposed rule recurses from `Option<int>.Some` to `Option<T>.Some`. Ordinary inference through the nested type's containing generic type supplies `T = int`.
+4. The argument then has a union conversion to the fixed parameter type, `Option<int>`.
+
 ### Inference from an Assignment Target
 
 We expect `Option<int> result = Parse("42")` in the walkthrough to work if [target-typed generic type inference](https://github.com/dotnet/csharplang/blob/madstorgersen-target-typing-proposal/proposals/target-typed-generic-type-inference.md) is adopted. This is a general inference feature, independent of unions. Without it, callers must write `Parse<int>("42")`.
@@ -389,7 +401,7 @@ Result<U, E> Map<T, U, E>(Result<T, E> result, Func<T, U> mapper)
 
 Existing union matching already specifies how to access the contained case. Compilers remain free to implement that behavior more efficiently while preserving the API and observable semantics. For example, tests over sealed reference-type cases can reduce to type checks, and typed access over inline cases can expose discriminator comparisons to the JIT.
 
-Inline storage and dispatch candidates are described in the [shared layout proposal](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/non-boxed-union-enum-layout.md). Those strategies do not change union conversions, case matching, or the meaning of object-valued `Value`.
+Inline storage and dispatch candidates are described in the [shared layout proposal](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/non-boxed-union-enum-layout.md). Optimizations must preserve the specified conversions, case matching, and access behavior.
 
 ## Open Questions
 
@@ -421,6 +433,12 @@ Should `union class` be an explicit synonym for bare `union`, as `record class` 
 
 Should `union struct` and its generated case records always be readonly, or follow the modifier-based rules in this draft?
 
+### Equality API Compatibility
+
+A public `Equals(U)` overload can change source binding through union conversions. For `union U(int)`, `value.Equals(42)` currently calls `Equals(object)` and compares the union with a boxed integer, yielding false. With the typed overload, it can convert `42` to `U` and compare two unions, yielding true.
+
+Should the strongly typed method instead be an explicit `IEquatable<U>` implementation? That would retain efficient generic comparisons without adding a public overload. Synthesis is an API change whose source compatibility needs evaluation, beyond optimizing the comparison itself.
+
 ### Independent Generic Case Parameters
 
 Should a case introduce independent type parameters, such as `case X<T>(T Value)` in a nongeneric union? Reference-type cases could represent this family of types, but matching, inference, constraints, and exhaustiveness would need further design. Inline storage cannot directly reserve space for an arbitrary independent `T` without boxing or other indirection. We should establish the need before adding that complexity.
@@ -433,7 +451,7 @@ We recommend disallowing empty parameter lists in case declarations and requirin
 
 We do not expect `Option.Some(42)` or `Use(.Some(42))`, for `Use<T>(Option<T> value)`, to work under the current drafts. The former needs lookup and inference of the containing type's omitted arguments. The latter needs case lookup on a partially inferred target and bounds from the case arguments. Related work includes [constructor-call inference](https://github.com/dotnet/csharplang/blob/main/proposals/inference-for-constructor-calls.md), [#9627](https://github.com/dotnet/csharplang/issues/9627), and the [revised nested-inference model](https://github.com/dotnet/csharplang/blob/madstorgersen-target-typing-proposal/proposals/target-typed-generic-type-inference.md#nested-inference).
 
-Ordinary method inference also does not infer `T` for `Use(Option<int>.Some(42))` through the union conversion. Passing an `Option<int>` value or specifying `Use<int>` works. Whether [case inference for unions](https://github.com/dotnet/csharplang/pull/10355) supplies the missing rule needs to be checked as that proposal evolves.
+These forms differ from [inference from a known case type](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/discriminated-unions.md#inference-from-a-known-case-type): the case type is not yet available when inference needs to select it.
 
 ### Metadata Encoding
 
