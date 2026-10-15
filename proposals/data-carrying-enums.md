@@ -478,8 +478,8 @@ public struct Message<T>
     private DateTime _timestamp;      // external struct kept opaque
     private T _value0, _value1;       // Values; T may contain references
 
-    [InlineArray(8)]
-    private struct UnmanagedData { private byte _element0; }
+    [InlineArray(2)]
+    private struct UnmanagedData { private int _element0; }
 }
 ```
 
