@@ -40,16 +40,17 @@ For example:
 ```csharp
 using System;
 
-public enum struct Option<T>
+public closed enum struct Option<T>
 {
-    None,
+    None = default,
     Some(T Value);
 
-    public T GetValueOrDefault(T fallback) => this switch
-    {
-        .Some(var value) => value,
-        _ => fallback
-    };
+    public T GetValueOrDefault(T fallback)
+        => this switch
+        {
+            .Some(var value) => value,
+            .None => fallback
+        };
 }
 
 static Option<T> Parse<T>(string text) where T : IParsable<T>
@@ -62,15 +63,16 @@ Option<int> result = Parse("42");
 string message = result switch
 {
     .Some(var value) => $"Parsed {value}",
-    .None => "Not an integer",
-    _ => "No value"
+    .None => "Not an integer"
 };
 
 Console.WriteLine(message); // Parsed 42
 Console.WriteLine(result.GetValueOrDefault(0)); // 42
 ```
 
-This example uses `enum struct` for value-type semantics. [`enum class`](https://github.com/dotnet/csharplang/blob/main/proposals/data-carrying-enums.md#enum-class-translation) provides reference-type semantics with the same case declaration, construction, and pattern syntax.
+The [`closed` modifier](https://github.com/dotnet/csharplang/blob/main/proposals/data-carrying-enums.md#exhaustiveness-and-evolution) fixes the set of cases. Designating `None` as the [`default` case](https://github.com/dotnet/csharplang/blob/main/proposals/data-carrying-enums.md#default-values) also accounts for zero-initialized values, so these switches can cover just `Some` and `None`.
+
+This example uses `enum struct` for value-type semantics. [`enum class`](https://github.com/dotnet/csharplang/blob/main/proposals/data-carrying-enums.md#enum-class-translation) provides reference-type semantics with the same case construction and pattern syntax.
 
 `Parse("42")` relies on [target-typed generic type inference](https://github.com/dotnet/csharplang/blob/main/proposals/target-typed-generic-type-inference.md) to infer `T` from `Option<int>`. The `.Some(...)` and `.None` forms depend on the [contextual syntax extensions](https://github.com/dotnet/csharplang/blob/main/proposals/data-carrying-enums.md#contextual-construction-and-inference) and avoid repeating the enclosing enum type.
 
@@ -96,11 +98,12 @@ public closed enum class Distance : ISpanFormattable
     Meters(double Value),
     Kilometers(double Value);
 
-    private double InMeters => this switch
-    {
-        Meters(var value) => value,
-        Kilometers(var value) => value * 1000
-    };
+    private double InMeters
+        => this switch
+        {
+            Meters(var value) => value,
+            Kilometers(var value) => value * 1000
+        };
 
     public string ToString(string? format, IFormatProvider? formatProvider)
         => InMeters.ToString(format, formatProvider);
@@ -193,11 +196,12 @@ The same lookup applies in target-typed switch arms:
 ```csharp
 closed enum class Result<T, E> { Ok(T Value), Error(E Value) }
 
-Result<U, E> Map<T, U, E>(Result<T, E> result, Func<T, U> mapper) => result switch
-{
-    .Ok(var value) => .Ok(mapper(value)),
-    .Error(var error) => .Error(error)
-};
+Result<U, E> Map<T, U, E>(Result<T, E> result, Func<T, U> mapper)
+    => result switch
+    {
+        .Ok(var value) => .Ok(mapper(value)),
+        .Error(var error) => .Error(error)
+    };
 ```
 
 Contextual case construction should compose with [generalized type inference](https://github.com/dotnet/csharplang/blob/madstorgersen-generalized-type-inference/proposals/generalized-type-inference.md), which allows information to flow between arguments and their context. For example, another argument can determine a generic method's type parameter and thereby the expected enum type:
@@ -254,7 +258,7 @@ public struct Option<T>
 
 For an `enum class`, `default(E)` is `null` and represents no case.
 
-For an `enum struct`, discriminator zero denotes an *uninitialized value* unless a `default` case is designated. Cases not designated as `default` have nonzero discriminators, including data-free cases. For the earlier `Option<T>` declaration:
+For an `enum struct`, discriminator zero denotes an *uninitialized value* unless a `default` case is designated. Cases not designated as `default` have nonzero discriminators, including data-free cases. Without `= default` on `None`, the walkthrough's `Option<T>` would have these values:
 
 ```csharp
 Option<int> uninitialized = default;   // no active case
@@ -265,12 +269,6 @@ Option<int> some = Option<int>.Some(0); // active Some with payload 0
 An `enum struct` may designate at most one case with `= default`, with or without payload parameters. This maps discriminator zero to that case, with each payload field receiving its type's default value in a zero-initialized enum:
 
 ```csharp
-enum struct Option<T>
-{
-    None = default,
-    Some(T Value)
-}
-
 Option<int> option = default;
 bool isNone = option is Option<int>.None; // true
 bool hasValue = option.HasValue;          // true
