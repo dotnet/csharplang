@@ -65,7 +65,7 @@ A data-carrying enum can expose behavior shared by all its cases. The initial de
 
 User-declared instance fields, auto-properties requiring instance storage, field-like instance events, and instance constructors are not currently allowed. Whether to permit additional state or custom constructors is discussed under [Additional Members](https://github.com/dotnet/csharplang/blob/main/proposals/data-carrying-enums.md#additional-members).
 
-Data-carrying enum declarations have no base list and cannot assign constant values to cases. An `enum struct` may designate a case with `= default`, as described under [Default Values](https://github.com/dotnet/csharplang/blob/main/proposals/data-carrying-enums.md#default-values). User members conflicting with generated members are errors, except for customization permitted by ordinary record rules.
+Data-carrying enum declarations have no [base list](https://github.com/dotnet/csharplang/blob/main/proposals/data-carrying-enums.md#deriving-enum-class-from-a-record) and cannot assign constant values to cases. An `enum struct` may designate a case with `= default`, as described under [Default Values](https://github.com/dotnet/csharplang/blob/main/proposals/data-carrying-enums.md#default-values). User members conflicting with generated members are errors, except for customization permitted by ordinary record rules.
 
 ### Partial Declarations
 
@@ -644,6 +644,21 @@ Should declarations such as `Empty()` be disallowed in favor of `Empty`, giving 
 ### Additional Members
 
 Should a data-carrying enum be able to declare additional instance state or custom instance constructors? State outside the cases would need defined initialization, copying, equality, and `with` behavior. A custom constructor would need to select a valid case and preserve the case-construction model.
+
+### Deriving `enum class` from a Record
+
+An `enum class` could derive from another record with an accessible parameterless constructor, or provide arguments to its base constructor directly in the base list. A further option is an enum primary constructor whose parameters are all forwarded to the base record, with cases supplying arguments to that constructor. For example, possible future syntax could be:
+
+```csharp
+record BaseRecord(int x);
+
+enum class Outer(int x) : BaseRecord(x)
+{
+    A(int x, int y) : base(x)
+}
+```
+
+These options add substantial design surface around constructor binding, inherited state, and record copying and equality. We recommend deferring record inheritance and enum primary constructors from the initial feature. The current design does not preclude adding them later; they are included here for completeness.
 
 ### Inference from Case Arguments
 
