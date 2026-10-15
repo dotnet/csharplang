@@ -235,9 +235,7 @@ Type-list-only declarations can also use `union struct`. Their existing case typ
 
 ### Metadata and Compatibility
 
-The compiler emits metadata identifying generated case types and their construction operations. Supporting compilers use it to enforce the restriction on `new` across assembly boundaries. The encoding remains an [open question](#metadata-encoding).
-
-Generated case types carry nonoptional [CompilerFeatureRequired](https://learn.microsoft.com/en-us/dotnet/api/system.runtime.compilerservices.compilerfeaturerequiredattribute) metadata with a feature name such as `"DiscriminatedUnionCases"` (TBD). An error-level `ObsoleteAttribute` guard covers older compilers, following the [required-members compatibility pattern](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-11.0/required-members.md#metadata-representation). Supporting compilers ignore that guard.
+The [shared design](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/union-enum-common.md#metadata-and-compatibility) defines the required metadata and compatibility guards.
 
 ## Value Semantics
 
