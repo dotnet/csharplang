@@ -97,7 +97,7 @@ Authors can separate cases and members into different parts. A members-only part
 
 The `readonly` and `ref` modifiers apply only to `enum struct` types. The `closed` modifier controls [case-set evolution](https://github.com/dotnet/csharplang/blob/main/proposals/data-carrying-enums.md#exhaustiveness-and-evolution).
 
-A cases-only body may have a trailing comma. A members-only body needs no leading separator. When cases precede members, a semicolon separates them and must be followed by at least one member. No comma is permitted immediately before that semicolon.
+The body grammar below is subject to these rules: a cases-only body may have a trailing comma, and a members-only body needs no leading separator. A semicolon is required between cases and members and is permitted only when both are present. No comma is permitted immediately before it.
 
 ```antlr
 data_enum_declaration
@@ -114,8 +114,7 @@ data_enum_modifier
     ;
 
 data_enum_body
-    : '{' (data_enum_case_declarations (',' | ';' class_member_declaration+)?
-          | class_member_declaration*) '}'
+    : '{' (data_enum_case_declarations ','?)? ';'? class_member_declaration* '}'
     ;
 
 data_enum_case_declarations

@@ -57,16 +57,15 @@ public enum struct Option<T>
 
 ### Syntax
 
-A body containing only members needs no leading semicolon. When values precede members, a semicolon separates them and must be followed by at least one member. No comma is permitted immediately before that semicolon. Values-only bodies retain their existing syntax, including an optional trailing comma.
+The body grammar below is subject to these rules: a values-only body may have a trailing comma, and a members-only body needs no leading separator. A semicolon is required between values and members and is permitted only when both are present. No comma is permitted immediately before it.
 
-The following extends `enum_body` in [C# specification §19.2, Enum declarations](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/enums.md#192-enum-declarations). In grammar diffs, `+` marks added alternatives:
+The following updates `enum_body` in [C# specification §19.2, Enum declarations](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/enums.md#192-enum-declarations). In grammar diffs, `-` marks removed lines and `+` marks added lines:
 
 ```diff
  enum_body
-     : '{' enum_member_declarations? '}'
-     | '{' enum_member_declarations ',' '}'
-+    | '{' class_member_declaration+ '}'
-+    | '{' enum_member_declarations ';' class_member_declaration+ '}'
+-    : '{' enum_member_declarations? '}'
+-    | '{' enum_member_declarations ',' '}'
++    : '{' (enum_member_declarations ','?)? ';'? class_member_declaration* '}'
      ;
 ```
 
