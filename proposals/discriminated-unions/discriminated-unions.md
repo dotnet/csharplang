@@ -177,7 +177,7 @@ public struct Option<T> : IUnion
 
 ### Default Values
 
-For `union struct`, discriminator zero denotes no active case unless one case is designated with `= default`. Other cases have nonzero discriminators. A designated case may have payload parameters:
+Without a designated `default` case, `default(U)` for a `union struct` has no active case. Designating a case with `= default` makes `default(U)` represent that case, with each payload field holding its type's default value. For example:
 
 ```csharp
 union struct Measurement
@@ -190,7 +190,7 @@ Measurement measurement = default;
 bool isReading = measurement is Measurement.Reading(0, null); // true
 ```
 
-At most one case may be designated, across all partial declarations. Zero-initialization gives its payload fields their type defaults, without executing case constructors or applying optional parameter defaults. Explicit construction preserves the supplied payload, including non-default values. Apart from the meaning of zero, numeric discriminator values are implementation details.
+At most one case may be designated, across all partial declarations. Zero-initialized fields and array elements follow the same rules. Zero-initialization does not execute case constructors or apply optional parameter defaults. Explicit construction preserves the supplied payload, including non-default values.
 
 The designated `default` case is active even when its payload contains nulls.
 

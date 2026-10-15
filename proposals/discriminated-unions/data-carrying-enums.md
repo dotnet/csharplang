@@ -219,7 +219,7 @@ public struct Option<T>
 
 For an `enum class`, `default(E)` is `null` and represents no case.
 
-For an `enum struct`, discriminator zero denotes an *uninitialized value* unless a `default` case is designated. Cases not designated as `default` have nonzero discriminators, including data-free cases. Without `= default` on `None`, the walkthrough's `Option<T>` would have these values:
+For an `enum struct` without a designated `default` case, `default(E)` is an *uninitialized value* with no active case. For example, if the walkthrough's `Option<T>` omitted `= default` on `None`:
 
 ```csharp
 Option<int> uninitialized = default;   // no active case
@@ -227,7 +227,7 @@ Option<int> none = Option<int>.None;   // active None
 Option<int> some = Option<int>.Some(0); // active Some with payload 0
 ```
 
-An `enum struct` may designate at most one case with `= default` across all partial declarations, with or without payload parameters. This maps discriminator zero to that case, with each payload field receiving its type's default value in a zero-initialized enum:
+An `enum struct` may designate at most one case with `= default` across all partial declarations. The designated case may have payload parameters. A zero-initialized enum then represents that case, with each payload field holding its type's default value:
 
 ```csharp
 Option<int> option = default;
@@ -244,7 +244,7 @@ Measurement measurement = default;
 bool isReading = measurement is Measurement.Reading(0, null); // true
 ```
 
-Constructing or converting the designated case preserves the supplied payload, including non-default values. Zero-initialization of fields and array elements follows the same rules and does not invoke case constructors or use optional parameter defaults. Apart from the meaning of zero, numeric discriminator values are implementation details.
+Constructing or converting the designated case preserves the supplied payload, including non-default values. Zero-initialization of fields and array elements follows the same rules and does not invoke case constructors or use optional parameter defaults.
 
 Nullable analysis checks a designated `default` case as if each payload property were initialized with `default` of its declared type. For example, `Reading(double Value, string Unit) = default` produces a warning at the designation because zero-initialization leaves `Unit` null despite its non-nullable declaration. The `string? Unit` in the example above permits that value.
 
@@ -400,7 +400,7 @@ Case types support ordinary record `with` expressions. On an `enum class` receiv
 
 ### Equality and Hashing
 
-`enum class` cases use record equality, including case type identity. `enum struct` equality requires the same discriminator and, for an active case, equality of the corresponding case records. Payload comparisons follow ordinary record rules, including `EqualityComparer<T>.Default`. Unused storage and padding do not participate.
+`enum class` cases use record equality, including case type identity. For active `enum struct` values, equality requires the same case and equality of the corresponding case records. Payload comparisons follow ordinary record rules, including `EqualityComparer<T>.Default`. Unused storage and padding do not participate.
 
 Both enum forms expose strongly typed `Equals`, `IEquatable<E>`, `Equals(object)`, and `==`/`!=` for the enum type `E`. Struct hashing follows the active case's record hashing and may incorporate case identity. Hash values and combining algorithms are implementation details.
 
