@@ -62,16 +62,6 @@ Use(Option<int>.Some(42));
 3. The proposed rule recurses from `Option<int>.Some` to `Option<T>.Some`. Ordinary inference through the nested type's containing generic type supplies `T = int`.
 4. The argument then has a union conversion to the fixed parameter type, `Option<int>`.
 
-### Inference from an Assignment Target
-
-We expect this line from both walkthroughs to work if [target-typed generic type inference](https://github.com/dotnet/csharplang/blob/madstorgersen-target-typing-proposal/proposals/target-typed-generic-type-inference.md) is adopted:
-
-```csharp
-Option<int> result = Parse("42");
-```
-
-Inferring `T` from the assignment target is a general method-inference feature, independent of either declaration syntax. Without that proposal, users must supply the type argument explicitly as `Parse<int>("42")`.
-
 ### Target-Typed Patterns and Switch Arms
 
 We expect these patterns and case constructions to work with target-typed static member access. The type parameters are declared on `Map`, so its body needs no generic inference. Here `Result<T, E>` is a `union` or a `closed enum class` declaring `Ok(T Value)` and `Error(E Value)` cases:
