@@ -272,7 +272,7 @@ The [shared library-evolution rules](https://github.com/dotnet/csharplang/blob/m
 
 Each case in a data-carrying enum declares a public nested type that can be used like any other type. Its effective accessibility is bounded by the enclosing enum. Case types are records. Record behavior supplies payload properties, deconstruction, and case equality. See [Construction and Case Access](https://github.com/dotnet/csharplang/blob/main/proposals/data-carrying-enums.md#construction-and-case-access) for restrictions on `new`.
 
-The type sketches below describe relationships between the enum and its cases. Storage and switch emit remain implementation details. Candidate strategies are discussed in the [shared layout proposal](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/union-enum-non-boxed-layout.md) and [Implementation Details](https://github.com/dotnet/csharplang/blob/main/proposals/data-carrying-enums.md#implementation-details).
+The type sketches below describe relationships between the enum and its cases. Storage and switch emit remain implementation details. See [Implementation Details](https://github.com/dotnet/csharplang/blob/main/proposals/data-carrying-enums.md#implementation-details) for candidate switch translations.
 
 ### `enum class` Translation
 
@@ -302,7 +302,7 @@ The base has no instance state, so case copy constructors call `base()`. Only th
 
 ### `enum struct` Translation
 
-The `struct` keyword selects an opinionated inline representation. Case types are separate `record struct` types, with conversions between the cases and the enum:
+The `struct` keyword selects an [opinionated inline representation](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/union-enum-non-boxed-layout.md). Case types are separate `record struct` types, with conversions between the cases and the enum:
 
 ```csharp
 // Conceptual type model and simple storage for Option<T>:

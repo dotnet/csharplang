@@ -2,7 +2,7 @@
 
 This proposal brings discriminated unions to C# by extending the [type-union feature](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-15.0/unions.md) with nested case declarations. Each `case` introduces a fresh type and adds it to the union's case set. Existing [union conversions](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-15.0/unions.md#union-conversions), matching, members, and exhaustiveness then apply.
 
-An [alternative approach](https://github.com/dotnet/csharplang/blob/main/proposals/data-carrying-enums.md) builds on familiar C# enums. Both proposals can use the [shared non-boxed layout](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/union-enum-non-boxed-layout.md) when declared with `struct`.
+An [alternative approach](https://github.com/dotnet/csharplang/blob/main/proposals/data-carrying-enums.md) builds on familiar C# enums.
 
 ## Example Walkthrough
 
@@ -55,14 +55,9 @@ The following extends the [union-declaration grammar](https://github.com/dotnet/
 
 ```antlr
 union_declaration
-    : attributes? union_modifier* 'union' 'struct'? identifier type_parameter_list?
+    : attributes? struct_modifier* 'partial'? 'union' 'struct'? identifier type_parameter_list?
       ('(' case_types ')')? struct_interfaces? type_parameter_constraints_clause*
       ('{' union_member_declaration* '}' | ';')
-    ;
-
-union_modifier
-    : struct_modifier
-    | 'partial'
     ;
 
 union_member_declaration
@@ -245,13 +240,19 @@ Assignment copies the enclosing struct shallowly. Bare unions copy a case refere
 
 For a union with declared cases, the conceptual model is a value containing one of a set of record types. The enclosing union therefore exposes record-like equality and hashing that delegate to the active case. It implements `IEquatable<U>` and provides `Equals(U)`, `Equals(object)`, `GetHashCode()`, `==`, and `!=`, with synthesis and customization following the [record-struct equality rules](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-10.0/record-structs.md#equality-members).
 
-Synthesized equality requires the same case and equality of the corresponding case records. Two values with no active case are equal and are unequal to active cases. A designated `default` case participates as its ordinary case. Unused storage and padding never participate. Hashing follows the active case's record hashing, with equal values producing equal hashes. Hash values and combining algorithms remain implementation details.
+Synthesized equality requires the same case and equality of the corresponding case records. Unused storage and padding never participate. Hashing follows the active case's record hashing, with equal values producing equal hashes. Hash values and combining algorithms remain implementation details.
 
-Existing type-list-only unions inherit `Equals(object)` and `GetHashCode()` from `System.ValueType`. Their single object field gives them contained-value equality. We also propose synthesizing `IEquatable<U>`, `Equals(U)`, and overrides of `Equals(object)` and `GetHashCode()` for these declarations, avoiding runtime field inspection and boxing for typed equality. The [public shape of the typed member](#equality-api-compatibility) remains a compatibility question.
+Without a designated `default` case, two `default(U)` instances of the same union type compare equal. A `default(U)` instance compares unequal to any constructed case. For the earlier `Result` declaration:
 
-For type-list-only declarations, synthesis preserves the existing contained-value equality semantics. If the contained values compare equal, the unions compare equal, even when the values have different runtime types or internal storage tags.
+```csharp
+Result uninitialized = default;
+bool equalsDefault = uninitialized == default(Result); // true
+bool equalsSuccess = uninitialized == Result.Success("Complete"); // false
+```
 
-Type-list-only bare unions with user-defined equality or hashing members, or a user-provided `IEquatable<U>` implementation, retain their existing behavior without default equality synthesis. A type-list-only `union struct` that customizes equality must provide `Equals(U)`, `Equals(object)`, and `GetHashCode()` together. An explicit `IEquatable<U>.Equals` implementation can supply the typed member. Incomplete customization is an error, so equality never falls back to comparing implementation storage.
+With a designated `default` case, `default(U)` compares as an instance of that case with default payload values.
+
+Type-list-only unions retain their existing equality and hashing semantics, including when using the non-boxed representation.
 
 ### Recursive Payloads and Concurrent Access
 
@@ -294,9 +295,3 @@ Should unions have a way to indicate that their case set is non-exhaustive, for 
 ### Explicit `union class` Spelling
 
 Should `union class` be an explicit synonym for bare `union`, as `record class` is for `record`? We would like this symmetry when adding `union struct`. However, bare `union` is itself an object-backed struct, so the word `class` would describe neither the containing CLR type nor the kind of every explicitly listed case. That potential confusion remains a reason to omit the synonym.
-
-### Equality API Compatibility
-
-Adding a public `Equals(U)` overload to existing type-list-only unions can change source binding through union conversions. For `union U(int)`, `value.Equals(42)` currently calls `Equals(object)` and compares the union with a boxed integer, yielding false. With the typed overload, it can convert `42` to `U` and compare two unions, yielding true.
-
-Should the strongly typed method instead be an explicit `IEquatable<U>` implementation? That would retain efficient generic comparisons without adding a public overload. Synthesis is an API change whose source compatibility needs evaluation, beyond optimizing the comparison itself.
