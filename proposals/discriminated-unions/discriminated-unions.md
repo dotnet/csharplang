@@ -243,15 +243,15 @@ Assignment copies the enclosing struct shallowly. Bare unions copy a case refere
 
 ### Equality and Hashing
 
-Current union declarations inherit `Equals(object)` and `GetHashCode()` from `System.ValueType`. Because they contain one object field, equality already compares that field using the contained value's equality. They do not generate a strongly typed `Equals` or implement `IEquatable<U>`.
+For a union with declared cases, the conceptual model is a value containing one of a set of record types. The enclosing union therefore exposes record-like equality and hashing that delegate to the active case. It implements `IEquatable<U>` and provides `Equals(U)`, `Equals(object)`, `GetHashCode()`, `==`, and `!=`, with synthesis and customization following the [record-struct equality rules](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-10.0/record-structs.md#equality-members).
 
-We propose generating `IEquatable<U>`, a strongly typed `Equals(U)`, and overrides of `Equals(object)` and `GetHashCode()` for union declarations, including existing type-list declarations. The synthesized `Equals(object)` checks the union type and delegates to the typed implementation. This gives an efficient implementation without relying on runtime field inspection or boxing the union for typed equality. The [public shape of the typed member](#equality-api-compatibility) remains a compatibility question.
+Synthesized equality requires the same case and equality of the corresponding case records. Two values with no active case are equal and are unequal to active cases. A designated `default` case participates as its ordinary case. Unused storage and padding never participate. Hashing follows the active case's record hashing, with equal values producing equal hashes. Hash values and combining algorithms remain implementation details.
 
-Bare unions with user-defined equality or hashing members, or a user-provided `IEquatable<U>` implementation, retain their existing behavior without default equality synthesis. A `union struct` that customizes equality must provide `Equals(U)`, `Equals(object)`, and `GetHashCode()` together. An explicit `IEquatable<U>.Equals` implementation can supply the typed member. Incomplete customization is an error, so equality never falls back to comparing implementation storage.
+Existing type-list-only unions inherit `Equals(object)` and `GetHashCode()` from `System.ValueType`. Their single object field gives them contained-value equality. We also propose synthesizing `IEquatable<U>`, `Equals(U)`, and overrides of `Equals(object)` and `GetHashCode()` for these declarations, avoiding runtime field inspection and boxing for typed equality. The [public shape of the typed member](#equality-api-compatibility) remains a compatibility question.
 
-For declarations with generated cases, synthesized equality requires the same case and equal contents under that case's record rules. Two values with no active case are equal and are unequal to active cases. A designated `default` case participates as its ordinary case. Unused storage and padding never participate. Hashing follows the active case's equality, with equal values producing equal hashes. Hash values and combining algorithms remain implementation details.
+For type-list-only declarations, synthesis preserves the existing contained-value equality semantics. If the contained values compare equal, the unions compare equal, even when the values have different runtime types or internal storage tags.
 
-For type-list-only unions, synthesis preserves the existing contained-value equality semantics, including user-defined equality between different runtime types. A storage tag must not introduce a new inequality. This proposal does not add equality operators to the enclosing union.
+Type-list-only bare unions with user-defined equality or hashing members, or a user-provided `IEquatable<U>` implementation, retain their existing behavior without default equality synthesis. A type-list-only `union struct` that customizes equality must provide `Equals(U)`, `Equals(object)`, and `GetHashCode()` together. An explicit `IEquatable<U>.Equals` implementation can supply the typed member. Incomplete customization is an error, so equality never falls back to comparing implementation storage.
 
 ### Recursive Payloads and Concurrent Access
 
@@ -297,6 +297,6 @@ Should `union class` be an explicit synonym for bare `union`, as `record class` 
 
 ### Equality API Compatibility
 
-A public `Equals(U)` overload can change source binding through union conversions. For `union U(int)`, `value.Equals(42)` currently calls `Equals(object)` and compares the union with a boxed integer, yielding false. With the typed overload, it can convert `42` to `U` and compare two unions, yielding true.
+Adding a public `Equals(U)` overload to existing type-list-only unions can change source binding through union conversions. For `union U(int)`, `value.Equals(42)` currently calls `Equals(object)` and compares the union with a boxed integer, yielding false. With the typed overload, it can convert `42` to `U` and compare two unions, yielding true.
 
 Should the strongly typed method instead be an explicit `IEquatable<U>` implementation? That would retain efficient generic comparisons without adding a public overload. Synthesis is an API change whose source compatibility needs evaluation, beyond optimizing the comparison itself.
