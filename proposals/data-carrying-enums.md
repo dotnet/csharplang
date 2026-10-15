@@ -55,9 +55,13 @@ Data-carrying enum cases use their enclosing enum's type parameters and constrai
 
 Data-carrying enum declarations have no base list and cannot assign constant values to cases. An `enum struct` may designate a case with `= default`, as described under [Default Values](https://github.com/dotnet/csharplang/blob/main/proposals/data-carrying-enums.md#default-values).
 
+User-declared members may customize generated members where ordinary record rules allow it; other conflicts with generated members or case type names are errors. Whether to permit additional instance state or custom constructors is discussed under [Additional Members](https://github.com/dotnet/csharplang/blob/main/proposals/data-carrying-enums.md#additional-members).
+
 ### Partial Declarations
 
 Data-carrying enums support `partial` under the ordinary partial-type rules. Cases from all parts form one case set, with unique case names and at most one designated `default` case across the entire declaration.
+
+Authors can separate cases and members into different parts. A part containing only members begins its body with the separating semicolon, for example `partial enum struct Option<T> { ; /* members */ }`.
 
 ### Grammar
 
@@ -602,6 +606,10 @@ An `enum struct` cannot directly store an arbitrary independent `T` inline: its 
 ### Empty Parameter Lists
 
 Should declarations such as `Empty()` be disallowed in favor of `Empty`, giving data-free cases a single form? This concerns an empty *declaration* parameter list. A nonempty list containing optional or `params` parameters can still allow a call with no arguments under ordinary argument-binding rules.
+
+### Additional Members
+
+Should data-carrying enums permit additional instance state or custom instance constructors? State outside the cases would need defined initialization, copying, equality, and `with` behavior. A custom constructor would need to select a valid case and preserve the case-construction model.
 
 ### Inference from Case Arguments
 
