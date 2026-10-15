@@ -59,7 +59,7 @@ Data-carrying enum cases use their enclosing enum's type parameters and constrai
 
 ### Declaration Rules
 
-Data-carrying enum declarations may list interfaces, but cannot specify a [base class](https://github.com/dotnet/csharplang/blob/main/proposals/data-carrying-enums.md#deriving-enum-class-from-a-record). Interfaces are implemented by the enclosing type under ordinary interface-implementation rules.
+Data-carrying enum declarations may list interfaces, but cannot specify a base class. Whether to allow [record inheritance for `enum class`](https://github.com/dotnet/csharplang/blob/main/proposals/data-carrying-enums.md#deriving-enum-class-from-a-record) remains an open question. Interfaces are implemented by the enclosing type under ordinary interface-implementation rules.
 
 Cases cannot be assigned constant values. An `enum struct` may designate a case with `= default`, as described under [Default Values](https://github.com/dotnet/csharplang/blob/main/proposals/data-carrying-enums.md#default-values).
 
