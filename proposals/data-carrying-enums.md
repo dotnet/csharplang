@@ -186,9 +186,11 @@ public ref struct RefOption<T> where T : allows ref struct
 
 The existing [ref-safety and anti-constraint rules](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-13.0/ref-struct-interfaces.md#ref-struct-generic-parameters) apply to case construction, conversions, pattern extraction, and `TryGetValue`. Ref-like payloads remain in typed fields. Case types retain the applicable record-like payload properties, deconstruction, and copying behavior.
 
-#### Open Question: Record-Like Members
+#### Equality, Hashing, and Printing
 
-The [equality and hashing rules](#equality-and-hashing) below currently apply only to non-ref-like enums. Which equality, hashing, and printing members should be generated for ref-like enums and their cases? Ordinary [record structs](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-10.0/record-structs.md) do not permit `ref`; `EqualityComparer<T>` does not admit ref-like type arguments, and arbitrary ref-like payloads need not define suitable equality or formatting. The feature needs synthesis or omission rules for these members that do not require boxing.
+Ref-like enums and their cases do not receive synthesized record equality, hashing, or printing. The [equality and hashing rules](https://github.com/dotnet/csharplang/blob/main/proposals/data-carrying-enums.md#equality-and-hashing) below apply only to non-ref-like enums.
+
+By default, the compiler emits `Equals(object)` and `GetHashCode()` overrides that throw `NotSupportedException`, following [`Span<T>`](https://github.com/dotnet/runtime/blob/main/src/libraries/System.Private.CoreLib/src/System/Span.cs) and [`ReadOnlySpan<T>`](https://github.com/dotnet/runtime/blob/main/src/libraries/System.Private.CoreLib/src/System/ReadOnlySpan.cs). Authors provide any custom equality, hashing, or formatting on the enclosing enum, rather than on individual case types; for example, they may declare `==`/`!=` or override `ToString()`.
 
 ## Construction and Case Access
 
