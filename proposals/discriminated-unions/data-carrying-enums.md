@@ -66,11 +66,11 @@ Console.WriteLine(message); // Parsed 42
 Console.WriteLine(result.GetValueOrDefault(0)); // 42
 ```
 
-The [`closed` modifier](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/data-carrying-enums.md#exhaustiveness-and-evolution) fixes the set of cases. Designating `None` as the [`default` case](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/data-carrying-enums.md#default-values) also accounts for zero-initialized values, so these switches can cover just `Some` and `None`.
+The [`closed` modifier](https://github.com/dotnet/csharplang/blob/main/proposals/data-carrying-enums.md#exhaustiveness-and-evolution) fixes the set of cases. Designating `None` as the [`default` case](https://github.com/dotnet/csharplang/blob/main/proposals/data-carrying-enums.md#default-values) also accounts for zero-initialized values, so these switches can cover just `Some` and `None`.
 
-This example uses `enum struct` for value-type semantics. [`enum class`](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/data-carrying-enums.md#enum-class-translation) provides reference-type semantics with the same case construction and pattern syntax.
+This example uses `enum struct` for value-type semantics. [`enum class`](https://github.com/dotnet/csharplang/blob/main/proposals/data-carrying-enums.md#enum-class-translation) provides reference-type semantics with the same case construction and pattern syntax.
 
-`Parse("42")` relies on [target-typed generic type inference](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/data-carrying-enums.md#inference-from-an-assignment-target) to infer `T` from `Option<int>`. The `.Some(...)` and `.None` forms depend on the [contextual syntax extensions](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/data-carrying-enums.md#contextual-construction-and-inference), avoiding the need to repeat the enclosing enum type.
+`Parse("42")` relies on [target-typed generic type inference](https://github.com/dotnet/csharplang/blob/main/proposals/data-carrying-enums.md#inference-from-an-assignment-target) to infer `T` from `Option<int>`. The `.Some(...)` and `.None` forms depend on the [contextual syntax extensions](https://github.com/dotnet/csharplang/blob/main/proposals/data-carrying-enums.md#contextual-construction-and-inference), avoiding the need to repeat the enclosing enum type.
 
 ## Declarations
 
@@ -103,25 +103,25 @@ data_enum_case_declaration
     ;
 ```
 
-The `readonly` and `ref` modifiers apply only to `enum struct` types. The `closed` modifier controls [case-set evolution](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/data-carrying-enums.md#exhaustiveness-and-evolution).
+The `readonly` and `ref` modifiers apply only to `enum struct` types. The `closed` modifier controls [case-set evolution](https://github.com/dotnet/csharplang/blob/main/proposals/data-carrying-enums.md#exhaustiveness-and-evolution).
 
 The body grammar is subject to these rules: a cases-only body may have a trailing comma, and a members-only body needs no leading separator. A semicolon is required between cases and members and is permitted only when both are present. No comma is permitted immediately before it.
 
-The grammar uses the ordinary `parameter_list`. Whether to permit an [empty parameter list](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/data-carrying-enums.md#empty-parameter-lists) remains open.
+The grammar uses the ordinary `parameter_list`. Whether to permit an [empty parameter list](https://github.com/dotnet/csharplang/blob/main/proposals/data-carrying-enums.md#empty-parameter-lists) remains open.
 
-Whether the semicolon between cases and members is required remains an [open question in Members in Enum Declarations](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/enum-members.md#separating-values-from-members).
+Whether the semicolon between cases and members is required remains an [open question in Members in Enum Declarations](https://github.com/dotnet/csharplang/blob/main/proposals/enum-members.md#separating-values-from-members).
 
 ### Declaration Rules
 
-For user-declared functionality (like `GetValueOrDefault` in the walkthrough), this proposal builds on [Members in Enum Declarations](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/enum-members.md). That proposal defines the syntax and rules for adding members. It is not required for the members that the compiler generates under this proposal.
+For user-declared functionality (like `GetValueOrDefault` in the walkthrough), this proposal builds on [Members in Enum Declarations](https://github.com/dotnet/csharplang/blob/main/proposals/enum-members.md). That proposal defines the syntax and rules for adding members. It is not required for the members that the compiler generates under this proposal.
 
-Data-carrying enum cases use their enclosing enum's type parameters and constraints. Whether a case can declare [independent type parameters](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/data-carrying-enums.md#independent-generic-case-parameters) is an open question.
+Data-carrying enum cases use their enclosing enum's type parameters and constraints. Whether a case can declare [independent type parameters](https://github.com/dotnet/csharplang/blob/main/proposals/data-carrying-enums.md#independent-generic-case-parameters) is an open question.
 
-Data-carrying enum declarations may list interfaces, but cannot specify a base class. Whether to allow [record inheritance for `enum class`](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/data-carrying-enums.md#deriving-enum-class-from-a-record) remains an open question. Interfaces are implemented by the enclosing type under ordinary interface-implementation rules.
+Data-carrying enum declarations may list interfaces, but cannot specify a base class. Whether to allow [record inheritance for `enum class`](https://github.com/dotnet/csharplang/blob/main/proposals/data-carrying-enums.md#deriving-enum-class-from-a-record) remains an open question. Interfaces are implemented by the enclosing type under ordinary interface-implementation rules.
 
-Cases cannot be assigned constant values. An `enum struct` may designate a case with `= default`, as described under [Default Values](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/data-carrying-enums.md#default-values).
+Cases cannot be assigned constant values. An `enum struct` may designate a case with `= default`, as described under [Default Values](https://github.com/dotnet/csharplang/blob/main/proposals/data-carrying-enums.md#default-values).
 
-User-declared members may customize generated members where ordinary record rules allow it. Other conflicts with generated members or case type names are errors. Whether to permit additional instance state or custom constructors is discussed under [Additional Members](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/data-carrying-enums.md#additional-members).
+User-declared members may customize generated members where ordinary record rules allow it. Other conflicts with generated members or case type names are errors. Whether to permit additional instance state or custom constructors is discussed under [Additional Members](https://github.com/dotnet/csharplang/blob/main/proposals/data-carrying-enums.md#additional-members).
 
 For example, a data-carrying enum can implement [`ISpanFormattable`](https://learn.microsoft.com/en-us/dotnet/api/system.ispanformattable) to format either distance case in meters:
 
@@ -265,21 +265,21 @@ Payloads keep their declared types and nullability. For `Option<string?>.Some(nu
 
 Patterns that extract a case from an `enum struct` require an input statically known to be that enum type. They do not establish CLR inheritance. A boxed `enum struct` is still an enum, so testing an `object` input against a case type does not extract that case. Patterns on the enum's own members inspect the enum itself.
 
-Shorter pattern forms are discussed under [Target-Typed Patterns and Switch Arms](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/data-carrying-enums.md#target-typed-patterns-and-switch-arms).
+Shorter pattern forms are discussed under [Target-Typed Patterns and Switch Arms](https://github.com/dotnet/csharplang/blob/main/proposals/data-carrying-enums.md#target-typed-patterns-and-switch-arms).
 
 ### Exhaustiveness and Evolution
 
 Data-carrying enums follow the case-set policy of [open/closed enums](https://github.com/dotnet/csharplang/blob/main/proposals/closed-enums.md). A `closed` enum promises a fixed case set, allowing exhaustive matching without a future-case fallback. An enum without `closed` may gain cases, so consumers need a fallback for them. This uses that proposal's evolution policy, rather than its rules for integral enum values and conversions.
 
-Class null references follow the ordinary nullable-reference and switch rules. Whether exhaustiveness must account for an uninitialized struct, and whether `null` should match it, remain [open questions](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/data-carrying-enums.md#uninitialized-values-in-matching).
+Class null references follow the ordinary nullable-reference and switch rules. Whether exhaustiveness must account for an uninitialized struct, and whether `null` should match it, remain [open questions](https://github.com/dotnet/csharplang/blob/main/proposals/data-carrying-enums.md#uninitialized-values-in-matching).
 
 Renaming or removing public cases, changing payload parameters or properties, or changing between class and struct representations affects existing APIs. Changing the designated `default` case changes the meaning of zero-initialized storage and is a behavioral breaking change. Adding a struct case can increase storage or alignment requirements. Previously compiled switches retain their normal fallback or unmatched-switch behavior for newly added cases.
 
 ## Type Model
 
-Each data-carrying enum case declares a public nested type that can be used like any other type. Its effective accessibility is bounded by the enclosing enum. Case types are records except in the [ref-like form](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/data-carrying-enums.md#ref-like-enums). Record behavior supplies payload properties, deconstruction, and case equality. See [Construction and Case Access](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/data-carrying-enums.md#construction-and-case-access) for restrictions on `new`.
+Each data-carrying enum case declares a public nested type that can be used like any other type. Its effective accessibility is bounded by the enclosing enum. Case types are records except in the [ref-like form](https://github.com/dotnet/csharplang/blob/main/proposals/data-carrying-enums.md#ref-like-enums). Record behavior supplies payload properties, deconstruction, and case equality. See [Construction and Case Access](https://github.com/dotnet/csharplang/blob/main/proposals/data-carrying-enums.md#construction-and-case-access) for restrictions on `new`.
 
-The type sketches below describe relationships between the enum and its cases. Storage and switch emit remain implementation details. Candidate strategies are discussed in the [shared layout proposal](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/non-boxed-union-enum-layout.md) and [Implementation Details](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/data-carrying-enums.md#implementation-details).
+The type sketches below describe relationships between the enum and its cases. Storage and switch emit remain implementation details. Candidate strategies are discussed in the [shared layout proposal](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/non-boxed-union-enum-layout.md) and [Implementation Details](https://github.com/dotnet/csharplang/blob/main/proposals/data-carrying-enums.md#implementation-details).
 
 ### `enum class` Translation
 
@@ -325,7 +325,7 @@ public struct Option<T>
 }
 ```
 
-These sketches describe the type relationships and use ordinary nested record constructors in emitted code. The struct case types' mutability is described under [Readonly, Copying, and `with`](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/data-carrying-enums.md#readonly-copying-and-with).
+These sketches describe the type relationships and use ordinary nested record constructors in emitted code. The struct case types' mutability is described under [Readonly, Copying, and `with`](https://github.com/dotnet/csharplang/blob/main/proposals/data-carrying-enums.md#readonly-copying-and-with).
 
 ### Ref-Like Enums
 
@@ -369,13 +369,13 @@ The existing [ref-safety and anti-constraint rules](https://github.com/dotnet/cs
 
 #### Equality, Hashing, and Printing
 
-Ref-like enums and their cases do not receive synthesized record equality, hashing, or printing. The [equality and hashing rules](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/data-carrying-enums.md#equality-and-hashing) apply only to non-ref-like enums.
+Ref-like enums and their cases do not receive synthesized record equality, hashing, or printing. The [equality and hashing rules](https://github.com/dotnet/csharplang/blob/main/proposals/data-carrying-enums.md#equality-and-hashing) apply only to non-ref-like enums.
 
 By default, the compiler emits `Equals(object)` and `GetHashCode()` overrides that throw `NotSupportedException`, following [`Span<T>`](https://github.com/dotnet/runtime/blob/main/src/libraries/System.Private.CoreLib/src/System/Span.cs) and [`ReadOnlySpan<T>`](https://github.com/dotnet/runtime/blob/main/src/libraries/System.Private.CoreLib/src/System/ReadOnlySpan.cs). Authors provide any custom equality, hashing, or formatting on the enclosing enum, rather than on individual case types. For example, they may declare `==`/`!=` or override `ToString()`.
 
 ### Metadata and Compatibility
 
-The compiler emits a marker identifying the enum, its cases, and their construction operations. Supporting C# compilers use it to enforce the [construction rules](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/data-carrying-enums.md#construction-and-case-access) when consuming another assembly. The [metadata encoding](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/data-carrying-enums.md#metadata-encoding) remains to be designed.
+The compiler emits a marker identifying the enum, its cases, and their construction operations. Supporting C# compilers use it to enforce the [construction rules](https://github.com/dotnet/csharplang/blob/main/proposals/data-carrying-enums.md#construction-and-case-access) when consuming another assembly. The [metadata encoding](https://github.com/dotnet/csharplang/blob/main/proposals/data-carrying-enums.md#metadata-encoding) remains to be designed.
 
 The enum and its generated case types also carry a nonoptional [CompilerFeatureRequired](https://learn.microsoft.com/en-us/dotnet/api/system.runtime.compilerservices.compilerfeaturerequiredattribute) attribute with a feature name such as `"DataCarryingEnums"` (TBD). Compilers that recognize the attribute but lack feature support reject use of these types, preventing acceptance of `new E.Case(...)` that would become invalid after a compiler upgrade. To cover compilers predating the attribute, the compiler also emits an error-level `ObsoleteAttribute` compatibility guard that supporting compilers ignore, following the [required-members pattern](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-11.0/required-members.md#metadata-representation).
 
@@ -385,7 +385,7 @@ Data-carrying enum cases use the familiar record rules. The enclosing enum adds 
 
 ### Readonly, Copying, and `with`
 
-`enum struct` types currently follow ordinary [`readonly struct` rules](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/structs.md#1622-struct-modifiers): an unmodified `enum struct` is mutable, and `readonly enum struct` is readonly. Generated cases have the enum's readonlyness and follow [`record struct` property rules](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-10.0/record-structs.md#properties), using `get`/`set` properties for mutable cases and `get`/`init` for readonly cases. Whether to make `enum struct` types [always readonly](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/data-carrying-enums.md#always-readonly-enum-struct-types) remains open. Generated queries, extraction methods, and equality members are `readonly` instance members.
+`enum struct` types currently follow ordinary [`readonly struct` rules](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/structs.md#1622-struct-modifiers): an unmodified `enum struct` is mutable, and `readonly enum struct` is readonly. Generated cases have the enum's readonlyness and follow [`record struct` property rules](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-10.0/record-structs.md#properties), using `get`/`set` properties for mutable cases and `get`/`init` for readonly cases. Whether to make `enum struct` types [always readonly](https://github.com/dotnet/csharplang/blob/main/proposals/data-carrying-enums.md#always-readonly-enum-struct-types) remains open. Generated queries, extraction methods, and equality members are `readonly` instance members.
 
 Assignment follows ordinary class and struct rules and copies payloads shallowly. Extracting a struct case produces an independent value, so changing it does not update the enum:
 
@@ -410,7 +410,7 @@ Two uninitialized values of the same `enum struct` are equal, have equal hashes,
 
 ### Recursive Payloads
 
-An `enum struct` follows the normal [value-type layout rules](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/structs.md#1642-value-semantics), and a [`ref enum struct`](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/data-carrying-enums.md#ref-like-enums) follows the corresponding rules for `ref struct` types. Recursive payloads are permitted wherever those rules allow them.
+An `enum struct` follows the normal [value-type layout rules](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/structs.md#1642-value-semantics), and a [`ref enum struct`](https://github.com/dotnet/csharplang/blob/main/proposals/data-carrying-enums.md#ref-like-enums) follows the corresponding rules for `ref struct` types. Recursive payloads are permitted wherever those rules allow them.
 
 For example:
 
@@ -432,7 +432,7 @@ The walkthrough combines data-carrying enums with target-typed access and infere
 
 [Target-typed static member access](https://github.com/dotnet/csharplang/blob/main/proposals/target-typed-static-member-access.md) defines leading-dot lookup and its conversions. [Generalized generic type inference](https://github.com/dotnet/csharplang/blob/madstorgersen-generalized-type-inference/proposals/generalized-type-inference.md) describes target-derived bounds. The [revised target-typed generic inference draft](https://github.com/dotnet/csharplang/blob/madstorgersen-target-typing-proposal/proposals/target-typed-generic-type-inference.md) specifies when binding retries with a target and how nested inference proceeds. These drafts remain in progress. The analysis below uses the revised draft's rule that successful ordinary binding takes precedence.
 
-Inference starting from case arguments, including `Use(.Some(42))` without another source for the outer type argument, remains an [open question](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/data-carrying-enums.md#inference-from-case-arguments).
+Inference starting from case arguments, including `Use(.Some(42))` without another source for the outer type argument, remains an [open question](https://github.com/dotnet/csharplang/blob/main/proposals/data-carrying-enums.md#inference-from-case-arguments).
 
 ### Case Access with a Known Target
 
@@ -446,7 +446,7 @@ Option<int> some = .Some(42);
 1. Each initializer has the target type `Option<int>`.
 2. The [target-typed member binding conversion](https://github.com/dotnet/csharplang/blob/main/proposals/target-typed-static-member-access.md#basic-expression) qualifies `.None` as `Option<int>.None`. The [invocation target-typing conversion](https://github.com/dotnet/csharplang/blob/main/proposals/target-typed-static-member-access.md#target-typing-with-invocations) similarly qualifies `.Some(42)` as `Option<int>.Some(42)`.
 3. Lookup finds the nested case types on the already constructed `Option<int>`. Its type arguments are known, just as they would be for lookup of a static property on that type. No inference through the nested member is needed.
-4. This proposal's [case-construction rules](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/data-carrying-enums.md#construction-and-case-access) produce the corresponding case values without `new`. Each result then uses the [case-to-enum conversion](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/data-carrying-enums.md#generated-apis-and-conversions) to satisfy the target.
+4. This proposal's [case-construction rules](https://github.com/dotnet/csharplang/blob/main/proposals/data-carrying-enums.md#construction-and-case-access) produce the corresponding case values without `new`. Each result then uses the [case-to-enum conversion](https://github.com/dotnet/csharplang/blob/main/proposals/data-carrying-enums.md#generated-apis-and-conversions) to satisfy the target.
 
 Without a target, `var value = .None` is an error.
 
@@ -471,7 +471,7 @@ This ordering agrees with the revised draft's [nested-inference rules](https://g
 
 ### Inference from an Assignment Target
 
-We expect this line from the [walkthrough](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/data-carrying-enums.md#example-walkthrough) to work if [target-typed generic type inference](https://github.com/dotnet/csharplang/blob/madstorgersen-target-typing-proposal/proposals/target-typed-generic-type-inference.md) is adopted:
+We expect this line from the [walkthrough](https://github.com/dotnet/csharplang/blob/main/proposals/data-carrying-enums.md#example-walkthrough) to work if [target-typed generic type inference](https://github.com/dotnet/csharplang/blob/madstorgersen-target-typing-proposal/proposals/target-typed-generic-type-inference.md) is adopted:
 
 ```csharp
 Option<int> result = Parse("42");
@@ -560,7 +560,7 @@ The costs and choices are:
 - `Value` boxes struct cases and requires object-convertible cases.
 - Public protocol names can conflict with domain meanings: `Option<T>.Value` might mean its payload and `HasValue` might mean `Some`, whereas the protocol exposes the active case and recognizes `None` too. A member provider avoids name conflicts but adds interface metadata and would require deciding where the proposed public `HasValue` belongs.
 - Union type patterns inspect the contained case, while untyped property/positional patterns inspect the enum. Integration must preserve that distinction, following the [LDM decision on pattern targets](https://github.com/dotnet/csharplang/blob/main/meetings/2026/LDM-2026-08-12.md#union-pattern-matching-targets).
-- Union null patterns would select the open [uninitialized-null matching option](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/data-carrying-enums.md#uninitialized-values-in-matching), with nullable `Value`. A designated `default` case could use non-nullable `Value`. Annotations and access members must agree.
+- Union null patterns would select the open [uninitialized-null matching option](https://github.com/dotnet/csharplang/blob/main/proposals/data-carrying-enums.md#uninitialized-values-in-matching), with nullable `Value`. A designated `default` case could use non-nullable `Value`. Annotations and access members must agree.
 - Union case-type exhaustiveness must accommodate the enum's separate open/closed evolution policy.
 
 `[Union]` alone would not provide the stronger [JIT optimization contract](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/non-boxed-union-enum-layout.md#runtime-recognition-and-alternatives).
@@ -581,7 +581,7 @@ Should the `null` pattern match the uninitialized state, or should it remain spe
 
 ### Always-Readonly `enum struct` Types
 
-Should `enum struct` types and their generated case records always be readonly, or should they follow the [modifier-based rules](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/data-carrying-enums.md#readonly-copying-and-with) in this draft?
+Should `enum struct` types and their generated case records always be readonly, or should they follow the [modifier-based rules](https://github.com/dotnet/csharplang/blob/main/proposals/data-carrying-enums.md#readonly-copying-and-with) in this draft?
 
 ### Independent Generic Case Parameters
 
@@ -601,7 +601,7 @@ Should data-carrying enums permit additional instance state? We recommend keepin
 
 Should custom instance constructors be permitted? A custom constructor would need to select a valid case and preserve the case-construction model.
 
-Parameterized cases use `N(...)` or `N(...) = default`. The former shares its prefix with an instance constructor. That overlap would need consideration if constructors were allowed and the [comma-only separator alternative](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/enum-members.md#separating-values-from-members) were selected.
+Parameterized cases use `N(...)` or `N(...) = default`. The former shares its prefix with an instance constructor. That overlap would need consideration if constructors were allowed and the [comma-only separator alternative](https://github.com/dotnet/csharplang/blob/main/proposals/enum-members.md#separating-values-from-members) were selected.
 
 ### Deriving `enum class` from a Record
 
