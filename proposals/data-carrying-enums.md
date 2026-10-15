@@ -221,7 +221,7 @@ By default, the compiler emits `Equals(object)` and `GetHashCode()` overrides th
 
 ## Construction and Case Access
 
-Ordinary enums use `Color.Red`. Data-carrying enums extend this to `E.Case(arguments)`:
+An ordinary enum value can be obtained using the syntactic form `E.Case`, such as `Color.Red`. Data-carrying enums extend this syntax to `E.Case(arguments)`:
 
 ```csharp
 var some = Option<int>.Some(42); // Option<int>.Some
