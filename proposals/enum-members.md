@@ -9,14 +9,24 @@ public enum Color
 {
     Red,
     Green,
-    Blue;
+    Blue,
+    Yellow,
+    Cyan,
+    Magenta,
+    Black,
+    White;
 
-    public string DisplayName() => this switch
+    public int ToRGB() => this switch
     {
-        Red => "red",
-        Green => "green",
-        Blue => "blue",
-        _ => "unknown"
+        Red => 0xFF0000,
+        Green => 0x00FF00,
+        Blue => 0x0000FF,
+        Yellow => 0xFFFF00,
+        Cyan => 0x00FFFF,
+        Magenta => 0xFF00FF,
+        Black => 0x000000,
+        White => 0xFFFFFF,
+        _ => throw new InvalidOperationException("Unknown color.")
     };
 }
 ```
@@ -112,12 +122,17 @@ public static class ColorExtensions
 {
     extension(Color color)
     {
-        public string DisplayName() => color switch
+        public int ToRGB() => color switch
         {
-            Color.Red => "red",
-            Color.Green => "green",
-            Color.Blue => "blue",
-            _ => "unknown"
+            Color.Red => 0xFF0000,
+            Color.Green => 0x00FF00,
+            Color.Blue => 0x0000FF,
+            Color.Yellow => 0xFFFF00,
+            Color.Cyan => 0x00FFFF,
+            Color.Magenta => 0xFF00FF,
+            Color.Black => 0x000000,
+            Color.White => 0xFFFFFF,
+            _ => throw new InvalidOperationException("Unknown color.")
         };
     }
 }
