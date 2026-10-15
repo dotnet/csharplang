@@ -78,11 +78,11 @@ union_case_declaration
 
 A union with `case` declarations must omit the parenthesized type list in every partial declaration. Allowing a type list to add existing types alongside declared cases is an [open question](#mixing-existing-types-and-declared-cases). When no type list is supplied, at least one `case` declaration is required across all partial declarations.
 
-The `ref` modifier requires `union struct`. Its [protocol implications](#ref-like-unions) remain unresolved. Whether to permit an explicit `union class` synonym is an [open question](#explicit-union-class-spelling).
+The `ref` modifier applies only to `union struct`. Supporting [ref-like case types](#ref-like-unions) requires changes to the union pattern. Whether to permit an explicit `union class` synonym is an [open question](#explicit-union-class-spelling).
 
 ### Case Declarations
 
-For example:
+Given a union declaration such as:
 
 ```csharp
 union Result
@@ -233,7 +233,7 @@ Type-list-only declarations can also use `union struct`. Their existing case typ
 
 ### Ref-Like Unions
 
-The [shared ref-like design](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/union-enum-common.md#ref-like-enums-and-unions) describes `ref union struct`, including its unresolved union-protocol requirements.
+The [shared ref-like design](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/union-enum-common.md#ref-like-enums-and-unions) describes `ref union struct` and the changes needed to support ref-like case types.
 
 ### Metadata and Compatibility
 

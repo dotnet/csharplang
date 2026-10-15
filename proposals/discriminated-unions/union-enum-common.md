@@ -138,9 +138,9 @@ RefOption<Span<int>> option = RefOption<Span<int>>.Some(buffer);
 
 The existing [ref-safety and anti-constraint rules](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-13.0/ref-struct-interfaces.md#ref-struct-generic-parameters) apply to case construction, conversions, pattern extraction, and `TryGetValue`. Ref-like payloads remain in typed fields. Case types retain the applicable record-like payload properties, deconstruction, and copying behavior.
 
-### Union Protocol
+### Union Pattern for Ref-Like Cases
 
-For `ref union struct`, the object-valued `Value` requirement is a fundamental unresolved problem: these case values cannot be boxed. The current union protocol also requires case types to be object-convertible. Merely implementing `IUnion` on a ref struct does not solve either issue. This form needs a protocol extension, potentially allowing typed creation and `HasValue`/`TryGetValue` without an object-valued view. Its construction, conversions, and matching remain contingent on that design.
+For `ref union struct`, the object-valued `Value` requirement is unresolved because these case values cannot be boxed. The current union pattern also requires case types to be object-convertible. Merely implementing `IUnion` on a ref struct does not solve either issue. This form needs changes to the union pattern, potentially allowing typed creation and `HasValue`/`TryGetValue` without an object-valued view. Its construction, conversions, and matching remain contingent on that design.
 
 ### Equality and Hashing
 
