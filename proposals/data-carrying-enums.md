@@ -52,28 +52,22 @@ public enum struct Option<T>
     };
 }
 
-static class Example
+static Option<T> Parse<T>(string text) where T : IParsable<T>
+    => T.TryParse(text, provider: null, out var value)
+        ? .Some(value)
+        : .None;
+
+Option<int> result = Parse("42");
+
+string message = result switch
 {
-    static Option<T> Parse<T>(string text) where T : IParsable<T>
-        => T.TryParse(text, provider: null, out var value)
-            ? .Some(value)
-            : .None;
+    .Some(var value) => $"Parsed {value}",
+    .None => "Not an integer",
+    _ => "No value"
+};
 
-    static void Main()
-    {
-        Option<int> result = Parse("42");
-
-        string message = result switch
-        {
-            .Some(var value) => $"Parsed {value}",
-            .None => "Not an integer",
-            _ => "No value"
-        };
-
-        Console.WriteLine(message); // Parsed 42
-        Console.WriteLine(result.GetValueOrDefault(0)); // 42
-    }
-}
+Console.WriteLine(message); // Parsed 42
+Console.WriteLine(result.GetValueOrDefault(0)); // 42
 ```
 
 This example uses `enum struct` for value-type semantics. [`enum class`](https://github.com/dotnet/csharplang/blob/main/proposals/data-carrying-enums.md#enum-class-translation) provides reference-type semantics with the same case declaration, construction, and pattern syntax.
