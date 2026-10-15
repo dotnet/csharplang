@@ -43,11 +43,17 @@ public enum class Result
 public enum struct Option<T>
 {
     None,
-    Some(T value)
+    Some(T value);
+
+    public T GetValueOrDefault(T fallback) => this switch
+    {
+        Some(var value) => value,
+        _ => fallback
+    };
 }
 ```
 
-For user-declared functionality, this proposal builds on [Members in Enum Declarations](https://github.com/dotnet/csharplang/blob/main/proposals/enum-members.md). That proposal defines the syntax and rules for adding members; it is not required for the members that the compiler generates under this proposal.
+For user-declared functionality (like `GetValueOrDefault` in the above example), this proposal builds on [Members in Enum Declarations](https://github.com/dotnet/csharplang/blob/main/proposals/enum-members.md). That proposal defines the syntax and rules for adding members; it is not required for the members that the compiler generates under this proposal.
 
 Data-carrying enum cases use their enclosing enum's type parameters and constraints. Whether a case can declare [independent type parameters](https://github.com/dotnet/csharplang/blob/main/proposals/data-carrying-enums.md#independent-generic-case-parameters) is an open question.
 
