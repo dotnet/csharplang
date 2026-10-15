@@ -86,7 +86,7 @@ union Result
 }
 ```
 
-The compiler declares the nested case types and adds them to the union's case set. The equivalent type-list declaration is:
+The compiler declares the nested case types and adds them to the union's case set. The equivalent declaration using existing union syntax is:
 
 ```csharp
 union Result(Result.Success, Result.Failure)
@@ -143,7 +143,7 @@ Whether unions with declared cases should also [restrict direct construction](#d
 
 A `union struct` generates the [non-boxing access pattern](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-15.0/unions.md#non-boxing-access-members): `HasValue` and a `TryGetValue(out Case value)` overload for each case. All of these are `readonly` instance members.
 
-When a `union struct` declares cases with `case`, `Value` returns a boxed copy of the case instance. Repeated reads may return different boxes, and mutating a returned box does not update the union. Bare `union` instead retains its stored object. `union struct` declarations with only a type list may need reference-backed storage to preserve existing union semantics, as discussed in the [shared layout proposal](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/union-enum-non-boxed-layout.md#scope).
+When a `union struct` declares cases with `case`, `Value` returns a boxed copy of the case instance. Repeated reads may return different boxes, and mutating a returned box does not update the union. Bare `union` instead retains its stored object. A `union struct` combining existing types may need reference-backed storage to preserve existing union semantics, as discussed in the [shared layout proposal](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/union-enum-non-boxed-layout.md#scope).
 
 <details>
 <summary>Example: generated access API for Option&lt;T&gt;</summary>
@@ -230,7 +230,7 @@ public struct Option<T> : IUnion
 }
 ```
 
-Type-list-only declarations can also use `union struct`. Their existing case types keep their declared class or struct kind.
+Unions of existing types can also select this storage strategy by adding `struct`, as in `union struct X(T1, T2, T3)`.
 
 ### Metadata and Compatibility
 
@@ -260,7 +260,7 @@ bool equalsSuccess = uninitialized == Result.Success("Complete"); // false
 
 With a designated `default` case, `default(U)` compares as an instance of that case with default payload values.
 
-Type-list-only unions retain their existing equality and hashing semantics, including when using the non-boxed representation.
+Unions of existing types retain their equality and hashing semantics when declared with `union struct`.
 
 ### Recursive Payloads and Concurrent Access
 

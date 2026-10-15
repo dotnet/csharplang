@@ -10,7 +10,7 @@ Bare `union` retains the existing object-backed struct representation. `enum cla
 
 For a `union struct`, the union pattern's object-valued `Value` property can box a value-type case. Typed creation, `HasValue`, and `TryGetValue` avoid that access. Support for ref-like values is explored in the [separate ref-like proposal](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/union-enum-ref-like-types.md).
 
-Existing type-list cases can require reference-backed or hybrid storage. For example, a struct case may overlap an interface case implemented by that struct. Preserving the [union creation-equivalence rules](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-15.0/unions.md#well-formedness) and the identity of an incoming interface reference can require retaining a box. The non-boxing goal for generated cases does not override these requirements.
+Unions of existing types may require reference-backed or hybrid storage. For example, a listed struct type may implement a listed interface type. Preserving the [union creation-equivalence rules](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-15.0/unions.md#well-formedness) and the identity of an incoming interface reference can require retaining a box. The non-boxing goal for generated cases does not override these requirements.
 
 Packing and extraction below implement the creation and access operations defined by the two language proposals. They do not introduce additional language conversions or a shared public API.
 
@@ -191,7 +191,7 @@ else if (__value._discriminator == 3) { /* C3 body */ }
 
 With additional recognition, the runtime could select a dense jump table, sparse tree, or chain and eliminate redundant extraction checks. These are candidate optimizations, not guarantees about current JIT behavior.
 
-The input must be evaluated once. Optimization must preserve guards, deconstruction, null handling, observable source ordering, and fallback behavior. For type-list unions, existing [union well-formedness](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-15.0/unions.md#well-formedness) and matching rules still apply, including when case types overlap. A storage discriminator cannot make matching depend on which creation overload was called. Reference-type cases remain references, preserving the identity of the contained object.
+The input must be evaluated once. Optimization must preserve guards, deconstruction, null handling, observable source ordering, and fallback behavior. For unions of existing types, [union well-formedness](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-15.0/unions.md#well-formedness) and matching rules still apply, including when the listed types overlap. A storage discriminator cannot make matching depend on which creation overload was called. Values of reference types retain their object identity.
 
 ### Performance and Current Runtime Behavior
 
