@@ -188,7 +188,7 @@ The existing [ref-safety and anti-constraint rules](https://github.com/dotnet/cs
 
 #### Open Question: Record-Like Members
 
-The [equality and hashing rules](https://github.com/dotnet/csharplang/blob/main/proposals/data-carrying-enums.md#equality-and-hashing) below currently apply only to non-ref-like enums. Which equality, hashing, and printing members should be generated for ref-like enums and their cases? Ordinary [record structs](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-10.0/record-structs.md) do not permit `ref`; `EqualityComparer<T>` does not admit ref-like type arguments, and arbitrary ref-like payloads need not define suitable equality or formatting. The feature needs synthesis or omission rules for these members that do not require boxing.
+The [equality and hashing rules](#equality-and-hashing) below currently apply only to non-ref-like enums. Which equality, hashing, and printing members should be generated for ref-like enums and their cases? Ordinary [record structs](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-10.0/record-structs.md) do not permit `ref`; `EqualityComparer<T>` does not admit ref-like type arguments, and arbitrary ref-like payloads need not define suitable equality or formatting. The feature needs synthesis or omission rules for these members that do not require boxing.
 
 ## Construction and Case Access
 
