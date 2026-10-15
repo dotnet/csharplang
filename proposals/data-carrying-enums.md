@@ -184,7 +184,7 @@ public ref struct RefOption<T> where T : allows ref struct
 }
 ```
 
-The existing [ref-safety and anti-constraint rules](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-13.0/ref-struct-interfaces.md#ref-struct-generic-parameters) apply to case construction, conversions, pattern extraction, and `TryGetValue`. Ref-like payloads remain in typed fields; they are neither boxed nor stored as raw bytes. Case types retain the applicable record-like payload properties, deconstruction, and copying behavior.
+The existing [ref-safety and anti-constraint rules](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-13.0/ref-struct-interfaces.md#ref-struct-generic-parameters) apply to case construction, conversions, pattern extraction, and `TryGetValue`. Ref-like payloads remain in typed fields. Case types retain the applicable record-like payload properties, deconstruction, and copying behavior.
 
 #### Open Question: Record-Like Members
 
