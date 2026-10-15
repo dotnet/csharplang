@@ -416,7 +416,7 @@ The simplest layout is a discriminator followed by a separate field for each cas
 
 Our initial expectation is that this approach would often make `enum struct` types too large to be practical. Even a handful of cases could substantially increase storage and copying costs. This assessment needs performance validation and sign-off from LDM and the runtime team. The compact layout below aims to minimize storage safely with only a small runtime cost for rearranging data during case conversions.
 
-An attribute or other mechanism could let authors prefer separate case fields when they accept larger enum values for faster conversions. Whether that choice is valuable enough to expose remains open. The compiler could also choose a hybrid layout.
+We aim to provide a default that balances space and speed. We are also open to letting authors configure that balance, most likely through attributes, similar to existing .NET layout controls such as [StructLayout](https://learn.microsoft.com/en-us/dotnet/api/system.runtime.interopservices.structlayoutattribute). Whether to offer customization, its form and scope, and its availability in the initial feature are all undecided.
 
 #### Safety Requirements
 
@@ -660,7 +660,7 @@ An `enum struct` cannot directly store an arbitrary independent `T` inline: its 
 
 ### Empty Parameter Lists
 
-Should declarations such as `Empty()` be disallowed in favor of `Empty`, giving data-free cases a single form? This concerns an empty *declaration* parameter list. A nonempty list containing optional or `params` parameters can still allow a call with no arguments under ordinary argument-binding rules.
+We recommend disallowing empty parameter lists in case declarations and requiring cases declared without parameters to be used without parentheses. This keeps the syntax consistent with ordinary enums: data-free cases have no parameters or parentheses, while data-carrying cases declare parameters and use parentheses for construction. Parentheses remain required when optional or `params` parameters allow zero arguments, so such calls still use `()`.
 
 ### Additional Members
 
