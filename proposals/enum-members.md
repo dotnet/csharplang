@@ -57,7 +57,7 @@ public enum struct Option<T>
 
 ### Syntax
 
-The existing values-only form remains valid. A body containing only members needs no leading semicolon. When values precede a member section, a semicolon separates them; the value list may have a trailing comma and the member section may be empty.
+A body containing only members needs no leading semicolon. When values precede members, a semicolon separates them and must be followed by at least one member. No comma is permitted immediately before that semicolon. Values-only bodies retain their existing syntax, including an optional trailing comma.
 
 The following extends `enum_body` in [C# specification §19.2, Enum declarations](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/enums.md#192-enum-declarations). In grammar diffs, `+` marks added alternatives:
 
@@ -66,7 +66,7 @@ The following extends `enum_body` in [C# specification §19.2, Enum declarations
      : '{' enum_member_declarations? '}'
      | '{' enum_member_declarations ',' '}'
 +    | '{' class_member_declaration+ '}'
-+    | '{' enum_member_declarations ','? ';' class_member_declaration* '}'
++    | '{' enum_member_declarations ';' class_member_declaration+ '}'
      ;
 ```
 
@@ -114,7 +114,7 @@ This already supports methods and computed properties without new enum syntax. C
 
 Should the semicolon be required, or could the final comma after the values separate them from member declarations?
 
-The semicolon gives a clear visual boundary. An enum value is `N` or `N = expression`; methods, properties, fields, and nested types have distinguishable declaration syntax. Instance constructors are excluded, and static constructors start with `static`.
+The semicolon gives a clear visual boundary. An enum value is `N` or `N = expression`. Methods, properties, fields, and nested types have distinguishable declaration syntax. Instance constructors are excluded, and static constructors start with `static`.
 
 An alternative would require values to precede members. When both are present, a comma after the last value would be mandatory:
 
