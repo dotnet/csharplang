@@ -8,7 +8,7 @@ The layout is an implementation detail. Compilers may change it, including to us
 
 Bare `union` retains the existing object-backed struct representation. `enum class` retains its case-reference representation. Neither uses the inline storage described here.
 
-For a non-ref-like `union struct`, the union protocol's object-valued `Value` property can box a value-type case. Typed creation, `HasValue`, and `TryGetValue` avoid that access. Ref-like forms require typed storage for ref-like payloads and remain subject to ordinary ref-safety rules. The union proposal separately identifies the unresolved object-valued `Value` requirement for `ref union struct`.
+For a non-ref-like `union struct`, the union protocol's object-valued `Value` property can box a value-type case. Typed creation, `HasValue`, and `TryGetValue` avoid that access. Ref-like forms require typed storage for ref-like payloads and remain subject to ordinary ref-safety rules. The [shared ref-like design](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/union-enum-common.md#union-protocol) covers the unresolved `Value` requirement for `ref union struct`.
 
 Existing type-list cases can require reference-backed or hybrid storage. For example, a struct case may overlap an interface case implemented by that struct. Preserving the [union creation-equivalence rules](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-15.0/unions.md#well-formedness) and the identity of an incoming interface reference can require retaining a box. The non-boxing goal for generated cases does not override these requirements.
 

@@ -81,3 +81,67 @@ Result<U, E> Map<T, U, E>(Result<T, E> result, Func<T, U> mapper)
 4. `mapper(value)` supplies a `U` for `Result<U, E>.Ok`, while `error` supplies an `E` for `Result<U, E>.Error`. Each case value converts to the enclosing result type using that proposal's conversion rules.
 
 [Type-pattern inference](https://github.com/dotnet/csharplang/blob/main/proposals/inference-for-type-patterns.md) separately addresses written type names with omitted generic arguments.
+
+## Ref-Like Enums and Unions
+
+The `ref` modifier on `enum struct` or `union struct` makes both the enclosing type and every generated case a `ref struct`, including data-free cases. Payloads may therefore be ref-like types or type parameters declared with `allows ref struct`.
+
+The enum-based declaration is:
+
+```csharp
+public ref enum struct RefOption<T> where T : allows ref struct
+{
+    None = default,
+    Some(T Value)
+}
+```
+
+The corresponding union-based syntax is:
+
+```csharp
+public ref union struct RefOption<T> where T : allows ref struct
+{
+    case None = default;
+    case Some(T Value);
+}
+```
+
+Both have the following conceptual type shape, using ordinary `ref struct` types with generated payload properties and deconstruction:
+
+```csharp
+public ref struct RefOption<T> where T : allows ref struct
+{
+    public ref struct None { }
+
+    public ref struct Some
+    {
+        public T Value { get; set; }
+
+        public Some(T Value) => this.Value = Value;
+
+        public readonly void Deconstruct(out T Value) => Value = this.Value;
+    }
+
+    private byte _discriminator;
+    private T _value;
+
+    // Generated construction, case-access APIs, and metadata omitted.
+}
+```
+
+For example, the enum-based form can hold a span:
+
+```csharp
+Span<int> buffer = stackalloc int[16];
+RefOption<Span<int>> option = RefOption<Span<int>>.Some(buffer);
+```
+
+The existing [ref-safety and anti-constraint rules](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-13.0/ref-struct-interfaces.md#ref-struct-generic-parameters) apply to case construction, conversions, pattern extraction, and `TryGetValue`. Ref-like payloads remain in typed fields. Case types retain the applicable record-like payload properties, deconstruction, and copying behavior.
+
+### Union Protocol
+
+For `ref union struct`, the object-valued `Value` requirement is a fundamental unresolved problem: these case values cannot be boxed. The current union protocol also requires case types to be object-convertible. Merely implementing `IUnion` on a ref struct does not solve either issue. This form needs a protocol extension, potentially allowing typed creation and `HasValue`/`TryGetValue` without an object-valued view. Its construction, conversions, and matching remain contingent on that design.
+
+### Equality and Hashing
+
+Ref-like enums, unions, and their generated cases do not receive synthesized record equality or hashing. By default, the compiler emits `Equals(object)` and `GetHashCode()` overrides that throw `NotSupportedException`, following [`Span<T>`](https://github.com/dotnet/runtime/blob/main/src/libraries/System.Private.CoreLib/src/System/Span.cs) and [`ReadOnlySpan<T>`](https://github.com/dotnet/runtime/blob/main/src/libraries/System.Private.CoreLib/src/System/ReadOnlySpan.cs). Authors provide any custom equality and hashing on the enclosing enum or union, rather than on individual case types. For example, they may declare `==`/`!=`.

@@ -233,40 +233,7 @@ Type-list-only declarations can also use `union struct`. Their existing case typ
 
 ### Ref-Like Unions
 
-The proposed `ref union struct` form makes both the enclosing union and every generated case a `ref struct`. This permits ref-like payloads and type parameters with `allows ref struct`:
-
-```csharp
-public ref union struct RefOption<T> where T : allows ref struct
-{
-    case None = default;
-    case Some(T Value);
-}
-```
-
-Its conceptual types would be ordinary ref structs with generated payload properties and deconstruction:
-
-```csharp
-public ref struct RefOption<T> where T : allows ref struct
-{
-    public ref struct None { }
-
-    public ref struct Some
-    {
-        public T Value { get; set; }
-        public Some(T Value) => this.Value = Value;
-        public readonly void Deconstruct(out T Value) => Value = this.Value;
-    }
-
-    private byte _discriminator;
-    private T _value;
-
-    // Typed construction and access members omitted.
-}
-```
-
-The object-valued `Value` requirement is a fundamental unresolved problem: these case values cannot be boxed. The current union protocol also requires case types to be object-convertible. Merely implementing `IUnion` on a ref struct does not solve either issue. This form needs a protocol extension, potentially allowing typed creation and `HasValue`/`TryGetValue` without an object-valued view. Its construction, conversions, and matching remain contingent on that design.
-
-Ordinary [ref-safety and anti-constraint rules](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-13.0/ref-struct-interfaces.md#ref-struct-generic-parameters) must apply throughout. Ref-like payloads stay in typed fields. Ref-like unions and their cases receive no synthesized record equality, hashing, or printing. As with `Span<T>`, default `Equals(object)` and `GetHashCode()` overrides can throw `NotSupportedException`. Authors provide any custom equality operators or formatting on the enclosing union rather than individual cases.
+The [shared ref-like design](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/union-enum-common.md#ref-like-enums-and-unions) describes `ref union struct`, including its unresolved union-protocol requirements.
 
 ### Metadata and Compatibility
 
@@ -292,7 +259,7 @@ Bare unions with user-defined equality or hashing members, or a user-provided `I
 
 For declarations with generated cases, synthesized equality requires the same case and equal contents under that case's record rules. Two values with no active case are equal and are unequal to active cases. A designated `default` case participates as its ordinary case. Unused storage and padding never participate. Hashing follows the active case's equality, with equal values producing equal hashes. Hash values and combining algorithms remain implementation details.
 
-For type-list-only unions, synthesis preserves the existing contained-value equality semantics, including user-defined equality between different runtime types. A storage tag must not introduce a new inequality. This proposal does not add equality operators or formatting members to the enclosing union.
+For type-list-only unions, synthesis preserves the existing contained-value equality semantics, including user-defined equality between different runtime types. A storage tag must not introduce a new inequality. This proposal does not add equality operators to the enclosing union.
 
 ### Recursive Payloads and Concurrent Access
 

@@ -327,49 +327,7 @@ These sketches describe the type relationships and use ordinary nested record co
 
 ### Ref-Like Enums
 
-The `ref` modifier on `enum struct` makes both the enclosing enum and every generated case type a `ref struct`, including data-free cases. Payloads may therefore be ref-like types or type parameters declared with `allows ref struct`:
-
-```csharp
-public ref enum struct RefOption<T> where T : allows ref struct
-{
-    None,
-    Some(T Value)
-}
-
-Span<int> buffer = stackalloc int[16];
-RefOption<Span<int>> option = RefOption<Span<int>>.Some(buffer);
-```
-
-Its conceptual expansion uses ordinary `ref struct` types with generated payload properties and deconstruction:
-
-```csharp
-public ref struct RefOption<T> where T : allows ref struct
-{
-    public ref struct None { }
-
-    public ref struct Some
-    {
-        public T Value { get; set; }
-
-        public Some(T Value) => this.Value = Value;
-
-        public readonly void Deconstruct(out T Value) => Value = this.Value;
-    }
-
-    private byte _discriminator;
-    private T _value;
-
-    // Generated case-access APIs and metadata omitted.
-}
-```
-
-The existing [ref-safety and anti-constraint rules](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-13.0/ref-struct-interfaces.md#ref-struct-generic-parameters) apply to case construction, conversions, pattern extraction, and `TryGetValue`. Ref-like payloads remain in typed fields. Case types retain the applicable record-like payload properties, deconstruction, and copying behavior.
-
-#### Equality, Hashing, and Printing
-
-Ref-like enums and their cases do not receive synthesized record equality, hashing, or printing. The [equality and hashing rules](https://github.com/dotnet/csharplang/blob/main/proposals/data-carrying-enums.md#equality-and-hashing) apply only to non-ref-like enums.
-
-By default, the compiler emits `Equals(object)` and `GetHashCode()` overrides that throw `NotSupportedException`, following [`Span<T>`](https://github.com/dotnet/runtime/blob/main/src/libraries/System.Private.CoreLib/src/System/Span.cs) and [`ReadOnlySpan<T>`](https://github.com/dotnet/runtime/blob/main/src/libraries/System.Private.CoreLib/src/System/ReadOnlySpan.cs). Authors provide any custom equality, hashing, or formatting on the enclosing enum, rather than on individual case types. For example, they may declare `==`/`!=` or override `ToString()`.
+The [shared ref-like design](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/union-enum-common.md#ref-like-enums-and-unions) describes `ref enum struct` and its generated case types.
 
 ### Metadata and Compatibility
 
@@ -399,6 +357,8 @@ progress = running with { Count = 3 }; // update a case copy, then convert back
 Case types support ordinary record `with` expressions. On an `enum class` receiver, `e with { }` clones the runtime case record, preserving case identity. On an `enum struct`, ordinary [struct `with` rules](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-10.0/record-structs.md#allow-with-expression-on-structs) copy its active case or uninitialized state. Initializers bind against the receiver's static type, so case-specific payload updates require a case-typed receiver.
 
 ### Equality and Hashing
+
+These rules apply to non-ref-like enums.
 
 `enum class` cases use record equality, including case type identity. For active `enum struct` values, equality requires the same case and equality of the corresponding case records. Payload comparisons follow ordinary record rules, including `EqualityComparer<T>.Default`. Unused storage and padding do not participate.
 
