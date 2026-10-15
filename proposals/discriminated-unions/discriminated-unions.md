@@ -56,7 +56,7 @@ The following extends the [union-declaration grammar](https://github.com/dotnet/
 ```antlr
 union_declaration
     : attributes? union_modifier* 'union' 'struct'? identifier type_parameter_list?
-      ('(' case_types? ')')? struct_interfaces? type_parameter_constraints_clause*
+      ('(' case_types ')')? struct_interfaces? type_parameter_constraints_clause*
       ('{' union_member_declaration* '}' | ';')
     ;
 
@@ -76,7 +76,7 @@ union_case_declaration
     ;
 ```
 
-The `case_types` production is unchanged. A nonempty explicit type list and `case` declarations cannot occur in the same union, including across partial declarations. Omitting the type list is equivalent to writing `()`. The complete union must have at least one case type.
+The `case_types` production is unchanged and requires at least one type. A union with `case` declarations must omit the parenthesized type list in every partial declaration. The complete union must have at least one case type.
 
 The `ref` modifier requires `union struct`. Its [protocol implications](#ref-like-unions) remain unresolved. Whether to permit an explicit `union class` synonym is an [open question](#explicit-union-class-spelling).
 
@@ -92,7 +92,7 @@ union Result
 }
 ```
 
-This is shorthand for `union Result() { /* the same cases */ }`. The compiler declares the nested case types and includes them in the union's type list. Its conceptual expansion is:
+The compiler declares the nested case types and adds them to the union's case set. The equivalent type-list declaration is:
 
 ```csharp
 union Result(Result.Success, Result.Failure)
@@ -407,7 +407,7 @@ Inline storage and dispatch candidates are described in the [shared layout propo
 
 ### Mixing Existing Types and Declared Cases
 
-Should a future version permit the following?
+A future extension could allow a parenthesized list of additional types alongside declared cases:
 
 ```csharp
 union Result(AuthIssue)
@@ -417,7 +417,7 @@ union Result(AuthIssue)
 }
 ```
 
-Conceptually, this would add the fresh case types to the explicit list, yielding `union Result(AuthIssue, Success, Failure)`. The initial proposal prohibits mixing.
+Conceptually, this would add the fresh case types to the explicit list, yielding `union Result(AuthIssue, Result.Success, Result.Failure)`.
 
 Allowing `object` in such a list would overlap every generated case. A naked type parameter could similarly become a generated case type or one of its supertypes when instantiated. This would undermine the expectation that the declared cases are distinct alternatives. We would need either restrictions that ensure disjointness or a deliberate choice to retain ordinary overlapping type-union behavior.
 
