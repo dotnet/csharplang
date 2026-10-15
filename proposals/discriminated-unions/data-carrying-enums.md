@@ -114,7 +114,7 @@ Whether the semicolon between cases and members is required remains an [open que
 
 For user-declared functionality (like `GetValueOrDefault` in the walkthrough), this proposal builds on [Members in Enum Declarations](https://github.com/dotnet/csharplang/blob/main/proposals/enum-members.md). That proposal defines the syntax and rules for adding members. It is not required for the members that the compiler generates under this proposal.
 
-Data-carrying enum cases use their enclosing enum's type parameters and constraints. Whether a case can declare [independent type parameters](https://github.com/dotnet/csharplang/blob/main/proposals/data-carrying-enums.md#independent-generic-case-parameters) is an open question.
+Cases in a data-carrying enum use their enclosing enum's type parameters and constraints. Whether a case can declare [independent type parameters](https://github.com/dotnet/csharplang/blob/main/proposals/data-carrying-enums.md#independent-generic-case-parameters) is an open question.
 
 Data-carrying enum declarations may list interfaces, but cannot specify a base class. Whether to allow [record inheritance for `enum class`](https://github.com/dotnet/csharplang/blob/main/proposals/data-carrying-enums.md#deriving-enum-class-from-a-record) remains an open question. Interfaces are implemented by the enclosing type under ordinary interface-implementation rules.
 
@@ -272,7 +272,7 @@ Renaming or removing public cases, changing payload parameters or properties, or
 
 ## Type Model
 
-Each data-carrying enum case declares a public nested type that can be used like any other type. Its effective accessibility is bounded by the enclosing enum. Case types are records. Record behavior supplies payload properties, deconstruction, and case equality. See [Construction and Case Access](https://github.com/dotnet/csharplang/blob/main/proposals/data-carrying-enums.md#construction-and-case-access) for restrictions on `new`.
+Each case in a data-carrying enum declares a public nested type that can be used like any other type. Its effective accessibility is bounded by the enclosing enum. Case types are records. Record behavior supplies payload properties, deconstruction, and case equality. See [Construction and Case Access](https://github.com/dotnet/csharplang/blob/main/proposals/data-carrying-enums.md#construction-and-case-access) for restrictions on `new`.
 
 The type sketches below describe relationships between the enum and its cases. Storage and switch emit remain implementation details. Candidate strategies are discussed in the [shared layout proposal](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/union-enum-non-boxed-layout.md) and [Implementation Details](https://github.com/dotnet/csharplang/blob/main/proposals/data-carrying-enums.md#implementation-details).
 
@@ -328,7 +328,7 @@ The [shared design](https://github.com/dotnet/csharplang/blob/main/proposals/dis
 
 ## Value Semantics
 
-Data-carrying enum cases use the familiar record rules. The enclosing enum adds the behavior needed to represent any one of those case values, including copying and equality for the struct representation.
+Cases in a data-carrying enum use the familiar record rules. The enclosing enum adds the behavior needed to represent any one of those case values, including copying and equality for the struct representation.
 
 ### Readonly, Copying, and `with`
 
