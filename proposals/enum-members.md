@@ -5,7 +5,7 @@ Discussion: <https://github.com/dotnet/csharplang/discussions/8987>
 
 ## Summary
 
-Allow users to declare methods, properties, and other members inside an enum, after a semicolon separating them from the enum's values.
+Allow users to declare methods, properties, and other members inside an enum.
 
 ```csharp
 public closed enum Color
@@ -57,7 +57,7 @@ public enum struct Option<T>
 
 ### Syntax
 
-The existing values-only form remains valid. A member section can be empty and can follow an empty value list or a list with a trailing comma.
+The existing values-only form remains valid. A body containing only members needs no leading semicolon. When values precede a member section, a semicolon separates them; the value list may have a trailing comma and the member section may be empty.
 
 The following extends `enum_body` in [C# specification §19.2, Enum declarations](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/enums.md#192-enum-declarations). In grammar diffs, `+` marks added alternatives:
 
@@ -65,8 +65,8 @@ The following extends `enum_body` in [C# specification §19.2, Enum declarations
  enum_body
      : '{' enum_member_declarations? '}'
      | '{' enum_member_declarations ',' '}'
-+    | '{' enum_member_declarations? ';' class_member_declaration* '}'
-+    | '{' enum_member_declarations ',' ';' class_member_declaration* '}'
++    | '{' class_member_declaration+ '}'
++    | '{' enum_member_declarations ','? ';' class_member_declaration* '}'
      ;
 ```
 

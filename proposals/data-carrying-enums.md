@@ -91,7 +91,7 @@ public closed enum class Distance : ISpanFormattable
 
 Data-carrying enums support `partial` under the ordinary partial-type rules. Cases from all parts form one case set, with unique case names and at most one designated `default` case across the entire declaration.
 
-Authors can separate cases and members into different parts. A part containing only members begins its body with the separating semicolon, for example `partial enum struct Option<T> { ; /* members */ }`.
+Authors can separate cases and members into different parts. A part containing only members needs no leading separator: `partial enum struct Option<T> { /* members */ }`.
 
 ### Grammar
 
@@ -112,7 +112,8 @@ data_enum_modifier
     ;
 
 data_enum_body
-    : '{' data_enum_case_declarations? (';' class_member_declaration*)? '}'
+    : '{' (data_enum_case_declarations (';' class_member_declaration*)?
+          | class_member_declaration*) '}'
     ;
 
 data_enum_case_declarations
