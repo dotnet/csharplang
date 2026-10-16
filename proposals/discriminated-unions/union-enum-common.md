@@ -42,7 +42,7 @@ Option<int> some = .Some(42);
 3. Lookup finds the nested case types on the already constructed `Option<int>`. Its type arguments are known, just as they would be for lookup of a static property on that type. No inference through the nested member is needed.
 4. Case construction produces the corresponding case values without `new`. Each result then uses the [case-to-enum conversion](https://github.com/dotnet/csharplang/blob/main/proposals/data-carrying-enums.md#generated-apis-and-conversions) or the existing [union conversion](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-15.0/unions.md#union-conversions) to satisfy the target.
 
-Without a target, `var value = .None` is an error. The leading-dot rules need to recognize generated cases under the construction rules of the [enum-based](https://github.com/dotnet/csharplang/blob/main/proposals/data-carrying-enums.md#construction-and-case-access) and [union-based](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/discriminated-unions.md#construction-and-case-access) designs.
+Without a target, `var value = .None` is an error. The leading-dot rules need to recognize case types under the construction rules of the [enum-based](https://github.com/dotnet/csharplang/blob/main/proposals/data-carrying-enums.md#construction-and-case-access) and [union-based](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/discriminated-unions.md#construction-and-case-access) designs.
 
 ### Inference from Another Argument
 
@@ -118,12 +118,12 @@ Result<U, E> Map<T, U, E>(Result<T, E> result, Func<T, U> mapper)
 
 ## Metadata and Compatibility
 
-The compiler emits metadata identifying generated case types and their construction operations. For data-carrying enums, it also identifies the enclosing enum. Supporting C# compilers use it to enforce the [enum-based](https://github.com/dotnet/csharplang/blob/main/proposals/data-carrying-enums.md#construction-and-case-access) and [union-based](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/discriminated-unions.md#construction-and-case-access) construction rules across assembly boundaries. The [encoding](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/union-enum-common.md#metadata-encoding) remains an open question.
+The compiler emits metadata identifying case types and their construction operations. For data-carrying enums, it also identifies the enclosing enum. Supporting C# compilers use it to enforce the [enum-based](https://github.com/dotnet/csharplang/blob/main/proposals/data-carrying-enums.md#construction-and-case-access) and [union-based](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/discriminated-unions.md#construction-and-case-access) construction rules across assembly boundaries. The [encoding](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/union-enum-common.md#metadata-encoding) remains an open question.
 
 The compiler adds a nonoptional [CompilerFeatureRequired](https://learn.microsoft.com/en-us/dotnet/api/system.runtime.compilerservices.compilerfeaturerequiredattribute) attribute to:
 
-- The data-carrying enum and its generated case types, with a feature name such as `"DataCarryingEnums"` (TBD).
-- Generated union case types, with a feature name such as `"DiscriminatedUnionCases"` (TBD).
+- The data-carrying enum and its case types, with a feature name such as `"DataCarryingEnums"` (TBD).
+- Types introduced by union `case` declarations, with a feature name such as `"DiscriminatedUnionCases"` (TBD).
 
 Compilers that recognize the attribute but lack feature support reject use of these types. This prevents acceptance of `new E.Case(...)` that would become invalid after a compiler upgrade. An error-level `ObsoleteAttribute` guard covers compilers predating `CompilerFeatureRequired`, following the [required-members compatibility pattern](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-11.0/required-members.md#metadata-representation). Supporting compilers ignore that guard.
 
@@ -167,13 +167,13 @@ union struct Expr
 
 ## Library Evolution
 
-Renaming or removing public cases, changing their payload parameters or properties, or changing a declaration to or from its `struct` form affects existing APIs. Changing the designated `default` case changes the meaning of zero-initialized storage and is a behavioral breaking change. Adding a case to a declaration with inline storage can increase its storage or alignment requirements. Previously compiled switches retain their normal fallback or unmatched-switch behavior if they encounter a new case.
+Renaming or removing public cases, changing their payload parameters or properties, or changing a declaration to or from its `struct` form affects existing APIs. Changing the designated `default` case changes the meaning of zero-initialized storage and is a behavioral breaking change. Adding a case to a declaration with inline storage can increase its storage or alignment requirements. Previously compiled switches use any existing fallback if they encounter a new case. A switch expression with no matching arm throws.
 
 ## Open Questions
 
 ### Always-Readonly Struct Types
 
-Should declarations using the `struct` keyword and their generated case records always be readonly, or should authors opt in with the `readonly` modifier?
+Should declarations using the `struct` keyword and their case records always be readonly, or should authors opt in with the `readonly` modifier?
 
 ### Customizing Case Records
 
@@ -243,11 +243,11 @@ var numbers = Message.Numbers(); // Values is an empty array
 
 We do not expect the following forms to infer their omitted type arguments under the current drafts. Each needs additional rules:
 
-- `Option.Some(42)` needs lookup and inference of the containing type's omitted arguments. [Constructor-call inference](https://github.com/dotnet/csharplang/blob/main/proposals/inference-for-constructor-calls.md), tracked by [#9627](https://github.com/dotnet/csharplang/issues/9627), and the [updated proposal](https://github.com/dotnet/csharplang/pull/10312) with [type-group lookup](https://github.com/dotnet/csharplang/pull/10310) offer related machinery. Applying it to generated case syntax needs an explicit design.
+- `Option.Some(42)` needs lookup and inference of the containing type's omitted arguments. [Constructor-call inference](https://github.com/dotnet/csharplang/blob/main/proposals/inference-for-constructor-calls.md), tracked by [#9627](https://github.com/dotnet/csharplang/issues/9627), and the [updated proposal](https://github.com/dotnet/csharplang/pull/10312) with [type-group lookup](https://github.com/dotnet/csharplang/pull/10310) offer related machinery. Applying it to case construction syntax needs an explicit design.
 - `Use(.Some(42))`, for `Use<T>(Option<T> value)`, needs case lookup on a partially inferred target and gathering bounds from the case arguments. The [current nested-inference model](https://github.com/dotnet/csharplang/blob/madstorgersen-target-typing-proposal/proposals/target-typed-generic-type-inference.md#nested-inference) instead requires outer inference to complete before supplying a target to an inner expression that cannot bind independently.
 
 These forms differ from [inference from a known case type](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/union-enum-common.md#inference-from-a-known-case-type): the case type is not yet available when inference needs to select it.
 
 ### Metadata Encoding
 
-How should metadata identify the declaration, its generated cases, and their construction operations? The attribute or other metadata form and final generated API names remain to be designed.
+How should metadata identify the declaration, its case types, and their construction operations? The attribute or other metadata form and final generated API names remain to be designed.

@@ -3,7 +3,7 @@
 Champion issue: <https://github.com/dotnet/csharplang/issues/10378>
 Discussion: <https://github.com/dotnet/csharplang/discussions/10379>
 
-This proposal brings discriminated unions to C# through the familiar enum model: a value is one of several named cases, and each case can carry data. The new `enum class` and `enum struct` forms provide reference-type and value-type representations with record-like behavior for their cases.
+This proposal brings discriminated unions to C# through the familiar enum model: a value is one of several named cases, and each case can carry data. The new `enum class` and `enum struct` forms declare nested record classes and record structs, respectively, as their cases.
 
 It is a follow-up to the [type unions](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-15.0/unions.md) proposal. Type unions combine existing types, while data-carrying enums declare a type and its cases together. An [alternative design](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/discriminated-unions.md) builds discriminated unions directly on the `union` feature.
 
@@ -112,7 +112,7 @@ Whether the semicolon between cases and members is required remains an [open que
 
 ### Declaration Rules
 
-Each case in a data-carrying enum is shorthand for declaring a public nested record type with the given name and optional primary constructor parameter list. Cases are sealed record classes in an `enum class` and record structs in an `enum struct`. Allowing authors to supply [record bodies and case-specific interfaces](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/union-enum-common.md#customizing-case-records) is a possible future extension.
+A case declaration introduces a public nested record. Its parameter list, if present, declares that record's primary constructor. Cases are sealed record classes in an `enum class` and record structs in an `enum struct`. Allowing authors to supply [record bodies and case-specific interfaces](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/union-enum-common.md#customizing-case-records) is a possible future extension.
 
 For user-declared functionality (like `GetValueOrDefault` in the walkthrough), this proposal builds on [Members in Enum Declarations](https://github.com/dotnet/csharplang/blob/main/proposals/enum-members.md). That proposal defines the syntax and rules for adding members. It is not required for the members that the compiler generates under this proposal.
 
@@ -168,7 +168,7 @@ UseSome(Option<int>.Some(42));
 
 Arguments bind under the corresponding record constructor's rules.
 
-Object-creation expressions targeting a data-carrying enum or a generated case type are errors, including explicit and target-typed `new`, with or without arguments:
+Object-creation expressions targeting a data-carrying enum or one of its case types are errors, including explicit and target-typed `new`, with or without arguments:
 
 ```csharp
 var invalid = new Option<int>.Some(42); // error
@@ -181,13 +181,13 @@ Option<int> stillInvalid = new();       // error
 Case-to-enum conversions use existing C# conversion rules. `enum class` cases have implicit reference conversions to their base enum and explicit reference conversions back. For `enum struct`, the compiler generates operators governed by the existing user-defined conversion rules. The proposed minimum API adds:
 
 - An `implicit operator` from each case type to the enum.
-- A boolean `IsCase` property for each case, such as `IsSome`, testing case identity.
+- A boolean `IsCase` property for each case, such as `IsSome`, indicating whether the enum represents that case.
 - `HasValue`, which returns `true` when the enum represents a case, including a designated `default` case, and `false` otherwise.
 - A `TryGetValue(out Case value)` overload for each case. When the enum represents that case, it returns `true` and assigns the case value to the out parameter. Otherwise it returns `false` and assigns `default(Case)`.
 - An `explicit operator` from the enum to each case type, returning the case value if the enum represents that case or throwing `InvalidCastException` otherwise.
 
 <details>
-<summary>Example: generated case-access API for Option&lt;T&gt;</summary>
+<summary>Example: generated access API for Option&lt;T&gt;</summary>
 
 Public signatures for the earlier `Option<T>` (bodies, storage, and ordinary record members omitted):
 
@@ -249,7 +249,7 @@ Nullability warnings and `default!` suppression follow the [shared rules for def
 
 ### Case Patterns
 
-`enum class` cases use reference type patterns and record deconstruction. For an `enum struct`, a pattern naming a declared case tests case identity and extracts the case value. Property and positional patterns then inspect that value:
+`enum class` cases use reference type patterns and record deconstruction. For an `enum struct`, a pattern naming a declared case tests whether the enum represents that case and extracts the case value. Property and positional patterns then inspect that value:
 
 ```csharp
 if (option is Option<int>.Some(var value))
@@ -264,7 +264,7 @@ Patterns that extract a case from an `enum struct` require an input statically k
 
 ### Exhaustiveness and Evolution
 
-Data-carrying enums follow the case-set policy of [open/closed enums](https://github.com/dotnet/csharplang/blob/main/proposals/closed-enums.md). A `closed` enum promises a fixed case set, allowing exhaustive matching without a future-case fallback. An enum without `closed` may gain cases, so consumers need a fallback for them. This uses that proposal's evolution policy, rather than its rules for integral enum values and conversions.
+Data-carrying enums follow the rules for [open and closed enums](https://github.com/dotnet/csharplang/blob/main/proposals/closed-enums.md). A `closed` enum promises a fixed case set, allowing exhaustive matching without a future-case fallback. An enum without `closed` may gain cases, so consumers need a fallback for them. This uses that proposal's evolution policy, rather than its rules for integral enum values and conversions.
 
 Whether exhaustiveness must account for a struct value that represents no case, and whether `null` should match it, remain [open questions](https://github.com/dotnet/csharplang/blob/main/proposals/data-carrying-enums.md#uninitialized-values-in-matching).
 
@@ -276,7 +276,7 @@ The type sketches below describe relationships between the enum and its cases.
 
 ### `enum class` Translation
 
-An `enum class` is an abstract record base with a private parameterless constructor and no copy constructor. A value holds the actual case reference. Data-free cases use shared instances. For example:
+An `enum class` is an abstract record base with a private parameterless constructor and no copy constructor. A non-null value is the case instance itself. Data-free cases use shared instances. For example:
 
 ```csharp
 public enum class Result
@@ -377,15 +377,15 @@ The benefit is interoperability with other unions. The base/case relationship al
 
 The generated `enum struct` construction operations, `HasValue`, and `TryGetValue` fit much of the custom-union pattern. Integration would additionally need `[Union]` and an object-valued `Value`. `IUnion` could expose the same view at runtime.
 
-Benefits include reusing union conversion, case-pattern, deconstruction, and nullable-matching machinery while retaining inline storage and non-boxing `TryGetValue`.
+Benefits include reusing union conversions, case patterns, deconstruction, and rules for `null` patterns while retaining inline storage and non-boxing `TryGetValue`.
 
 The costs and choices are:
 
-- `Value` boxes struct cases and requires object-convertible cases.
-- Public union member names can conflict with domain meanings: `Option<T>.Value` might mean its payload and `HasValue` might mean `Some`, whereas the union access members expose the active case and recognize `None` too. A member provider avoids name conflicts but adds interface metadata and would require deciding where the proposed public `HasValue` belongs.
+- `Value` boxes struct cases and requires case types implicitly convertible to `object`.
+- Public union member names can conflict with domain meanings: `Option<T>.Value` might mean its payload and `HasValue` might mean `Some`, whereas the union access members expose the case instance and recognize `None` too. A member provider avoids name conflicts but adds interface metadata and would require deciding where the proposed public `HasValue` belongs.
 - Union type patterns inspect the contained case, while untyped property/positional patterns inspect the enum. Integration must preserve that distinction, following the [LDM decision on pattern targets](https://github.com/dotnet/csharplang/blob/main/meetings/2026/LDM-2026-08-12.md#union-pattern-matching-targets).
 - Union null patterns would select the open [uninitialized-null matching option](https://github.com/dotnet/csharplang/blob/main/proposals/data-carrying-enums.md#uninitialized-values-in-matching), with nullable `Value`. A designated `default` case could use non-nullable `Value`. Annotations and access members must agree.
-- Union case-type exhaustiveness must accommodate the enum's separate open/closed evolution policy.
+- Union exhaustiveness checking must accommodate the enum's separate open/closed evolution policy.
 
 </details>
 
@@ -415,9 +415,9 @@ The [shared recommendation](https://github.com/dotnet/csharplang/blob/main/propo
 
 ### Additional Members
 
-Should data-carrying enums permit additional instance state? We recommend keeping instance state in the cases, even when all cases carry some common data. The enclosing enum can expose a computed property that switches on the active case to return that data. Callers can then access it through the enum without introducing fields that need separate initialization, copying, equality, and `with` rules.
+Should data-carrying enums permit additional instance state? We recommend keeping instance state in the cases, even when all cases carry some common data. The enclosing enum can expose a computed property that switches on the case it represents to return that data. Callers can then access it through the enum without introducing fields that need separate initialization, copying, equality, and `with` rules.
 
-Should custom instance constructors be permitted? A custom constructor would need to select a valid case and preserve the case-construction model.
+Should custom instance constructors be permitted? A custom constructor would need to select a valid case.
 
 Parameterized cases use `N(...)` or `N(...) = default`. The former shares its prefix with an instance constructor. That overlap would need consideration if constructors were allowed and the [comma-only separator alternative](https://github.com/dotnet/csharplang/blob/main/proposals/enum-members.md#separating-values-from-members) were selected.
 

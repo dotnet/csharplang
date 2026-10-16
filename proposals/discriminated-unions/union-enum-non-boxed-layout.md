@@ -1,16 +1,16 @@
 # Non-Boxed Storage for Unions and Data-Carrying Enums
 
-The `struct` keyword in [`enum struct`](https://github.com/dotnet/csharplang/blob/main/proposals/data-carrying-enums.md) and [`union struct`](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/discriminated-unions.md) selects an opinionated layout that holds generated cases' data inline, avoiding boxing during their ordinary creation and extraction. This proposal describes a shared implementation approach. Each language proposal defines its own case types, construction, conversions, defaults, matching, and equality.
+The `struct` keyword in [`enum struct`](https://github.com/dotnet/csharplang/blob/main/proposals/data-carrying-enums.md) and [`union struct`](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/discriminated-unions.md) selects an opinionated layout that stores case data inline, avoiding boxing during ordinary creation and extraction. This proposal describes a shared implementation approach. Each language proposal defines its own case types, construction, conversions, defaults, matching, and equality.
 
 The layout is an implementation detail. Compilers may change it, including to use future runtime capabilities, while preserving the specified API and observable semantics. No particular size, field layout, native ABI, or persistent byte representation is guaranteed.
 
 ## Scope
 
-Bare `union` retains the existing object-backed struct representation. `enum class` retains its case-reference representation. Neither uses the inline storage described here.
+A `union` without the `struct` modifier retains the existing object-backed struct representation. A non-null `enum class` value is the case instance itself. Neither uses the inline storage described here.
 
-For a `union struct`, the union pattern's object-valued `Value` property can box a value-type case. Typed creation, `HasValue`, and `TryGetValue` avoid that access. Support for ref-like values is explored in the [separate ref-like proposal](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/union-enum-ref-like-types.md).
+For a `union struct`, the union pattern's object-valued `Value` property can box a value-type case. Construction directly from a case value, `HasValue`, and `TryGetValue` avoid that access. Support for ref-like values is explored in the [separate ref-like proposal](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/union-enum-ref-like-types.md).
 
-Unions of existing types may require reference-backed or hybrid storage. For example, a listed struct type may implement a listed interface type. Preserving the [union creation-equivalence rules](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-15.0/unions.md#well-formedness) and the identity of an incoming interface reference can require retaining a box. The non-boxing goal for generated cases does not override these requirements.
+Unions of existing types may need to retain boxed values, potentially alongside unboxed fields. For example, a listed struct type may implement a listed interface type. Preserving the [union creation equivalence rules](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-15.0/unions.md#well-formedness) and the identity of an incoming interface reference can require retaining the original box.
 
 Packing and extraction below implement the creation and access operations defined by the two language proposals. They do not introduce additional language conversions or a shared public API.
 
@@ -24,7 +24,7 @@ We aim to provide a default that balances space and speed. We are also open to l
 
 ### Concurrent Access and Safety
 
-`union struct` and `enum struct` values follow the existing [atomicity rules for struct reads and writes](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/variables.md#96-atomicity-of-variable-references). Unsynchronized accesses may tear, observing case identity and payload from different writes. Such observations are unspecified and accessors may throw, but must preserve memory and type safety under the usual safety assumptions for payload types and user code. Neither copying nor `readonly` makes a concurrent read atomic.
+`union struct` and `enum struct` values follow the existing [atomicity rules for struct reads and writes](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/variables.md#96-atomicity-of-variable-references). Unsynchronized accesses may tear, observing a discriminator from one write and payload from another. Such observations are unspecified and accessors may throw, but must preserve memory and type safety under the usual safety assumptions for payload types and user code. Neither copying nor `readonly` makes a concurrent read atomic.
 
 To preserve memory safety, GC reference locations must be determined by the runtime layout independently of the discriminator, including during assignment. No location may alternate between managed references and unmanaged data, and arbitrary bits must never become references.
 
@@ -60,7 +60,7 @@ These require no annotation and describe managed storage, rather than interop ma
 
 In the conservative layout, structs from referenced assemblies are stored in fields of their own types. The runtime determines their size and GC layout, keeping storage safe if a dependency grows or acquires references. A library update can add managed references to a previously unmanaged struct. Recompiling a consumer that relies on an `unmanaged` constraint detects that change, but the [CLR does not enforce the constraint](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-7.3/blittable.md#detailed-design) when loading existing binaries. The [checked packing opt-in](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/union-enum-non-boxed-layout.md#possible-checked-packing-opt-in) could permit raw storage for such types.
 
-The compiler can arrange generated cases' declared payload components directly. Decomposing a nested user struct must preserve all value state without invoking user getters, setters, or constructors, and respect accessibility, safety, and supported versioning. Otherwise it remains typed. Being in the current assembly is insufficient when layout dependencies cross assembly boundaries.
+The compiler can arrange the payload components of case records directly. Decomposing a nested user struct must preserve all value state without invoking user getters, setters, or constructors, and respect accessibility, safety, and supported versioning. Otherwise, the struct is stored in a field of its declared type. Being in the current assembly is insufficient when layout dependencies cross assembly boundaries.
 
 Unmanagedness alone does not establish byte layout. Raw packing must account for architecture, alignment, and padding. The type definition seen at compile time does not guarantee its layout at runtime.
 
@@ -88,7 +88,7 @@ union struct Message<T>
 }
 ```
 
-The candidate fields below apply to either declaration. Generated case types, construction, and access APIs differ as specified by their respective proposals:
+The candidate fields below apply to either declaration. Case types, construction, and access APIs differ as specified by their respective proposals:
 
 ```csharp
 // Candidate storage; case types and APIs omitted:
@@ -108,7 +108,7 @@ public struct Message<T>
 
 ### Packing and Extraction
 
-In the shared-pool layout, creation from a case packs components into their assigned slots and sets the discriminator. Extraction checks case identity and reconstructs the value. Mixed layouts require rearranging components rather than reinterpreting the shared storage as a complete case. For example, `Buffer` uses `_reference0` and both integers in `_unmanaged`, while `Pair` uses both reference slots. Unused reference and typed slots are defaulted so inactive cases retain no references.
+In the shared-pool layout, creation from a case packs components into their assigned slots and sets the discriminator. Extraction checks for the requested case and reconstructs the case value. Mixed layouts require rearranging components rather than reinterpreting the shared storage as a complete case. For example, `Buffer` uses `_reference0` and both integers in `_unmanaged`, while `Pair` uses both reference slots. Unused reference and typed slots are set to `default` to avoid retaining references from other cases.
 
 When every case is unmanaged and the required layout facts are established, complete case values can safely overlap in one region sized and aligned for the largest case, with a separate discriminator. Packing and extraction can then copy each case as a whole.
 
