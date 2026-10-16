@@ -233,7 +233,7 @@ The [shared design](https://github.com/dotnet/csharplang/blob/main/proposals/dis
 
 ## Value Semantics
 
-### Readonly, Copying, and `with`
+### Readonly
 
 Cases declared in a `union struct` have the union's readonlyness and follow [record-struct property rules](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-10.0/record-structs.md#properties). Whether `union struct` types should always be readonly remains an [open question](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/union-enum-common.md#always-readonly-struct-types).
 
