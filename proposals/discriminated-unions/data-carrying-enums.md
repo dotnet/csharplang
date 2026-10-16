@@ -70,7 +70,7 @@ The [`closed` modifier](#exhaustiveness-and-evolution) fixes the set of cases. D
 
 This example uses `enum struct` for value-type semantics. [`enum class`](#enum-class-translation) provides reference-type semantics with the same case construction and pattern syntax.
 
-`Parse("42")` relies on [target-typed generic type inference](https://github.com/dotnet/csharplang/blob/madstorgersen-target-typing-proposal/proposals/target-typed-generic-type-inference.md), which is not specific to data-carrying enums, to infer `T` from `Option<int>`. The `.Some(...)` and `.None` forms depend on the [contextual syntax extensions](#contextual-construction-and-inference), avoiding the need to repeat the enclosing enum type.
+`Parse("42")` relies on [target-typed generic type inference](https://github.com/dotnet/csharplang/blob/madstorgersen-target-typing-proposal/proposals/target-typed-generic-type-inference.md), which is not specific to data-carrying enums, to infer `T` from `Option<int>`. The `.Some(...)` and `.None` forms depend on the [contextual syntax extensions](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/union-enum-common.md#contextual-construction-and-inference), avoiding the need to repeat the enclosing enum type.
 
 ## Declarations
 
@@ -161,9 +161,6 @@ Cases use `E.Case` for data-free cases and `E.Case(arguments)` for cases with pa
 Option<int>.Some some = Option<int>.Some(42);
 Option<int> option = some;
 option = Option<int>.None;
-
-void UseSome(Option<int>.Some value) { /* ... */ }
-UseSome(Option<int>.Some(42));
 ```
 
 Arguments bind under the corresponding record constructor's rules.
@@ -273,11 +270,7 @@ Data-carrying enums follow the rules for [open and closed enums](https://github.
 
 Whether exhaustiveness must account for a struct value that represents no case, and whether `null` should match it, remain [open questions](#uninitialized-values-in-matching).
 
-The [shared library-evolution rules](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/union-enum-common.md#library-evolution) cover compatibility when declarations change.
-
 ## Type Model
-
-The type sketches below describe relationships between the enum and its cases.
 
 ### `enum class` Translation
 
@@ -303,7 +296,7 @@ public abstract record class Result
 }
 ```
 
-The base has no instance state, so case copy constructors call `base()`. Only the declared cases may derive from the enum. The private constructor and sealed cases prevent external derivation, including across assembly boundaries.
+The base has no instance state, so case copy constructors call `base()`. Only the declared cases may derive from the enum. Its private constructor prevents external derivation.
 
 ### `enum struct` Translation
 
@@ -323,13 +316,7 @@ public struct Option<T>
 }
 ```
 
-These sketches describe the type relationships and use ordinary nested record constructors in emitted code. The struct case types' mutability is described under [Readonly](#readonly).
-
-### Metadata and Compatibility
-
-The [shared design](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/union-enum-common.md#metadata-and-compatibility) defines the required metadata and compatibility guards.
-
-## Value Semantics
+The emitted code uses ordinary nested record constructors.
 
 ### Readonly
 
@@ -337,19 +324,9 @@ The [shared design](https://github.com/dotnet/csharplang/blob/main/proposals/dis
 
 Generated queries, extraction methods, and instance equality members are `readonly`.
 
-### Equality and Hashing
+## Common Behavior
 
-The [shared equality and hashing rules](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/union-enum-common.md#equality-and-hashing) apply to both enum forms. An `enum class` uses its record hierarchy's equality and hashing implementation. An `enum struct` implements these operations over its [non-boxed storage](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/union-enum-non-boxed-layout.md#equality-and-hashing).
-
-### Recursive Payloads and Concurrent Access
-
-The [shared rules for recursive payloads](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/union-enum-common.md#recursive-payloads) apply.
-
-Torn accesses follow the [shared concurrency and safety requirements](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/union-enum-non-boxed-layout.md#concurrent-access-and-safety).
-
-## Contextual Construction and Inference
-
-The [shared design](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/union-enum-common.md#contextual-construction-and-inference) describes how case construction and patterns compose with target-typed access and generic inference.
+The [common design](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/union-enum-common.md) covers equality and hashing, recursive payloads, concurrent access, metadata and compatibility, library evolution, and contextual case syntax and inference.
 
 ## Switch Dispatch
 
@@ -360,7 +337,7 @@ The [shared switch emission discussion](https://github.com/dotnet/csharplang/blo
 <details>
 <summary>Exploratory integration with the union pattern and IUnion</summary>
 
-Integration between data-carrying enums and type unions remains exploratory, with no requirements for the feature. Neither representation is required to implement the union pattern, carry `[Union]`, or implement `IUnion`. LDM could choose integration, reuse selected machinery, or keep the features independent. Any integration must preserve the enum construction and hierarchy rules through its metadata.
+Integration between data-carrying enums and type unions remains exploratory, with no requirements for the feature. Neither representation is required to implement the union pattern, carry `[Union]`, or implement `IUnion`. Any integration must preserve the enum construction and hierarchy rules through its metadata.
 
 ### Union Pattern and Runtime Access
 
@@ -371,8 +348,6 @@ The [type-unions proposal](https://github.com/dotnet/csharplang/blob/main/propos
 ### Possible Integration for `enum class`
 
 A [union member provider](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-15.0/unions.md#union-member-providers) could supply `Create` methods returning the case reference unchanged and `Value` returning `this`, optionally exposed through `IUnion`. This needs no wrapper allocation, though recursive runtime inspection must account for the self-reference.
-
-The benefit is interoperability with other unions. The base/case relationship already supplies most language behavior, so integration adds APIs or provider metadata.
 
 ### Possible Integration for `enum struct`
 

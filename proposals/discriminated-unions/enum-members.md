@@ -77,11 +77,11 @@ The initial design permits:
 
 - Instance methods, computed properties and indexers, and events with explicit accessors, without additional instance storage.
 - Static members, including constants, fields, and static constructors.
-- Nested types, which follow their ordinary declaration rules.
+- Nested types.
 
 User-declared instance fields, auto-properties requiring instance storage, field-like instance events, and instance constructors are not allowed. These restrictions preserve the enum's underlying value representation.
 
-The usual accessibility, lookup, and overload rules apply. In an instance member, `this` is the enclosing enum value. User members share a declaration space with the enum's named values. Conflicts with compiler-generated members are errors.
+User members share a declaration space with the enum's named values. Conflicts with compiler-generated members are errors.
 
 ## Implementation Considerations
 
@@ -108,7 +108,7 @@ public static class ColorExtensions
 }
 ```
 
-This already supports methods and computed properties without new enum syntax. Consumers must still bring the extension namespace into scope, such as with `using Example.Extensions;`.
+Consumers must still bring the extension namespace into scope, such as with `using Example.Extensions;`.
 
 ## Open Questions
 

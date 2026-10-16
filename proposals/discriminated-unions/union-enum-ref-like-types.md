@@ -49,14 +49,14 @@ public ref struct RefOption<T> where T : allows ref struct
 }
 ```
 
-For example, the enum-based form can hold a span:
+Either form can hold a span:
 
 ```csharp
 Span<int> buffer = stackalloc int[16];
 RefOption<Span<int>> option = RefOption<Span<int>>.Some(buffer);
 ```
 
-The existing [ref-safety and anti-constraint rules](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-13.0/ref-struct-interfaces.md#ref-struct-generic-parameters) apply to case construction, conversions, pattern extraction, and `TryGetValue`. Ref-like payloads are stored in fields of their declared types under the [shared non-boxed layout](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/union-enum-non-boxed-layout.md). Case parameters produce properties and a corresponding `Deconstruct` method.
+The existing [ref-safety and anti-constraint rules](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-13.0/ref-struct-interfaces.md#ref-struct-generic-parameters) apply to case construction, conversions, pattern extraction, and `TryGetValue`. Ref-like payloads are stored in fields of their declared types under the [shared non-boxed layout](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/union-enum-non-boxed-layout.md).
 
 ## Equality and Hashing
 
@@ -66,4 +66,4 @@ Ref-like enums, unions, and their case types do not receive synthesized record e
 
 ### Union Pattern for Ref-Like Cases
 
-For `ref union struct`, the object-valued `Value` requirement is unresolved because these case values cannot be boxed. The current union pattern also requires case types to be implicitly convertible to `object`. Merely implementing `IUnion` on a ref struct does not solve either issue. This form needs changes to the union pattern, potentially allowing construction directly from a case value and access through `HasValue`/`TryGetValue` without an object-valued `Value`. Its construction, conversions, and matching remain contingent on that design.
+For `ref union struct`, the object-valued `Value` requirement is unresolved because these case values cannot be boxed. The current union pattern also requires case types to be implicitly convertible to `object`. This form needs changes to the union pattern, potentially allowing construction directly from a case value and access through `HasValue`/`TryGetValue` without an object-valued `Value`. Construction, conversions, and matching depend on resolving these requirements.

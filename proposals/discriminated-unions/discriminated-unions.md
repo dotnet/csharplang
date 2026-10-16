@@ -45,7 +45,7 @@ Designating `None` as the [`default` case](#default-values) accounts for zero-in
 
 The [`struct` keyword](#union-struct-translation) selects inline storage and value-type cases. Without `struct`, a [`union`](#union-translation) keeps the existing object-backed struct representation and uses reference-type cases.
 
-`Parse("42")` relies on [target-typed generic type inference](https://github.com/dotnet/csharplang/blob/madstorgersen-target-typing-proposal/proposals/target-typed-generic-type-inference.md), which is not specific to unions. The `.Some(...)` and `.None` forms depend on the [contextual syntax extensions](#contextual-construction-and-inference), avoiding the need to repeat the enclosing union type.
+`Parse("42")` relies on [target-typed generic type inference](https://github.com/dotnet/csharplang/blob/madstorgersen-target-typing-proposal/proposals/target-typed-generic-type-inference.md), which is not specific to unions. The `.Some(...)` and `.None` forms depend on the [contextual syntax extensions](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/union-enum-common.md#contextual-construction-and-inference), avoiding the need to repeat the enclosing union type.
 
 ## Declarations
 
@@ -120,9 +120,6 @@ Cases use `E.Case` for data-free cases and `E.Case(arguments)` for cases with pa
 Option<int>.Some some = Option<int>.Some(42);
 Option<int> option = some;
 option = Option<int>.None;
-
-void UseSome(Option<int>.Some value) { /* ... */ }
-UseSome(Option<int>.Some(42));
 ```
 
 Arguments bind under the corresponding record constructor's rules.
@@ -140,7 +137,7 @@ Whether unions with declared cases should also [restrict direct construction](#d
 
 A `union struct` generates the [non-boxing access pattern](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-15.0/unions.md#non-boxing-access-members).
 
-When a `union struct` has case declarations, `Value` returns a boxed copy of the case instance. Repeated reads may return different boxes, and mutating a returned box does not update the union. Without `struct`, the union instead retains its stored object. A `union struct` combining existing types may need to retain boxed values to preserve existing union semantics, as discussed in the [shared layout proposal](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/union-enum-non-boxed-layout.md#scope).
+For a `union struct` with case declarations, `Value` returns a boxed copy of the selected case. Unions of existing types may need to preserve incoming boxes, as discussed in the [layout proposal](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/union-enum-non-boxed-layout.md#scope).
 
 <details>
 <summary>Example: generated access API for Option&lt;T&gt;</summary>
@@ -168,9 +165,7 @@ For this declaration, `Value` has a non-nullable return type because `None` is t
 
 </details>
 
-## Defaults and Evolution
-
-### Default Values
+## Default Values
 
 A `union struct` may designate at most one case with `= default` across all partial declarations. A zero-initialized union value, such as `default(U)`, behaves as follows:
 
@@ -193,12 +188,6 @@ bool gotReading = measurement.TryGetValue(out Measurement.Reading reading); // t
 ```
 
 Nullability warnings and `default!` suppression follow the [shared rules for default cases](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/union-enum-common.md#nullability-of-default-cases). The designation is permitted only on `union struct`.
-
-### Library Evolution
-
-Whether unions should support an explicitly open case set is an [open question](#open-unions).
-
-The [shared library-evolution rules](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/union-enum-common.md#library-evolution) cover compatibility when declarations change.
 
 ## Type Model
 
@@ -227,33 +216,15 @@ public struct Option<T> : IUnion
 
 Unions of existing types can also select this storage strategy by adding `struct`, as in `union struct X(T1, T2, T3)`.
 
-### Metadata and Compatibility
-
-The [shared design](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/union-enum-common.md#metadata-and-compatibility) defines the required metadata and compatibility guards.
-
-## Value Semantics
-
 ### Readonly
 
 Cases declared in a `union struct` have the union's readonlyness and follow [record-struct property rules](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-10.0/record-structs.md#properties). Whether `union struct` types should always be readonly remains an [open question](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/union-enum-common.md#always-readonly-struct-types).
 
-### Equality and Hashing
+## Common Behavior
 
-Unions with case declarations follow the [shared equality and hashing rules](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/union-enum-common.md#equality-and-hashing).
-
-A `union` without `struct` can implement equality with `object.Equals(left.Value, right.Value)` and delegate hashing to the stored case instance when present. A `union struct` implements these operations over its [non-boxed storage](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/union-enum-non-boxed-layout.md#equality-and-hashing).
+The [common design](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/union-enum-common.md) covers equality and hashing, recursive payloads, concurrent access, metadata and compatibility, library evolution, and contextual case syntax and inference.
 
 Unions of existing types retain their equality and hashing semantics when declared with `union struct`.
-
-### Recursive Payloads and Concurrent Access
-
-The [shared rules for recursive payloads](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/union-enum-common.md#recursive-payloads) apply.
-
-Torn accesses follow the [shared concurrency and safety requirements](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/union-enum-non-boxed-layout.md#concurrent-access-and-safety).
-
-## Contextual Construction and Inference
-
-The [shared design](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/union-enum-common.md#contextual-construction-and-inference) describes how case construction and patterns compose with target-typed access and generic inference.
 
 ## Switch Dispatch
 

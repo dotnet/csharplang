@@ -24,13 +24,13 @@ union struct Option<T>
 
 Their construction and pattern syntax is the same, so the use-site examples apply to both designs. The steps below identify which rules each shortened form needs, so compatibility can be checked as the related proposals evolve.
 
-[Target-typed static member access](https://github.com/dotnet/csharplang/blob/main/proposals/target-typed-static-member-access.md) defines leading-dot lookup and its conversions. [Generalized generic type inference](https://github.com/dotnet/csharplang/blob/madstorgersen-generalized-type-inference/proposals/generalized-type-inference.md) describes target-derived bounds. The [revised target-typed generic inference draft](https://github.com/dotnet/csharplang/blob/madstorgersen-target-typing-proposal/proposals/target-typed-generic-type-inference.md) specifies when binding retries with a target and how nested inference proceeds. These drafts remain in progress. The analysis below uses the revised draft's rule that successful ordinary binding takes precedence.
+The analysis follows the [revised target-typed generic inference draft](https://github.com/dotnet/csharplang/blob/madstorgersen-target-typing-proposal/proposals/target-typed-generic-type-inference.md): successful ordinary binding takes precedence over rebinding with a target. The related proposals remain in progress.
 
 Inference starting from case arguments, including `Use(.Some(42))` without another source for the outer type argument, remains an [open question](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/union-enum-common.md#inference-from-case-arguments).
 
 ### Case Access with a Known Target
 
-We expect these forms to work with target-typed static member access and either proposal's case-construction rules:
+We expect these forms to work with [target-typed static member access](https://github.com/dotnet/csharplang/blob/main/proposals/target-typed-static-member-access.md) and either proposal's case-construction rules:
 
 ```csharp
 Option<int> none = .None;
@@ -114,8 +114,6 @@ Result<U, E> Map<T, U, E>(Result<T, E> result, Func<T, U> mapper)
 3. The method's return type `Result<U, E>` target-types the switch arms and qualifies their construction expressions.
 4. `mapper(value)` supplies a `U` for `Result<U, E>.Ok`, while `error` supplies an `E` for `Result<U, E>.Error`. Each case value converts to the enclosing result type using that proposal's conversion rules.
 
-[Type-pattern inference](https://github.com/dotnet/csharplang/blob/main/proposals/inference-for-type-patterns.md) separately addresses written type names with omitted generic arguments.
-
 ## Metadata and Compatibility
 
 The compiler emits metadata identifying case types and their construction operations. For data-carrying enums, it also identifies the enclosing enum. Supporting C# compilers use it to enforce the [enum-based](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/data-carrying-enums.md#construction-and-case-access) and [union-based](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/discriminated-unions.md#construction-and-case-access) construction rules across assembly boundaries. The [encoding](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/union-enum-common.md#metadata-encoding) remains an open question.
@@ -158,13 +156,15 @@ For a union or enum named `Result`, we propose:
 
 We could omit these members, but we believe that would be surprising and undesirable. Users would have to unwrap cases for comparisons or write the boilerplate that records already eliminate. Combining records into a discriminated union should preserve that convenience.
 
-Member synthesis and customization follow the [record-class](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-9.0/records.md#equality-members) or [record-struct](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-10.0/record-structs.md#equality-members) equality rules, according to the enclosing type's class or struct kind.
+Customization of synthesized equality members follows the [record-class](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-9.0/records.md#equality-members) or [record-struct](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-10.0/record-structs.md#equality-members) rules, according to the enclosing type's class or struct kind.
 
 Note that a record's synthesized `==` and `!=` operators delegate to `Equals`. We follow the same approach here.
 
+Instances are equal when they represent the same case and their contents are equal under that case record's equality rules.
+
 For a struct with no designated `default` case, default-initialized instances compare equal to each other and unequal to instances representing a case. With a designated `default` case, equality uses that case with default payload values.
 
-Hashing uses the selected case and its contents. Equal instances must have equal hash codes.
+Hashing uses the selected case and its contents.
 
 For example, these declarations have class cases:
 
@@ -228,9 +228,13 @@ union struct Expr
 }
 ```
 
+## Concurrent Access
+
+Concurrent access to `enum struct` and `union struct` values follows the [layout proposal's concurrency and safety requirements](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/union-enum-non-boxed-layout.md#concurrent-access-and-safety).
+
 ## Library Evolution
 
-Renaming or removing public cases, changing their payload parameters or properties, or changing a declaration to or from its `struct` form affects existing APIs. Changing the designated `default` case changes the meaning of zero-initialized storage and is a behavioral breaking change. Adding a case to a declaration with inline storage can increase its storage or alignment requirements. Previously compiled switches use any existing fallback if they encounter a new case. A switch expression with no matching arm throws.
+Changing the designated `default` case changes what `default` represents in either design and is a behavioral breaking change. Adding a case to an `enum struct` or `union struct` can increase its storage or alignment requirements. Previously compiled switches use any existing fallback if they encounter a new case. A switch expression with no matching arm throws.
 
 ## Open Questions
 
@@ -274,7 +278,7 @@ Inline storage cannot directly hold an arbitrary independent `T`: the enclosing 
 
 ### Empty Parameter Lists
 
-We recommend disallowing empty parameter lists in case declarations and requiring cases declared without parameters to be used without parentheses. This keeps the syntax consistent with ordinary enums: data-free cases have no parameters or parentheses, while data-carrying cases declare parameters and use parentheses for construction. Parentheses remain required when optional or `params` parameters allow zero arguments, so such calls still use `()`.
+We recommend rejecting empty parameter lists in case declarations and using data-free cases without parentheses, as with ordinary enums. Cases with optional or `params` parameters still require `()` when no arguments are supplied.
 
 For example, either declaration could provide these cases:
 
@@ -304,7 +308,7 @@ var numbers = Message.Numbers(); // Values is an empty array
 
 ### Inference from Case Arguments
 
-We do not expect the following forms to infer their omitted type arguments under the current drafts. Each needs additional rules:
+We do not expect the following forms to infer their omitted type arguments under [generalized generic type inference](https://github.com/dotnet/csharplang/blob/madstorgersen-generalized-type-inference/proposals/generalized-type-inference.md) or the revised target-typed inference draft. Each needs additional rules:
 
 - `Option.Some(42)` needs lookup and inference of the containing type's omitted arguments. [Constructor-call inference](https://github.com/dotnet/csharplang/blob/main/proposals/inference-for-constructor-calls.md), tracked by [#9627](https://github.com/dotnet/csharplang/issues/9627), and the [updated proposal](https://github.com/dotnet/csharplang/pull/10312) with [type-group lookup](https://github.com/dotnet/csharplang/pull/10310) offer related machinery. Applying it to case construction syntax needs an explicit design.
 - `Use(.Some(42))`, for `Use<T>(Option<T> value)`, needs case lookup on a partially inferred target and gathering bounds from the case arguments. The [current nested-inference model](https://github.com/dotnet/csharplang/blob/madstorgersen-target-typing-proposal/proposals/target-typed-generic-type-inference.md#nested-inference) instead requires outer inference to complete before supplying a target to an inner expression that cannot bind independently.
