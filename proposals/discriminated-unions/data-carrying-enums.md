@@ -116,7 +116,7 @@ A case declaration introduces a public nested record. Its parameter list, if pre
 
 For user-declared functionality (like `GetValueOrDefault` in the walkthrough), this proposal builds on [Members in Enum Declarations](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/enum-members.md). That proposal defines the syntax and rules for adding members. It is not required for the members that the compiler generates under this proposal.
 
-Cases in a data-carrying enum use their enclosing enum's type parameters and constraints. Whether a case can declare [independent type parameters](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/union-enum-common.md#independent-generic-case-parameters) is an open question.
+Cases in a data-carrying enum use their enclosing enum's type parameters and constraints, which limits [case reuse between different instantiations](union-enum-common.md#generic-case-identity). Whether a case can declare [independent type parameters](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/union-enum-common.md#independent-generic-case-parameters) is an open question.
 
 Data-carrying enum declarations may list interfaces, but cannot specify a base class.
 
@@ -163,7 +163,7 @@ Option<int> option = some;
 option = Option<int>.None;
 ```
 
-Arguments bind under the corresponding record constructor's rules.
+Arguments bind under the corresponding record constructor's rules. [Detailed lookup rules](union-enum-common.md#binding-case-access), including chained member access, remain to be specified.
 
 Object-creation expressions targeting case types are errors, including explicit and target-typed `new`:
 

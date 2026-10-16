@@ -114,6 +114,28 @@ Result<U, E> Map<T, U, E>(Result<T, E> result, Func<T, U> mapper)
 3. The method's return type `Result<U, E>` target-types the switch arms and qualifies their construction expressions.
 4. `mapper(value)` supplies a `U` for `Result<U, E>.Ok`, while `error` supplies an `E` for `Result<U, E>.Error`. Each case value converts to the enclosing result type using that proposal's conversion rules.
 
+## Generic Case Identity
+
+In both designs, a nested case type includes every type argument of its enclosing type, even when its payload does not use that argument. For either `Result<T, E>` declaration above:
+
+```csharp
+Result<int, string>.Error error = Result<int, string>.Error("Failed");
+Result<string, string> result = error; // error: the nested case types differ
+Result<string, string> reconstructed = Result<string, string>.Error(error.Value);
+```
+
+The incoming error cannot be propagated directly when a pipeline changes only the success type. The `Map` example reconstructs its `Error` case for this reason. The same restriction applies to the struct forms. Improved inference can shorten construction, but cannot change type identity.
+
+Ordinary unions can instead use separately declared records whose type parameters describe only their own payloads:
+
+```csharp
+public record Ok<T>(T Value);
+public record Error<E>(E Value);
+public union Result<T, E>(Ok<T>, Error<E>);
+```
+
+Here, `Error<E>` can be reused across different success types. Both shorthand designs choose nesting and therefore give up this reuse, as explored in the working group's [analysis of case nesting](https://github.com/dotnet/csharplang/blob/main/meetings/working-groups/discriminated-unions/to-nest-or-not-to-nest.md#too-many-type-parameters).
+
 ## Metadata and Compatibility
 
 The compiler emits metadata identifying case types and their construction operations. For data-carrying enums, it also identifies the enclosing enum. Supporting C# compilers use it to enforce the [enum-based](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/data-carrying-enums.md#construction-and-case-access) and [union-based](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/discriminated-unions.md#construction-and-case-access) construction rules across assembly boundaries. The [encoding](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/union-enum-common.md#metadata-encoding) remains an open question.
@@ -125,7 +147,9 @@ The compiler adds a nonoptional [CompilerFeatureRequired](https://learn.microsof
 
 Compilers that recognize the attribute but lack feature support reject use of these types. This prevents acceptance of `new E.Case(...)` that would become invalid after a compiler upgrade. An error-level `ObsoleteAttribute` guard covers compilers predating `CompilerFeatureRequired`, following the [required-members compatibility pattern](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-11.0/required-members.md#metadata-representation). Supporting compilers ignore that guard.
 
-## Nullability of Default Cases
+## Default Values and Nullability
+
+### Nullability of Default Cases
 
 Nullable analysis checks a designated `default` case as if each payload property were initialized with `default` of its declared type. Both declarations below produce a warning at `= default` because zero-initialization leaves `Unit` null despite its non-nullable declaration:
 
@@ -142,6 +166,42 @@ union struct Measurement
 ```
 
 Declaring `string? Unit` permits that value. Writing `= default!` suppresses these warnings without changing the default payload values.
+
+### Nullable Values and Case Payloads
+
+A null payload, a struct representing no case, and a nullable struct with no value are distinct states. Consider either declaration, with no designated `default` case:
+
+```csharp
+enum struct Message
+{
+    Empty,
+    Text(string? Value)
+}
+
+union struct Message
+{
+    case Empty;
+    case Text(string? Value);
+}
+```
+
+```csharp
+Message textCase = Message.Text(null);
+Message uninitialized = default;
+Message? noUnion = null;
+Message? present = default(Message);
+```
+
+The represented cases below apply to both designs. The last column follows the existing [union null-pattern rules](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-15.0/unions.md#constant-pattern), including [matching nullable unions](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-15.0/unions.md#resolved-union-matching-for-nullable-of-a-union-value-type). Null-pattern matching for `enum struct` remains an [open question](data-carrying-enums.md#uninitialized-values-in-matching).
+
+| Variable | Represented case | Nullable wrapper's `HasValue` | `is null` for `union struct` |
+| --- | --- | --- | --- |
+| `textCase` | `Text` with a null payload | Not nullable | `false` |
+| `uninitialized` | No case | Not nullable | `true` |
+| `noUnion` | No union value | `false` | `true` |
+| `present` | The contained union represents no case | `true` | `true` |
+
+For `union struct`, `textCase.Value` returns a boxed `Text` record, while `uninitialized.Value` returns null. Designating `Empty` as the `default` case makes the second and fourth rows represent `Empty` instead. The union's `Value` is then a boxed `Empty` record, and neither matches `null`. The null nullable wrapper in the third row remains null.
 
 ## Equality and Hashing
 
@@ -238,6 +298,20 @@ Changing the designated `default` case changes what `default` represents in eith
 
 ## Open Questions
 
+### Binding Case Access
+
+The intended binding distinguishes type and value contexts and supports chained member access. Using either `Option<T>` declaration above:
+
+```csharp
+Option<int>.None none = Option<int>.None;
+Option<int>.Some some = Option<int>.Some(42);
+bool equal = Option<int>.None.Equals(none);
+```
+
+The declared types name the nested records. The first two initializers produce case instances, and the last invokes the `None` instance's `Equals` method.
+
+Precise lookup rules remain to be specified, including how to choose between a case type's static members and its instance's members in chained accesses. [LDM previously explored a general type-as-value mechanism](https://github.com/dotnet/csharplang/blob/main/meetings/2025/LDM-2025-08-27.md#type-value-conversion) for data-free cases. We need to decide whether to use that mechanism or define case-specific binding rules. This work is required even for fully qualified case access and is independent of target-typed access and generic inference.
+
 ### Always-Readonly Struct Types
 
 Should declarations using the `struct` keyword and their case records always be readonly, or should authors opt in with the `readonly` modifier?
@@ -318,3 +392,5 @@ These forms differ from [inference from a known case type](https://github.com/do
 ### Metadata Encoding
 
 How should metadata identify the declaration, its case types, and their construction operations? The attribute or other metadata form and final generated API names remain to be designed.
+
+The encoding must describe cases of constructed generic types and expose their supported construction operations to tools. Reflection-based serializers and source generators should be used to validate case discovery and construction, including the wrapper-versus-case distinction raised in [earlier LDM review](https://github.com/dotnet/csharplang/blob/main/meetings/2025/LDM-2025-05-28.md#nominal-type-unions).

@@ -2,6 +2,8 @@
 
 The [union-based design](discriminated-unions.md) and [data-carrying enum design](data-carrying-enums.md) offer two ways to bring discriminated unions to C#. The union approach extends one feature to cover both existing types and newly declared cases. The enum approach extends familiar named alternatives and, with `enum class`, represents each value directly as a case record.
 
+LDM [previously chose the enum-centric direction](https://github.com/dotnet/csharplang/blob/main/meetings/2025/LDM-2025-09-29.md#enums-vs-unions) and anticipated translation through unions. These drafts revisit the choice with differences in both declaration syntax and runtime type models.
+
 ## Declaration and Language Design
 
 ### One Union Feature or an Extension to Enums
@@ -50,6 +52,10 @@ Data-carrying enums instead adopt the [open/closed enum policy](../closed-enums.
 
 Unions already support members and interface implementations. The union-based proposal can reuse their rules and concentrate on declaring cases. Data-carrying enums introduce those capabilities into another declaration form and build on [Members in Enum Declarations](enum-members.md) for user-declared functionality. That is additional language design, but it also makes ordinary enums more useful independently of discriminated unions.
 
+### Generic Case Reuse
+
+Both shorthand designs nest their cases, so a case inherits every enclosing type argument. An error case cannot be passed directly between `Result<int, E>` and `Result<string, E>`, even though its error payload has the same type. The [common design](union-enum-common.md#generic-case-identity) explains this restriction. The underlying union feature provides an alternative: separately declared case records can use only the type parameters their payloads need and be shared between union instantiations.
+
 ## Object Model and Existing C# Code
 
 ### Direct Case Objects
@@ -68,7 +74,19 @@ For `enum class`, `value` is still the `Result.Success` object. An ordinary case
 
 Inheritance also means a concrete enum case retains methods and interfaces declared on its enclosing enum. A union case does not inherit its wrapper's functionality. Narrowing a union to its case can therefore require converting back to the union to use those members.
 
-The same distinction affects generic code. With `enum class`, `IEnumerable<Result.Success>` can convert covariantly to `IEnumerable<Result>`. A union requires element-wise conversion because its cases are not derived from the enclosing type.
+### Generic Libraries and Tooling
+
+Given an `IEnumerable<Result> results` whose elements represent `Success` cases:
+
+```csharp
+IEnumerable<Result.Success> successes = results.OfType<Result.Success>();
+```
+
+For `enum class`, this finds the case objects. For `union`, `union struct`, and `enum struct`, enumeration exposes boxed enclosing structs, so `OfType` finds no case instances. A lambda such as `results.Where(result => result is Result.Success)` can use union- or enum-aware matching because the input is statically known to be `Result`. Improved inference does not change ordinary runtime type tests inside generic library code.
+
+With `enum class`, `IEnumerable<Result.Success>` can also convert covariantly to `IEnumerable<Result>`. A union requires element-wise conversion because its cases are not derived from the enclosing type.
+
+Reflection and serialization expose the same representation boundary. An inspection contract such as `IUnion` lets tools opt into unwrapping a union, but existing libraries do not automatically use it. Case discovery and construction remain [metadata design work](union-enum-common.md#metadata-encoding).
 
 ### Class and Struct Semantics
 

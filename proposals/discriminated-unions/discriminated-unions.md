@@ -100,7 +100,7 @@ union Result(Result.Success, Result.Failure)
 
 Types introduced by `case` declarations are not instantiated with `new`. See [Construction and Case Access](#construction-and-case-access).
 
-Cases use the containing union's type parameters and constraints. Independent case type parameters are an [open question](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/union-enum-common.md#independent-generic-case-parameters).
+Cases use the containing union's type parameters and constraints, which limits [case reuse between different instantiations](union-enum-common.md#generic-case-identity). Independent case type parameters are an [open question](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/union-enum-common.md#independent-generic-case-parameters).
 
 ### User-Declared Constructors
 
@@ -122,7 +122,7 @@ Option<int> option = some;
 option = Option<int>.None;
 ```
 
-Arguments bind under the corresponding record constructor's rules.
+Arguments bind under the corresponding record constructor's rules. [Detailed lookup rules](union-enum-common.md#binding-case-access), including chained member access, remain to be specified.
 
 Object-creation expressions targeting case types are errors, including explicit and target-typed `new`:
 
@@ -193,7 +193,7 @@ Nullability warnings and `default!` suppression follow the [shared rules for def
 
 ### `union` Translation
 
-A `union` without the `struct` modifier uses the [existing object-backed representation](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-15.0/unions.md#lowering).
+A `union` without the `struct` modifier uses the [existing object-backed representation](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-15.0/unions.md#lowering). Data-free cases use shared instances.
 
 ### `union struct` Translation
 
