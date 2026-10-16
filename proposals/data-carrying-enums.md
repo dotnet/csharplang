@@ -158,7 +158,7 @@ Authors can separate cases and members into different parts. A members-only part
 Data-carrying enums use `E.Case` for data-free cases, as ordinary enums do, and `E.Case(arguments)` for cases with parameters. Both forms produce a value of the case type:
 
 ```csharp
-var some = Option<int>.Some(42); // Option<int>.Some
+Option<int>.Some some = Option<int>.Some(42);
 Option<int> option = some;
 option = Option<int>.None;
 

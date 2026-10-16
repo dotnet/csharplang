@@ -117,7 +117,7 @@ For unions with case declarations and for all `union struct` types, user code ca
 Cases declared with `case` use `U.Case` for data-free cases and `U.Case(arguments)` for cases with parameters. Both forms produce a value of the case type:
 
 ```csharp
-var success = Result.Success("Complete"); // Result.Success
+Result.Success success = Result.Success("Complete");
 Result result = success;
 
 void UseSuccess(Result.Success value) { /* ... */ }
