@@ -5,7 +5,7 @@ Discussion: <https://github.com/dotnet/csharplang/discussions/10379>
 
 This proposal brings discriminated unions to C# through the familiar enum model: a value is one of several named cases, and each case can carry data. The new `enum class` and `enum struct` forms declare nested record classes and record structs, respectively, as their cases.
 
-It is a follow-up to the [type unions](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-15.0/unions.md) proposal. Type unions combine existing types, while data-carrying enums declare a type and its cases together. An [alternative design](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/discriminated-unions.md) builds discriminated unions directly on the `union` feature.
+It is a follow-up to the [type unions](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-15.0/unions.md) proposal. Type unions combine existing types, while data-carrying enums declare a type and its cases together. An [alternative design](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/discriminated-unions.md) builds discriminated unions directly on the `union` feature. The [design comparison](comparison.md) examines their tradeoffs.
 
 It consolidates design feedback from many years of repository discussions, especially [#113](https://github.com/dotnet/csharplang/issues/113) and related issues.
 

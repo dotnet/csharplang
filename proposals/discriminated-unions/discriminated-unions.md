@@ -2,7 +2,7 @@
 
 This proposal brings discriminated unions to C# by extending the [type-union feature](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-15.0/unions.md) with nested case declarations. Each `case` declares a nested record and adds it to the union's set of case types. Existing union conversions, matching, members, and exhaustiveness then apply.
 
-An [alternative approach](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/data-carrying-enums.md) builds on familiar C# enums.
+An [alternative approach](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/data-carrying-enums.md) builds on familiar C# enums. The [design comparison](comparison.md) examines their tradeoffs.
 
 ## Example Walkthrough
 
