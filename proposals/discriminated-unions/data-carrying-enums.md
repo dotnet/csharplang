@@ -323,7 +323,7 @@ public struct Option<T>
 }
 ```
 
-These sketches describe the type relationships and use ordinary nested record constructors in emitted code. The struct case types' mutability is described under [Readonly, Copying, and `with`](#readonly-copying-and-with).
+These sketches describe the type relationships and use ordinary nested record constructors in emitted code. The struct case types' mutability is described under [Readonly](#readonly).
 
 ### Metadata and Compatibility
 
@@ -331,7 +331,7 @@ The [shared design](https://github.com/dotnet/csharplang/blob/main/proposals/dis
 
 ## Value Semantics
 
-### Readonly, Copying, and `with`
+### Readonly
 
 `enum struct` types follow ordinary [`readonly struct` rules](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/structs.md#1622-struct-modifiers). Their case types have the enum's readonlyness and follow [`record struct` property rules](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-10.0/record-structs.md#properties). Whether to make `enum struct` types [always readonly](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/union-enum-common.md#always-readonly-struct-types) remains open.
 
