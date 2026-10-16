@@ -255,7 +255,7 @@ Torn accesses follow the [shared concurrency and safety requirements](https://gi
 
 The [shared design](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/union-enum-common.md#contextual-construction-and-inference) describes how case construction and patterns compose with target-typed access and generic inference.
 
-## Implementation Details
+## Switch Dispatch
 
 A `union` without the `struct` modifier can use existing union switch dispatch. `union struct` may warrant [specialized dispatch](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/union-enum-switch-emit.md) for its non-boxed storage.
 

@@ -351,7 +351,7 @@ Torn accesses follow the [shared concurrency and safety requirements](https://gi
 
 The [shared design](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/union-enum-common.md#contextual-construction-and-inference) describes how case construction and patterns compose with target-typed access and generic inference.
 
-## Implementation Details
+## Switch Dispatch
 
 The [shared switch emission discussion](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/union-enum-switch-emit.md) covers type tests for `enum class`, non-boxing case access for `enum struct`, and possible optimizations.
 
