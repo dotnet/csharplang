@@ -112,6 +112,8 @@ Whether the semicolon between cases and members is required remains an [open que
 
 ### Declaration Rules
 
+Each case in a data-carrying enum is shorthand for declaring a public nested record type with the given name and optional primary constructor parameter list. Cases are sealed record classes in an `enum class` and record structs in an `enum struct`. Allowing authors to supply [record bodies and case-specific interfaces](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/union-enum-common.md#customizing-case-records) is a possible future extension.
+
 For user-declared functionality (like `GetValueOrDefault` in the walkthrough), this proposal builds on [Members in Enum Declarations](https://github.com/dotnet/csharplang/blob/main/proposals/enum-members.md). That proposal defines the syntax and rules for adding members. It is not required for the members that the compiler generates under this proposal.
 
 Cases in a data-carrying enum use their enclosing enum's type parameters and constraints. Whether a case can declare [independent type parameters](https://github.com/dotnet/csharplang/blob/main/proposals/data-carrying-enums.md#independent-generic-case-parameters) is an open question.
@@ -270,13 +272,11 @@ The [shared library-evolution rules](https://github.com/dotnet/csharplang/blob/m
 
 ## Type Model
 
-Each case in a data-carrying enum declares a public nested record type that can be used like any other type. These types are not instantiated with `new`. See [Construction and Case Access](https://github.com/dotnet/csharplang/blob/main/proposals/data-carrying-enums.md#construction-and-case-access).
-
 The type sketches below describe relationships between the enum and its cases.
 
 ### `enum class` Translation
 
-An `enum class` is an abstract record base with a private parameterless constructor, no copy constructor, and sealed nested case records. A value holds the actual case reference. Data-free cases use shared instances. For example:
+An `enum class` is an abstract record base with a private parameterless constructor and no copy constructor. A value holds the actual case reference. Data-free cases use shared instances. For example:
 
 ```csharp
 public enum class Result
@@ -302,7 +302,7 @@ The base has no instance state, so case copy constructors call `base()`. Only th
 
 ### `enum struct` Translation
 
-The `struct` keyword selects an [opinionated inline representation](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/union-enum-non-boxed-layout.md). Case types are separate `record struct` types, with conversions between the cases and the enum:
+The `struct` keyword selects an [opinionated inline representation](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/union-enum-non-boxed-layout.md). For example:
 
 ```csharp
 // Conceptual type model and simple storage for Option<T>:

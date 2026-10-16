@@ -76,6 +76,8 @@ The `ref` modifier is excluded from this proposal. A [separate proposal](https:/
 
 ### Case Declarations
 
+Each `case` is shorthand for declaring a public nested record type with the given name and optional primary constructor parameter list. Cases are sealed record classes in a bare `union` and record structs in a `union struct`. Allowing authors to supply [record bodies and case-specific interfaces](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/union-enum-common.md#customizing-case-records) is a possible future extension.
+
 Given a union declaration such as:
 
 ```csharp
@@ -86,7 +88,7 @@ union Result
 }
 ```
 
-The compiler declares nested record types and adds them to the union's set of types, as illustrated using existing union syntax:
+The compiler adds the declared types to the union's set of types. Using existing union syntax, this corresponds to:
 
 ```csharp
 union Result(Result.Success, Result.Failure)
@@ -98,7 +100,7 @@ union Result(Result.Success, Result.Failure)
 
 Types introduced by `case` declarations are not instantiated with `new`. See [Construction and Case Access](#construction-and-case-access).
 
-Each case declares a public nested type. Cases use the containing union's type parameters and constraints. Independent case type parameters are an [open question](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/union-enum-common.md#independent-generic-case-parameters).
+Cases use the containing union's type parameters and constraints. Independent case type parameters are an [open question](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/union-enum-common.md#independent-generic-case-parameters).
 
 ### User-Declared Constructors
 
@@ -201,11 +203,11 @@ The [shared library-evolution rules](https://github.com/dotnet/csharplang/blob/m
 
 ### `union` Translation
 
-For bare `union`, each `case` declares a sealed record class. The containing union uses the [existing object-backed representation](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-15.0/unions.md#lowering).
+Bare `union` uses the [existing object-backed representation](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-15.0/unions.md#lowering).
 
 ### `union struct` Translation
 
-The `struct` keyword selects an opinionated inline representation from the [shared layout proposal](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/union-enum-non-boxed-layout.md), which also discusses possible configuration. Each `case` declares a separate record struct:
+The `struct` keyword selects an opinionated inline representation from the [shared layout proposal](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/union-enum-non-boxed-layout.md), which also discusses possible configuration. For example:
 
 ```csharp
 // Conceptual type model and simple storage for Option<T>:

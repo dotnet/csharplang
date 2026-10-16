@@ -175,6 +175,32 @@ Renaming or removing public cases, changing their payload parameters or properti
 
 Should declarations using the `struct` keyword and their generated case records always be readonly, or should authors opt in with the `readonly` modifier?
 
+### Customizing Case Records
+
+Both designs could let authors supply the record body as well as its name and primary constructor parameters. For example, these are possible future forms:
+
+```csharp
+enum class Message
+{
+    Text(string Value)
+    {
+        public int Length => Value.Length;
+    },
+    Empty
+}
+
+union Message
+{
+    case Text(string Value)
+    {
+        public int Length => Value.Length;
+    }
+    case Empty;
+}
+```
+
+The body could declare members or customize synthesized record members under ordinary record rules. Cases could also specify additional interfaces. Whether these extensions are useful enough to support, and their exact syntax and restrictions, remain open. Both designs leave room to add them later.
+
 ### Independent Generic Case Parameters
 
 Should a case introduce its own type parameters, for example an enum case `X<T>(T Value)` or a union case `case X<T>(T Value);` in a nongeneric declaration?
