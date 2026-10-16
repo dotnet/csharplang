@@ -258,7 +258,7 @@ The [shared design](https://github.com/dotnet/csharplang/blob/main/proposals/dis
 
 ## Implementation Details
 
-The [shared switch-emission discussion](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/union-enum-switch-emit.md) covers local performance measurements, candidate lowerings, and possible compiler and JIT optimizations.
+Bare `union` can use existing union switch dispatch. `union struct` may warrant [specialized dispatch](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/union-enum-switch-emit.md) for its non-boxed storage.
 
 ## Open Questions
 

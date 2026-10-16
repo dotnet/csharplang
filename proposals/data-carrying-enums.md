@@ -352,7 +352,7 @@ The [shared design](https://github.com/dotnet/csharplang/blob/main/proposals/dis
 
 ## Implementation Details
 
-The [shared switch-emission discussion](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/union-enum-switch-emit.md) covers local performance measurements, candidate lowerings, and possible compiler and JIT optimizations.
+The [shared switch emission discussion](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/union-enum-switch-emit.md) covers type tests for `enum class`, non-boxing case access for `enum struct`, and possible optimizations.
 
 ## Possible Connections to Type Unions
 
@@ -386,8 +386,6 @@ The costs and choices are:
 - Union type patterns inspect the contained case, while untyped property/positional patterns inspect the enum. Integration must preserve that distinction, following the [LDM decision on pattern targets](https://github.com/dotnet/csharplang/blob/main/meetings/2026/LDM-2026-08-12.md#union-pattern-matching-targets).
 - Union null patterns would select the open [uninitialized-null matching option](https://github.com/dotnet/csharplang/blob/main/proposals/data-carrying-enums.md#uninitialized-values-in-matching), with nullable `Value`. A designated `default` case could use non-nullable `Value`. Annotations and access members must agree.
 - Union case-type exhaustiveness must accommodate the enum's separate open/closed evolution policy.
-
-`[Union]` alone would not provide the stronger [JIT optimization contract](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/union-enum-switch-emit.md#runtime-recognition-and-alternatives).
 
 </details>
 
