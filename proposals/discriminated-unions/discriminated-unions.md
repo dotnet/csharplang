@@ -114,23 +114,24 @@ For unions with case declarations and for all `union struct` types, user code ca
 
 ## Construction and Case Access
 
-Cases declared with `case` use `U.Case` for data-free cases and `U.Case(arguments)` for cases with parameters. Both forms produce a value of the case type:
+Cases use `E.Case` for data-free cases and `E.Case(arguments)` for cases with parameters, where `E` is the enclosing type. Both forms produce a value of the case type:
 
 ```csharp
-Result.Success success = Result.Success("Complete");
-Result result = success;
+Option<int>.Some some = Option<int>.Some(42);
+Option<int> option = some;
+option = Option<int>.None;
 
-void UseSuccess(Result.Success value) { /* ... */ }
-UseSuccess(Result.Success("Complete"));
+void UseSome(Option<int>.Some value) { /* ... */ }
+UseSome(Option<int>.Some(42));
 ```
 
 Arguments bind under the corresponding record constructor's rules.
 
-Explicit and target-typed object-creation expressions for types introduced by `case` declarations are errors:
+Object-creation expressions targeting case types are errors, including explicit and target-typed `new`:
 
 ```csharp
-var invalid = new Result.Success("Complete"); // error
-Result.Success alsoInvalid = new("Complete"); // error
+var invalid = new Option<int>.Some(42); // error
+Option<int>.Some alsoInvalid = new(42); // error
 ```
 
 Whether unions with declared cases should also [restrict direct construction](#direct-construction-of-the-enclosing-union) remains open.

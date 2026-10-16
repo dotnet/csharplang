@@ -155,7 +155,7 @@ Authors can separate cases and members into different parts. A members-only part
 
 ## Construction and Case Access
 
-Data-carrying enums use `E.Case` for data-free cases, as ordinary enums do, and `E.Case(arguments)` for cases with parameters. Both forms produce a value of the case type:
+Cases use `E.Case` for data-free cases and `E.Case(arguments)` for cases with parameters, where `E` is the enclosing type. Both forms produce a value of the case type:
 
 ```csharp
 Option<int>.Some some = Option<int>.Some(42);
@@ -168,12 +168,17 @@ UseSome(Option<int>.Some(42));
 
 Arguments bind under the corresponding record constructor's rules.
 
-Object-creation expressions targeting a data-carrying enum or one of its case types are errors, including explicit and target-typed `new`, with or without arguments:
+Object-creation expressions targeting case types are errors, including explicit and target-typed `new`:
 
 ```csharp
 var invalid = new Option<int>.Some(42); // error
 Option<int>.Some alsoInvalid = new(42); // error
-Option<int> stillInvalid = new();       // error
+```
+
+These restrictions also apply to the enclosing enum:
+
+```csharp
+Option<int> stillInvalid = new(); // error
 ```
 
 ### Generated APIs and Conversions
