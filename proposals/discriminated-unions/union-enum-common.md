@@ -196,8 +196,8 @@ The represented cases below apply to both designs. The last column follows the e
 
 | Variable | Represented case | Nullable wrapper's `HasValue` | `is null` for `union struct` |
 | --- | --- | --- | --- |
-| `textCase` | `Text` with a null payload | Not nullable | `false` |
-| `uninitialized` | No case | Not nullable | `true` |
+| `textCase` | `Text` with a null payload | N/A | `false` |
+| `uninitialized` | No case | N/A | `true` |
 | `noUnion` | No union value | `false` | `true` |
 | `present` | The contained union represents no case | `true` | `true` |
 
