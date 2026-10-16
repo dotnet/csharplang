@@ -116,7 +116,7 @@ For user-declared functionality (like `GetValueOrDefault` in the walkthrough), t
 
 Cases in a data-carrying enum use their enclosing enum's type parameters and constraints. Whether a case can declare [independent type parameters](https://github.com/dotnet/csharplang/blob/main/proposals/data-carrying-enums.md#independent-generic-case-parameters) is an open question.
 
-Data-carrying enum declarations may list interfaces, but cannot specify a base class. Whether to allow [record inheritance for `enum class`](https://github.com/dotnet/csharplang/blob/main/proposals/data-carrying-enums.md#deriving-enum-class-from-a-record) remains an open question.
+Data-carrying enum declarations may list interfaces, but cannot specify a base class.
 
 Cases cannot be assigned constant values.
 
@@ -447,21 +447,6 @@ Should data-carrying enums permit additional instance state? We recommend keepin
 Should custom instance constructors be permitted? A custom constructor would need to select a valid case and preserve the case-construction model.
 
 Parameterized cases use `N(...)` or `N(...) = default`. The former shares its prefix with an instance constructor. That overlap would need consideration if constructors were allowed and the [comma-only separator alternative](https://github.com/dotnet/csharplang/blob/main/proposals/enum-members.md#separating-values-from-members) were selected.
-
-### Deriving `enum class` from a Record
-
-An `enum class` could derive from another record with an accessible parameterless constructor, or provide arguments to its base constructor directly in the base list. A further option is an enum primary constructor whose parameters are all forwarded to the base record, with cases supplying arguments to that constructor. For example, possible future syntax could be:
-
-```csharp
-record BaseRecord(int X);
-
-enum class Outer(int X) : BaseRecord(X)
-{
-    A(int X, int Y) : base(X)
-}
-```
-
-These options add substantial design surface around constructor binding, inherited state, and record copying and equality. We recommend deferring record inheritance and enum primary constructors from the initial feature. The current design does not preclude adding them later. They are included here for completeness.
 
 ### Inference from a Known Case Type
 
