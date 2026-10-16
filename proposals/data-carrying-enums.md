@@ -334,11 +334,7 @@ Generated queries, extraction methods, and instance equality members are `readon
 
 ### Equality and Hashing
 
-Every case is a record, so both enum forms expose record equality and hashing on the enum type itself. Callers can compare enum instances directly or use them as collection keys.
-
-Both enum forms expose strongly typed `Equals`, `IEquatable<E>`, `Equals(object)`, and `==`/`!=` for the enum type `E`. Equality requires matching case types and delegates to the case value's equality implementation. Hashing delegates to the case value's `GetHashCode()`.
-
-Two values of the same `enum struct` with `HasValue == false` compare equal. If only one has `HasValue == false`, they compare unequal.
+The [shared equality and hashing rules](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/union-enum-common.md#equality-and-hashing) apply to both enum forms. An `enum class` uses its record hierarchy's equality and hashing implementation. An `enum struct` implements these operations over its [non-boxed storage](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/union-enum-non-boxed-layout.md#equality-and-hashing).
 
 ### Recursive Payloads and Concurrent Access
 

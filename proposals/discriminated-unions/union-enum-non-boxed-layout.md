@@ -1,6 +1,6 @@
 # Non-Boxed Storage for Unions and Data-Carrying Enums
 
-The `struct` keyword in [`enum struct`](https://github.com/dotnet/csharplang/blob/main/proposals/data-carrying-enums.md) and [`union struct`](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/discriminated-unions.md) selects an opinionated layout that stores case data inline, avoiding boxing during ordinary creation and extraction. This proposal describes a shared implementation approach. Each language proposal defines its own case types, construction, conversions, defaults, matching, and equality.
+The `struct` keyword in [`enum struct`](https://github.com/dotnet/csharplang/blob/main/proposals/data-carrying-enums.md) and [`union struct`](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/discriminated-unions.md) selects an opinionated layout that stores case data inline, avoiding boxing during ordinary creation and extraction. This proposal describes a shared implementation approach. Each language proposal defines its own case types, construction, conversions, defaults, and matching.
 
 The layout is an implementation detail. Compilers may change it, including to use future runtime capabilities, while preserving the specified API and observable semantics. No particular size, field layout, native ABI, or persistent byte representation is guaranteed.
 
@@ -160,6 +160,78 @@ An enum or union using raw packing must validate its own size and reference-cont
 Validation in the payload type's static constructor alone is insufficient: defaults, arrays, layout queries, and whole-value copies can bypass it. A later library could also remove the annotation or validate a different size. A consumer reserving eight bytes must validate its own eight-byte expectation, rejecting updates that ordinary typed storage could accept.
 
 The `DateTime` assertion uses its current eight-byte managed size. The language does not guarantee that size. These cases could share an eight-byte region, separately from the discriminator. The annotation permits packing without requiring it and establishes only reference containment and total size. Field offsets, alignment, and accessibility need separate justification, or values can be copied opaquely. Adoption remains a joint LDM and runtime-team decision supported by performance measurements.
+
+## Equality and Hashing
+
+For data-carrying enums and unions with case declarations, equality and hashing implement the [shared value-equality rules](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/union-enum-common.md#equality-and-hashing) without boxing the active case or accessing an object-valued `Value` property. In the compact layout, equality first checks that the discriminators identify the same case, then compares corresponding payload fields with their declared types' equality comparers. Hashing can combine the case discriminator with those fields' hash codes.
+
+The enclosing struct need not produce the same hash code as an extracted case, including the boxed case returned by `Value`.
+
+For example, `Reading` and `Range` can share their first `double` slot. `Reading` also uses a string slot, while `Range` uses a second `double` slot:
+
+```csharp
+enum struct Measurement
+{
+    Missing = default,
+    Reading(double Value, string? Unit),
+    Range(double Minimum, double Maximum)
+}
+
+union struct Measurement
+{
+    case Missing = default;
+    case Reading(double Value, string? Unit);
+    case Range(double Minimum, double Maximum);
+}
+```
+
+The decomposed storage and synthesized equality members could be as follows. Case types and other members are omitted:
+
+```csharp
+public struct Measurement : IEquatable<Measurement>
+{
+    private byte _discriminator; // 0: Missing, 1: Reading, 2: Range
+    private double _value0;      // Reading.Value or Range.Minimum
+    private double _value1;      // Range.Maximum
+    private string? _unit;       // Reading.Unit
+
+    public readonly bool Equals(Measurement other)
+    {
+        if (_discriminator != other._discriminator)
+            return false;
+
+        return _discriminator switch
+        {
+            0 => true,
+            1 => EqualityComparer<double>.Default.Equals(_value0, other._value0) &&
+                 EqualityComparer<string?>.Default.Equals(_unit, other._unit),
+            2 => EqualityComparer<double>.Default.Equals(_value0, other._value0) &&
+                 EqualityComparer<double>.Default.Equals(_value1, other._value1),
+            _ => throw new InvalidOperationException()
+        };
+    }
+
+    public override readonly bool Equals(object? obj)
+        => obj is Measurement other && Equals(other);
+
+    public override readonly int GetHashCode()
+        => _discriminator switch
+        {
+            0 => 0,
+            1 => HashCode.Combine(_discriminator, _value0, _unit),
+            2 => HashCode.Combine(_discriminator, _value0, _value1),
+            _ => throw new InvalidOperationException()
+        };
+
+    public static bool operator ==(Measurement left, Measurement right)
+        => left.Equals(right);
+
+    public static bool operator !=(Measurement left, Measurement right)
+        => !(left == right);
+}
+```
+
+If future [case bodies](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/union-enum-common.md#customizing-case-records) permit custom case equality or hashing, the implementation must honor those members. Reconstructing a typed case and invoking its methods can do this without boxing the case.
 
 ## Case Dispatch
 

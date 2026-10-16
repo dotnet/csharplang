@@ -145,6 +145,69 @@ union struct Measurement
 
 Declaring `string? Unit` permits that value. Writing `= default!` suppresses these warnings without changing the default payload values.
 
+## Equality and Hashing
+
+Each case declared in a union or data-carrying enum is a record representing data. We expect users to treat the enclosing union or enum as a data value too, so we propose giving it value equality and hashing.
+
+For a union or enum named `Result`, we propose:
+
+- `IEquatable<Result>`.
+- A strongly typed `Equals(Result)` method (`Equals(Result?)` for `enum class`).
+- Overrides of `Equals(object?)` and `GetHashCode()`.
+- `==` and `!=` operators for `Result`.
+
+We could omit these members, but we believe that would be surprising and undesirable. Users would have to unwrap cases for comparisons or write the boilerplate that records already eliminate. Combining records into a discriminated union should preserve that convenience.
+
+Member synthesis and customization follow the [record-class](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-9.0/records.md#equality-members) or [record-struct](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-10.0/record-structs.md#equality-members) equality rules, according to the enclosing type's class or struct kind.
+
+Note that a record's synthesized `==` and `!=` operators delegate to `Equals`. We follow the same approach here.
+
+For a struct with no designated `default` case, default-initialized instances compare equal to each other and unequal to instances representing a case. With a designated `default` case, equality uses that case with default payload values.
+
+Hashing uses the selected case and its contents. Equal instances must have equal hash codes.
+
+For example, these declarations have class cases:
+
+```csharp
+enum class Result
+{
+    Success(string Value),
+    Failure(int Code)
+}
+
+union Result
+{
+    case Success(string Value);
+    case Failure(int Code);
+}
+```
+
+The object-backed `union Result` can synthesize the following equality members. Other union members and interfaces are omitted:
+
+```csharp
+public struct Result : IEquatable<Result>
+{
+    public object? Value { get; }
+
+    public readonly bool Equals(Result other)
+        => object.Equals(Value, other.Value);
+
+    public override readonly bool Equals(object? obj)
+        => obj is Result other && Equals(other);
+
+    public override readonly int GetHashCode()
+        => Value?.GetHashCode() ?? 0;
+
+    public static bool operator ==(Result left, Result right)
+        => left.Equals(right);
+
+    public static bool operator !=(Result left, Result right)
+        => !(left == right);
+}
+```
+
+The `enum class` form gets these behaviors from its record hierarchy. For `enum struct` and `union struct`, the [non-boxed layout proposal](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/union-enum-non-boxed-layout.md#equality-and-hashing) shows how equality and hashing operate on decomposed storage without boxing the case.
+
 ## Recursive Payloads
 
 Recursive payloads follow the normal [value-type layout rules](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/structs.md#1642-value-semantics). A value type cannot recursively contain itself by value when that would require infinite storage. Recursion through references is permitted.

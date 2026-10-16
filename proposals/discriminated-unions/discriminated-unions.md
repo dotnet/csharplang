@@ -238,11 +238,9 @@ Cases declared in a `union struct` have the union's readonlyness and follow [rec
 
 ### Equality and Hashing
 
-Every declared case is a record, so we lift record equality and hashing to the union itself. This gives callers familiar record semantics when comparing union instances directly or using them as collection keys.
+Unions with case declarations follow the [shared equality and hashing rules](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/union-enum-common.md#equality-and-hashing).
 
-The union implements `IEquatable<U>` and provides `Equals(U)`, `Equals(object)`, `GetHashCode()`, `==`, and `!=`, with synthesis and customization following the [record-struct equality rules](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-10.0/record-structs.md#equality-members).
-
-Equality requires matching case types and delegates to the case value's equality implementation. A union whose `Value` is `null` compares equal only to another instance of the same union type whose `Value` is also `null`. Hashing delegates to the case value's `GetHashCode()` when present.
+A `union` without `struct` can implement equality with `object.Equals(left.Value, right.Value)` and delegate hashing to the stored case instance when present. A `union struct` implements these operations over its [non-boxed storage](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/union-enum-non-boxed-layout.md#equality-and-hashing).
 
 Unions of existing types retain their equality and hashing semantics when declared with `union struct`.
 
