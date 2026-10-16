@@ -86,7 +86,7 @@ union Result
 }
 ```
 
-The compiler declares the nested case types and adds them to the union's case set. The equivalent declaration using existing union syntax is:
+The compiler declares nested record types and adds them to the union's set of types, as illustrated using existing union syntax:
 
 ```csharp
 union Result(Result.Success, Result.Failure)
@@ -96,29 +96,23 @@ union Result(Result.Success, Result.Failure)
 }
 ```
 
-These types are not instantiated with `new`. See [Construction and Case Access](#construction-and-case-access).
+Types introduced by `case` declarations are not instantiated with `new`. See [Construction and Case Access](#construction-and-case-access).
 
-Each case declares a public nested type, with effective accessibility bounded by its containing union. Cases use the containing union's type parameters and constraints. Independent case type parameters are an [open question](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/union-enum-common.md#independent-generic-case-parameters).
-
-Case names must be unique and must not conflict with other members.
+Each case declares a public nested type. Cases use the containing union's type parameters and constraints. Independent case type parameters are an [open question](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/union-enum-common.md#independent-generic-case-parameters).
 
 ### User-Declared Constructors
 
 User-declared constructors follow the [existing union constructor rules](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-15.0/unions.md#union-declarations). For example, the earlier `Result` could declare:
 
 ```csharp
-public Result(bool success, string message) : this(Result.Success(message))
-{
-    if (!success)
-        this = Result.Failure(-1);
-}
+internal Result(string message) : this(Result.Success(message)) { }
 ```
 
 For declarations with generated cases and for `union struct` declarations, user code cannot assign to the generated `Value` property, including inside constructors. This keeps initialization within the declared case set and independent of the storage representation.
 
 ## Construction and Case Access
 
-Generated cases use the syntactic forms `U.Case` and `U.Case(arguments)` to produce values of the case type:
+Cases declared with `case` use `U.Case` for data-free cases and `U.Case(arguments)` for cases with parameters. Both forms produce a value of the case type:
 
 ```csharp
 var success = Result.Success("Complete"); // Result.Success
@@ -128,7 +122,7 @@ void UseSuccess(Result.Success value) { /* ... */ }
 UseSuccess(Result.Success("Complete"));
 ```
 
-A case without a parameter list is a value expression in a value context. Arguments for a parameterized case bind under the corresponding record constructor's rules.
+Arguments bind under the corresponding record constructor's rules.
 
 Explicit and target-typed object-creation expressions for generated case types are errors:
 
@@ -205,15 +199,13 @@ The [shared library-evolution rules](https://github.com/dotnet/csharplang/blob/m
 
 ## Type Model
 
-Generated case types provide record-like payload properties, deconstruction, copying, and equality.
-
 ### `union` Translation
 
-Bare `union` generates sealed record class cases and uses the [existing object-backed representation](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-15.0/unions.md#lowering) for the containing union.
+For bare `union`, each `case` declares a sealed record class. The containing union uses the [existing object-backed representation](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-15.0/unions.md#lowering).
 
 ### `union struct` Translation
 
-The `struct` keyword selects an opinionated inline representation from the [shared layout proposal](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/union-enum-non-boxed-layout.md), which also discusses possible configuration. Generated cases are separate record structs:
+The `struct` keyword selects an opinionated inline representation from the [shared layout proposal](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/union-enum-non-boxed-layout.md), which also discusses possible configuration. Each `case` declares a separate record struct:
 
 ```csharp
 // Conceptual type model and simple storage for Option<T>:
@@ -240,9 +232,7 @@ The [shared design](https://github.com/dotnet/csharplang/blob/main/proposals/dis
 
 ### Readonly, Copying, and `with`
 
-Generated reference-type cases follow record-class rules. Generated value-type cases follow record-struct rules and the containing union's readonlyness: mutable cases have `get`/`set` payload properties, while readonly cases have `get`/`init`. Whether `union struct` types should always be readonly remains an [open question](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/union-enum-common.md#always-readonly-struct-types).
-
-Assignment copies the enclosing struct shallowly. Bare unions copy a case reference. `union struct` values copy their stored payload. Extracting a struct case gives an independent value, and changing it does not update the union. Case values support the corresponding record `with` expressions.
+Cases declared in a `union struct` have the union's readonlyness and follow [record-struct property rules](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-10.0/record-structs.md#properties). Whether `union struct` types should always be readonly remains an [open question](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/union-enum-common.md#always-readonly-struct-types).
 
 ### Equality and Hashing
 
@@ -250,17 +240,7 @@ Every declared case is a record, so we lift record equality and hashing to the u
 
 The union implements `IEquatable<U>` and provides `Equals(U)`, `Equals(object)`, `GetHashCode()`, `==`, and `!=`, with synthesis and customization following the [record-struct equality rules](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-10.0/record-structs.md#equality-members).
 
-Synthesized equality requires the same case and equality of the corresponding case records. Unused storage and padding never participate. Hashing follows the active case's record hashing, with equal values producing equal hashes. Hash values and combining algorithms remain implementation details.
-
-Without a designated `default` case, two `default(U)` instances of the same union type compare equal. A `default(U)` instance compares unequal to any constructed case. For the earlier `Result` declaration:
-
-```csharp
-Result uninitialized = default;
-bool equalsDefault = uninitialized == default(Result); // true
-bool equalsSuccess = uninitialized == Result.Success("Complete"); // false
-```
-
-With a designated `default` case, `default(U)` compares as an instance of that case with default payload values.
+Equality requires matching case types and delegates to the case value's equality implementation. A union whose `Value` is `null` compares equal only to another instance of the same union type whose `Value` is also `null`. Hashing delegates to the case value's `GetHashCode()` when present.
 
 Unions of existing types retain their equality and hashing semantics when declared with `union struct`.
 
@@ -304,4 +284,4 @@ Should unions have a way to indicate that their case set is non-exhaustive, for 
 
 ### Explicit `union class` Spelling
 
-Should `union class` be an explicit synonym for bare `union`, as `record class` is for `record`? We would like this symmetry when adding `union struct`. However, bare `union` is itself an object-backed struct, so the word `class` would describe neither the containing CLR type nor the kind of every explicitly listed case. That potential confusion remains a reason to omit the synonym.
+Should `union class` be an explicit synonym for bare `union`, as `record class` is for `record`? We would like this symmetry when adding `union struct`. For cases declared in the body, `class` would describe the record-class cases, while the containing union would remain an object-backed struct. That difference could make the spelling confusing.

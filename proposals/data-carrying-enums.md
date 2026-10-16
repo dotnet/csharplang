@@ -116,7 +116,7 @@ For user-declared functionality (like `GetValueOrDefault` in the walkthrough), t
 
 Cases in a data-carrying enum use their enclosing enum's type parameters and constraints. Whether a case can declare [independent type parameters](https://github.com/dotnet/csharplang/blob/main/proposals/data-carrying-enums.md#independent-generic-case-parameters) is an open question.
 
-Data-carrying enum declarations may list interfaces, but cannot specify a base class. Whether to allow [record inheritance for `enum class`](https://github.com/dotnet/csharplang/blob/main/proposals/data-carrying-enums.md#deriving-enum-class-from-a-record) remains an open question. Interfaces are implemented by the enclosing type under ordinary interface-implementation rules.
+Data-carrying enum declarations may list interfaces, but cannot specify a base class. Whether to allow [record inheritance for `enum class`](https://github.com/dotnet/csharplang/blob/main/proposals/data-carrying-enums.md#deriving-enum-class-from-a-record) remains an open question.
 
 Cases cannot be assigned constant values.
 
@@ -153,7 +153,7 @@ Authors can separate cases and members into different parts. A members-only part
 
 ## Construction and Case Access
 
-An ordinary enum value can be obtained using the syntactic form `E.Case`, such as `Color.Red`. Data-carrying enums extend this syntax to `E.Case(arguments)`:
+Data-carrying enums use `E.Case` for data-free cases, as ordinary enums do, and `E.Case(arguments)` for cases with parameters. Both forms produce a value of the case type:
 
 ```csharp
 var some = Option<int>.Some(42); // Option<int>.Some
@@ -164,7 +164,7 @@ void UseSome(Option<int>.Some value) { /* ... */ }
 UseSome(Option<int>.Some(42));
 ```
 
-A case without a parameter list is a value expression in a value context. A case with a parameter list is invoked with arguments bound under the corresponding record constructor's rules. Both forms produce a value of the case type.
+Arguments bind under the corresponding record constructor's rules.
 
 Object-creation expressions targeting a data-carrying enum or a generated case type are errors, including explicit and target-typed `new`, with or without arguments:
 
@@ -176,13 +176,13 @@ Option<int> stillInvalid = new();       // error
 
 ### Generated APIs and Conversions
 
-Case-to-enum conversions use existing C# conversion rules. `enum class` cases have implicit reference conversions to their base enum and explicit reference conversions back, with ordinary type tests and `as`. For `enum struct`, the compiler generates operators governed by the existing user-defined conversion rules. The proposed minimum API adds:
+Case-to-enum conversions use existing C# conversion rules. `enum class` cases have implicit reference conversions to their base enum and explicit reference conversions back. For `enum struct`, the compiler generates operators governed by the existing user-defined conversion rules. The proposed minimum API adds:
 
 - An `implicit operator` from each case type to the enum.
 - A boolean `IsCase` property for each case, such as `IsSome`, testing case identity.
-- `HasValue`, which is false when uninitialized and true for any active case, including a designated `default` case.
-- A `TryGetValue(out Case value)` overload for each case. When the case is active, it returns true and assigns the case value to the out parameter. Otherwise it returns false and assigns `default(Case)`.
-- An `explicit operator` from the enum to each case type, returning its value if active or throwing `InvalidCastException` otherwise.
+- `HasValue`, which returns `true` when the enum represents a case, including a designated `default` case, and `false` otherwise.
+- A `TryGetValue(out Case value)` overload for each case. When the enum represents that case, it returns `true` and assigns the case value to the out parameter. Otherwise it returns `false` and assigns `default(Case)`.
+- An `explicit operator` from the enum to each case type, returning the case value if the enum represents that case or throwing `InvalidCastException` otherwise.
 
 <details>
 <summary>Example: generated case-access API for Option&lt;T&gt;</summary>
@@ -218,15 +218,15 @@ public struct Option<T>
 
 For an `enum class`, `default(E)` is `null` and represents no case.
 
-For an `enum struct` without a designated `default` case, `default(E)` is an *uninitialized value* with no active case. For example, if the walkthrough's `Option<T>` omitted `= default` on `None`:
+For an `enum struct` without a designated `default` case, `default(E)` represents none of its cases and `HasValue` is `false`. For example, if the walkthrough's `Option<T>` omitted `= default` on `None`:
 
 ```csharp
-Option<int> uninitialized = default;   // no active case
-Option<int> none = Option<int>.None;   // active None
-Option<int> some = Option<int>.Some(0); // active Some with payload 0
+Option<int> uninitialized = default;   // HasValue is false
+Option<int> none = Option<int>.None;   // represents None
+Option<int> some = Option<int>.Some(0); // represents Some with Value = 0
 ```
 
-An `enum struct` may designate at most one case with `= default` across all partial declarations. The designated case may have payload parameters. A zero-initialized enum then represents that case, with each payload property holding its type's default value:
+An `enum struct` may designate at most one case with `= default` across all partial declarations. The designated case may have payload parameters. A zero-initialized enum then represents that case, with `HasValue` equal to `true` and each payload property holding its type's default value:
 
 ```csharp
 Option<int> option = default;
@@ -264,13 +264,13 @@ Patterns that extract a case from an `enum struct` require an input statically k
 
 Data-carrying enums follow the case-set policy of [open/closed enums](https://github.com/dotnet/csharplang/blob/main/proposals/closed-enums.md). A `closed` enum promises a fixed case set, allowing exhaustive matching without a future-case fallback. An enum without `closed` may gain cases, so consumers need a fallback for them. This uses that proposal's evolution policy, rather than its rules for integral enum values and conversions.
 
-Class null references follow the ordinary nullable-reference and switch rules. Whether exhaustiveness must account for an uninitialized struct, and whether `null` should match it, remain [open questions](https://github.com/dotnet/csharplang/blob/main/proposals/data-carrying-enums.md#uninitialized-values-in-matching).
+Whether exhaustiveness must account for a struct value that represents no case, and whether `null` should match it, remain [open questions](https://github.com/dotnet/csharplang/blob/main/proposals/data-carrying-enums.md#uninitialized-values-in-matching).
 
 The [shared library-evolution rules](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/union-enum-common.md#library-evolution) cover compatibility when declarations change.
 
 ## Type Model
 
-Each case in a data-carrying enum declares a public nested type that can be used like any other type. Its effective accessibility is bounded by the enclosing enum. Case types are records. Record behavior supplies payload properties, deconstruction, and case equality. See [Construction and Case Access](https://github.com/dotnet/csharplang/blob/main/proposals/data-carrying-enums.md#construction-and-case-access) for restrictions on `new`.
+Each case in a data-carrying enum declares a public nested record type that can be used like any other type. These types are not instantiated with `new`. See [Construction and Case Access](https://github.com/dotnet/csharplang/blob/main/proposals/data-carrying-enums.md#construction-and-case-access).
 
 The type sketches below describe relationships between the enum and its cases. Storage and switch emit remain implementation details. See [Implementation Details](https://github.com/dotnet/csharplang/blob/main/proposals/data-carrying-enums.md#implementation-details) for candidate switch translations.
 
@@ -326,40 +326,25 @@ The [shared design](https://github.com/dotnet/csharplang/blob/main/proposals/dis
 
 ## Value Semantics
 
-Cases in a data-carrying enum use the familiar record rules. The enclosing enum adds the behavior needed to represent any one of those case values, including copying and equality for the struct representation.
-
 ### Readonly, Copying, and `with`
 
-`enum struct` types currently follow ordinary [`readonly struct` rules](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/structs.md#1622-struct-modifiers): an unmodified `enum struct` is mutable, and `readonly enum struct` is readonly. Generated cases have the enum's readonlyness and follow [`record struct` property rules](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-10.0/record-structs.md#properties), using `get`/`set` properties for mutable cases and `get`/`init` for readonly cases. Whether to make `enum struct` types [always readonly](https://github.com/dotnet/csharplang/blob/main/proposals/data-carrying-enums.md#always-readonly-enum-struct-types) remains open. Generated queries, extraction methods, and equality members are `readonly` instance members.
+`enum struct` types follow ordinary [`readonly struct` rules](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/structs.md#1622-struct-modifiers). Their case types have the enum's readonlyness and follow [`record struct` property rules](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-10.0/record-structs.md#properties). Whether to make `enum struct` types [always readonly](https://github.com/dotnet/csharplang/blob/main/proposals/data-carrying-enums.md#always-readonly-enum-struct-types) remains open.
 
-Assignment follows ordinary class and struct rules and copies payloads shallowly. Extracting a struct case produces an independent value, so changing it does not update the enum:
-
-```csharp
-enum struct Progress { Waiting, Running(int Count) }
-
-Progress progress = Progress.Running(1);
-Progress.Running running = (Progress.Running)progress;
-running.Count = 2; // progress still contains Count = 1
-progress = running with { Count = 3 }; // update a case copy, then convert back
-```
-
-Case types support ordinary record `with` expressions. On an `enum class` receiver, `e with { }` clones the runtime case record, preserving case identity. On an `enum struct`, ordinary [struct `with` rules](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-10.0/record-structs.md#allow-with-expression-on-structs) copy its active case or uninitialized state. Initializers bind against the receiver's static type, so case-specific payload updates require a case-typed receiver.
+Generated queries, extraction methods, and instance equality members are `readonly`.
 
 ### Equality and Hashing
 
-`enum class` cases use record equality, including case type identity. For active `enum struct` values, equality requires the same case and equality of the corresponding case records. Payload comparisons follow ordinary record rules, including `EqualityComparer<T>.Default`. Unused storage and padding do not participate.
+Every case is a record, so both enum forms expose record equality and hashing on the enum type itself. Callers can compare enum instances directly or use them as collection keys.
 
-Both enum forms expose strongly typed `Equals`, `IEquatable<E>`, `Equals(object)`, and `==`/`!=` for the enum type `E`. Struct hashing follows the active case's record hashing and may incorporate case identity. Hash values and combining algorithms are implementation details.
+Both enum forms expose strongly typed `Equals`, `IEquatable<E>`, `Equals(object)`, and `==`/`!=` for the enum type `E`. Equality requires matching case types and delegates to the case value's equality implementation. Hashing delegates to the case value's `GetHashCode()`.
 
-Two uninitialized values of the same `enum struct` are equal, have equal hashes, and are unequal to any active case. A designated `default` case participates as that active case.
+Two values of the same `enum struct` with `HasValue == false` compare equal. If only one has `HasValue == false`, they compare unequal.
 
-### Recursive Payloads
+### Recursive Payloads and Concurrent Access
 
 The [shared rules for recursive payloads](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/union-enum-common.md#recursive-payloads) apply.
 
-### Concurrent Access
-
-`enum struct` values follow the shared layout proposal's [concurrency and safety requirements](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/union-enum-non-boxed-layout.md#concurrent-access-and-safety).
+Torn accesses follow the [shared concurrency and safety requirements](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/union-enum-non-boxed-layout.md#concurrent-access-and-safety).
 
 ## Contextual Construction and Inference
 
@@ -480,4 +465,6 @@ These options add substantial design surface around constructor binding, inherit
 
 ### Inference from a Known Case Type
 
-For a method `Use<T>(Option<T> value)`, inferring `T` from `Use(Option<int>.Some(42))` requires recognizing the generated case-to-enum relationship. Existing method inference does not follow an `enum struct`'s user-defined conversion. `Use<int>(Option<int>.Some(42))` or passing a value already typed as `Option<int>` works without that addition.
+For a method `Use<T>(Option<T> value)`, we expect `Use(Option<int>.Some(42))` to infer `T = int` for unions if [union-case type inference](https://github.com/dotnet/csharplang/pull/10355) is adopted. We would likely want to extend that proposal to cover `enum struct` cases as well: existing method inference does not follow the generated user-defined conversion. For `enum class`, ordinary inference through the case's base type already works.
+
+Until that extension is designed, `enum struct` callers can write `Use<int>(Option<int>.Some(42))` or pass a value already typed as `Option<int>`.

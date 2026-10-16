@@ -6,7 +6,23 @@ This file is for design material that is identical or very nearly identical in b
 
 ## Contextual Construction and Inference
 
-Qualified case construction and patterns work without target-typed access or improved generic inference. The examples below use the `Option<T>` cases from either walkthrough: `None` and `Some(T Value)`. The traces identify which rules each shortened form needs, so compatibility can be checked as the related proposals evolve.
+Case construction and patterns that name the enclosing type, such as `Option<int>.Some(42)`, work without target-typed access or improved generic inference. The examples below use these alternative declarations:
+
+```csharp
+enum struct Option<T>
+{
+    None = default,
+    Some(T Value)
+}
+
+union struct Option<T>
+{
+    case None = default;
+    case Some(T Value);
+}
+```
+
+Their construction and pattern syntax is the same, so the use-site examples apply to both designs. The steps below identify which rules each shortened form needs, so compatibility can be checked as the related proposals evolve.
 
 [Target-typed static member access](https://github.com/dotnet/csharplang/blob/main/proposals/target-typed-static-member-access.md) defines leading-dot lookup and its conversions. [Generalized generic type inference](https://github.com/dotnet/csharplang/blob/madstorgersen-generalized-type-inference/proposals/generalized-type-inference.md) describes target-derived bounds. The [revised target-typed generic inference draft](https://github.com/dotnet/csharplang/blob/madstorgersen-target-typing-proposal/proposals/target-typed-generic-type-inference.md) specifies when binding retries with a target and how nested inference proceeds. These drafts remain in progress. The analysis below uses the revised draft's rule that successful ordinary binding takes precedence.
 
@@ -68,7 +84,21 @@ For the union-based design, inference proceeds as follows:
 
 ### Target-Typed Patterns and Switch Arms
 
-We expect these patterns and case constructions to work with target-typed static member access. The type parameters are declared on `Map`, so its body needs no generic inference. Here `Result<T, E>` is a `union` or a `closed enum class` declaring `Ok(T Value)` and `Error(E Value)` cases:
+We expect these patterns and case constructions to work with target-typed static member access. The type parameters are declared on `Map`, so its body needs no generic inference. The example applies to either declaration:
+
+```csharp
+closed enum class Result<T, E>
+{
+    Ok(T Value),
+    Error(E Value)
+}
+
+union Result<T, E>
+{
+    case Ok(T Value);
+    case Error(E Value);
+}
+```
 
 ```csharp
 Result<U, E> Map<T, U, E>(Result<T, E> result, Func<T, U> mapper)
@@ -99,21 +129,39 @@ Compilers that recognize the attribute but lack feature support reject use of th
 
 ## Nullability of Default Cases
 
-Nullable analysis checks a designated `default` case as if each payload property were initialized with `default` of its declared type. `Reading(double Value, string Unit) = default` produces a warning at the designation because zero-initialization leaves `Unit` null despite its non-nullable declaration. Declaring `string? Unit` permits that value.
+Nullable analysis checks a designated `default` case as if each payload property were initialized with `default` of its declared type. Both declarations below produce a warning at `= default` because zero-initialization leaves `Unit` null despite its non-nullable declaration:
 
-Writing `Reading(double Value, string Unit) = default!` suppresses these warnings without changing the default payload values.
+```csharp
+enum struct Measurement
+{
+    Reading(double Value, string Unit) = default // warning
+}
+
+union struct Measurement
+{
+    case Reading(double Value, string Unit) = default; // warning
+}
+```
+
+Declaring `string? Unit` permits that value. Writing `= default!` suppresses these warnings without changing the default payload values.
 
 ## Recursive Payloads
 
 Recursive payloads follow the normal [value-type layout rules](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/structs.md#1642-value-semantics). A value type cannot recursively contain itself by value when that would require infinite storage. Recursion through references is permitted.
 
-For example:
+For example, both declarations below would require infinite storage:
 
 ```csharp
 enum struct Expr
 {
     Number(int Value),
     Add(Expr Left, Expr Right) // error
+}
+
+union struct Expr
+{
+    case Number(int Value);
+    case Add(Expr Left, Expr Right); // error
 }
 ```
 
@@ -129,7 +177,7 @@ Should declarations using the `struct` keyword and their generated case records 
 
 ### Independent Generic Case Parameters
 
-Should a case introduce its own type parameters, for example `X<T>(T Value)` in a nongeneric declaration?
+Should a case introduce its own type parameters, for example an enum case `X<T>(T Value)` or a union case `case X<T>(T Value);` in a nongeneric declaration?
 
 Reference-type cases could represent this as a family of record types. The design would need to explain how to match or deconstruct all `X<T>` values without knowing `T`, infer the arguments, enforce constraints, and determine exhaustiveness. The [closed-hierarchy proposal](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-15.0/closed-hierarchies.md#type-parameter-restriction) currently restricts independent type parameters for this reason.
 
@@ -138,6 +186,32 @@ Inline storage cannot directly hold an arbitrary independent `T`: the enclosing 
 ### Empty Parameter Lists
 
 We recommend disallowing empty parameter lists in case declarations and requiring cases declared without parameters to be used without parentheses. This keeps the syntax consistent with ordinary enums: data-free cases have no parameters or parentheses, while data-carrying cases declare parameters and use parentheses for construction. Parentheses remain required when optional or `params` parameters allow zero arguments, so such calls still use `()`.
+
+For example, either declaration could provide these cases:
+
+```csharp
+enum struct Message
+{
+    Empty,
+    Text(string Value = ""),
+    Numbers(params int[] Values)
+}
+
+union struct Message
+{
+    case Empty;
+    case Text(string Value = "");
+    case Numbers(params int[] Values);
+}
+```
+
+The same construction syntax applies to both:
+
+```csharp
+var empty = Message.Empty;
+var text = Message.Text();       // Value is ""
+var numbers = Message.Numbers(); // Values is an empty array
+```
 
 ### Inference from Case Arguments
 

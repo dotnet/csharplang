@@ -58,11 +58,11 @@ These require no annotation and describe managed storage, rather than interop ma
 
 ### External Types and Decomposition
 
-In the conservative layout, structs from referenced assemblies remain opaque typed values. The runtime determines their size and GC layout, keeping storage safe if a dependency grows or acquires references. Compile-time `unmanaged` classification is insufficient: C# enforces that constraint but the [CLR does not](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-7.3/blittable.md#detailed-design). Recompilation against a reference-containing definition rejects an unmanaged-constrained use. Replacing a binary dependency need not reject the instantiation. The [checked packing opt-in](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/union-enum-non-boxed-layout.md#possible-checked-packing-opt-in) could permit raw storage for such types.
+In the conservative layout, structs from referenced assemblies are stored in fields of their own types. The runtime determines their size and GC layout, keeping storage safe if a dependency grows or acquires references. A library update can add managed references to a previously unmanaged struct. Recompiling a consumer that relies on an `unmanaged` constraint detects that change, but the [CLR does not enforce the constraint](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-7.3/blittable.md#detailed-design) when loading existing binaries. The [checked packing opt-in](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/union-enum-non-boxed-layout.md#possible-checked-packing-opt-in) could permit raw storage for such types.
 
 The compiler can arrange generated cases' declared payload components directly. Decomposing a nested user struct must preserve all value state without invoking user getters, setters, or constructors, and respect accessibility, safety, and supported versioning. Otherwise it remains typed. Being in the current assembly is insufficient when layout dependencies cross assembly boundaries.
 
-Unmanagedness alone does not establish byte layout. Raw packing must account for architecture, alignment, and padding. Reference metadata does not guarantee execution-time layout.
+Unmanagedness alone does not establish byte layout. Raw packing must account for architecture, alignment, and padding. The type definition seen at compile time does not guarantee its layout at runtime.
 
 ### Mixed-Data Example
 
@@ -108,9 +108,9 @@ public struct Message<T>
 
 ### Packing and Extraction
 
-In the shared-pool layout, creation from a case packs components into their assigned slots and sets the discriminator. Extraction checks case identity and reconstructs the value. Mixed layouts require rearranging, or "swizzling," components rather than reinterpreting the shared storage as a complete case. For example, `Buffer` uses `_reference0` and both integers in `_unmanaged`, while `Pair` uses both reference slots. Unused reference and typed slots are defaulted so inactive cases retain no references.
+In the shared-pool layout, creation from a case packs components into their assigned slots and sets the discriminator. Extraction checks case identity and reconstructs the value. Mixed layouts require rearranging components rather than reinterpreting the shared storage as a complete case. For example, `Buffer` uses `_reference0` and both integers in `_unmanaged`, while `Pair` uses both reference slots. Unused reference and typed slots are defaulted so inactive cases retain no references.
 
-When every case is unmanaged and the required layout facts are established, complete case values can safely overlap in one region sized and aligned for the largest case, with a separate discriminator, avoiding field swizzling.
+When every case is unmanaged and the required layout facts are established, complete case values can safely overlap in one region sized and aligned for the largest case, with a separate discriminator. Packing and extraction can then copy each case as a whole.
 
 ### Possible Checked Packing Opt-in
 
@@ -155,9 +155,9 @@ private static void __ValidateSize<T>(int expectedSize) where T : struct
 
 Both checks use actual managed representation, not marshaling size. The illustrative helpers can be shared across types. Failure must prevent raw access with a managed exception, such as a type-initialization failure, and raw copies must remain in bounds, as with [`MemoryMarshal.Read` and `Write`](https://github.com/dotnet/runtime/blob/main/src/libraries/System.Private.CoreLib/src/System/Runtime/InteropServices/MemoryMarshal.cs). These guarantees would remove the need for `unsafe`.
 
-A container using raw packing must validate its own recorded claims once per constructed container type through a generated static constructor. Constructors and creation from case values must trigger this before packing, under the [struct static-constructor rules](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/structs.md#16410-static-constructors). Extraction must likewise ensure validation has completed before reconstructing payloads from raw storage, including for a designated `default` case. Returning typed `default` payloads or a failed `TryGetValue` result requires no raw access.
+An enum or union using raw packing must validate its own size and reference-containment assumptions through a generated static constructor, once per enclosing type, including each closed generic instantiation. Constructors and creation from case values must trigger this before packing, under the [struct static-constructor rules](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/structs.md#16410-static-constructors). Extraction must likewise ensure validation has completed before reconstructing payloads from raw storage, including for a designated `default` case. Returning typed `default` payloads or a failed `TryGetValue` result requires no raw access.
 
-The payload initializer alone is insufficient: defaults, arrays, layout queries, and whole-value copies can bypass it. A later library could also remove the annotation or validate a different size. A consumer reserving eight bytes must validate its own eight-byte expectation, rejecting updates that ordinary typed storage could accept.
+Validation in the payload type's static constructor alone is insufficient: defaults, arrays, layout queries, and whole-value copies can bypass it. A later library could also remove the annotation or validate a different size. A consumer reserving eight bytes must validate its own eight-byte expectation, rejecting updates that ordinary typed storage could accept.
 
 The `DateTime` assertion uses its current eight-byte managed size. The language does not guarantee that size. These cases could share an eight-byte region, separately from the discriminator. The annotation permits packing without requiring it and establishes only reference containment and total size. Field offsets, alignment, and accessibility need separate justification, or values can be copied opaquely. Adoption remains a joint LDM and runtime-team decision supported by performance measurements.
 
