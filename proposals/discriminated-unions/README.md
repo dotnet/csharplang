@@ -7,7 +7,24 @@ This directory explores two alternative designs for bringing the traditional pro
 Start with either of the two main proposals. Each introduces its syntax with a complete example before describing the design:
 
 - [Discriminated unions](discriminated-unions.md) adds `case` declarations to unions.
+
+  ```csharp
+  union struct Option<T>
+  {
+      case None = default;
+      case Some(T Value);
+  }
+  ```
+
 - [Data-carrying enums](data-carrying-enums.md) adds cases with associated data through `enum class` and `enum struct`.
+
+  ```csharp
+  closed enum struct Option<T>
+  {
+      None = default,
+      Some(T Value)
+  }
+  ```
 
 Readers can follow either proposal without reading the other first. Most supporting documents are shared between the two approaches.
 
