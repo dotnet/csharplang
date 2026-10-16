@@ -66,7 +66,7 @@ Console.WriteLine(message); // Parsed 42
 Console.WriteLine(result.GetValueOrDefault(0)); // 42
 ```
 
-The [`closed` modifier](#exhaustiveness-and-evolution) fixes the set of cases. Designating `None` as the [`default` case](#default-values) also accounts for zero-initialized values, so these switches can cover just `Some` and `None`.
+The [`closed` modifier](#exhaustiveness-and-evolution) fixes the set of cases. Designating `None` as the [`default` case](#default-values) also accounts for zero-initialized values, so that switches can cover just `Some` and `None`.
 
 This example uses `enum struct` for value-type semantics. [`enum class`](#enum-class-translation) provides reference-type semantics with the same case construction and pattern syntax.
 
