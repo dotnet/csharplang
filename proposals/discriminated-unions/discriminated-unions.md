@@ -137,7 +137,7 @@ Whether unions with declared cases should also [restrict direct construction](#d
 
 ### Access APIs for `union struct`
 
-A `union struct` generates the [non-boxing access pattern](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-15.0/unions.md#non-boxing-access-members): `HasValue` and a `TryGetValue(out Case value)` overload for each case. All of these are `readonly` instance members.
+A `union struct` generates the [non-boxing access pattern](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-15.0/unions.md#non-boxing-access-members).
 
 When a `union struct` has case declarations, `Value` returns a boxed copy of the case instance. Repeated reads may return different boxes, and mutating a returned box does not update the union. Without `struct`, the union instead retains its stored object. A `union struct` combining existing types may need to retain boxed values to preserve existing union semantics, as discussed in the [shared layout proposal](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/union-enum-non-boxed-layout.md#scope).
 
