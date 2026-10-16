@@ -392,5 +392,3 @@ These forms differ from [inference from a known case type](https://github.com/do
 ### Metadata Encoding
 
 How should metadata identify the declaration, its case types, and their construction operations? The attribute or other metadata form and final generated API names remain to be designed.
-
-The encoding must describe cases of constructed generic types and expose their supported construction operations to tools. Reflection-based serializers and source generators should be used to validate case discovery and construction, including the wrapper-versus-case distinction raised in [earlier LDM review](https://github.com/dotnet/csharplang/blob/main/meetings/2025/LDM-2025-05-28.md#nominal-type-unions).
