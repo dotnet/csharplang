@@ -38,7 +38,7 @@ public closed enum Color
 
 Behavior belonging to an enum can live alongside its values and be available wherever the type is used.
 
-For [data-carrying enums](https://github.com/dotnet/csharplang/blob/main/proposals/data-carrying-enums.md), these members can operate on the case represented by the enum:
+For [data-carrying enums](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/data-carrying-enums.md), these members can operate on the case represented by the enum:
 
 ```csharp
 public enum struct Option<T>

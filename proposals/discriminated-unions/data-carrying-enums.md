@@ -66,11 +66,11 @@ Console.WriteLine(message); // Parsed 42
 Console.WriteLine(result.GetValueOrDefault(0)); // 42
 ```
 
-The [`closed` modifier](https://github.com/dotnet/csharplang/blob/main/proposals/data-carrying-enums.md#exhaustiveness-and-evolution) fixes the set of cases. Designating `None` as the [`default` case](https://github.com/dotnet/csharplang/blob/main/proposals/data-carrying-enums.md#default-values) also accounts for zero-initialized values, so these switches can cover just `Some` and `None`.
+The [`closed` modifier](#exhaustiveness-and-evolution) fixes the set of cases. Designating `None` as the [`default` case](#default-values) also accounts for zero-initialized values, so these switches can cover just `Some` and `None`.
 
-This example uses `enum struct` for value-type semantics. [`enum class`](https://github.com/dotnet/csharplang/blob/main/proposals/data-carrying-enums.md#enum-class-translation) provides reference-type semantics with the same case construction and pattern syntax.
+This example uses `enum struct` for value-type semantics. [`enum class`](#enum-class-translation) provides reference-type semantics with the same case construction and pattern syntax.
 
-`Parse("42")` relies on [target-typed generic type inference](https://github.com/dotnet/csharplang/blob/madstorgersen-target-typing-proposal/proposals/target-typed-generic-type-inference.md), which is not specific to data-carrying enums, to infer `T` from `Option<int>`. The `.Some(...)` and `.None` forms depend on the [contextual syntax extensions](https://github.com/dotnet/csharplang/blob/main/proposals/data-carrying-enums.md#contextual-construction-and-inference), avoiding the need to repeat the enclosing enum type.
+`Parse("42")` relies on [target-typed generic type inference](https://github.com/dotnet/csharplang/blob/madstorgersen-target-typing-proposal/proposals/target-typed-generic-type-inference.md), which is not specific to data-carrying enums, to infer `T` from `Option<int>`. The `.Some(...)` and `.None` forms depend on the [contextual syntax extensions](#contextual-construction-and-inference), avoiding the need to repeat the enclosing enum type.
 
 ## Declarations
 
@@ -108,13 +108,13 @@ The body grammar is subject to these rules: a cases-only body may have a trailin
 
 The grammar uses the ordinary `parameter_list`. Whether to permit an [empty parameter list](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/union-enum-common.md#empty-parameter-lists) remains open.
 
-Whether the semicolon between cases and members is required remains an [open question in Members in Enum Declarations](https://github.com/dotnet/csharplang/blob/main/proposals/enum-members.md#separating-values-from-members).
+Whether the semicolon between cases and members is required remains an [open question in Members in Enum Declarations](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/enum-members.md#separating-values-from-members).
 
 ### Declaration Rules
 
 A case declaration introduces a public nested record. Its parameter list, if present, declares that record's primary constructor. Cases are sealed record classes in an `enum class` and record structs in an `enum struct`. Allowing authors to supply [record bodies and case-specific interfaces](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/union-enum-common.md#customizing-case-records) is a possible future extension.
 
-For user-declared functionality (like `GetValueOrDefault` in the walkthrough), this proposal builds on [Members in Enum Declarations](https://github.com/dotnet/csharplang/blob/main/proposals/enum-members.md). That proposal defines the syntax and rules for adding members. It is not required for the members that the compiler generates under this proposal.
+For user-declared functionality (like `GetValueOrDefault` in the walkthrough), this proposal builds on [Members in Enum Declarations](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/enum-members.md). That proposal defines the syntax and rules for adding members. It is not required for the members that the compiler generates under this proposal.
 
 Cases in a data-carrying enum use their enclosing enum's type parameters and constraints. Whether a case can declare [independent type parameters](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/union-enum-common.md#independent-generic-case-parameters) is an open question.
 
@@ -122,7 +122,7 @@ Data-carrying enum declarations may list interfaces, but cannot specify a base c
 
 Cases cannot be assigned constant values.
 
-User-declared members may customize generated members where ordinary record rules allow it. Other conflicts with generated members or case type names are errors. Whether to permit additional instance state or custom constructors is discussed under [Additional Members](https://github.com/dotnet/csharplang/blob/main/proposals/data-carrying-enums.md#additional-members).
+User-declared members may customize generated members where ordinary record rules allow it. Other conflicts with generated members or case type names are errors. Whether to permit additional instance state or custom constructors is discussed under [Additional Members](#additional-members).
 
 For example, a data-carrying enum can implement [`ISpanFormattable`](https://learn.microsoft.com/en-us/dotnet/api/system.ispanformattable) to format either distance case in meters:
 
@@ -266,7 +266,7 @@ Patterns that extract a case from an `enum struct` require an input statically k
 
 Data-carrying enums follow the rules for [open and closed enums](https://github.com/dotnet/csharplang/blob/main/proposals/closed-enums.md). A `closed` enum promises a fixed case set, allowing exhaustive matching without a future-case fallback. An enum without `closed` may gain cases, so consumers need a fallback for them. This uses that proposal's evolution policy, rather than its rules for integral enum values and conversions.
 
-Whether exhaustiveness must account for a struct value that represents no case, and whether `null` should match it, remain [open questions](https://github.com/dotnet/csharplang/blob/main/proposals/data-carrying-enums.md#uninitialized-values-in-matching).
+Whether exhaustiveness must account for a struct value that represents no case, and whether `null` should match it, remain [open questions](#uninitialized-values-in-matching).
 
 The [shared library-evolution rules](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/union-enum-common.md#library-evolution) cover compatibility when declarations change.
 
@@ -318,7 +318,7 @@ public struct Option<T>
 }
 ```
 
-These sketches describe the type relationships and use ordinary nested record constructors in emitted code. The struct case types' mutability is described under [Readonly, Copying, and `with`](https://github.com/dotnet/csharplang/blob/main/proposals/data-carrying-enums.md#readonly-copying-and-with).
+These sketches describe the type relationships and use ordinary nested record constructors in emitted code. The struct case types' mutability is described under [Readonly, Copying, and `with`](#readonly-copying-and-with).
 
 ### Metadata and Compatibility
 
@@ -380,7 +380,7 @@ The costs and choices are:
 - `Value` boxes struct cases and requires case types implicitly convertible to `object`.
 - Public union member names can conflict with domain meanings: `Option<T>.Value` might mean its payload and `HasValue` might mean `Some`, whereas the union access members expose the case instance and recognize `None` too. A member provider avoids name conflicts but adds interface metadata and would require deciding where the proposed public `HasValue` belongs.
 - Union type patterns inspect the contained case, while untyped property/positional patterns inspect the enum. Integration must preserve that distinction, following the [LDM decision on pattern targets](https://github.com/dotnet/csharplang/blob/main/meetings/2026/LDM-2026-08-12.md#union-pattern-matching-targets).
-- Union null patterns would select the open [uninitialized-null matching option](https://github.com/dotnet/csharplang/blob/main/proposals/data-carrying-enums.md#uninitialized-values-in-matching), with nullable `Value`. A designated `default` case could use non-nullable `Value`. Annotations and access members must agree.
+- Union null patterns would select the open [uninitialized-null matching option](#uninitialized-values-in-matching), with nullable `Value`. A designated `default` case could use non-nullable `Value`. Annotations and access members must agree.
 - Union exhaustiveness checking must accommodate the enum's separate open/closed evolution policy.
 
 </details>
@@ -403,7 +403,7 @@ Should data-carrying enums permit additional instance state? We recommend keepin
 
 Should custom instance constructors be permitted? A custom constructor would need to select a valid case.
 
-Parameterized cases use `N(...)` or `N(...) = default`. The former shares its prefix with an instance constructor. That overlap would need consideration if constructors were allowed and the [comma-only separator alternative](https://github.com/dotnet/csharplang/blob/main/proposals/enum-members.md#separating-values-from-members) were selected.
+Parameterized cases use `N(...)` or `N(...) = default`. The former shares its prefix with an instance constructor. That overlap would need consideration if constructors were allowed and the [comma-only separator alternative](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/enum-members.md#separating-values-from-members) were selected.
 
 ### Inference from a Known Case Type
 

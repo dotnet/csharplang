@@ -1,6 +1,6 @@
 # Non-Boxed Storage for Unions and Data-Carrying Enums
 
-The `struct` keyword in [`enum struct`](https://github.com/dotnet/csharplang/blob/main/proposals/data-carrying-enums.md) and [`union struct`](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/discriminated-unions.md) selects an opinionated layout that stores case data inline, avoiding boxing during ordinary creation and extraction. This proposal describes a shared implementation approach. Each language proposal defines its own case types, construction, conversions, defaults, and matching.
+The `struct` keyword in [`enum struct`](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/data-carrying-enums.md) and [`union struct`](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/discriminated-unions.md) selects an opinionated layout that stores case data inline, avoiding boxing during ordinary creation and extraction. This proposal describes a shared implementation approach. Each language proposal defines its own case types, construction, conversions, defaults, and matching.
 
 The layout is an implementation detail. Compilers may change it, including to use future runtime capabilities, while preserving the specified API and observable semantics. No particular size, field layout, native ABI, or persistent byte representation is guaranteed.
 

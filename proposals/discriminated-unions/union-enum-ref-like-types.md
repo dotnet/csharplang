@@ -1,6 +1,6 @@
 # Ref-Like Unions and Enums
 
-This proposal explores allowing unions and data-carrying enums to hold ref-like values such as `Span<T>`. It is an optional extension to the [union-based discriminated-union proposal](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/discriminated-unions.md) and the [data-carrying enum proposal](https://github.com/dotnet/csharplang/blob/main/proposals/data-carrying-enums.md). Either design can proceed without it if the use cases do not justify the additional complexity.
+This proposal explores allowing unions and data-carrying enums to hold ref-like values such as `Span<T>`. It is an optional extension to the [union-based discriminated-union proposal](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/discriminated-unions.md) and the [data-carrying enum proposal](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/data-carrying-enums.md). Either design can proceed without it if the use cases do not justify the additional complexity.
 
 ## Design
 

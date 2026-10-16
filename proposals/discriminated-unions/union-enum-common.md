@@ -1,6 +1,6 @@
 # Common Design for Discriminated Unions and Data-Carrying Enums
 
-This document is not intended to be read on its own. It holds design material referenced by the [union-based discriminated-union proposal](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/discriminated-unions.md) and the [data-carrying enum proposal](https://github.com/dotnet/csharplang/blob/main/proposals/data-carrying-enums.md) to avoid repetition.
+This document is not intended to be read on its own. It holds design material referenced by the [union-based discriminated-union proposal](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/discriminated-unions.md) and the [data-carrying enum proposal](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/data-carrying-enums.md) to avoid repetition.
 
 This file is for design material that is identical or very nearly identical in both proposals. Any differences are called out explicitly.
 
@@ -40,9 +40,9 @@ Option<int> some = .Some(42);
 1. Each initializer has the target type `Option<int>`.
 2. The [target-typed member binding conversion](https://github.com/dotnet/csharplang/blob/main/proposals/target-typed-static-member-access.md#basic-expression) qualifies `.None` as `Option<int>.None`. The [invocation target-typing conversion](https://github.com/dotnet/csharplang/blob/main/proposals/target-typed-static-member-access.md#target-typing-with-invocations) similarly qualifies `.Some(42)` as `Option<int>.Some(42)`.
 3. Lookup finds the nested case types on the already constructed `Option<int>`. Its type arguments are known, just as they would be for lookup of a static property on that type. No inference through the nested member is needed.
-4. Case construction produces the corresponding case values without `new`. Each result then uses the [case-to-enum conversion](https://github.com/dotnet/csharplang/blob/main/proposals/data-carrying-enums.md#generated-apis-and-conversions) or the existing [union conversion](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-15.0/unions.md#union-conversions) to satisfy the target.
+4. Case construction produces the corresponding case values without `new`. Each result then uses the [case-to-enum conversion](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/data-carrying-enums.md#generated-apis-and-conversions) or the existing [union conversion](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-15.0/unions.md#union-conversions) to satisfy the target.
 
-Without a target, `var value = .None` is an error. The leading-dot rules need to recognize case types under the construction rules of the [enum-based](https://github.com/dotnet/csharplang/blob/main/proposals/data-carrying-enums.md#construction-and-case-access) and [union-based](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/discriminated-unions.md#construction-and-case-access) designs.
+Without a target, `var value = .None` is an error. The leading-dot rules need to recognize case types under the construction rules of the [enum-based](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/data-carrying-enums.md#construction-and-case-access) and [union-based](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/discriminated-unions.md#construction-and-case-access) designs.
 
 ### Inference from Another Argument
 
@@ -67,7 +67,7 @@ This ordering agrees with the revised draft's [nested-inference rules](https://g
 
 We expect this call to infer `T = int` for both `union` and `union struct` if [union-case type inference](https://github.com/dotnet/csharplang/pull/10355) is adopted. For `enum class`, ordinary inference through the case's `Option<int>` base type already supplies `T = int`.
 
-For `enum struct`, the corresponding inference remains an [open question](https://github.com/dotnet/csharplang/blob/main/proposals/data-carrying-enums.md#inference-from-a-known-case-type) because existing method inference does not follow its generated user-defined conversion.
+For `enum struct`, the corresponding inference remains an [open question](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/data-carrying-enums.md#inference-from-a-known-case-type) because existing method inference does not follow its generated user-defined conversion.
 
 ```csharp
 void Use<T>(Option<T> value) { /* ... */ }
@@ -118,7 +118,7 @@ Result<U, E> Map<T, U, E>(Result<T, E> result, Func<T, U> mapper)
 
 ## Metadata and Compatibility
 
-The compiler emits metadata identifying case types and their construction operations. For data-carrying enums, it also identifies the enclosing enum. Supporting C# compilers use it to enforce the [enum-based](https://github.com/dotnet/csharplang/blob/main/proposals/data-carrying-enums.md#construction-and-case-access) and [union-based](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/discriminated-unions.md#construction-and-case-access) construction rules across assembly boundaries. The [encoding](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/union-enum-common.md#metadata-encoding) remains an open question.
+The compiler emits metadata identifying case types and their construction operations. For data-carrying enums, it also identifies the enclosing enum. Supporting C# compilers use it to enforce the [enum-based](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/data-carrying-enums.md#construction-and-case-access) and [union-based](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/discriminated-unions.md#construction-and-case-access) construction rules across assembly boundaries. The [encoding](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/union-enum-common.md#metadata-encoding) remains an open question.
 
 The compiler adds a nonoptional [CompilerFeatureRequired](https://learn.microsoft.com/en-us/dotnet/api/system.runtime.compilerservices.compilerfeaturerequiredattribute) attribute to:
 
