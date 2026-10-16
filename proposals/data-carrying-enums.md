@@ -272,11 +272,11 @@ The [shared library-evolution rules](https://github.com/dotnet/csharplang/blob/m
 
 Each case in a data-carrying enum declares a public nested record type that can be used like any other type. These types are not instantiated with `new`. See [Construction and Case Access](https://github.com/dotnet/csharplang/blob/main/proposals/data-carrying-enums.md#construction-and-case-access).
 
-The type sketches below describe relationships between the enum and its cases. Storage and switch emit remain implementation details. See [Implementation Details](https://github.com/dotnet/csharplang/blob/main/proposals/data-carrying-enums.md#implementation-details) for candidate switch translations.
+The type sketches below describe relationships between the enum and its cases.
 
 ### `enum class` Translation
 
-An `enum class` is an abstract record base with a private parameterless constructor, no copy constructor, and sealed nested case records. A value holds the actual case reference. For example:
+An `enum class` is an abstract record base with a private parameterless constructor, no copy constructor, and sealed nested case records. A value holds the actual case reference. Data-free cases use shared instances. For example:
 
 ```csharp
 public enum class Result
@@ -352,32 +352,7 @@ The [shared design](https://github.com/dotnet/csharplang/blob/main/proposals/dis
 
 ## Implementation Details
 
-The following are candidate switch translations. They may change with compiler and runtime improvements while preserving the specified API and observable behavior.
-
-Data-free `enum class` cases use shared instances.
-
-### Switch Translation
-
-Switches over data-carrying enums identify the active case before extracting its payload. The candidate translations below use a chain of `is` tests for `enum class` or case predicates for `enum struct`, which the runtime could optimize.
-
-The input is evaluated once. Reordering tests must preserve null handling, guards, deconstruction, source ordering where observable, and the original fallback behavior. The sketches below omit those details and use distinct unguarded cases.
-
-#### `enum class` Case Tests
-
-For an `enum class` with cases `E.C1`, `E.C2`, and `E.C3`, use `is` to test each case type and bind the case value:
-
-```csharp
-var __case = e;
-if (__case is E.C1 c1) { HandleC1(c1.Value); }
-else if (__case is E.C2 c2) { HandleC2(c2.Value); }
-else if (__case is E.C3 c3) { HandleC3(c3.Value); }
-```
-
-Because the case types are sealed, the runtime can reduce these `is` tests to method-table pointer comparisons. Distinct case identities could support a balanced tree or profile-guided ordering. Class enums could also use predicates and extraction if those optimize efficiently.
-
-#### `enum struct` Case Tests
-
-The shared layout proposal covers [case dispatch](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/union-enum-non-boxed-layout.md#case-dispatch), [current measurements](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/union-enum-non-boxed-layout.md#performance-and-current-runtime-behavior), and [runtime-recognition alternatives](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/union-enum-non-boxed-layout.md#runtime-recognition-and-alternatives).
+The [shared switch-emission discussion](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/union-enum-switch-emit.md) covers local performance measurements, candidate lowerings, and possible compiler and JIT optimizations.
 
 ## Possible Connections to Type Unions
 
@@ -412,7 +387,7 @@ The costs and choices are:
 - Union null patterns would select the open [uninitialized-null matching option](https://github.com/dotnet/csharplang/blob/main/proposals/data-carrying-enums.md#uninitialized-values-in-matching), with nullable `Value`. A designated `default` case could use non-nullable `Value`. Annotations and access members must agree.
 - Union case-type exhaustiveness must accommodate the enum's separate open/closed evolution policy.
 
-`[Union]` alone would not provide the stronger [JIT optimization contract](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/union-enum-non-boxed-layout.md#runtime-recognition-and-alternatives).
+`[Union]` alone would not provide the stronger [JIT optimization contract](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/union-enum-switch-emit.md#runtime-recognition-and-alternatives).
 
 </details>
 

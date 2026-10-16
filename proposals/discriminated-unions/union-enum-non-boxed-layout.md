@@ -163,51 +163,7 @@ The `DateTime` assertion uses its current eight-byte managed size. The language 
 
 ## Case Dispatch
 
-A `union struct` or `enum struct` can expose a case test backed by its discriminator, allowing the runtime to optimize dispatch after inlining. The enum proposal uses `IsCase` predicates and case conversions:
-
-```csharp
-var __value = value;
-if (__value.IsC1) { HandleC1(((E.C1)__value).Value); }
-else if (__value.IsC2) { HandleC2(((E.C2)__value).Value); }
-else if (__value.IsC3) { HandleC3(((E.C3)__value).Value); }
-```
-
-The union proposal uses its non-boxing access pattern:
-
-```csharp
-var __value = value;
-if (__value.TryGetValue(out E.C1 c1)) { HandleC1(c1.Value); }
-else if (__value.TryGetValue(out E.C2 c2)) { HandleC2(c2.Value); }
-else if (__value.TryGetValue(out E.C3 c3)) { HandleC3(c3.Value); }
-```
-
-Inlining exposes the discriminator comparisons:
-
-```csharp
-if (__value._discriminator == 1) { /* C1 body */ }
-else if (__value._discriminator == 2) { /* C2 body */ }
-else if (__value._discriminator == 3) { /* C3 body */ }
-```
-
-With additional recognition, the runtime could select a dense jump table, sparse tree, or chain and eliminate redundant extraction checks. These are candidate optimizations, not guarantees about current JIT behavior.
-
-The input must be evaluated once. Optimization must preserve guards, deconstruction, null handling, observable source ordering, and fallback behavior. For unions of existing types, [union well-formedness](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-15.0/unions.md#well-formedness) and matching rules still apply, including when the listed types overlap. A storage discriminator cannot make matching depend on which creation overload was called. Values of reference types retain their object identity.
-
-### Performance and Current Runtime Behavior
-
-Earlier local .NET 11 RC1 ARM64 checks of candidate enum dispatch patterns with 16 sealed class cases and 16 struct cases found that exact-type and discriminator-predicate chains remained linear in fully optimized code and Tier 1 with dynamic PGO, even after predicate inlining.
-
-Preliminary M4 Mac benchmarks indicate that linear dispatch performs well and appears sufficient through 32 cases in the tested patterns. Larger case sets may warrant better emit or JIT optimization without blocking initial implementation. Validation on x64 and other architectures, varied usage patterns and case distributions, guards, and both switch statements and expressions remains warranted.
-
-Marking struct conversions for inlining removed redundant extraction checks in the local tests.
-
-### Runtime Recognition and Alternatives
-
-The [existing switch-recognition pass](https://github.com/dotnet/runtime/blob/main/src/coreclr/jit/switchrecognition.cpp#L28) runs after inlining, but handles comparison chains whose successful tests share a destination. Different case bodies stop recognition. Extending it is one possible approach.
-
-If general recognition raises correctness concerns, an attribute in `System.Runtime.CompilerServices` could opt compiler-generated unions and enums into optimization. Its contract would cover stable case identity during dispatch, side-effect-free predicates agreeing with the case mapping, and extraction after a successful test. It could identify a struct's discriminator field for direct runtime access. This optional optimization contract is distinct from the required source-semantics marker. Its name and final contract remain undecided. The ordinary `[Union]` marker does not identify a discriminator or provide this stronger contract.
-
-A final fallback is exposing a discriminator and emitting an integral switch, using existing runtime optimizations directly. Reference-backed representations would need a case-to-discriminator mapping too. We would prefer to avoid this: the mapping would become a stable API and ABI contract. Reordering cases or inserting a case anywhere could no longer simply renumber them in declaration order. Case numbering and library evolution would need a durable design. Extraction must still follow each proposal's specified access semantics, including reconstruction from shared storage.
+The [shared switch-emission discussion](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/union-enum-switch-emit.md#non-boxed-cases) describes dispatch through typed case access, avoiding boxing, and possible compiler and JIT optimizations.
 
 ## Open Questions
 
