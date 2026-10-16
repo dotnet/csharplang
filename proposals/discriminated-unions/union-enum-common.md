@@ -224,4 +224,4 @@ These forms differ from [inference from a known case type](https://github.com/do
 
 ### Metadata Encoding
 
-How should metadata identify the declaration, its generated cases, and their construction operations? The attribute or other metadata form and final generated API names remain to be designed. The enum-based encoding must also describe hierarchy restrictions.
+How should metadata identify the declaration, its generated cases, and their construction operations? The attribute or other metadata form and final generated API names remain to be designed.
