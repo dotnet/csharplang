@@ -3,7 +3,7 @@
 Champion issue: <https://github.com/dotnet/csharplang/issues/10378>
 Discussion: <https://github.com/dotnet/csharplang/discussions/10379>
 
-This proposal brings discriminated unions to C# through the familiar enum model: a value is one of several named cases, and each case can carry data. The new `enum class` and `enum struct` forms declare nested record classes and record structs, respectively, as their cases.
+This proposal brings discriminated unions to C# through the familiar enum model: a value is one of several named cases, and each case can carry data. The new `enum class` and `enum struct` forms declare nested [`record class`](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-9.0/records.md) and [`record struct`](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-10.0/record-structs.md) types, respectively, as their cases.
 
 It is a follow-up to the [type unions](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-15.0/unions.md) proposal. Type unions combine existing types, while data-carrying enums declare a type and its cases together. An [alternative design](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/discriminated-unions.md) builds discriminated unions directly on the `union` feature. The [design comparison](comparison.md) examines their tradeoffs.
 
@@ -112,7 +112,7 @@ Whether the semicolon between cases and members is required remains an [open que
 
 ### Declaration Rules
 
-A case declaration introduces a public nested record. Its parameter list, if present, declares that record's primary constructor. Cases are sealed record classes in an `enum class` and record structs in an `enum struct`. Allowing authors to supply [record bodies and case-specific interfaces](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/union-enum-common.md#customizing-case-records) is a possible future extension.
+A case declaration introduces a public nested record. Its parameter list, if present, declares that record's primary constructor. Cases are sealed `record class` types in an `enum class` and `record struct` types in an `enum struct`. Allowing authors to supply [record bodies and case-specific interfaces](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/union-enum-common.md#customizing-case-records) is a possible future extension.
 
 For user-declared functionality (like `GetValueOrDefault` in the walkthrough), this proposal builds on [Members in Enum Declarations](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/enum-members.md). That proposal defines the syntax and rules for adding members. It is not required for the members that the compiler generates under this proposal.
 

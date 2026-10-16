@@ -1,6 +1,6 @@
 # Discriminated Unions
 
-This proposal brings discriminated unions to C# by extending the [type-union feature](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-15.0/unions.md) with nested case declarations. Each `case` declares a nested record and adds it to the union's set of case types. Existing union conversions, matching, members, and exhaustiveness then apply.
+This proposal brings discriminated unions to C# by extending the [type-union feature](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-15.0/unions.md) with nested case declarations. Each `case` declares a nested [record](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-9.0/records.md) and adds it to the union's set of case types. Existing union conversions, matching, members, and exhaustiveness then apply.
 
 An [alternative approach](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/data-carrying-enums.md) builds on familiar C# enums. The [design comparison](comparison.md) examines their tradeoffs.
 
@@ -43,7 +43,7 @@ Console.WriteLine(result.GetValueOrDefault(0)); // 42
 
 Designating `None` as the [`default` case](#default-values) accounts for zero-initialized values.
 
-The [`struct` keyword](#union-struct-translation) selects inline storage and value-type cases. Without `struct`, a [`union`](#union-translation) keeps the existing object-backed struct representation and uses reference-type cases.
+The [`struct` keyword](#union-struct-translation) selects inline storage and declares each case as a nested [`record struct`](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-10.0/record-structs.md). Without `struct`, a [`union`](#union-translation) keeps the existing object-backed struct representation and declares each case as a nested `record class`.
 
 `Parse("42")` relies on [target-typed generic type inference](https://github.com/dotnet/csharplang/blob/madstorgersen-target-typing-proposal/proposals/target-typed-generic-type-inference.md), which is not specific to unions. The `.Some(...)` and `.None` forms depend on the [contextual syntax extensions](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/union-enum-common.md#contextual-construction-and-inference), avoiding the need to repeat the enclosing union type.
 
@@ -76,7 +76,7 @@ The `ref` modifier is excluded from this proposal. A [separate proposal](https:/
 
 ### Case Declarations
 
-A case declaration introduces a public nested record. Its parameter list, if present, declares that record's primary constructor. Without `struct`, cases are sealed record classes. With `struct`, they are record structs. Allowing authors to supply [record bodies and case-specific interfaces](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/union-enum-common.md#customizing-case-records) is a possible future extension.
+A case declaration introduces a public nested record. Its parameter list, if present, declares that record's primary constructor. Without `struct`, cases are sealed `record class` types. With `struct`, they are `record struct` types. Allowing authors to supply [record bodies and case-specific interfaces](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/union-enum-common.md#customizing-case-records) is a possible future extension.
 
 Given a union declaration such as:
 
