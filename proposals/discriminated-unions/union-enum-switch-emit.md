@@ -1,6 +1,6 @@
 # Switch Emission for Unions and Data-Carrying Enums
 
-Switch emission is an implementation detail of the [union-based](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/discriminated-unions.md) and [enum-based](https://github.com/dotnet/csharplang/blob/main/proposals/data-carrying-enums.md) designs. The compiler and JIT may change their strategies while preserving the specified API and observable semantics.
+Switch emission is an implementation detail of the [union-based](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/discriminated-unions.md) and [enum-based](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/data-carrying-enums.md) designs. The compiler and JIT may change their strategies while preserving the specified API and observable semantics.
 
 ## Local Measurements
 
