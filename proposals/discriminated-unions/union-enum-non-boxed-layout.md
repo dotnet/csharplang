@@ -22,14 +22,6 @@ Our initial expectation is that this approach would often make `union struct` an
 
 We aim to provide a default that balances space and speed. We are also open to letting authors configure that balance, most likely through attributes, similar to existing .NET layout controls such as [StructLayout](https://learn.microsoft.com/en-us/dotnet/api/system.runtime.interopservices.structlayoutattribute). Whether to offer customization, its form and scope, and its availability in the initial feature are all undecided.
 
-### Performance Validation
-
-The working group's [earlier implementation analysis](https://github.com/dotnet/csharplang/blob/main/meetings/working-groups/discriminated-unions/Union%20implementation%20challenges.md#challenges-with-union-structs) identified copying, packing costs, and inhibited runtime optimizations as risks. Prototypes should compare this layout with separate case fields and the object-backed representation, measuring:
-
-- Struct size, array density, and copying costs for primitive, mixed, generic, and external payloads.
-- Allocation and execution costs for construction, extraction, matching, equality, and hashing across architectures and assembly boundaries.
-- Generated code size and Native AOT specialization, including the case records and lifted equality members. Ordinary unions [deliberately use plain structs](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-15.0/unions.md#resolved-is-union-declaration-a-record) partly to avoid unnecessary record synthesis.
-
 ### Concurrent Access and Safety
 
 `union struct` and `enum struct` values follow the existing [atomicity rules for struct reads and writes](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/variables.md#96-atomicity-of-variable-references). Unsynchronized accesses may tear, observing a discriminator from one write and payload from another. Such observations are unspecified and accessors may throw, but must preserve memory and type safety under the usual safety assumptions for payload types and user code. Neither copying nor `readonly` makes a concurrent read atomic.
