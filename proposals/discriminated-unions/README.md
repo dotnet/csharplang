@@ -28,6 +28,8 @@ Start with either of the two main proposals. Each introduces its syntax with a c
 
 Readers can follow either proposal without reading the other first. Most supporting documents are shared between the two approaches.
 
+The [design comparison](comparison.md) examines the advantages and tradeoffs of each approach.
+
 ## Supporting Documents
 
 The main proposals link to shared details as needed:
