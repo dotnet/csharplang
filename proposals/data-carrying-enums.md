@@ -106,7 +106,7 @@ The `readonly` modifier applies only to `enum struct` types. The `ref` modifier 
 
 The body grammar is subject to these rules: a cases-only body may have a trailing comma, and a members-only body needs no leading separator. A semicolon is required between cases and members and is permitted only when both are present. No comma is permitted immediately before it.
 
-The grammar uses the ordinary `parameter_list`. Whether to permit an [empty parameter list](https://github.com/dotnet/csharplang/blob/main/proposals/data-carrying-enums.md#empty-parameter-lists) remains open.
+The grammar uses the ordinary `parameter_list`. Whether to permit an [empty parameter list](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/union-enum-common.md#empty-parameter-lists) remains open.
 
 Whether the semicolon between cases and members is required remains an [open question in Members in Enum Declarations](https://github.com/dotnet/csharplang/blob/main/proposals/enum-members.md#separating-values-from-members).
 
@@ -116,7 +116,7 @@ A case declaration introduces a public nested record. Its parameter list, if pre
 
 For user-declared functionality (like `GetValueOrDefault` in the walkthrough), this proposal builds on [Members in Enum Declarations](https://github.com/dotnet/csharplang/blob/main/proposals/enum-members.md). That proposal defines the syntax and rules for adding members. It is not required for the members that the compiler generates under this proposal.
 
-Cases in a data-carrying enum use their enclosing enum's type parameters and constraints. Whether a case can declare [independent type parameters](https://github.com/dotnet/csharplang/blob/main/proposals/data-carrying-enums.md#independent-generic-case-parameters) is an open question.
+Cases in a data-carrying enum use their enclosing enum's type parameters and constraints. Whether a case can declare [independent type parameters](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/union-enum-common.md#independent-generic-case-parameters) is an open question.
 
 Data-carrying enum declarations may list interfaces, but cannot specify a base class.
 
@@ -328,7 +328,7 @@ The [shared design](https://github.com/dotnet/csharplang/blob/main/proposals/dis
 
 ### Readonly, Copying, and `with`
 
-`enum struct` types follow ordinary [`readonly struct` rules](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/structs.md#1622-struct-modifiers). Their case types have the enum's readonlyness and follow [`record struct` property rules](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-10.0/record-structs.md#properties). Whether to make `enum struct` types [always readonly](https://github.com/dotnet/csharplang/blob/main/proposals/data-carrying-enums.md#always-readonly-enum-struct-types) remains open.
+`enum struct` types follow ordinary [`readonly struct` rules](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/structs.md#1622-struct-modifiers). Their case types have the enum's readonlyness and follow [`record struct` property rules](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-10.0/record-structs.md#properties). Whether to make `enum struct` types [always readonly](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/union-enum-common.md#always-readonly-struct-types) remains open.
 
 Generated queries, extraction methods, and instance equality members are `readonly`.
 
@@ -391,7 +391,7 @@ The costs and choices are:
 
 ## Open Questions
 
-The remaining choices below affect source behavior or compatibility. The rules above describe the current design where an alternative has not yet been selected.
+Questions common to both proposals are listed in the [shared design](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/union-enum-common.md#open-questions).
 
 ### Uninitialized Values in Matching
 
@@ -400,18 +400,6 @@ Should a switch covering every declared case of a `closed enum struct` count as 
 One option is to use the declared case set for exhaustiveness, as other language features use static information even when runtime values can differ. A switch expression without a matching arm would then throw if an uninitialized value reaches it. Another option is to require explicit handling through `HasValue` or a fallback. This is separate from handling future cases of an open enum.
 
 Should the `null` pattern match the uninitialized state, or should it remain specific to null references and nullable values? A designated `default` case already has an ordinary case pattern.
-
-### Always-Readonly `enum struct` Types
-
-The [shared question](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/union-enum-common.md#always-readonly-struct-types) considers whether the struct form should always be readonly.
-
-### Independent Generic Case Parameters
-
-The [shared question](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/union-enum-common.md#independent-generic-case-parameters) considers type parameters declared on individual cases.
-
-### Empty Parameter Lists
-
-The [shared recommendation](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/union-enum-common.md#empty-parameter-lists) covers empty parameter lists and parentheses on data-free cases.
 
 ### Additional Members
 
@@ -423,6 +411,6 @@ Parameterized cases use `N(...)` or `N(...) = default`. The former shares its pr
 
 ### Inference from a Known Case Type
 
-For a method `Use<T>(Option<T> value)`, we expect `Use(Option<int>.Some(42))` to infer `T = int` for unions if [union-case type inference](https://github.com/dotnet/csharplang/pull/10355) is adopted. We would likely want to extend that proposal to cover `enum struct` cases as well: existing method inference does not follow the generated user-defined conversion. For `enum class`, ordinary inference through the case's base type already works.
+We would likely want to extend [union-case type inference](https://github.com/dotnet/csharplang/pull/10355) to cover `enum struct` cases. Existing method inference does not follow the compiler-generated user-defined conversions, so `Use(Option<int>.Some(42))` cannot infer `T` for a method `Use<T>(Option<T> value)`.
 
 Until that extension is designed, `enum struct` callers can write `Use<int>(Option<int>.Some(42))` or pass a value already typed as `Option<int>`.
