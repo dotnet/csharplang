@@ -30,6 +30,8 @@ To preserve memory safety, GC reference locations must be determined by the runt
 
 Shared reference slots require checked extraction: a reader testing a string case could observe an array from a concurrent write. Extraction must check the reference actually read or use an equivalent safe mechanism. The discriminator alone cannot justify an unchecked cast.
 
+The concurrent-copy hazards explored in [Fast, Efficient Unions](https://github.com/dotnet/csharplang/issues/7016) motivate these restrictions on shared storage.
+
 ### Conservative Storage
 
 A candidate inline layout uses a discriminator and three shared pools:
