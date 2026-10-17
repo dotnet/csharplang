@@ -4,7 +4,7 @@ This document explores separating two choices in the [union-based design](discri
 
 Different applications make different tradeoffs between allocations, value size, copying, and the work needed to pack and unpack payloads. [Earlier implementation discussions](../../meetings/working-groups/discriminated-unions/Union%20implementation%20challenges.md#challenges-with-union-structs) highlight how rearranging payloads for compact storage can offset the benefits of avoiding allocations.
 
-The language would define the required behavior and member shapes while leaving storage policy to the implementation. We could ship generators for common strategies without making their policies part of the language. Authors can already implement their own storage through the [custom-union pattern](../csharp-15.0/unions.md#union-types), without a layout-selection attribute. Attributes would let them conveniently select a generator-provided strategy. Choosing an attribute is less direct than using a keyword, but lets strategies evolve independently and avoids committing the language to one balance of these costs.
+The language would define the required behavior and member shapes while leaving storage policy to generators. We could ship generators for common strategies without making their policies part of the language. Attributes would let authors select among those opinionated options or use third-party generators. Choosing an attribute is less direct than using a keyword, but lets strategies evolve independently and avoids committing the language to one balance of these costs.
 
 ## Example Walkthrough
 
