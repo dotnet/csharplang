@@ -194,7 +194,7 @@ For example:
 ```csharp
 union Measurement
 {
-    case Missing;
+    case struct Missing;
     case struct Reading(double Value, string? Unit) = default;
 }
 
