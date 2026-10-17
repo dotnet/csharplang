@@ -15,7 +15,7 @@ The layouts below illustrate the flexibility of the extension point across alloc
 An expression tree can use struct leaves for efficiency and class nodes for recursion:
 
 ```csharp
-[UnionLayout(typeof(CompactLayout))]
+[UnionLayout(Layout = .Compact)]
 public readonly partial union Expr
 {
     case struct Number(int Value);
@@ -35,7 +35,7 @@ static int Evaluate(Expr expression, IReadOnlyDictionary<string, int> names)
     };
 ```
 
-To see what `CompactLayout` generates, jump to [Expanded Storage and Access Code](#expanded-storage-and-access-code).
+To see the generated code, jump to [Expanded Storage and Access Code](#expanded-storage-and-access-code).
 
 `case` declares a sealed nested [`record class`](../csharp-9.0/records.md). `case struct` declares a nested [`record struct`](../csharp-10.0/record-structs.md), with the enclosing union's readonlyness. The parameter list is the record's primary constructor. The enclosing union remains a struct in every representation.
 
@@ -56,7 +56,7 @@ The attribute selects a generator's storage strategy. We propose also having the
 
 The compiler validates member shapes. Their behavior follows the same trust model as [custom unions](../csharp-15.0/unions.md#well-formedness).
 
-`CompactLayout` is a marker type supplied by a generator package, giving the generator a compiler-checked strategy identity. The type supplies no implementation. The selector's final form remains open: an enum could name a fixed set of strategies, or string identifiers could allow an extensible set without marker types.
+The examples use an enum-valued `Layout` property to select a strategy. The final selection mechanism remains open and could use enums, named constants, types, or another approach.
 
 All unions with case declarations, including the default object-backed form, should expose the same per-case constructors, `Value`, `HasValue`, typed `TryGetValue` overloads, and [shared equality members](union-enum-common.md#equality-and-hashing). They also declare and implement a public nested `IUnionMembers` provider whose static `Create` overloads identify the declared cases. [Union conversions](../csharp-15.0/unions.md#union-member-providers) call those factories, so other constructor overloads do not add case types. Switching strategies must preserve these public members and the specified case semantics.
 
@@ -189,7 +189,7 @@ This is simple and keeps every union value to one reference, making the wrapper 
 
 ### Separate Case Fields
 
-A strategy selected with `[UnionLayout(typeof(SeparateFieldsLayout))]` could give each case its own typed field. For the walkthrough's `Expr`, it would emit:
+A strategy selected with `[UnionLayout(Layout = .SeparateFields)]` could give each case its own typed field. For the walkthrough's `Expr`, it would emit:
 
 ```csharp
 private readonly byte _case;
@@ -202,10 +202,10 @@ This is simple to generate and makes reads and writes straightforward: creation 
 
 ### Compact Storage
 
-This follows the [conservative layout](union-enum-non-boxed-layout.md#conservative-storage) in the non-boxed-storage proposal. The walkthrough's `CompactLayout` shares a reference slot between cases. More varied payloads can share primitive storage too:
+This follows the [conservative layout](union-enum-non-boxed-layout.md#conservative-storage) in the non-boxed-storage proposal. The walkthrough's `.Compact` strategy shares a reference slot between cases. More varied payloads can share primitive storage too:
 
 ```csharp
-[UnionLayout(typeof(CompactLayout))]
+[UnionLayout(Layout = .Compact)]
 public readonly partial union Message<T>
 {
     case struct Text(string Content, int Code);
@@ -260,7 +260,7 @@ A generator can store selected struct cases inline and box others. For example, 
 case struct Add(Expr Left, Expr Right);
 ```
 
-Storing that case inline would require `Expr` to contain itself. A strategy selected with `[UnionLayout(typeof(HybridLayout))]` can instead emit:
+Storing that case inline would require `Expr` to contain itself. A strategy selected with `[UnionLayout(Layout = .Hybrid)]` can instead emit:
 
 ```csharp
 private readonly byte _case;
@@ -275,7 +275,7 @@ private readonly object? _reference; // Name.Identifier or a boxed Add
 When payloads are unmanaged, runtime-computed overlap can avoid the separate typed slots needed for otherwise opaque type parameters. For example:
 
 ```csharp
-[UnionLayout(typeof(UnmanagedLayout))]
+[UnionLayout(Layout = .Unmanaged)]
 public readonly partial union Sample<T> where T : unmanaged
 {
     case struct Item(T Value);
@@ -336,7 +336,7 @@ Consider this Swift type:
 The C# declaration can select a strategy supplied by a binding generator for this Swift type:
 
 ```csharp
-[UnionLayout(typeof(SwiftNativeReadingLayout))]
+[UnionLayout(Layout = .Swift)]
 public readonly partial union NativeReading
 {
     case struct Number(long Value) = default;
