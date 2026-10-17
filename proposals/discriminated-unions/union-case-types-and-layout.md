@@ -56,6 +56,8 @@ The compiler validates member shapes. Their behavior follows the same trust mode
 
 All unions with case declarations, including the default object-backed form, should expose the same per-case constructors, `Value`, `HasValue`, typed `TryGetValue` overloads, and [shared equality members](union-enum-common.md#equality-and-hashing). They also declare and implement a public nested `IUnionMembers` provider whose static `Create` overloads identify the declared cases. [Union conversions](../csharp-15.0/unions.md#union-member-providers) call those factories, so other constructor overloads do not add case types. Switching strategies must preserve these public members and the specified case semantics.
 
+Class cases are non-nullable. Union constructors and `Create` factories taking such a case throw `ArgumentNullException` for a null case reference, including with the default object-backed representation.
+
 The generator owns the creation and access members that implement its storage strategy. Conflicting user declarations are errors. Other user-declared members remain supported, including equality customizations that use public case access under the shared customization rules. User-declared instance fields remain prohibited.
 
 Existing unions of arbitrary types keep their current default behavior.
@@ -89,7 +91,7 @@ public readonly partial union Expr : Expr.IUnionMembers, IEquatable<Expr>
 
     public Expr(Number value) : this(NumberCase, value.Value, null) { }
     public Expr(Name value) : this(NameCase, 0, value.Identifier) { }
-    public Expr(Add value) : this(value is null ? (byte)0 : AddCase, 0, value) { }
+    public Expr(Add value) : this(AddCase, 0, value ?? throw new ArgumentNullException(nameof(value))) { }
 
     public interface IUnionMembers
     {
@@ -297,9 +299,9 @@ This requires a compiler and runtime that support extended layout. A generator c
 
 Case record kinds and the designated default case are declaration semantics. A layout strategy must preserve them. This exploration retains `= default` for struct cases, with the [existing default-payload and nullability rules](union-enum-common.md#nullability-of-default-cases).
 
-In the expanded `Expr`, zero-initialization represents no case. If `Number` were designated `default`, the generator would map the zero discriminator to `Number(0)`. It would also reserve a separate no-case encoding for a null reference supplied through `Create(Add)`. Mapping that null to the active default case would violate the existing union creation rules. `Value` therefore remains nullable when null class inputs are possible, even with a designated default case.
+In the expanded `Expr`, zero-initialization represents no case, so `Value` is nullable. If `Number` were designated `default`, zero-initialization would instead represent `Number(0)` and `Value` would be non-nullable. Object-backed storage can use null storage for that designated case, without a separate no-case encoding.
 
-Object-backed storage can make the same distinction with one field: null storage denotes the designated default, while a private sentinel denotes no case. Its `Value` accessor translates the sentinel to null and null storage to the designated case value. A compact representation can instead reserve a nonzero discriminator for no case.
+Rejecting null class inputs satisfies the [union well-formedness rules](../csharp-15.0/unions.md#well-formedness): a rejected input creates no union value, and every class-case creation member rejects null in the same way, preserving creation equivalence.
 
 For struct cases, `Value` may box a fresh copy on each access. Its contract cannot guarantee box identity, even if the object-backed implementation retains the original box.
 
@@ -482,7 +484,7 @@ Mixed per-case kinds do not transfer directly to `enum class`: its cases derive 
 
 ## Evidence
 
-The storage and access implementation was exercised as a custom union on .NET 11 RC1 ARM64. Tests covered conversions, recursive patterns, typed and boxed access, failed extraction, null payloads and class inputs, designated defaults, equality, and hashing. A warmed 100,000-iteration loop performing typed leaf construction, pattern extraction, equality, and hashing allocated zero bytes on its thread. The enclosing struct occupied 16 bytes, compared with the object-backed wrapper's single reference. This also makes each `Add` larger, trading larger child fields for fewer leaf allocations.
+The storage and access implementation was exercised as a custom union on .NET 11 RC1 ARM64. Tests covered conversions, recursive patterns, typed and boxed access, failed extraction, null payloads, rejection of null class inputs, designated defaults, equality, and hashing. A warmed 100,000-iteration loop performing typed leaf construction, pattern extraction, equality, and hashing allocated zero bytes on its thread. The enclosing struct occupied 16 bytes, compared with the object-backed wrapper's single reference. This also makes each `Add` larger, trading larger child fields for fewer leaf allocations.
 
 Additional probes checked separate-field, compact, and hybrid representations, including a boxed recursive struct case.
 
