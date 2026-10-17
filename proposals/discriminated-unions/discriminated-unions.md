@@ -11,10 +11,10 @@ An `Option<T>` represents either a value (`Some`) or its absence (`None`). The f
 ```csharp
 using System;
 
-public union struct Option<T>
+public union Option<T>
 {
-    case None = default;
-    case Some(T Value);
+    case struct None = default;
+    case struct Some(T Value);
 
     public T GetValueOrDefault(T fallback)
         => this switch
@@ -43,9 +43,41 @@ Console.WriteLine(result.GetValueOrDefault(0)); // 42
 
 Designating `None` as the [`default` case](#default-values) accounts for zero-initialized values.
 
-The [`struct` keyword](#union-struct-translation) selects inline storage and declares each case as a nested [`record struct`](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-10.0/record-structs.md). Without `struct`, a [`union`](#union-translation) keeps the existing object-backed struct representation and declares each case as a nested `record class`.
+Each `case struct` declares a nested [`record struct`](../csharp-10.0/record-structs.md); a plain `case` declares a sealed nested `record class`. The enclosing `union` uses [object-backed storage](#type-model), boxing `record struct` cases. Choosing a [generated layout](union-case-types-and-layout.md) could avoid those allocations.
 
 `Parse("42")` relies on [target-typed generic type inference](https://github.com/dotnet/csharplang/blob/madstorgersen-target-typing-proposal/proposals/target-typed-generic-type-inference.md), which is not specific to unions. The `.Some(...)` and `.None` forms depend on the [contextual syntax extensions](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/union-enum-common.md#contextual-construction-and-inference), avoiding the need to repeat the enclosing union type.
+
+## Motivation
+
+A type union accepts values of existing types, which can overlap. Every `string` is also an `object`, so this union cannot distinguish whether a string was supplied through its `string` or `object` constructor:
+
+```csharp
+union Content(string, object);
+
+Content text = new("hello");
+Content other = new((object)"hello");
+
+bool textIsString = text is string;   // true
+bool otherIsString = other is string; // true
+```
+
+A discriminated union declares a distinct record for each case. Each value created from a case represents exactly that case, regardless of its payload's runtime type:
+
+```csharp
+union Content
+{
+    case Text(string Value);
+    case Other(object Value);
+}
+
+Content text = Content.Text("hello");
+Content other = Content.Other("hello");
+
+bool textIsText = text is Content.Text;   // true
+bool otherIsText = other is Content.Text; // false
+```
+
+Both payloads are strings, but the chosen case remains distinct.
 
 ## Declarations
 
@@ -55,7 +87,7 @@ The following extends the [union-declaration grammar](https://github.com/dotnet/
 
 ```antlr
 union_declaration
-    : attributes? struct_modifier* 'partial'? 'union' 'struct'? identifier type_parameter_list?
+    : attributes? struct_modifier* 'partial'? 'union' identifier type_parameter_list?
       ('(' case_types ')')? struct_interfaces? type_parameter_constraints_clause*
       ('{' union_member_declaration* '}' | ';')
     ;
@@ -66,17 +98,17 @@ union_member_declaration
     ;
 
 union_case_declaration
-    : attributes? 'case' identifier parameter_list? ('=' 'default' '!'?)? ';'
+    : attributes? 'case' 'struct'? identifier parameter_list? ('=' 'default' '!'?)? ';'
     ;
 ```
 
 A union with `case` declarations must omit the parenthesized type list in every partial declaration. Allowing a type list to add existing types alongside declared cases is an [open question](#mixing-existing-types-and-declared-cases). When no type list is supplied, at least one `case` declaration is required across all partial declarations.
 
-The `ref` modifier is excluded from this proposal. A [separate proposal](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/union-enum-ref-like-types.md) explores `ref union struct` and its open design questions. Whether to permit an explicit `union class` synonym is an [open question](#explicit-union-class-spelling).
+The `ref` modifier is excluded from this proposal. A [separate proposal](union-enum-ref-like-types.md) explores ref-like unions and their open design questions. Selecting the record kind for all cases with `union struct` instead is an [open question](#per-case-or-uniform-record-kinds).
 
 ### Case Declarations
 
-A case declaration introduces a public nested record. Its parameter list, if present, declares that record's primary constructor. Without `struct`, cases are sealed `record class` types. With `struct`, they are `record struct` types. Allowing authors to supply [record bodies and case-specific interfaces](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/union-enum-common.md#customizing-case-records) is a possible future extension.
+A case declaration introduces a public nested record. Its parameter list, if present, declares that record's primary constructor. A `case` declares a sealed `record class`; a `case struct` declares a `record struct`. Both kinds may appear in the same union. Allowing authors to supply [record bodies and case-specific interfaces](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/union-enum-common.md#customizing-case-records) is a possible future extension.
 
 Given a union declaration such as:
 
@@ -110,7 +142,7 @@ User-declared constructors follow the [existing union constructor rules](https:/
 internal Result(string message) : this(Result.Success(message)) { }
 ```
 
-For unions with case declarations and for all `union struct` types, user code cannot assign to the compiler-generated `Value` property, including inside constructors. This keeps initialization independent of the storage representation.
+For unions with case declarations, user code cannot assign to the compiler-generated `Value` property, including inside constructors. This keeps initialization independent of the storage representation.
 
 ## Construction and Case Access
 
@@ -133,11 +165,13 @@ Option<int>.Some alsoInvalid = new(42); // error
 
 Whether unions with declared cases should also [restrict direct construction](#direct-construction-of-the-enclosing-union) remains open.
 
-### Access APIs for `union struct`
+### Access APIs
 
-A `union struct` generates the [non-boxing access pattern](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-15.0/unions.md#non-boxing-access-members).
+A union with case declarations generates the [non-boxing access pattern](../csharp-15.0/unions.md#non-boxing-access-members).
 
-For a `union struct` with case declarations, `Value` returns a boxed copy of the selected case. Unions of existing types may need to preserve incoming boxes, as discussed in the [layout proposal](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/union-enum-non-boxed-layout.md#scope).
+For a `record class` case, `Value` returns the case reference. For a `record struct` case, it returns a boxed copy; box identity is not guaranteed across accesses. A layout strategy can provide typed construction and extraction without boxing.
+
+Construction from a `record class` case throws `ArgumentNullException` for a null case reference. Rejecting null consistently preserves [creation equivalence](../csharp-15.0/unions.md#well-formedness).
 
 <details>
 <summary>Example: generated access API for Option&lt;T&gt;</summary>
@@ -154,8 +188,9 @@ public struct Option<T> : IUnion
     public Option(None value) { ... }
     public Option(Some value) { ... }
 
-    public readonly object Value { get; }
     public readonly bool HasValue { get; }
+    public readonly object Value { get; }
+
     public readonly bool TryGetValue(out None value) { ... }
     public readonly bool TryGetValue(out Some value) { ... }
 }
@@ -167,15 +202,17 @@ For this declaration, `Value` has a non-nullable return type because `None` is t
 
 ## Default Values
 
-A `union struct` may designate at most one case with `= default` across all partial declarations. A zero-initialized union value, such as `default(U)`, behaves as follows:
+A `case` or `case struct` may be designated with `= default`. At most one case may be designated across all partial declarations. A zero-initialized union value, such as `default(U)`, behaves as follows:
 
-- If a case is designated, `Value` returns a boxed instance of that case, with each payload property holding its type's default value. `HasValue` is `true`, and `TryGetValue` for that case returns `true`.
+- If a case is designated, `Value` returns an instance of that case, with each payload property holding its type's default value. `HasValue` is `true`, and `TryGetValue` for that case returns `true`.
 - Otherwise, `Value` returns `null`. `HasValue` is `false`, and `TryGetValue` returns `false` for every declared case.
+
+For a designated `record class` case, `Value` and `TryGetValue` on zero-initialized unions return the same cached instance, shared per closed union type. For a data-free case, this is the instance used by case access as well.
 
 For example:
 
 ```csharp
-union struct Measurement
+union Measurement
 {
     case Missing;
     case Reading(double Value, string? Unit) = default;
@@ -184,53 +221,28 @@ union struct Measurement
 Measurement measurement = default;
 bool hasValue = measurement.HasValue; // true
 bool isReading = measurement is Measurement.Reading(0, null); // true
-bool gotReading = measurement.TryGetValue(out Measurement.Reading reading); // true
+bool gotReading = measurement.TryGetValue(out Measurement.Reading? reading); // true
 ```
 
-Nullability warnings and `default!` suppression follow the [shared rules for default cases](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/union-enum-common.md#nullability-of-default-cases). The designation is permitted only on `union struct`.
+Nullability warnings and `default!` suppression follow the [shared rules for default cases](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/union-enum-common.md#nullability-of-default-cases).
 
 ## Type Model
 
-### `union` Translation
+A `union` uses the [existing object-backed struct representation](../csharp-15.0/unions.md#lowering). `record class` cases retain their references; `record struct` cases are boxed on entry. Data-free `record class` cases use shared instances.
 
-A `union` without the `struct` modifier uses the [existing object-backed representation](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-15.0/unions.md#lowering). Data-free cases use shared instances.
-
-### `union struct` Translation
-
-The `struct` keyword selects an opinionated inline representation from the [shared layout proposal](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/union-enum-non-boxed-layout.md), which also discusses possible configuration. For example:
-
-```csharp
-// Conceptual type model and simple storage for Option<T>:
-[Union]
-public struct Option<T> : IUnion
-{
-    public record struct None;
-    public record struct Some(T Value);
-
-    private byte _discriminator;
-    private T _value;
-
-    // Generated construction, access, and equality members omitted.
-}
-```
-
-Unions of existing types can also select this storage strategy by adding `struct`, as in `union struct X(T1, T2, T3)`.
-
-An [alternative design](union-case-types-and-layout.md) uses attributes to select source-generated layouts, leaving storage policy outside the language.
+The [generated-layout proposal](union-case-types-and-layout.md) explores selecting storage independently through attributes and source generators. The [non-boxed storage exploration](union-enum-non-boxed-layout.md) describes a compact layout that could be offered through that mechanism.
 
 ### Readonly
 
-Cases declared in a `union struct` have the union's readonlyness and follow [record-struct property rules](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-10.0/record-structs.md#properties). Whether `union struct` types should always be readonly remains an [open question](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/union-enum-common.md#always-readonly-struct-types).
+`record struct` cases have the union's readonlyness and follow [record-struct property rules](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-10.0/record-structs.md#properties). Whether the union and those cases should always be readonly remains an [open question](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/union-enum-common.md#always-readonly-struct-types).
 
 ## Common Behavior
 
 The [common design](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/union-enum-common.md) covers equality and hashing, recursive payloads, concurrent access, metadata and compatibility, library evolution, and contextual case syntax and inference.
 
-Unions of existing types retain their equality and hashing semantics when declared with `union struct`.
-
 ## Switch Dispatch
 
-A `union` without the `struct` modifier can use existing union switch dispatch. `union struct` may warrant [specialized dispatch](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/union-enum-switch-emit.md) for its non-boxed storage.
+A union can use existing union switch dispatch. A non-boxed layout may warrant [specialized dispatch](union-enum-switch-emit.md).
 
 ## Open Questions
 
@@ -260,6 +272,10 @@ Allowing `object` in such a list would overlap every declared case type. A type 
 
 Should unions have a way to indicate that their case set is non-exhaustive, for example `open union`? This would let authors add cases in later versions while requiring consumers to account for future cases. The indication must be available to downstream compilers through metadata. The design should consider alignment with the [open/closed enum proposal](https://github.com/dotnet/csharplang/blob/main/proposals/closed-enums.md).
 
-### Explicit `union class` Spelling
+### Per-Case or Uniform Record Kinds
 
-Should `union class` be an explicit synonym for `union` without the `struct` modifier, as `record class` is for `record`? We would like this symmetry when adding `union struct`. For cases declared in the body, `class` would describe the record-class cases, while the containing union would remain an object-backed struct. That difference could make the spelling confusing.
+Do authors need to choose each case's record kind, or would a uniform choice be simpler?
+
+An alternative would use `union` for `record class` cases and `union struct` for `record struct` cases, with plain `case` declarations in either body. This would shorten declarations when all cases have the same kind and reduce the choices authors need to make. It would give up the ability to combine class cases, such as recursive nodes, with small struct cases in one declaration. Storage selection could remain independent under either approach.
+
+With that alternative, should `union class` be an explicit synonym for `union`, matching the symmetry of `record`, `record class`, and `record struct`? The keyword would describe the case records, while the containing union would remain a struct, which could be confusing.

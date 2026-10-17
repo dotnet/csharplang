@@ -18,9 +18,9 @@ Earlier inspection of generated code with .NET 11 RC1 on ARM64, using 16 sealed 
 
 The following sketches identify the case before extracting its payload. `E` denotes the enclosing enum or union. They show distinct, unguarded cases and omit fallback handling.
 
-### Reference-Type Cases
+### Object-Backed Dispatch
 
-For an `enum class`, evaluate the input once as `__case`. For a `union` without the `struct` modifier, evaluate the input and read its stored `Value` once as `__case`. Either can then use a chain of type tests:
+For an `enum class`, evaluate the input once as `__case`. For an object-backed union, evaluate the input and read its `Value` once as `__case`. Either can then use a chain of type tests:
 
 ```csharp
 if (__case is E.C1 c1) { HandleC1(c1.Value); }
@@ -28,13 +28,13 @@ else if (__case is E.C2 c2) { HandleC2(c2.Value); }
 else if (__case is E.C3 c3) { HandleC3(c3.Value); }
 ```
 
-Because the declared case types are sealed, the runtime can reduce these `is` tests to method-table pointer comparisons.
+For sealed `record class` cases, the runtime can reduce these `is` tests to method-table pointer comparisons. Object-backed unions can also test and unbox `record struct` cases.
 
 ### Non-Boxed Cases
 
 With the [non-boxed layout](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/union-enum-non-boxed-layout.md), switch lowering should use typed case-access operations. Reading an object-valued `Value` to inspect a struct case forces boxing and can defeat the purpose of the optimized layout on operations expected to be fast.
 
-Both `enum struct` and `union struct` support non-boxing extraction through `TryGetValue`:
+Both `enum struct` and unions support typed extraction through `TryGetValue`, which a non-boxed layout implements without boxing:
 
 ```csharp
 var __value = value;
@@ -63,4 +63,4 @@ The [existing switch-recognition pass](https://github.com/dotnet/runtime/blob/ma
 
 If general recognition raises correctness concerns, an attribute in `System.Runtime.CompilerServices` could opt compiler-generated unions and enums into optimization. The contract would require the case represented by a value to remain stable during dispatch. Case tests would have no observable side effects and would agree with extraction. The attribute could identify a struct's discriminator field for direct runtime access. This optional optimization contract is separate from the [metadata required to enforce construction rules](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/union-enum-common.md#metadata-and-compatibility). Its name and final contract remain undecided. The ordinary `[Union]` marker does not identify a discriminator or provide this stronger contract.
 
-A final fallback is exposing a discriminator and emitting an integral switch, using existing runtime optimizations directly. `enum class` and `union` without `struct` would also need a case-to-discriminator mapping. We would prefer to avoid this: the mapping would become a stable API and ABI contract. Reordering cases or inserting a case anywhere could no longer simply renumber them in declaration order. Case numbering and library evolution would need a durable design. Extraction must still follow each proposal's specified access semantics, including reconstruction from shared storage.
+A final fallback is exposing a discriminator and emitting an integral switch, using existing runtime optimizations directly. `enum class` and object-backed unions would also need a case-to-discriminator mapping. We would prefer to avoid this: the mapping would become a stable API and ABI contract. Reordering cases or inserting a case anywhere could no longer simply renumber them in declaration order. Case numbering and library evolution would need a durable design. Extraction must still follow each proposal's specified access semantics, including reconstruction from shared storage.
