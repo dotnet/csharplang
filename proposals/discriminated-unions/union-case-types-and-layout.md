@@ -4,7 +4,7 @@ This document explores separating two choices in the [union-based design](discri
 
 Different applications make different tradeoffs between allocations, value size, copying, and the work needed to pack and unpack payloads. [Earlier implementation discussions](../../meetings/working-groups/discriminated-unions/Union%20implementation%20challenges.md#challenges-with-union-structs) highlight how rearranging payloads for compact storage can offset the benefits of avoiding allocations.
 
-The language would define the required behavior and member shapes while leaving storage policy to the implementation. We could ship generators for common strategies without making their policies part of the language. Authors could supply their own implementations or select third-party generators through attributes. Choosing an attribute is less direct than using a keyword, but lets strategies evolve independently and avoids committing the language to one balance of these costs.
+The language would define the required behavior and member shapes while leaving storage policy to the implementation. We could ship generators for common strategies without making their policies part of the language. Authors can already implement their own storage through the [custom-union pattern](../csharp-15.0/unions.md#union-types), without a layout-selection attribute. Attributes would let them conveniently select a generator-provided strategy. Choosing an attribute is less direct than using a keyword, but lets strategies evolve independently and avoids committing the language to one balance of these costs.
 
 ## Example Walkthrough
 
@@ -42,7 +42,7 @@ Because `Add` is a class, its child expressions live in a separate object. If `A
 
 The [current union declaration](../csharp-15.0/unions.md#union-declarations) synthesizes an object-backed `Value` property and case constructors. It prohibits additional instance fields and a union member provider. A generator cannot replace that representation by adding a partial declaration.
 
-We propose recognizing a `UnionLayoutAttribute` in `System.Runtime.CompilerServices` as a request for an explicitly supplied representation, whether handwritten or generated. The compiler would:
+The attribute selects a generator's storage strategy. We propose also having the compiler recognize `UnionLayoutAttribute` in `System.Runtime.CompilerServices` so generated partial declarations can replace the default representation. The compiler would:
 
 1. Require the union and any enclosing types to be partial.
 2. Declare the nested case records before generators run. A generator can find the attribute with [`ForAttributeWithMetadataName`](https://learn.microsoft.com/en-us/dotnet/api/microsoft.codeanalysis.syntaxvalueprovider.forattributewithmetadataname) and inspect case symbols, primary constructors, constraints, and readonlyness without depending on another generator's output.

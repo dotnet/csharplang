@@ -318,7 +318,7 @@ public struct Option<T>
 
 The emitted code uses ordinary nested record constructors.
 
-An [alternative design](union-case-types-and-layout.md) makes layout an extension point, with implementations supplied by authors or generators. Attributes select a strategy without making its storage policy part of the language.
+An [alternative design](union-case-types-and-layout.md) uses attributes to select source-generated layouts, leaving storage policy outside the language.
 
 ### Readonly
 

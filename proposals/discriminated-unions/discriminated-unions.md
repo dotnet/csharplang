@@ -216,7 +216,7 @@ public struct Option<T> : IUnion
 
 Unions of existing types can also select this storage strategy by adding `struct`, as in `union struct X(T1, T2, T3)`.
 
-An [alternative design](union-case-types-and-layout.md) makes layout an extension point, with implementations supplied by authors or generators. Attributes select a strategy without making its storage policy part of the language.
+An [alternative design](union-case-types-and-layout.md) uses attributes to select source-generated layouts, leaving storage policy outside the language.
 
 ### Readonly
 
