@@ -8,7 +8,7 @@ A parser may want to return either a slice of its input or an error without allo
 
 ## Design
 
-The proposed `ref` modifier applies to `enum struct` and `union`. A ref-like union is restricted to `case struct` declarations. Both forms make the enclosing type and each case type a `ref struct`, including data-free cases. Payloads may therefore be ref-like types or type parameters declared with `allows ref struct`.
+The proposed `ref` modifier applies to `enum struct` and `union`. This exploration restricts ref-like unions to `case struct` declarations. Both forms make the enclosing type and each case type a `ref struct`, including data-free cases. Payloads may therefore be ref-like types or type parameters declared with `allows ref struct`.
 
 The enum-based declaration is:
 

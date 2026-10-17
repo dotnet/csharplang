@@ -26,9 +26,9 @@ Packing and extraction below implement the creation and access operations define
 
 The simplest layout is a discriminator followed by a separate field for each case type. The containing struct's size is roughly the sum of all case sizes plus the discriminator and padding. Conversions can copy the selected case directly into or out of its field.
 
-Our initial expectation is that this approach would often make enclosing union and enum structs too large to be practical. Even a handful of cases could substantially increase storage and copying costs. The compact layout below aims to reduce storage while preserving safety. Its packing and extraction costs, including the effect of shared storage on JIT optimizations, need measurement on representative workloads. Choosing a default requires performance validation and sign-off from LDM and the runtime team.
+Our initial expectation is that this approach would often make enclosing union and enum structs too large to be practical. Even a handful of cases could substantially increase storage and copying costs. The compact layout below aims to reduce storage while preserving safety. Its packing and extraction costs, including the effect of shared storage on JIT optimizations, need measurement on representative workloads.
 
-We aim to provide a default that balances space and speed. We are also open to letting authors configure that balance, most likely through attributes, similar to existing .NET layout controls such as [StructLayout](https://learn.microsoft.com/en-us/dotnet/api/system.runtime.interopservices.structlayoutattribute). Whether to offer customization, its form and scope, and its availability in the initial feature are all undecided.
+For `enum struct`, choosing a default layout requires performance validation and sign-off from LDM and the runtime team. Whether authors can configure that default, for example through attributes, remains open.
 
 ### Concurrent Access and Safety
 
@@ -45,7 +45,7 @@ The concurrent-copy hazards explored in [Fast, Efficient Unions](https://github.
 A candidate inline layout uses a discriminator and three kinds of storage:
 
 1. **Unmanaged data**: A byte region for the [predefined types](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/union-enum-non-boxed-layout.md#primitive-types-and-layout-assumptions) below, sized for the greatest combined requirement of any case, including padding and alignment. Cases share the region, with distinct locations for components within each case.
-2. **Managed references**: Enough slots for the case containing the most references. A slot is normally `object`, but can be more specific when that type accommodates every value assigned to it, such as a slot used only for strings.
+2. **Managed references**: Enough slots for the case containing the most references. A slot is normally `object`, but can be more specific when that type accommodates every value assigned to it, such as a slot used only for strings. A `record class` case uses one slot for the case reference.
 3. **Typed values**: Slots for arbitrary value types and type parameters not known to be reference types. Each type needs enough slots for its maximum count in any case. Distinct types cannot generally share a slot. Reference-constrained type parameters can use the managed reference slots.
 
 Compatibility of a container's own unmanaged classification is an [open question](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/union-enum-non-boxed-layout.md#unmanaged-classification).
@@ -70,7 +70,7 @@ These require no annotation and describe managed storage, rather than interop ma
 
 In the conservative layout, structs from referenced assemblies are stored in fields of their own types. The runtime determines their size and GC layout, keeping storage safe if a dependency grows or acquires references. A library update can add managed references to a previously unmanaged struct. Recompiling a consumer that relies on an `unmanaged` constraint detects that change, but the [CLR does not enforce the constraint](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-7.3/blittable.md#detailed-design) when loading existing binaries. The [checked packing opt-in](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/union-enum-non-boxed-layout.md#possible-checked-packing-opt-in) could permit raw storage for such types.
 
-The compiler can arrange the payload components of case records directly. Decomposing a nested user struct must preserve all value state without invoking user getters, setters, or constructors, and respect accessibility, safety, and supported versioning. Otherwise, the struct is stored in a field of its declared type. Being in the current assembly is insufficient when layout dependencies cross assembly boundaries.
+The implementation can arrange the payload components of `record struct` cases directly. Decomposing a nested user struct must preserve all value state without invoking user getters, setters, or constructors, and respect accessibility, safety, and supported versioning. Otherwise, the struct is stored in a field of its declared type. Being in the current assembly is insufficient when layout dependencies cross assembly boundaries.
 
 Unmanagedness alone does not establish byte layout. Raw packing must account for architecture, alignment, and padding. The type definition seen at compile time does not guarantee its layout at runtime.
 
@@ -118,7 +118,7 @@ public struct Message<T>
 
 ### Packing and Extraction
 
-In this layout, creation from a case packs components into their assigned slots and sets the discriminator. Extraction checks for the requested case and reconstructs the case value. Mixed layouts require rearranging components rather than reinterpreting the shared storage as a complete case. For example, `Buffer` uses `_reference0` and both integers in `_unmanaged`, while `Pair` uses both reference slots. Unused reference and typed slots are set to `default` to avoid retaining references from other cases.
+In this layout, creation from a `record struct` case packs components into their assigned slots and sets the discriminator. Extraction checks for the requested case and reconstructs the case value. Mixed layouts require rearranging components rather than reinterpreting the shared storage as a complete case. For example, `Buffer` uses `_reference0` and both integers in `_unmanaged`, while `Pair` uses both reference slots. Unused reference and typed slots are set to `default` to avoid retaining references from other cases.
 
 When every case is unmanaged and the required layout facts are established, complete case values can safely overlap in one region sized and aligned for the largest case, with a separate discriminator. Packing and extraction can then copy each case as a whole.
 
@@ -173,7 +173,7 @@ The `DateTime` assertion uses its current eight-byte managed size. The language 
 
 ## Equality and Hashing
 
-For data-carrying enums and unions with case declarations, equality and hashing implement the [shared value-equality rules](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/union-enum-common.md#equality-and-hashing) without boxing the active case or accessing an object-valued `Value` property. In the compact layout, equality first checks that the discriminators identify the same case, then compares corresponding payload fields with their declared types' equality comparers. Hashing can combine the case discriminator with those fields' hash codes.
+For data-carrying enums and unions with case declarations, equality and hashing implement the [shared value-equality rules](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/union-enum-common.md#equality-and-hashing) without boxing the active case or accessing an object-valued `Value` property. Equality first checks that the discriminators identify the same case. For a stored `record class`, equality and hashing delegate to that record's members. For a decomposed `record struct`, equality compares corresponding payload fields with their declared types' equality comparers, and hashing can combine the case discriminator with those fields' hash codes.
 
 The enclosing struct need not produce the same hash code as an extracted case, including the boxed case returned by `Value`.
 
@@ -241,7 +241,7 @@ public struct Measurement : IEquatable<Measurement>
 }
 ```
 
-If future [case bodies](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/union-enum-common.md#customizing-case-records) permit custom case equality or hashing, the implementation must honor those members. Reconstructing a typed case and invoking its methods can do this without boxing the case.
+If future [case bodies](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/union-enum-common.md#customizing-case-records) permit custom case equality or hashing, the implementation must honor those members. For a decomposed `record struct`, reconstructing the case and invoking its methods can do this without boxing.
 
 ## Case Dispatch
 

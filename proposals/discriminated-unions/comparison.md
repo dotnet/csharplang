@@ -62,7 +62,7 @@ Both shorthand designs nest their cases, so a case inherits every enclosing type
 
 An `enum class` value is the case record itself. A union with object-backed storage is a struct containing a reference to that record. The direct model makes `enum class` fit more naturally into existing code that relies on inheritance or works through `object` and interfaces.
 
-Given `enum class Result` or `union Result` with record-class `Success` and `Failure` cases:
+Given `enum class Result` or `union Result` with `record class` cases named `Success` and `Failure`:
 
 ```csharp
 Result.Success success = Result.Success("Complete");

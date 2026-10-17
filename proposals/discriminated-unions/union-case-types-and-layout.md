@@ -49,7 +49,7 @@ The attribute selects a generator's storage strategy. We propose also having the
 
 1. Require the union and any enclosing types to be partial.
 2. Declare the nested case records before generators run. A generator can find the attribute with [`ForAttributeWithMetadataName`](https://learn.microsoft.com/en-us/dotnet/api/microsoft.codeanalysis.syntaxvalueprovider.forattributewithmetadataname) and inspect case symbols, primary constructors, constraints, and readonlyness without depending on another generator's output.
-3. Suppress the default storage and implementation members, allowing the generator to supply them in matching `partial union` declarations.
+3. Suppress the default storage and synthesized implementation members, including the `IUnionMembers` provider, allowing the generator to supply them in matching `partial union` declarations.
 4. Validate the completed union. Its creation members must describe exactly the declared cases, and its required access and equality members must be present. Missing implementation is an error, even when no generator is installed.
 
 The compiler validates member shapes. Their behavior follows the same trust model as [custom unions](../csharp-15.0/unions.md#well-formedness).
@@ -242,7 +242,7 @@ Creation and extraction use the same typed fields: `Buffer` writes and reads `Pa
 
 This strategy aims to minimize union size by decomposing struct cases and reusing fields, without boxing. The tradeoff is rearranging ("swizzling") payloads during creation and extraction, along with type checks when reading shared reference fields. The generated code is more complex than with separate case fields. Primitive storage, reference slots, and typed slots are sized independently, so their combined size can exceed that of any individual case. The size benefit must be weighed against packing, extraction, and JIT optimization costs on the intended runtimes and workloads.
 
-Decomposition is safe for the compiler-defined case records with only synthesized primary-constructor state. Arbitrary nested structs, external types, and type parameters retain typed storage. If future case bodies add state or user-defined accessors, the generator must preserve the complete case value or use an explicit decomposition contract. Running user getters or reconstructing through a validating constructor would change semantics.
+Decomposition is safe for declared `record struct` cases with only synthesized primary-constructor state. Arbitrary nested structs, external types, and type parameters retain typed storage. If future case bodies add state or user-defined accessors, the generator must preserve the complete case value or use an explicit decomposition contract. Running user getters or reconstructing through a validating constructor would change semantics.
 
 The [checked packing opt-in](union-enum-non-boxed-layout.md#possible-checked-packing-opt-in) can likewise be implemented by a generator. It emits the consumer-side size and reference-containment checks and ensures they run before every raw packing or extraction path, including extraction from `default`. A static constructor on the payload type alone remains insufficient.
 
