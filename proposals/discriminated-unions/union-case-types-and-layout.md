@@ -414,11 +414,11 @@ The generated declarations use [`CallConvSwift`](https://learn.microsoft.com/en-
 internal static partial class NativeMethods
 {
     [DllImport("LayoutProbe", EntryPoint = "make_native_reading")]
-    [UnmanagedCallConv(CallConvs = new[] { typeof(CallConvSwift) })]
+    [UnmanagedCallConv(CallConvs = [typeof(CallConvSwift)])]
     internal static extern NativeReading MakeNumber(long value);
 
     [DllImport("LayoutProbe", EntryPoint = "read_native_reading")]
-    [UnmanagedCallConv(CallConvs = new[] { typeof(CallConvSwift) })]
+    [UnmanagedCallConv(CallConvs = [typeof(CallConvSwift)])]
     internal static extern long Read(NativeReading value);
 }
 ```
@@ -433,7 +433,7 @@ The nine-byte managed type has an array stride of 9, while Swift places these en
 internal static unsafe partial class NativeMethods
 {
     [DllImport("LayoutProbe", EntryPoint = "sum_native_readings")]
-    [UnmanagedCallConv(CallConvs = new[] { typeof(CallConvSwift) })]
+    [UnmanagedCallConv(CallConvs = [typeof(CallConvSwift)])]
     private static extern long Sum(void* values, int count);
 
     internal static long Sum(ReadOnlySpan<NativeReading> values)
