@@ -27,6 +27,7 @@ static int Evaluate(Expr expression, IReadOnlyDictionary<string, int> names)
         Expr.Number(var value) => value,
         Expr.Name(var name) => names[name],
         Expr.Add(var left, var right) => Evaluate(left, names) + Evaluate(right, names),
+        null => throw new ArgumentException("The expression has no case.", nameof(expression)),
     };
 ```
 
@@ -36,7 +37,7 @@ To see what `CompactLayout` generates, jump to [Expanded Storage and Access Code
 
 Without the attribute, ordinary object-backed storage boxes `Number` and `Name` when they enter the union and stores an `Add` reference directly. The illustrated compact strategy stores a number in an `int` field, a name's identifier in a reference field, or an `Add` object in that same reference field. Creating and extracting the leaves then requires no boxing. An `Add` retains its object identity.
 
-Because `Add` is a class, its child expressions live in a separate object. If `Add` were a struct, a layout strategy would need to box it to avoid making `Expr` contain itself.
+Because `Add` is a class, its child expressions live in a separate object. If `Add` were a struct, a layout strategy would need reference indirection, such as boxing, to avoid making `Expr` contain itself.
 
 ## Compiler and Generator Responsibilities
 
@@ -53,7 +54,7 @@ The compiler validates member shapes. Their behavior follows the same trust mode
 
 `CompactLayout` is a marker type supplied by a generator package, giving the generator a compiler-checked strategy identity. The type supplies no implementation. The selector's final form remains open: an enum could name a fixed set of strategies, or string identifiers could allow an extensible set without marker types.
 
-All unions with case declarations, including the default object-backed form, should expose the same per-case constructors, `Value`, `HasValue`, typed `TryGetValue` overloads, and [shared equality members](union-enum-common.md#equality-and-hashing). They also declare and implement a public nested `IUnionMembers` provider whose static `Create` overloads identify the declared cases. [Union conversions](../csharp-15.0/unions.md#union-member-providers) call those factories, so other constructor overloads do not add case types. Switching strategies must preserve this public contract for previously compiled consumers.
+All unions with case declarations, including the default object-backed form, should expose the same per-case constructors, `Value`, `HasValue`, typed `TryGetValue` overloads, and [shared equality members](union-enum-common.md#equality-and-hashing). They also declare and implement a public nested `IUnionMembers` provider whose static `Create` overloads identify the declared cases. [Union conversions](../csharp-15.0/unions.md#union-member-providers) call those factories, so other constructor overloads do not add case types. Switching strategies must preserve these public members and the specified case semantics.
 
 The generator owns the creation and access members that implement its storage strategy. Conflicting user declarations are errors. Other user-declared members remain supported, including equality customizations that use public case access under the shared customization rules. User-declared instance fields remain prohibited.
 
@@ -167,6 +168,8 @@ Equality and hashing use typed payloads without reading `Value`, following the [
 ## Storage Strategies
 
 These strategies build on the [non-boxed storage exploration](union-enum-non-boxed-layout.md). The examples show instance fields and omit the creation, access, and equality members illustrated above.
+
+A strategy that cannot support a declaration must either use a documented fallback that preserves its case semantics or report a generator diagnostic. For example, separate fields cannot directly store a recursive struct case, and unmanaged overlap cannot store a string payload. A strategy may permit boxing as a fallback or reject those declarations.
 
 ### Default Object-Backed Storage
 
@@ -304,9 +307,7 @@ Layout choices also affect `Unsafe.SizeOf`, allocation, array density, and unman
 
 ## Swift Interop
 
-A native binding may need the union to match an existing enum's ABI. [Runtime issue #100896](https://github.com/dotnet/runtime/issues/100896) is directly relevant to moving layout policy into attributes and generators. Its [approved API](https://github.com/dotnet/runtime/issues/100896#issuecomment-2110876749) uses `LayoutKind.Extended`, `ExtendedLayoutAttribute`, and kinds including `CUnion`, `SwiftStruct`, and `SwiftEnum`. The current implementation exposes the two C layout kinds. The issue remains open for the remaining kinds.
-
-`CUnion` supplies overlapping payload storage, without supplying a discriminated union's tag or access operations. Swift enum layout also involves trailing padding, spare bits, and architecture-specific rules. A generator still needs to implement the logical case API and preserve bits used by the native discriminator.
+A specialized binding generator can provide working Swift interop for concrete, frozen enums with trivial payloads. With the proposed compiler hook, it can emit the native representation on the union itself, implement its case operations, and generate call declarations and marshalling. We verified the representation below with Swift 6.4 and .NET 11 RC1 CoreCLR on ARM64, including native arguments, returns, `inout` mutation, buffers, and an enclosing struct.
 
 ### A Concrete Frozen Enum
 
@@ -320,27 +321,66 @@ Consider this Swift type:
 }
 ```
 
-On the tested ARM64 Swift toolchain, its payload occupies eight bytes and its discriminator is the ninth byte: `number` uses 0, `pair` uses 1, and `empty` uses 2. Its size is 9, stride is 16, and alignment is 8. A binding generator can represent an individual value on the tested CoreCLR with:
+The C# declaration can select a strategy supplied by a binding generator for this Swift type:
 
 ```csharp
-[StructLayout(LayoutKind.Explicit, Size = 9)]
-public struct NativeReadingStorage
+[UnionLayout(typeof(SwiftNativeReadingLayout))]
+public readonly partial union NativeReading
 {
-    [FieldOffset(0)] public long Number;
-    [FieldOffset(0)] public int First;
-    [FieldOffset(4)] public int Second;
-    [FieldOffset(8)] public byte Tag;
+    case struct Number(long Value) = default;
+    case struct Pair(int First, int Second);
+    case struct Empty;
 }
 ```
 
-For direct native representation, the generator places these fields and the layout attribute on the union itself. Creation assigns the payload fields and the ABI-defined tag. Extraction switches on `Tag` and constructs the corresponding record struct. This can back a union with `Number(long Value)`, `Pair(int First, int Second)`, and `Empty` struct cases using the same member pattern as `Expr`. `Number` must be the designated default case because all-zero native storage represents `number(0)`.
+For the tested target, the native payload occupies eight bytes and its discriminator is the ninth byte: `number` uses 0, `pair` uses 1, and `empty` uses 2. Its size is 9, stride is 16, and alignment is 8. The generator can emit this storage and construction code:
 
-On Swift 6.4 and .NET 11 RC1, passing this storage through native Swift functions with [`CallConvSwift`](https://learn.microsoft.com/en-us/dotnet/api/system.runtime.compilerservices.callconvswift) succeeded for number round-trips and pair and empty decoding.
+```csharp
+[StructLayout(LayoutKind.Explicit, Size = 9)]
+public readonly partial union NativeReading
+{
+    [FieldOffset(0)] private readonly long _number;
+    [FieldOffset(0)] private readonly int _first;
+    [FieldOffset(4)] private readonly int _second;
+    [FieldOffset(8)] private readonly byte _tag;
 
-<details>
-<summary>Native-call probe</summary>
+    public NativeReading(Number value)
+    {
+        this = default;
+        _number = value.Value;
+        _tag = 0;
+    }
 
-The Swift library exports these functions using Swift's calling convention:
+    public NativeReading(Pair value)
+    {
+        this = default;
+        _first = value.First;
+        _second = value.Second;
+        _tag = 1;
+    }
+
+    public NativeReading(Empty value) { this = default; _tag = 2; }
+
+    public bool HasValue => true;
+
+    public object Value
+        => _tag switch
+        {
+            0 => NativeReading.Number(_number),
+            1 => NativeReading.Pair(_first, _second),
+            2 => NativeReading.Empty,
+        };
+
+    // The union member provider, typed extraction, and equality members
+    // follow the earlier example and add no instance storage.
+}
+```
+
+`Number` is the designated default case because all-zero native storage represents `number(0)`. If a native type's zero representation is invalid, the generator must diagnose the unsupported declaration or emit boundary validation and marshalling that reject invalid managed defaults.
+
+### Native Calls
+
+For example, the Swift library can export functions using Swift's calling convention:
 
 ```swift
 @_silgen_name("make_native_reading")
@@ -356,34 +396,81 @@ public func readNativeReading(_ value: NativeReading) -> Int64 {
 }
 ```
 
-After building the library with `swiftc -emit-library -module-name LayoutProbe InteropProbe.swift -o libLayoutProbe.dylib`, the managed declarations use the matching calling convention:
+The generated declarations use [`CallConvSwift`](https://learn.microsoft.com/en-us/dotnet/api/system.runtime.compilerservices.callconvswift) and the union type directly:
 
 ```csharp
-internal static class NativeMethods
+internal static partial class NativeMethods
 {
     [DllImport("LayoutProbe", EntryPoint = "make_native_reading")]
     [UnmanagedCallConv(CallConvs = new[] { typeof(CallConvSwift) })]
-    internal static extern NativeReadingStorage MakeNumber(long value);
+    internal static extern NativeReading MakeNumber(long value);
 
     [DllImport("LayoutProbe", EntryPoint = "read_native_reading")]
     [UnmanagedCallConv(CallConvs = new[] { typeof(CallConvSwift) })]
-    internal static extern long Read(NativeReadingStorage value);
+    internal static extern long Read(NativeReading value);
 }
 ```
 
-`MakeNumber(42)` returned `Number = 42` and `Tag = 0`. Passing it back to `Read` returned 42. Passing `First = 1`, `Second = 2`, and `Tag = 1` returned 3, and passing `Tag = 2` returned -1.
+`MakeNumber(42)` produces `NativeReading.Number(42)`. Passing it back to `Read` returns 42. `Read(NativeReading.Pair(1, 2))` returns 3, and `Read(NativeReading.Empty)` returns -1. A Swift `inout NativeReading` parameter can similarly be bound as `ref NativeReading`.
 
-</details>
+### Buffers and Enclosing Structs
 
-The managed explicit-layout type's array stride was 9, while Swift's was 16. Matching the bytes of one value therefore does not establish compatibility for arrays or enclosing aggregates. A generator can emit a marshaller that copies each element at the native stride. General direct representation requires runtime layout support for the relevant size, stride, alignment, and calling-convention rules.
+The nine-byte managed type has an array stride of 9, while Swift places these enum elements 16 bytes apart. A generated marshaller can allocate an eight-byte-aligned native buffer and copy nine bytes per element at sixteen-byte intervals. For example, given a Swift function taking `UnsafePointer<NativeReading>` and an `Int32` count and returning the sum of the readings, the generator can emit:
 
-### Spare Bits and Generic Payloads
+```csharp
+internal static unsafe partial class NativeMethods
+{
+    [DllImport("LayoutProbe", EntryPoint = "sum_native_readings")]
+    [UnmanagedCallConv(CallConvs = new[] { typeof(CallConvSwift) })]
+    private static extern long Sum(void* values, int count);
+
+    internal static long Sum(ReadOnlySpan<NativeReading> values)
+    {
+        if (values.IsEmpty)
+            return 0;
+
+        void* buffer = NativeMemory.AlignedAlloc(checked((nuint)values.Length * 16), 8);
+        try
+        {
+            for (int i = 0; i < values.Length; i++)
+                Unsafe.WriteUnaligned((byte*)buffer + (nuint)i * 16, values[i]);
+
+            return Sum(buffer, values.Length);
+        }
+        finally
+        {
+            NativeMemory.AlignedFree(buffer);
+        }
+    }
+}
+```
+
+Reading an element written by Swift uses `Unsafe.ReadUnaligned<NativeReading>((byte*)buffer + (nuint)i * 16)`. We verified native reads and writes using this representation. Swift's `Array<NativeReading>` collection has its own representation and would need a separate binding.
+
+Using `Size = 16` for the union also worked for individual native calls and pinned managed arrays used as native buffers. That padding is not a universal solution: Swift can place a following `UInt8` field at offset 9 inside an enclosing struct. A binding generator must preserve that aggregate layout, for example:
+
+```csharp
+[StructLayout(LayoutKind.Explicit, Size = 10)]
+public struct NativeEnvelope
+{
+    [FieldOffset(0)] public NativeReading Reading;
+    [FieldOffset(9)] public byte Marker;
+}
+```
+
+We verified native arguments and returns for this aggregate with the nine-byte enum representation. Its native stride is again 16. Ordinary nesting of the sixteen-byte enum representation puts `Marker` at offset 16. The generator must account for native size, alignment, stride, and call conventions together.
+
+### Limits and Runtime Support
 
 A frozen Swift enum with `none` and `bit(Bool)` used one byte in the same experiment: `bit(false)` was `0x00`, `bit(true)` was `0x01`, and `none` was `0x02`. A generator for that concrete binding can encode and decode those bytes with a checked switch. A separate tag byte would give the wrong representation, and reading a tagged byte as an ordinary C# `bool` would lose the distinction.
 
 For an open generic payload, the usable spare bits and discriminator location can depend on the actual runtime type. A general generator cannot bake in a single offset and mask. Supporting that strategy requires runtime operations that identify the case, initialize its discriminator, and project its payload while preserving shared bits, or Swift-side helper functions that perform those operations. Merely computing the containing type's size does not supply those access operations.
 
-Concrete frozen bindings can generate the access code demonstrated above. Bindings for resilient Swift enums need Swift metadata and value-witness operations or a marshalling boundary that keeps their representation opaque. Swift-owned indirect cases and objects also require retain/release and ownership conversion. A generator cannot insert retain/release into ordinary struct copies. Such cases need a managed owner and a marshalling boundary, or lifetime support from the language or runtime. A managed `Add` reference is a GC reference and cannot serve as a Swift object pointer.
+Bindings for resilient Swift enums likewise need Swift metadata and value-witness operations or a marshalling boundary that keeps their representation opaque. Swift-owned indirect cases and objects require retain/release and destruction operations. A generator cannot insert those operations into ordinary C# struct copies. Such cases need a managed owner and a marshalling boundary, or lifetime support from the language or runtime. A managed `Add` reference is a GC reference and cannot serve as a Swift object pointer.
+
+[Runtime issue #100896](https://github.com/dotnet/runtime/issues/100896) addresses complementary layout support. Its [approved API](https://github.com/dotnet/runtime/issues/100896#issuecomment-2110876749) includes `ExtendedLayoutKind.SwiftStruct` and `SwiftEnum`, but the current implementation exposes only `CStruct` and `CUnion`. `CUnion` supplies overlapping storage, without supplying a Swift enum's discriminator or projection operations. Even full layout support would still need case access and ownership handling.
+
+The demonstrated explicit-size representation works on the tested ARM64 CoreCLR. [Earlier runtime investigation](https://github.com/dotnet/runtime/issues/100896#issuecomment-2079979240) reported differences across runtimes, and Swift's spare-bit rules vary by architecture. A binding generator must target a supported ABI and runtime, use marshalling where necessary, or diagnose an unsupported combination. Ordinary source generation alone does not establish direct representation for arbitrary Swift enums.
 
 ## Applying the Mechanism to the Other Designs
 
