@@ -2,6 +2,10 @@
 
 The `struct` keyword in [`enum struct`](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/data-carrying-enums.md) and [`union struct`](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/discriminated-unions.md) selects an opinionated layout that stores case data inline, avoiding boxing during ordinary creation and extraction. This proposal describes a shared implementation approach. Each language proposal defines its own case types, construction, conversions, defaults, and matching.
 
+## Motivation
+
+Object-backed storage boxes struct cases. Storing cases inline can avoid those allocations, but reserving a separate field for every case makes each value grow with their combined size. This proposal explores sharing storage between cases to keep values compact while preserving type and memory safety.
+
 The layout is an implementation detail. Compilers may change it, including to use future runtime capabilities, while preserving the specified API and observable semantics. No particular size, field layout, native ABI, or persistent byte representation is guaranteed.
 
 An [alternative design](union-case-types-and-layout.md) uses attributes to select source-generated layouts, leaving storage policy outside the language. The strategies below could be offered as options through that mechanism.

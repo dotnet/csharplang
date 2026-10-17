@@ -2,6 +2,10 @@
 
 This proposal explores allowing unions and data-carrying enums to hold ref-like values such as `Span<T>`. It is an optional extension to the [union-based discriminated-union proposal](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/discriminated-unions.md) and the [data-carrying enum proposal](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/data-carrying-enums.md). Either design can proceed without it if the use cases do not justify the additional complexity.
 
+## Motivation
+
+A parser may want to return either a slice of its input or an error without allocating or copying the slice. `ReadOnlySpan<char>` cannot be boxed or stored in an ordinary struct, so the existing representations cannot carry that result. Ref-like unions and enums would support such payloads under the existing ref-safety rules. The union-based form also needs changes to its [access pattern](#union-pattern-for-ref-like-cases).
+
 ## Design
 
 The proposed `ref` modifier applies only to `enum struct` and `union struct`. It makes both the enclosing type and each case type a `ref struct`, including data-free cases. Payloads may therefore be ref-like types or type parameters declared with `allows ref struct`.

@@ -2,9 +2,11 @@
 
 This document explores separating two choices in the [union-based design](discriminated-unions.md): the record kind of each declared case and the storage representation of the enclosing union. The enclosing declaration uses `union` for every storage strategy. Each case chooses `record class` or `record struct`, and an attribute can select a source-generated representation.
 
-Different applications make different tradeoffs between allocations, value size, copying, and the work needed to pack and unpack payloads. [Earlier implementation discussions](../../meetings/working-groups/discriminated-unions/Union%20implementation%20challenges.md#challenges-with-union-structs) highlight how rearranging payloads for compact storage can offset the benefits of avoiding allocations.
+## Motivation
 
-The language would define the required behavior and member shapes while leaving storage policy to generators. We could ship generators for common strategies without making their policies part of the language. Attributes would let authors select among those opinionated options or use third-party generators. Choosing an attribute is less direct than using a keyword, but lets strategies evolve independently and avoids committing the language to one balance of these costs.
+A recursive tree can benefit from class nodes and small struct leaves, independently of how the enclosing union stores them. Different applications make different tradeoffs between allocations, value size, copying, and payload rearrangement, as [earlier implementation discussions](../../meetings/working-groups/discriminated-unions/Union%20implementation%20challenges.md#challenges-with-union-structs) explore.
+
+The language would define case semantics while generators supply storage strategies. Attributes would let authors choose strategies supplied by our generators or third-party generators. Choosing an attribute is less direct than using a keyword, but lets strategies evolve without committing the language to one balance of these costs.
 
 ## Example Walkthrough
 
