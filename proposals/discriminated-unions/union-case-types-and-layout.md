@@ -4,7 +4,7 @@ This document explores separating two choices in the [union-based design](discri
 
 ## Motivation
 
-A recursive tree can benefit from class nodes and small struct leaves, independently of how the enclosing union stores them. Different applications make different tradeoffs between allocations, value size, copying, and payload rearrangement, as [earlier implementation discussions](../../meetings/working-groups/discriminated-unions/Union%20implementation%20challenges.md#challenges-with-union-structs) explore.
+Applications have different requirements and constraints around allocation, value size, copying, runtime support, and interoperability. Authors should be able to choose case record kinds and storage strategies independently, balancing the [tradeoffs](../../meetings/working-groups/discriminated-unions/Union%20implementation%20challenges.md#challenges-with-union-structs) for their workloads.
 
 The language would define case semantics while generators supply storage strategies. Attributes would let authors choose strategies supplied by our generators or third-party generators. Choosing an attribute is less direct than using a keyword, but lets strategies evolve without committing the language to one balance of these costs.
 
