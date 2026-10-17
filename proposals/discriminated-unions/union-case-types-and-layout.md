@@ -1,100 +1,83 @@
 # Per-Case Records and Generated Union Layouts
 
-This document explores separating two choices in the [union-based design](discriminated-unions.md): the record kind of each declared case and the storage representation of the enclosing union. There is one `union` declaration form. Each case chooses `record class` or `record struct`, and an attribute can select a source-generated representation.
-
-The existing custom-union pattern is sufficient to consume the generated representation. Supporting it directly on a `union` declaration needs a compiler extension that delegates storage and member synthesis to generated partial declarations. The examples below demonstrate the resulting ordinary C# and identify that extension.
+This document explores separating two choices in the [union-based design](discriminated-unions.md): the record kind of each declared case and the storage representation of the enclosing union. The enclosing declaration uses `union` for every storage strategy. Each case chooses `record class` or `record struct`, and an attribute can select a source-generated representation.
 
 ## Example Walkthrough
 
-An expression tree benefits from both kinds of cases. Small leaves can be stored inline, while recursive addition nodes provide the reference needed to keep an inline representation finite:
+An expression tree can use struct leaves for efficiency and class nodes for recursion:
 
 ```csharp
 [UnionLayout(typeof(CompactLayout))]
 public readonly partial union Expr
 {
-    case struct Number(double Value);
+    case struct Number(int Value);
     case struct Name(string Identifier);
     case Add(Expr Left, Expr Right);
 }
 
 Expr expression = Expr.Add(Expr.Number(1), Expr.Name("x"));
 
-static double Evaluate(Expr expression, IReadOnlyDictionary<string, double> names)
+static int Evaluate(Expr expression, IReadOnlyDictionary<string, int> names)
     => expression switch
     {
         Expr.Number(var value) => value,
         Expr.Name(var name) => names[name],
         Expr.Add(var left, var right) => Evaluate(left, names) + Evaluate(right, names),
-        _ => throw new InvalidOperationException()
     };
 ```
 
-`case` declares a sealed nested [`record class`](../csharp-9.0/records.md). `case struct` declares a nested [`record struct`](../csharp-10.0/record-structs.md), with the enclosing union's readonlyness. The parameter list is the record's primary constructor. A record struct can be stored inline, in an array, or in a box. The enclosing union remains a struct in every representation.
+To see what `CompactLayout` generates, jump to [Expanded Storage and Access Code](#expanded-storage-and-access-code).
 
-Without the attribute, ordinary object-backed storage boxes `Number` and `Name` when they enter the union and stores an `Add` reference directly. The illustrated compact strategy stores a number in a `double` field, a name's identifier in a reference field, or an `Add` object in that same reference field. Creating and extracting the leaves then requires no boxing. An `Add` retains its object identity.
+`case` declares a sealed nested [`record class`](../csharp-9.0/records.md). `case struct` declares a nested [`record struct`](../csharp-10.0/record-structs.md), with the enclosing union's readonlyness. The parameter list is the record's primary constructor. The enclosing union remains a struct in every representation.
+
+Without the attribute, ordinary object-backed storage boxes `Number` and `Name` when they enter the union and stores an `Add` reference directly. The illustrated compact strategy stores a number in an `int` field, a name's identifier in a reference field, or an `Add` object in that same reference field. Creating and extracting the leaves then requires no boxing. An `Add` retains its object identity.
 
 The recursion is `Expr` to an `Add` reference to its child `Expr` values. Making `Add` a struct would require a different storage decision: object-backed storage can box it, while a strategy that insists on storing it inline must reject the resulting recursive layout. A hybrid strategy could retain boxing for that case.
 
-The attribute and strategy names in this document are provisional. The separate [`ref` extension](union-enum-ref-like-types.md) retains its own questions about ref safety and object-valued access.
-
 ## Compiler and Generator Responsibilities
 
-The compiler defines case declarations, construction syntax, the case set, matching, and the public union contract. The generator supplies fields and implementations for that contract. The runtime lays out the resulting fields, tracks GC references, and implements native calling conventions.
+The [current union declaration](../csharp-15.0/unions.md#union-declarations) synthesizes an object-backed `Value` property and case constructors. It prohibits additional instance fields and a union member provider. A generator cannot replace that representation by adding a partial declaration.
 
-The [current union declaration](../csharp-15.0/unions.md#union-declarations) always synthesizes an object-backed `Value` property and case constructors. It prohibits additional instance fields and a union member provider. A generator cannot remove that backing field or replace those members by adding another partial declaration.
-
-We propose recognizing a `UnionLayoutAttribute` on a union declaration as a request for an externally supplied representation. Its `Type` argument selects a strategy understood by an installed generator, as in `typeof(CompactLayout)` above. The provisional attribute would be defined in `System.Runtime.CompilerServices`, letting the generator find it by its fully qualified metadata name. The compiler need not understand the individual strategies. This mode would:
+We propose recognizing a `UnionLayoutAttribute` in `System.Runtime.CompilerServices` as a request for a generator-supplied representation. The compiler would:
 
 1. Require the union and any enclosing types to be partial.
-2. Expose the nested case record symbols and their primary constructors before generators run.
-3. Suppress the default storage and implementation members, allowing generated fields, constructors, and accessors in matching `partial union` declarations.
-4. Validate the completed union after generation. Its creation members must describe exactly the declared cases, and its required access and equality members must be present.
+2. Declare the nested case records before generators run. A generator can find the attribute with [`ForAttributeWithMetadataName`](https://learn.microsoft.com/en-us/dotnet/api/microsoft.codeanalysis.syntaxvalueprovider.forattributewithmetadataname) and inspect case symbols, primary constructors, constraints, and readonlyness without depending on another generator's output.
+3. Suppress the default storage and implementation members, allowing the generator to supply them in matching `partial union` declarations.
+4. Validate the completed union. Its creation members must describe exactly the declared cases, and its required access and equality members must be present. Missing implementation is an error, even when no generator is installed.
 
-In this mode, field and constructor declarations follow ordinary struct rules. A generator that owns the representation can diagnose conflicting user-declared fields. The compiler validates the required member shapes, while their behavioral correctness follows the same trust model as [custom unions](../csharp-15.0/unions.md#well-formedness).
+The compiler validates member shapes. Their behavior follows the same trust model as [custom unions](../csharp-15.0/unions.md#well-formedness).
 
-The public contract must remain independent of the selected strategy. All unions with case declarations, including the default object-backed form, should expose the same per-case constructors, `Value`, `HasValue`, typed `TryGetValue` overloads, and the [shared equality members](union-enum-common.md#equality-and-hashing). They should also have the same public `IUnionMembers` provider described below. Switching strategies must preserve those signatures so previously compiled consumers keep their construction and access operations.
+`CompactLayout` is a marker type supplied by a generator package, giving the generator a compiler-checked strategy identity. The type supplies no implementation. The selector's final form remains open: an enum could name a fixed set of strategies, or string identifiers could allow an extensible set without marker types.
 
-This changes synthesis for the new case-declaration feature. Existing unions of arbitrary types keep their current default behavior.
+All unions with case declarations, including the default object-backed form, should expose the same per-case constructors, `Value`, `HasValue`, typed `TryGetValue` overloads, and [shared equality members](union-enum-common.md#equality-and-hashing). They also declare and implement a public nested `IUnionMembers` provider whose static `Create` overloads identify the declared cases. [Union conversions](../csharp-15.0/unions.md#union-member-providers) call those factories, so other constructor overloads do not add case types. Switching strategies must preserve this public contract for previously compiled consumers.
 
-## Generator Inputs and Output
+The generator owns the creation and access members that implement its storage strategy. Conflicting user declarations are errors. Other user-declared members remain supported, including equality customizations that use public case access under the shared customization rules. User-declared instance fields remain prohibited.
 
-A generator can discover attributed declarations with `ForAttributeWithMetadataName`, then inspect their case symbols, record kinds, primary-constructor parameters, constraints, and readonlyness. The compiler creates these symbols directly from the case declarations. No generator needs to consume another generator's output to discover the cases.
-
-The generator emits a partial declaration with the same containing types and constraints. It supplies the fields, constructor bodies, accessors, equality members, and a public nested `IUnionMembers` interface. That provider's static `Create` overloads identify the cases using the [existing union-member pattern](../csharp-15.0/unions.md#union-member-providers). The union implements the provider's instance members. Other constructor overloads therefore do not accidentally add case types.
-
-Ordinary union conversions call those factories. Typed patterns use `HasValue` and `TryGetValue`, and can avoid the object-valued `Value` property. Consumers of a compiled assembly need the resulting members and case metadata, without running the generator themselves.
-
-The representation marker must cause missing implementation to fail compilation even if the generator package or analyzer is absent. Silently falling back to object-backed storage would defeat an author's explicit allocation or interop requirement.
+Existing unions of arbitrary types keep their current default behavior.
 
 ## Expanded Storage and Access Code
 
-The following expansion uses ordinary nested records in the first partial declaration and the representation implementation in the second. It is compilable C# using the existing custom-union pattern. Constructor calls show the lowering of case-construction expressions. Compatibility attributes for the new case syntax are omitted here.
+The generator contributes the following partial declaration:
 
 <details>
-<summary>Complete expanded C# for Expr</summary>
+<summary>Generated C# for Expr</summary>
 
 ```csharp
+#nullable enable
+
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
-using System.Runtime.CompilerServices;
 
-[Union]
-public readonly partial struct Expr
-{
-    public readonly record struct Number(double Value);
-    public readonly record struct Name(string Identifier);
-    public sealed record class Add(Expr Left, Expr Right);
-}
-
-public readonly partial struct Expr : IUnion, Expr.IUnionMembers, IEquatable<Expr>
+// The compiler supplies Expr's nested case records and IUnion implementation.
+public readonly partial union Expr : Expr.IUnionMembers, IEquatable<Expr>
 {
     private const byte NumberCase = 1, NameCase = 2, AddCase = 3;
     private readonly byte _case;
-    private readonly double _number;
+    private readonly int _number;
     private readonly object? _reference;
 
-    private Expr(byte caseId, double number, object? reference)
+    private Expr(byte caseId, int number, object? reference)
     {
         _case = caseId;
         _number = number;
@@ -107,17 +90,13 @@ public readonly partial struct Expr : IUnion, Expr.IUnionMembers, IEquatable<Exp
 
     public interface IUnionMembers
     {
-        public static Expr Create(Number value)
-            => new Expr(value);
-
-        public static Expr Create(Name value)
-            => new Expr(value);
-
-        public static Expr Create(Add value)
-            => new Expr(value);
+        public static Expr Create(Number value) => new Expr(value);
+        public static Expr Create(Name value) => new Expr(value);
+        public static Expr Create(Add value) => new Expr(value);
 
         object? Value { get; }
         bool HasValue { get; }
+
         bool TryGetValue(out Number value);
         bool TryGetValue(out Name value);
         bool TryGetValue([NotNullWhen(true)] out Add? value);
@@ -127,23 +106,22 @@ public readonly partial struct Expr : IUnion, Expr.IUnionMembers, IEquatable<Exp
         => _case switch
         {
             0 => null,
-            NumberCase => new Number(_number),
-            NameCase => new Name((string)_reference!),
+            NumberCase => Expr.Number(_number),
+            NameCase => Expr.Name((string)_reference!),
             AddCase => (Add?)_reference,
-            _ => throw new InvalidOperationException()
         };
 
     public bool HasValue => _case != 0;
 
     public bool TryGetValue(out Number value)
     {
-        value = _case == NumberCase ? new Number(_number) : default;
+        value = _case == NumberCase ? Expr.Number(_number) : default;
         return _case == NumberCase;
     }
 
     public bool TryGetValue(out Name value)
     {
-        value = _case == NameCase ? new Name((string)_reference!) : default;
+        value = _case == NameCase ? Expr.Name((string)_reference!) : default;
         return _case == NameCase;
     }
 
@@ -157,14 +135,12 @@ public readonly partial struct Expr : IUnion, Expr.IUnionMembers, IEquatable<Exp
         => _case == other._case && (_case switch
         {
             0 => true,
-            NumberCase => EqualityComparer<double>.Default.Equals(_number, other._number),
+            NumberCase => EqualityComparer<int>.Default.Equals(_number, other._number),
             NameCase => EqualityComparer<string>.Default.Equals((string)_reference!, (string)other._reference!),
             AddCase => EqualityComparer<Add?>.Default.Equals((Add?)_reference, (Add?)other._reference),
-            _ => throw new InvalidOperationException()
         });
 
-    public override bool Equals(object? obj)
-        => obj is Expr other && Equals(other);
+    public override bool Equals(object? obj) => obj is Expr other && Equals(other);
 
     public override int GetHashCode()
         => _case switch
@@ -173,24 +149,18 @@ public readonly partial struct Expr : IUnion, Expr.IUnionMembers, IEquatable<Exp
             NumberCase => HashCode.Combine(NumberCase, _number),
             NameCase => HashCode.Combine(NameCase, (string?)_reference),
             AddCase => HashCode.Combine(AddCase, (Add?)_reference),
-            _ => throw new InvalidOperationException()
         };
 
-    public static bool operator ==(Expr left, Expr right)
-        => left.Equals(right);
-
-    public static bool operator !=(Expr left, Expr right)
-        => !left.Equals(right);
+    public static bool operator ==(Expr left, Expr right) => left.Equals(right);
+    public static bool operator !=(Expr left, Expr right) => !(left == right);
 }
 ```
 
 </details>
 
-In generated source, reconstruction uses `Expr.Number(_number)` and `Expr.Name(...)`. The displayed `new` calls are their constructor lowering. This keeps the existing source-level restriction on constructing case types with `new`.
-
 `Name.Identifier` and the `Add` reference share one GC reference slot. The casts check the reference actually read, preserving type safety if a concurrent struct copy tears. Every constructor initializes all storage, so changing cases does not retain an unused reference. The [existing concurrency requirements](union-enum-non-boxed-layout.md#concurrent-access-and-safety) apply unchanged.
 
-The class case is stored as the original object. Its extraction and equality delegate to that record. The struct cases use typed payload comparisons, preserving the record rule that `==` delegates to `Equals`, including equality of `double.NaN` payloads. Neither equality nor hashing reads `Value`.
+Equality and hashing use typed payloads without reading `Value`, following the [shared value-equality rules](union-enum-common.md#equality-and-hashing).
 
 ## Rebuilding the Non-Boxed Layout Strategies
 
@@ -210,7 +180,7 @@ For example, a generator can overlay primitive payloads in a nongeneric helper, 
 [StructLayout(LayoutKind.Explicit)]
 internal struct NumericStorage
 {
-    [FieldOffset(0)] public double Number;
+    [FieldOffset(0)] public long Wide;
     [FieldOffset(0)] public int First;
     [FieldOffset(4)] public int Second;
 }
@@ -247,13 +217,13 @@ In the expanded `Expr`, zero-initialization represents no case. If `Number` were
 
 Object-backed storage can make the same distinction with one field: null storage denotes the designated default, while a private sentinel denotes no case. Its `Value` accessor translates the sentinel to null and null storage to the designated case value. A compact representation can instead reserve a nonzero discriminator for no case.
 
-For class cases, `Value` and typed extraction preserve the entered object. For struct cases, optimized storage returns a reconstructed value and `Value` may box a fresh copy on each access. The shared contract cannot guarantee box identity for those copies. The ordinary object-backed implementation can retain its original box, but callers cannot rely on that caching across layout choices.
+For struct cases, `Value` may box a fresh copy on each access. Its contract cannot guarantee box identity, even if the object-backed implementation retains the original box.
 
 Layout choices also affect `Unsafe.SizeOf`, allocation, array density, and unmanaged classification. Native interop can make layout an ABI contract. These consequences need explicit strategy contracts, even though the ordinary managed field arrangement remains an implementation detail. Compiler and generator upgrades must preserve the public members and any promised native representation.
 
 ## Swift Interop
 
-[Runtime issue #100896](https://github.com/dotnet/runtime/issues/100896) is directly relevant to moving layout policy into attributes and generators. Its [approved API](https://github.com/dotnet/runtime/issues/100896#issuecomment-2110876749) uses `LayoutKind.Extended`, `ExtendedLayoutAttribute`, and kinds including `CUnion`, `SwiftStruct`, and `SwiftEnum`. The current implementation exposes the two C layout kinds. The issue remains open for the remaining kinds. The earlier `CustomLayout` names in the issue's opening description are superseded by that review.
+[Runtime issue #100896](https://github.com/dotnet/runtime/issues/100896) is directly relevant to moving layout policy into attributes and generators. Its [approved API](https://github.com/dotnet/runtime/issues/100896#issuecomment-2110876749) uses `LayoutKind.Extended`, `ExtendedLayoutAttribute`, and kinds including `CUnion`, `SwiftStruct`, and `SwiftEnum`. The current implementation exposes the two C layout kinds. The issue remains open for the remaining kinds.
 
 `CUnion` supplies overlapping payload storage, without supplying a discriminated union's tag or access operations. Swift enum layout also involves trailing padding, spare bits, and architecture-specific rules. A generator still needs to implement the logical case API and preserve bits used by the native discriminator.
 
@@ -284,7 +254,7 @@ public struct NativeReadingStorage
 
 For direct native representation, the generator places these fields and the layout attribute on the union itself. Creation assigns the payload fields and the ABI-defined tag. Extraction switches on `Tag` and constructs the corresponding record struct. This can back a union with `Number(long Value)`, `Pair(int First, int Second)`, and `Empty` struct cases using the same member pattern as `Expr`. `Number` must be the designated default case because all-zero native storage represents `number(0)`.
 
-The experiment passed this storage to and from actual Swift functions using [`CallConvSwift`](https://learn.microsoft.com/en-us/dotnet/api/system.runtime.compilerservices.callconvswift). The functions used Swift's native calling convention, with explicit symbol names for P/Invoke lookup. Number round-trips and pair and empty decoding all succeeded. This verifies the individual frozen-type case on that toolchain and runtime.
+On Swift 6.4 and .NET 11 RC1, passing this storage through native Swift functions with [`CallConvSwift`](https://learn.microsoft.com/en-us/dotnet/api/system.runtime.compilerservices.callconvswift) succeeded for number round-trips and pair and empty decoding.
 
 <details>
 <summary>Native-call probe</summary>
@@ -334,8 +304,6 @@ For an open generic payload, the usable spare bits and discriminator location ca
 
 Concrete frozen bindings can generate the access code demonstrated above. Bindings for resilient Swift enums need Swift metadata and value-witness operations or a marshalling boundary that keeps their representation opaque. Swift-owned indirect cases and objects also require retain/release and ownership conversion. A generator cannot insert retain/release into ordinary struct copies. Such cases need a managed owner and a marshalling boundary, or lifetime support from the language or runtime. A managed `Add` reference is a GC reference and cannot serve as a Swift object pointer.
 
-The generator can therefore support bounded native strategies today, while the wider Swift layout kinds remain separate runtime capabilities. It must reject a native strategy when it cannot establish the complete layout and access contract.
-
 ## Applying the Mechanism to the Other Designs
 
 The same implementation mechanism can serve ordinary `union X(A, B)` declarations. Their arbitrary existing types require conservative typed storage or boxing where needed to preserve the [creation-equivalence and reference-identity requirements](union-enum-non-boxed-layout.md#scope). This does not imply adding the declared-record cases' equality policy to those unions.
@@ -344,10 +312,8 @@ An `enum struct` could also delegate its storage to a generator, adding its own 
 
 Mixed per-case kinds do not transfer directly to `enum class`: its cases derive from the enclosing record, which a record struct cannot do. The union approach can mix the kinds because its relationship to each case is expressed by construction and access members. This exploration leaves the existing enum-based proposal's type model intact.
 
-## Evidence and Remaining Language Work
+## Evidence
 
-The expanded `Expr` was compiled and exercised with .NET 11 RC1 on ARM64. Tests covered union conversions and recursive patterns, typed and boxed access, failed extraction, null payloads and null class inputs, default values, recursive equality, hashing, and `NaN`. Additional variants verified designated-default cases and their distinction from null class inputs in both compact and single-reference storage. A warmed 100,000-iteration loop performing typed leaf construction, pattern extraction, equality, and hashing allocated zero bytes on its thread. The enclosing struct occupied 24 bytes, compared with the default object-backed wrapper's single reference. This also makes each `Add` larger, trading larger child fields for fewer leaf allocations.
+The storage and access implementation was exercised as a custom union on .NET 11 RC1 ARM64. Tests covered conversions, recursive patterns, typed and boxed access, failed extraction, null payloads and class inputs, designated defaults, equality, and hashing. A warmed 100,000-iteration loop performing typed leaf construction, pattern extraction, equality, and hashing allocated zero bytes on its thread. The enclosing struct occupied 16 bytes, compared with the object-backed wrapper's single reference. This also makes each `Add` larger, trading larger child fields for fewer leaf allocations.
 
-The runtime experiment also verified generic `CUnion` sizes for eight- and twenty-four-byte payloads and rejection of a reference-containing instantiation. Swift 6.4 experiments measured the native layouts above and exercised native Swift calls from CoreCLR.
-
-These checks validate the emitted representation and its consumption through existing union support. A generator was not built. The remaining compiler work is the `case struct` declaration syntax, exposing case symbols to generators, the attribute for selecting generated storage, and validation of the completed partial union against the shared public contract. The [case-construction binding](union-enum-common.md#binding-case-access) and metadata work already tracked by the main proposals still applies.
+No generator or compiler extension was built. The proposed output requires the [compiler changes described above](#compiler-and-generator-responsibilities). [Case-construction binding](union-enum-common.md#binding-case-access) and metadata remain shared design work.
