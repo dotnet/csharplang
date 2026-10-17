@@ -2,6 +2,10 @@
 
 Switch emission is an implementation detail of the [union-based](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/discriminated-unions.md) and [enum-based](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/data-carrying-enums.md) designs. The compiler and JIT may change their strategies while preserving the specified API and observable semantics.
 
+## Motivation
+
+Pattern matching should be efficient without requiring a public discriminator or boxing struct cases. This exploration asks how far existing type tests and non-boxing accessors take us, and which compiler or JIT optimizations could improve dispatch. The declaration syntax need not depend on those implementation choices.
+
 ## Local Measurements
 
 Preliminary local .NET 11 benchmarks on an M4 Mac indicate that linear dispatch performs well through 32 cases in the tested patterns. These patterns resemble union dispatch, including linear chains of type tests and discriminator comparisons. The results suggest that straightforward lowering is sufficient for initial implementation. Larger case sets may warrant better compiler emission or JIT optimization, but those relatively extreme cases need not block the feature.

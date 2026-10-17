@@ -318,6 +318,8 @@ public struct Option<T>
 
 The emitted code uses ordinary nested record constructors.
 
+An [alternative design](union-case-types-and-layout.md) uses attributes to select source-generated layouts, leaving storage policy outside the language.
+
 ### Readonly
 
 `enum struct` types follow ordinary [`readonly struct` rules](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/structs.md#1622-struct-modifiers). Their case types have the enum's readonlyness and follow [`record struct` property rules](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-10.0/record-structs.md#properties). Whether to make `enum struct` types [always readonly](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/union-enum-common.md#always-readonly-struct-types) remains open.

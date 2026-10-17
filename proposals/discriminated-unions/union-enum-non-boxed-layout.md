@@ -2,7 +2,13 @@
 
 The `struct` keyword in [`enum struct`](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/data-carrying-enums.md) and [`union struct`](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/discriminated-unions.md) selects an opinionated layout that stores case data inline, avoiding boxing during ordinary creation and extraction. This proposal describes a shared implementation approach. Each language proposal defines its own case types, construction, conversions, defaults, and matching.
 
+## Motivation
+
+Object-backed storage boxes struct cases. Storing cases inline can avoid those allocations, but reserving a separate field for every case makes each value grow with their combined size. This proposal explores sharing storage between cases to keep values compact while preserving type and memory safety.
+
 The layout is an implementation detail. Compilers may change it, including to use future runtime capabilities, while preserving the specified API and observable semantics. No particular size, field layout, native ABI, or persistent byte representation is guaranteed.
+
+An [alternative design](union-case-types-and-layout.md) uses attributes to select source-generated layouts, leaving storage policy outside the language. The strategies below could be offered as options through that mechanism.
 
 ## Scope
 
@@ -18,7 +24,7 @@ Packing and extraction below implement the creation and access operations define
 
 The simplest layout is a discriminator followed by a separate field for each case type. The containing struct's size is roughly the sum of all case sizes plus the discriminator and padding. Conversions can copy the selected case directly into or out of its field.
 
-Our initial expectation is that this approach would often make `union struct` and `enum struct` types too large to be practical. Even a handful of cases could substantially increase storage and copying costs. This assessment needs performance validation and sign-off from LDM and the runtime team. The compact layout below aims to minimize storage safely with only a small runtime cost for rearranging data during case creation and extraction.
+Our initial expectation is that this approach would often make `union struct` and `enum struct` types too large to be practical. Even a handful of cases could substantially increase storage and copying costs. The compact layout below aims to reduce storage while preserving safety. Its packing and extraction costs, including the effect of shared storage on JIT optimizations, need measurement on representative workloads. Choosing a default requires performance validation and sign-off from LDM and the runtime team.
 
 We aim to provide a default that balances space and speed. We are also open to letting authors configure that balance, most likely through attributes, similar to existing .NET layout controls such as [StructLayout](https://learn.microsoft.com/en-us/dotnet/api/system.runtime.interopservices.structlayoutattribute). Whether to offer customization, its form and scope, and its availability in the initial feature are all undecided.
 
@@ -34,15 +40,15 @@ The concurrent-copy hazards explored in [Fast, Efficient Unions](https://github.
 
 ### Conservative Storage
 
-A candidate inline layout uses a discriminator and three shared pools:
+A candidate inline layout uses a discriminator and three kinds of storage:
 
 1. **Unmanaged data**: A byte region for the [predefined types](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/union-enum-non-boxed-layout.md#primitive-types-and-layout-assumptions) below, sized for the greatest combined requirement of any case, including padding and alignment. Cases share the region, with distinct locations for components within each case.
 2. **Managed references**: Enough slots for the case containing the most references. A slot is normally `object`, but can be more specific when that type accommodates every value assigned to it, such as a slot used only for strings.
-3. **Typed values**: Slots for arbitrary value types and type parameters not known to be reference types. Each type needs enough slots for its maximum count in any case. Distinct types cannot generally share a slot. Reference-constrained type parameters can use the reference pool.
+3. **Typed values**: Slots for arbitrary value types and type parameters not known to be reference types. Each type needs enough slots for its maximum count in any case. Distinct types cannot generally share a slot. Reference-constrained type parameters can use the managed reference slots.
 
 Compatibility of a container's own unmanaged classification is an [open question](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/union-enum-non-boxed-layout.md#unmanaged-classification).
 
-A `struct` constraint does not rule out references. Even `where T : unmanaged` need not provide a declaration-time byte size, so such parameters can remain in typed slots. The pool maxima can come from different cases, making their combined size greater than any individual case.
+A `struct` constraint does not rule out references. Even `where T : unmanaged` need not provide a declaration-time byte size, so such parameters can remain in typed slots. The maximum requirements for the three kinds of storage can come from different cases, making their combined size greater than any individual case.
 
 ### Primitive Types and Layout Assumptions
 
@@ -110,7 +116,7 @@ public struct Message<T>
 
 ### Packing and Extraction
 
-In the shared-pool layout, creation from a case packs components into their assigned slots and sets the discriminator. Extraction checks for the requested case and reconstructs the case value. Mixed layouts require rearranging components rather than reinterpreting the shared storage as a complete case. For example, `Buffer` uses `_reference0` and both integers in `_unmanaged`, while `Pair` uses both reference slots. Unused reference and typed slots are set to `default` to avoid retaining references from other cases.
+In this layout, creation from a case packs components into their assigned slots and sets the discriminator. Extraction checks for the requested case and reconstructs the case value. Mixed layouts require rearranging components rather than reinterpreting the shared storage as a complete case. For example, `Buffer` uses `_reference0` and both integers in `_unmanaged`, while `Pair` uses both reference slots. Unused reference and typed slots are set to `default` to avoid retaining references from other cases.
 
 When every case is unmanaged and the required layout facts are established, complete case values can safely overlap in one region sized and aligned for the largest case, with a separate discriminator. Packing and extraction can then copy each case as a whole.
 

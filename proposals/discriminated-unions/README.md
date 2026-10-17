@@ -36,6 +36,7 @@ The main proposals link to shared details as needed:
 
 - [Common design](union-enum-common.md) covers contextual construction and inference, equality and hashing, nullability, metadata, and other shared behavior and open questions.
 - [Non-boxed storage](union-enum-non-boxed-layout.md) explores an internal layout for `union struct` and `enum struct` that avoids boxing during construction and extraction.
+- [Per-case records and generated layouts](union-case-types-and-layout.md) explores choosing each case's record kind independently and selecting storage through attributes and source generators, including native layout and Swift interop.
 - [Ref-like types](union-enum-ref-like-types.md) explores an optional extension for ref-like payloads and its open questions. Neither main design depends on it.
 - [Switch emission](union-enum-switch-emit.md) discusses implementation strategies and possible compiler and JIT optimizations for both designs.
 
