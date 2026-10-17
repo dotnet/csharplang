@@ -171,9 +171,7 @@ A union with case declarations generates the [non-boxing access pattern](../csha
 
 For a `record class` case, `Value` returns the case reference. For a `record struct` case, it returns a boxed copy; box identity is not guaranteed across accesses. A layout strategy can provide typed construction and extraction without boxing.
 
-The union also declares and implements a public nested [union member provider](../csharp-15.0/unions.md#union-member-providers), `IUnionMembers`, with a static `Create` overload for each declared case. Union conversions use these factories, so user-declared constructor overloads do not add case types.
-
-Constructors and `Create` factories taking a `record class` case throw `ArgumentNullException` for a null case reference. A rejected input creates no union value, and rejecting it consistently preserves [creation equivalence](../csharp-15.0/unions.md#well-formedness).
+Construction from a `record class` case throws `ArgumentNullException` for a null case reference. Rejecting null consistently preserves [creation equivalence](../csharp-15.0/unions.md#well-formedness).
 
 <details>
 <summary>Example: generated access API for Option&lt;T&gt;</summary>
@@ -182,7 +180,7 @@ Public signatures for the walkthrough's `Option<T>`, with storage and ordinary r
 
 ```csharp
 [Union]
-public struct Option<T> : IUnion, Option<T>.IUnionMembers
+public struct Option<T> : IUnion
 {
     public record struct None;
     public record struct Some(T Value);
@@ -195,18 +193,6 @@ public struct Option<T> : IUnion, Option<T>.IUnionMembers
 
     public readonly bool TryGetValue(out None value) { ... }
     public readonly bool TryGetValue(out Some value) { ... }
-
-    public interface IUnionMembers
-    {
-        public static Option<T> Create(None value) => new Option<T>(value);
-        public static Option<T> Create(Some value) => new Option<T>(value);
-
-        bool HasValue { get; }
-        object Value { get; }
-
-        bool TryGetValue(out None value);
-        bool TryGetValue(out Some value);
-    }
 }
 ```
 
@@ -216,27 +202,29 @@ For this declaration, `Value` has a non-nullable return type because `None` is t
 
 ## Default Values
 
-A `case struct` may be designated with `= default`. At most one case may be designated across all partial declarations. A zero-initialized union value, such as `default(U)`, behaves as follows:
+A `case` or `case struct` may be designated with `= default`. At most one case may be designated across all partial declarations. A zero-initialized union value, such as `default(U)`, behaves as follows:
 
-- If a case is designated, `Value` returns a boxed instance of that case, with each payload property holding its type's default value. `HasValue` is `true`, and `TryGetValue` for that case returns `true`.
+- If a case is designated, `Value` returns an instance of that case, with each payload property holding its type's default value. `HasValue` is `true`, and `TryGetValue` for that case returns `true`.
 - Otherwise, `Value` returns `null`. `HasValue` is `false`, and `TryGetValue` returns `false` for every declared case.
+
+For a designated `record class` case, `Value` and `TryGetValue` on zero-initialized unions return the same cached instance, shared per closed union type. For a data-free case, this is the instance used by case access as well.
 
 For example:
 
 ```csharp
 union Measurement
 {
-    case struct Missing;
-    case struct Reading(double Value, string? Unit) = default;
+    case Missing;
+    case Reading(double Value, string? Unit) = default;
 }
 
 Measurement measurement = default;
 bool hasValue = measurement.HasValue; // true
 bool isReading = measurement is Measurement.Reading(0, null); // true
-bool gotReading = measurement.TryGetValue(out Measurement.Reading reading); // true
+bool gotReading = measurement.TryGetValue(out Measurement.Reading? reading); // true
 ```
 
-Nullability warnings and `default!` suppression follow the [shared rules for default cases](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/union-enum-common.md#nullability-of-default-cases). `record class` cases cannot be designated as the default case.
+Nullability warnings and `default!` suppression follow the [shared rules for default cases](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/union-enum-common.md#nullability-of-default-cases).
 
 ## Type Model
 
@@ -263,6 +251,19 @@ Questions common to both proposals are listed in the [shared design](https://git
 ### Direct Construction of the Enclosing Union
 
 Should a union with declared cases prohibit explicit and target-typed object creation of the enclosing union, so users construct a case and use its union conversion? If so, the design would need to preserve constructors for union conversions and specify how user-declared constructors could still be invoked.
+
+### Recursive Default Cases
+
+Consider a default case whose payload contains the enclosing union:
+
+```csharp
+union Chain
+{
+    case Link(Chain Next) = default;
+}
+```
+
+Here, `default(Chain)` exposes a `Link` whose `Next` is another `default(Chain)`. Caching gives repeated access the same `Link` reference, but synthesized record hashing follows `Next` indefinitely. A recursive `case struct` default can likewise cause equality and hashing to recurse. Should such defaults be restricted, or retain ordinary record behavior?
 
 ### Mixing Existing Types and Declared Cases
 

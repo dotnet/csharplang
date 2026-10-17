@@ -49,14 +49,14 @@ The attribute selects a generator's storage strategy. We propose also having the
 
 1. Require the union and any enclosing types to be partial.
 2. Declare the nested case records before generators run. A generator can find the attribute with [`ForAttributeWithMetadataName`](https://learn.microsoft.com/en-us/dotnet/api/microsoft.codeanalysis.syntaxvalueprovider.forattributewithmetadataname) and inspect case symbols, primary constructors, constraints, and readonlyness without depending on another generator's output.
-3. Suppress the default storage and synthesized implementation members, including the `IUnionMembers` provider, allowing the generator to supply them in matching `partial union` declarations.
+3. Suppress the default storage and synthesized implementation members, allowing the generator to supply them in matching `partial union` declarations.
 4. Validate the completed union. Its creation members must describe exactly the declared cases, and its required access and equality members must be present. Missing implementation is an error, even when no generator is installed.
 
 The compiler validates member shapes. Their behavior follows the same trust model as [custom unions](../csharp-15.0/unions.md#well-formedness).
 
 The examples use an enum-valued `Layout` property to select a strategy. The final selection mechanism remains open and could use enums, named constants, types, or another approach.
 
-Generated representations implement the union proposal's [construction and access APIs](discriminated-unions.md#access-apis), including its `IUnionMembers` provider, and the [shared equality members](union-enum-common.md#equality-and-hashing). Switching strategies must preserve these public members and the specified case semantics, including rejection of null case references.
+Generated representations implement the union proposal's [construction and access APIs](discriminated-unions.md#access-apis) and the [shared equality members](union-enum-common.md#equality-and-hashing). Switching strategies must preserve these public members and the specified case semantics, including rejection of null case references.
 
 The generator owns the creation and access members that implement its storage strategy. Conflicting user declarations are errors. Other user-declared members remain supported, including equality customizations that use public case access under the shared customization rules. User-declared instance fields remain prohibited.
 
@@ -73,7 +73,7 @@ using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 
 // The compiler supplies Expr's nested case records and IUnion implementation.
-public readonly partial union Expr : Expr.IUnionMembers, IEquatable<Expr>
+public readonly partial union Expr : IEquatable<Expr>
 {
     private const byte NumberCase = 1, NameCase = 2, AddCase = 3;
     private readonly byte _case;
@@ -90,20 +90,6 @@ public readonly partial union Expr : Expr.IUnionMembers, IEquatable<Expr>
     public Expr(Number value) : this(NumberCase, value.Value, null) { }
     public Expr(Name value) : this(NameCase, 0, value.Identifier) { }
     public Expr(Add value) : this(AddCase, 0, value ?? throw new ArgumentNullException(nameof(value))) { }
-
-    public interface IUnionMembers
-    {
-        public static Expr Create(Number value) => new Expr(value);
-        public static Expr Create(Name value) => new Expr(value);
-        public static Expr Create(Add value) => new Expr(value);
-
-        bool HasValue { get; }
-        object? Value { get; }
-
-        bool TryGetValue(out Number value);
-        bool TryGetValue(out Name value);
-        bool TryGetValue([NotNullWhen(true)] out Add? value);
-    }
 
     public bool HasValue => _case != 0;
 
@@ -302,6 +288,8 @@ The runtime overlaps the fields at offset zero and computes their maximum size a
 Layout strategies preserve the union proposal's [default-case semantics](discriminated-unions.md#default-values).
 
 In the expanded `Expr`, zero-initialization represents no case, so `Value` is nullable. If `Number` were designated `default`, zero-initialization would instead represent `Number(0)` and `Value` would be non-nullable. Object-backed storage can use null storage for that designated case, without a separate no-case encoding.
+
+If a `record class` case is designated instead, access to zero-initialized storage returns the cached default instance. The strategy must preserve that reference while retaining explicitly supplied class instances.
 
 Layout choices also affect `Unsafe.SizeOf`, allocation, array density, and unmanaged classification. Native interop can make layout an ABI contract. These consequences need explicit strategy contracts, even though the ordinary managed field arrangement remains an implementation detail. Compiler and generator upgrades must preserve the public members and any promised native representation.
 

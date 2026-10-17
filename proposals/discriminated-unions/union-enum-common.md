@@ -151,7 +151,7 @@ Compilers that recognize the attribute but lack feature support reject use of th
 
 ### Nullability of Default Cases
 
-Nullable analysis checks a designated `default` case as if each payload property were initialized with `default` of its declared type. Both declarations below produce a warning at `= default` because zero-initialization leaves `Unit` null despite its non-nullable declaration:
+Nullable analysis checks a designated `default` case as if each payload property were initialized with `default` of its declared type. Both declarations below produce a warning at `= default` because the designated case has a null `Unit` despite its non-nullable declaration:
 
 ```csharp
 enum struct Measurement
@@ -161,7 +161,7 @@ enum struct Measurement
 
 union Measurement
 {
-    case struct Reading(double Value, string Unit) = default; // warning
+    case Reading(double Value, string Unit) = default; // warning
 }
 ```
 
@@ -343,6 +343,8 @@ union Message
 ```
 
 The body could declare members or customize synthesized record members under ordinary record rules. Cases could also specify additional interfaces. Whether these extensions are useful enough to support, and their exact syntax and restrictions, remain open. Both designs leave room to add them later.
+
+Allowing mutable case state would require revisiting shared class instances used for data-free cases and union defaults.
 
 ### Independent Generic Case Parameters
 
