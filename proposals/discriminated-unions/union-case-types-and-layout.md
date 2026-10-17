@@ -175,7 +175,7 @@ Equality and hashing use typed payloads without reading `Value`, following the [
 
 These strategies build on the [non-boxed storage exploration](union-enum-non-boxed-layout.md). The examples show instance fields and omit the creation, access, and equality members illustrated above.
 
-A strategy that cannot support a declaration must either use a documented fallback that preserves its case semantics or report a generator diagnostic. For example, separate fields cannot directly store a recursive struct case, and unmanaged overlap cannot store a string payload. A strategy may permit boxing as a fallback or reject those declarations.
+Each strategy must specify its supported compiler and runtime targets. Unsupported declarations or targets require a documented fallback that preserves case semantics or a generator diagnostic. For example, separate fields cannot directly store a recursive struct case, and unmanaged overlap cannot store a string payload. A fallback may use boxing or separate typed fields, according to the strategy's policy.
 
 ### Default Object-Backed Storage
 
@@ -224,23 +224,29 @@ private readonly object? _reference;      // Text.Content or Buffer.Data
 private readonly T _item;                 // Item.Value
 ```
 
-The nongeneric helper overlaps the primitive payloads:
+On targets supporting [`ExtendedLayoutAttribute`](https://github.com/dotnet/runtime/blob/main/src/libraries/System.Private.CoreLib/src/System/Runtime/InteropServices/ExtendedLayoutAttribute.cs), a generator can use the `CStruct` and `CUnion` members of [`ExtendedLayoutKind`](https://github.com/dotnet/runtime/blob/main/src/libraries/System.Private.CoreLib/src/System/Runtime/InteropServices/ExtendedLayoutKind.cs) to group the integers and overlap that group with the `long`:
 
 ```csharp
-[StructLayout(LayoutKind.Explicit)]
+[ExtendedLayout(ExtendedLayoutKind.CStruct)]
+internal struct IntPair
+{
+    public int First;  // Text.Code or Buffer.Offset
+    public int Second; // Buffer.Count
+}
+
+[ExtendedLayout(ExtendedLayoutKind.CUnion)]
 internal struct NumericStorage
 {
-    [FieldOffset(0)] public int First;  // Text.Code or Buffer.Offset
-    [FieldOffset(4)] public int Second; // Buffer.Count
-    [FieldOffset(0)] public long Wide;  // Sequence.Value
+    public IntPair Pair;
+    public long Wide; // Sequence.Value
 }
 ```
 
-`T` stays in a typed field so the runtime can determine its size and GC references.
+The runtime determines field offsets, size, and alignment for the target platform. The pair could also be represented by an [inline array](../csharp-12.0/inline-arrays.md) of two `int` values inside the `CUnion`. Only the unmanaged numeric alternatives overlap. References and `T` stay in separate fields so the runtime can determine their GC layout.
 
-This strategy aims to minimize union size by decomposing struct cases and reusing fields, without boxing. The tradeoff is rearranging ("swizzling") payloads during creation and extraction, along with type checks when reading shared reference fields. The generated code is more complex than with separate case fields. Primitive storage, reference slots, and typed slots are sized independently, so their combined size can exceed that of any individual case.
+Creation and extraction use the same typed fields: `Buffer` writes and reads `Pair.First` and `Pair.Second`, while `Sequence` writes and reads `Wide`. These operations preserve payload values regardless of byte order.
 
-The runtime computes alignment from the typed fields. The explicit-layout helper must be outside any generic containing type because ordinary explicit-layout generic types are unsupported.
+This strategy aims to minimize union size by decomposing struct cases and reusing fields, without boxing. The tradeoff is rearranging ("swizzling") payloads during creation and extraction, along with type checks when reading shared reference fields. The generated code is more complex than with separate case fields. Primitive storage, reference slots, and typed slots are sized independently, so their combined size can exceed that of any individual case. The size benefit must be weighed against packing, extraction, and JIT optimization costs on the intended runtimes and workloads.
 
 Decomposition is safe for the compiler-defined case records with only synthesized primary-constructor state. Arbitrary nested structs, external types, and type parameters retain typed storage. If future case bodies add state or user-defined accessors, the generator must preserve the complete case value or use an explicit decomposition contract. Running user getters or reconstructing through a validating constructor would change semantics.
 
@@ -284,7 +290,7 @@ private readonly byte _case;
 private readonly UnmanagedStorage<T> _payload;
 ```
 
-Current .NET 11 sources contain [`ExtendedLayoutAttribute`](https://github.com/dotnet/runtime/blob/main/src/libraries/System.Private.CoreLib/src/System/Runtime/InteropServices/ExtendedLayoutAttribute.cs) and the `CStruct` and `CUnion` members of [`ExtendedLayoutKind`](https://github.com/dotnet/runtime/blob/main/src/libraries/System.Private.CoreLib/src/System/Runtime/InteropServices/ExtendedLayoutKind.cs). A generator can emit the payload helper as:
+A generator targeting a compiler and runtime with extended-layout support can emit:
 
 ```csharp
 [ExtendedLayout(ExtendedLayoutKind.CUnion)]
@@ -296,8 +302,6 @@ internal struct UnmanagedStorage<T> where T : unmanaged
 ```
 
 The runtime overlaps the fields at offset zero and computes their maximum size and alignment for the actual `T`. This combines compact storage with direct whole-payload reads and writes, even when the generator cannot know `T`'s byte size. The runtime rejects instantiations containing GC references, including ones constructed through reflection that bypass the C# `unmanaged` check.
-
-This requires a compiler and runtime that support extended layout. A generator can select a conservative typed-field implementation on older targets when its policy permits that choice, or report that the requested strategy is unsupported.
 
 ## Defaults and Observable Behavior
 
@@ -313,7 +317,9 @@ Layout choices also affect `Unsafe.SizeOf`, allocation, array density, and unman
 
 ## Swift Interop
 
-A specialized binding generator can provide working Swift interop for concrete, frozen enums with trivial payloads. With the proposed compiler hook, it can emit the native representation on the union itself, implement its case operations, and generate call declarations and marshalling. We verified the representation below with Swift 6.4 and .NET 11 RC1 CoreCLR on ARM64, including native arguments, returns, `inout` mutation, buffers, and an enclosing struct.
+A specialized binding generator can provide Swift interop for concrete, frozen enums with trivial payloads on a supported ABI and runtime. With the proposed compiler hook, it can emit the native representation on the union itself, implement its case operations, and generate call declarations and marshalling.
+
+The explicit layouts below are experiments for Swift 6.4 and .NET 11 RC1 CoreCLR on ARM64. We verified native arguments, returns, `inout` mutation, buffers, and an enclosing struct on that target. Production bindings should use runtime-supported Swift layout when available, or a marshalling boundary with Swift-side helpers. Their supported-target contract must cover native size, alignment, stride, and calling conventions.
 
 ### A Concrete Frozen Enum
 
@@ -339,7 +345,7 @@ public readonly partial union NativeReading
 }
 ```
 
-For the tested target, the native payload occupies eight bytes and its discriminator is the ninth byte: `number` uses 0, `pair` uses 1, and `empty` uses 2. Its size is 9, stride is 16, and alignment is 8. The generator can emit this storage and construction code:
+For the tested target, the native payload occupies eight bytes and its discriminator is the ninth byte: `number` uses 0, `pair` uses 1, and `empty` uses 2. Its size is 9, stride is 16, and alignment is 8. A generator for that target could emit:
 
 ```csharp
 [StructLayout(LayoutKind.Explicit, Size = 9)]
@@ -476,7 +482,7 @@ Bindings for resilient Swift enums likewise need Swift metadata and value-witnes
 
 [Runtime issue #100896](https://github.com/dotnet/runtime/issues/100896) addresses complementary layout support. Its [approved API](https://github.com/dotnet/runtime/issues/100896#issuecomment-2110876749) includes `ExtendedLayoutKind.SwiftStruct` and `SwiftEnum`, but the current implementation exposes only `CStruct` and `CUnion`. `CUnion` supplies overlapping storage, without supplying a Swift enum's discriminator or projection operations. Even full layout support would still need case access and ownership handling.
 
-The demonstrated explicit-size representation works on the tested ARM64 CoreCLR. [Earlier runtime investigation](https://github.com/dotnet/runtime/issues/100896#issuecomment-2079979240) reported differences across runtimes, and Swift's spare-bit rules vary by architecture. A binding generator must target a supported ABI and runtime, use marshalling where necessary, or diagnose an unsupported combination. Ordinary source generation alone does not establish direct representation for arbitrary Swift enums.
+[Runtime layout support](https://github.com/dotnet/runtime/issues/100896#issuecomment-2079979240) differs across runtimes, and Swift's spare-bit rules vary by architecture. A binding generator must validate its supported ABI and runtime combinations, using marshalling where necessary or diagnosing an unsupported combination.
 
 ## Applying the Mechanism to the Other Designs
 
@@ -490,7 +496,7 @@ Mixed per-case kinds do not transfer directly to `enum class`: its cases derive 
 
 The storage and access implementation was exercised as a custom union on .NET 11 RC1 ARM64. Tests covered conversions, recursive patterns, typed and boxed access, failed extraction, null payloads, rejection of null class inputs, designated defaults, equality, and hashing. A warmed 100,000-iteration loop performing typed leaf construction, pattern extraction, equality, and hashing allocated zero bytes on its thread. The enclosing struct occupied 16 bytes, compared with the object-backed wrapper's single reference. This also makes each `Add` larger, trading larger child fields for fewer leaf allocations.
 
-Additional probes checked separate-field, compact, and hybrid representations, including a boxed recursive struct case.
+Additional probes checked separate-field, compact, and hybrid representations, including a boxed recursive struct case. Extended-layout probes checked a `CStruct` pair and a `long` inside a `CUnion`, an inline-array pair alternative, and separate generic storage containing references.
 
 No generator or compiler extension was built. The proposed output requires the [compiler changes described above](#compiler-and-generator-responsibilities). [Case-construction binding](union-enum-common.md#binding-case-access) and metadata remain shared design work.
 

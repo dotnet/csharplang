@@ -24,7 +24,7 @@ Packing and extraction below implement the creation and access operations define
 
 The simplest layout is a discriminator followed by a separate field for each case type. The containing struct's size is roughly the sum of all case sizes plus the discriminator and padding. Conversions can copy the selected case directly into or out of its field.
 
-Our initial expectation is that this approach would often make `union struct` and `enum struct` types too large to be practical. Even a handful of cases could substantially increase storage and copying costs. This assessment needs performance validation and sign-off from LDM and the runtime team. The compact layout below aims to minimize storage safely with only a small runtime cost for rearranging data during case creation and extraction.
+Our initial expectation is that this approach would often make `union struct` and `enum struct` types too large to be practical. Even a handful of cases could substantially increase storage and copying costs. The compact layout below aims to reduce storage while preserving safety. Its packing and extraction costs, including the effect of shared storage on JIT optimizations, need measurement on representative workloads. Choosing a default requires performance validation and sign-off from LDM and the runtime team.
 
 We aim to provide a default that balances space and speed. We are also open to letting authors configure that balance, most likely through attributes, similar to existing .NET layout controls such as [StructLayout](https://learn.microsoft.com/en-us/dotnet/api/system.runtime.interopservices.structlayoutattribute). Whether to offer customization, its form and scope, and its availability in the initial feature are all undecided.
 
