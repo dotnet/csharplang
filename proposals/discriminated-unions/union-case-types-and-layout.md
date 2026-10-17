@@ -160,7 +160,7 @@ public readonly partial union Expr : Expr.IUnionMembers, IEquatable<Expr>
 
 </details>
 
-`Name.Identifier` and the `Add` reference share one GC reference slot. The casts check the reference actually read, preserving type safety if a concurrent struct copy tears. Every constructor initializes all storage, so changing cases does not retain an unused reference. The [existing concurrency requirements](union-enum-non-boxed-layout.md#concurrent-access-and-safety) apply unchanged.
+`Name.Identifier` and the `Add` reference share one GC reference slot. The casts check the reference actually read, preserving type safety if a concurrent struct copy tears. Every constructor initializes all storage, so changing cases does not retain an unused reference. This strategy follows the [existing concurrency requirements](union-enum-non-boxed-layout.md#concurrent-access-and-safety).
 
 Equality and hashing use typed payloads without reading `Value`, following the [shared value-equality rules](union-enum-common.md#equality-and-hashing).
 
@@ -176,7 +176,7 @@ Without any layout attribute, the compiler supplies the ordinary object-backed r
 private readonly object? _value; // boxed Number, boxed Name, or an Add reference
 ```
 
-This keeps the enclosing union small regardless of the case sizes. Struct cases are boxed on entry, while class cases retain their original references. It is useful when minimizing the wrapper's size matters more than avoiding those allocations.
+This is simple and keeps every union value to one reference, making the wrapper cheap to copy. Class cases retain their original references. Struct cases require boxing on entry and unboxing for typed extraction, adding allocations, GC pressure, and indirection.
 
 ### Separate Case Fields
 
@@ -189,7 +189,7 @@ private readonly Name _name;
 private readonly Add? _add;
 ```
 
-Creation and extraction can copy complete case values directly. This can be useful when minimizing conversion work matters more than the enclosing union's size. Each instance reserves space for every case, including inactive ones. Whole-value storage also accommodates opaque structs without decomposing their state.
+This is simple to generate and makes reads and writes straightforward: creation and extraction copy complete case values directly, without boxing or rearranging payloads. It also accommodates opaque structs. Every instance reserves space for all cases, including inactive ones. Many or large struct cases can therefore make the union very large, increasing memory use and copying costs.
 
 ### Shared Pools
 
@@ -229,7 +229,7 @@ internal struct NumericStorage
 
 `T` stays in a typed field so the runtime can determine its size and GC references.
 
-This is useful when many cases can reuse a few storage locations. It reduces reserved space at the cost of rearranging payloads during creation and extraction. Each pool is sized independently, so their combined size can exceed that of any individual case.
+Reusing storage can reduce union size without boxing the decomposed struct cases. Creation and extraction do more work to rearrange payloads and check shared reference types, and the generated code is more complex than with separate fields. Each pool is sized independently, so their combined size can exceed that of any individual case.
 
 The runtime computes alignment from the typed fields. The explicit-layout helper must be outside any generic containing type because ordinary explicit-layout generic types are unsupported.
 
@@ -253,7 +253,7 @@ private readonly int _number;
 private readonly object? _reference; // Name.Identifier or a boxed Add
 ```
 
-`Number` and `Name` still avoid boxing. The generator boxes `Add` on entry and unboxes it for typed extraction, keeping the recursive layout finite. This lets `Add` remain a record struct when used independently of the union. A policy could also box unusually large struct cases to limit the union's size.
+`Number` and `Name` avoid boxing, while boxing `Add` keeps the recursive layout finite. `Add` remains a record struct when used independently. The same policy could limit union size by boxing unusually large cases. Boxed cases incur allocation, GC pressure, and unboxing costs, and the generator must support both storage paths.
 
 ### Runtime-Computed Unmanaged Overlap
 
@@ -286,7 +286,7 @@ internal struct UnmanagedStorage<T> where T : unmanaged
 }
 ```
 
-The runtime overlaps the fields at offset zero and computes their maximum size and alignment for the actual `T`. This is useful when a generator cannot know `T`'s byte size at compile time but wants the two cases to share storage. The runtime rejects instantiations containing GC references, including ones constructed through reflection that bypass the C# `unmanaged` check.
+The runtime overlaps the fields at offset zero and computes their maximum size and alignment for the actual `T`. This combines compact storage with direct whole-payload reads and writes, even when the generator cannot know `T`'s byte size. The runtime rejects instantiations containing GC references, including ones constructed through reflection that bypass the C# `unmanaged` check.
 
 This requires a compiler and runtime that support extended layout. A generator can select a conservative typed-field implementation on older targets when its policy permits that choice, or report that the requested strategy is unsupported.
 
@@ -400,3 +400,9 @@ The storage and access implementation was exercised as a custom union on .NET 11
 Additional probes checked separate-field, shared-pool, and hybrid representations, including a boxed recursive struct case.
 
 No generator or compiler extension was built. The proposed output requires the [compiler changes described above](#compiler-and-generator-responsibilities). [Case-construction binding](union-enum-common.md#binding-case-access) and metadata remain shared design work.
+
+## Further Extensions
+
+For performance-sensitive workloads, a generator could offer an explicitly unsafe strategy that omits runtime type checks when extracting from shared reference slots. Such a strategy would rely on callers to prevent tearing, for example through synchronization or exclusive ownership.
+
+If that requirement is violated, a torn read could combine a discriminator from one write with a reference from another. Unchecked access could then treat that reference as the wrong type, violating type and memory safety. This would be an explicit opt-in tradeoff for that strategy. Whether removing those checks materially improves performance would need measurement.
