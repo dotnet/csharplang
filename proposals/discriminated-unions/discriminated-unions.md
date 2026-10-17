@@ -252,19 +252,6 @@ Questions common to both proposals are listed in the [shared design](https://git
 
 Should a union with declared cases prohibit explicit and target-typed object creation of the enclosing union, so users construct a case and use its union conversion? If so, the design would need to preserve constructors for union conversions and specify how user-declared constructors could still be invoked.
 
-### Recursive Default Cases
-
-Consider a default case whose payload contains the enclosing union:
-
-```csharp
-union Chain
-{
-    case Link(Chain Next) = default;
-}
-```
-
-Here, `default(Chain)` exposes a `Link` whose `Next` is another `default(Chain)`. Caching gives repeated access the same `Link` reference, but synthesized record hashing follows `Next` indefinitely. A recursive `case struct` default can likewise cause equality and hashing to recurse. Should such defaults be restricted, or retain ordinary record behavior?
-
 ### Mixing Existing Types and Declared Cases
 
 A future extension could allow a parenthesized list of additional types alongside declared cases:
