@@ -1,10 +1,10 @@
-# Per-Case Records and Generated Union Layouts
+# Generated Union Layouts
 
-This document explores separating two choices in the [union-based design](discriminated-unions.md): the record kind of each declared case and the storage representation of the enclosing union. The enclosing declaration uses `union` for every storage strategy. Each case chooses `record class` or `record struct`, and an attribute can select a source-generated representation.
+This proposal lets attributes select source-generated storage for a [union](discriminated-unions.md), independently of its declared cases. The union proposal defines `case` and `case struct`, their record types, and their semantics. This document explores how generators can implement those semantics with different layouts.
 
 ## Motivation
 
-Applications have different requirements and constraints around allocation, value size, copying, runtime support, and interoperability. Authors should be able to choose case record kinds and storage strategies independently, balancing the [tradeoffs](../../meetings/working-groups/discriminated-unions/Union%20implementation%20challenges.md#challenges-with-union-structs) for their workloads.
+Applications have different requirements and constraints around allocation, value size, copying, runtime support, and interoperability. Authors should be able to choose storage strategies that meet those needs, balancing the [tradeoffs](../../meetings/working-groups/discriminated-unions/Union%20implementation%20challenges.md#challenges-with-union-structs) for their workloads.
 
 The language would define case semantics while generators supply storage strategies. Attributes would let authors choose strategies supplied by our generators or third-party generators. Choosing an attribute is less direct than using a keyword, but lets strategies evolve without committing the language to one balance of these costs.
 
@@ -37,8 +37,6 @@ static int Evaluate(Expr expression, IReadOnlyDictionary<string, int> names)
 
 To see the generated code, jump to [Expanded Storage and Access Code](#expanded-storage-and-access-code).
 
-`case` declares a sealed nested [`record class`](../csharp-9.0/records.md). `case struct` declares a nested [`record struct`](../csharp-10.0/record-structs.md), with the enclosing union's readonlyness. The parameter list is the record's primary constructor. The enclosing union remains a struct in every representation.
-
 Without the attribute, ordinary object-backed storage boxes `Number` and `Name` when they enter the union and stores an `Add` reference directly. The illustrated compact strategy stores a number in an `int` field, a name's identifier in a reference field, or an `Add` object in that same reference field. Creating and extracting the leaves then requires no boxing. An `Add` retains its object identity.
 
 Because `Add` is a class, its child expressions live in a separate object. If `Add` were a struct, a layout strategy would need reference indirection, such as boxing, to avoid making `Expr` contain itself.
@@ -58,13 +56,9 @@ The compiler validates member shapes. Their behavior follows the same trust mode
 
 The examples use an enum-valued `Layout` property to select a strategy. The final selection mechanism remains open and could use enums, named constants, types, or another approach.
 
-All unions with case declarations, including the default object-backed form, should expose the same per-case constructors, `Value`, `HasValue`, typed `TryGetValue` overloads, and [shared equality members](union-enum-common.md#equality-and-hashing). They also declare and implement a public nested `IUnionMembers` provider whose static `Create` overloads identify the declared cases. [Union conversions](../csharp-15.0/unions.md#union-member-providers) call those factories, so other constructor overloads do not add case types. Switching strategies must preserve these public members and the specified case semantics.
-
-Class cases are non-nullable. Union constructors and `Create` factories taking such a case throw `ArgumentNullException` for a null case reference, including with the default object-backed representation.
+Generated representations implement the union proposal's [construction and access APIs](discriminated-unions.md#access-apis), including its `IUnionMembers` provider, and the [shared equality members](union-enum-common.md#equality-and-hashing). Switching strategies must preserve these public members and the specified case semantics, including rejection of null case references.
 
 The generator owns the creation and access members that implement its storage strategy. Conflicting user declarations are errors. Other user-declared members remain supported, including equality customizations that use public case access under the shared customization rules. User-declared instance fields remain prohibited.
-
-Existing unions of arbitrary types keep their current default behavior.
 
 ## Expanded Storage and Access Code
 
@@ -305,13 +299,9 @@ The runtime overlaps the fields at offset zero and computes their maximum size a
 
 ## Defaults and Observable Behavior
 
-Case record kinds and the designated default case are declaration semantics. A layout strategy must preserve them. This exploration retains `= default` for struct cases, with the [existing default-payload and nullability rules](union-enum-common.md#nullability-of-default-cases).
+Layout strategies preserve the union proposal's [default-case semantics](discriminated-unions.md#default-values).
 
 In the expanded `Expr`, zero-initialization represents no case, so `Value` is nullable. If `Number` were designated `default`, zero-initialization would instead represent `Number(0)` and `Value` would be non-nullable. Object-backed storage can use null storage for that designated case, without a separate no-case encoding.
-
-Rejecting null class inputs satisfies the [union well-formedness rules](../csharp-15.0/unions.md#well-formedness): a rejected input creates no union value, and every class-case creation member rejects null in the same way, preserving creation equivalence.
-
-For struct cases, `Value` may box a fresh copy on each access. Its contract cannot guarantee box identity, even if the object-backed implementation retains the original box.
 
 Layout choices also affect `Unsafe.SizeOf`, allocation, array density, and unmanaged classification. Native interop can make layout an ABI contract. These consequences need explicit strategy contracts, even though the ordinary managed field arrangement remains an implementation detail. Compiler and generator upgrades must preserve the public members and any promised native representation.
 
@@ -395,8 +385,6 @@ Local probes with Swift 6.4 and .NET 11 RC1 CoreCLR on ARM64 verified a concrete
 The same implementation mechanism can serve ordinary `union X(A, B)` declarations. Their arbitrary existing types require conservative typed storage or boxing where needed to preserve the [creation-equivalence and reference-identity requirements](union-enum-non-boxed-layout.md#scope). This does not imply adding the declared-record cases' equality policy to those unions.
 
 An `enum struct` could also delegate its storage to a generator, adding its own conversion and query members to the required shape. Compact storage, separate fields, runtime overlap, and packing checks remain reusable. The compiler would need an equivalent representation-delegation hook for that declaration form.
-
-Mixed per-case kinds do not transfer directly to `enum class`: its cases derive from the enclosing record, which a record struct cannot do. The union approach can mix the kinds because its relationship to each case is expressed by construction and access members. This exploration leaves the existing enum-based proposal's type model intact.
 
 ## Evidence
 

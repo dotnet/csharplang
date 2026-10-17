@@ -8,7 +8,7 @@ A parser may want to return either a slice of its input or an error without allo
 
 ## Design
 
-The proposed `ref` modifier applies only to `enum struct` and `union struct`. It makes both the enclosing type and each case type a `ref struct`, including data-free cases. Payloads may therefore be ref-like types or type parameters declared with `allows ref struct`.
+The proposed `ref` modifier applies to `enum struct` and `union`. A ref-like union is restricted to `case struct` declarations. Both forms make the enclosing type and each case type a `ref struct`, including data-free cases. Payloads may therefore be ref-like types or type parameters declared with `allows ref struct`.
 
 The enum-based declaration is:
 
@@ -23,10 +23,10 @@ public ref enum struct RefOption<T> where T : allows ref struct
 The corresponding union-based syntax is:
 
 ```csharp
-public ref union struct RefOption<T> where T : allows ref struct
+public ref union RefOption<T> where T : allows ref struct
 {
-    case None = default;
-    case Some(T Value);
+    case struct None = default;
+    case struct Some(T Value);
 }
 ```
 
@@ -70,4 +70,4 @@ Ref-like enums, unions, and their case types do not receive synthesized record e
 
 ### Union Pattern for Ref-Like Cases
 
-For `ref union struct`, the object-valued `Value` requirement is unresolved because these case values cannot be boxed. The current union pattern also requires case types to be implicitly convertible to `object`. This form needs changes to the union pattern, potentially allowing construction directly from a case value and access through `HasValue`/`TryGetValue` without an object-valued `Value`. Construction, conversions, and matching depend on resolving these requirements.
+For a ref-like union, the object-valued `Value` requirement is unresolved because these case values cannot be boxed. The current union pattern also requires case types to be implicitly convertible to `object`. This form needs changes to the union pattern, potentially allowing construction directly from a case value and access through `HasValue`/`TryGetValue` without an object-valued `Value`. Construction, conversions, and matching depend on resolving these requirements.

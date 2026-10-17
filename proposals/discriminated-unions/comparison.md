@@ -31,16 +31,16 @@ This keeps the case list compact. The cost is a longer declaration header and ad
 The union form has a lighter header and gives each case its own declaration:
 
 ```csharp
-union struct Result
+union Result
 {
-    case Success(string Value);
-    case Failure(int Code);
+    case struct Success(string Value);
+    case struct Failure(int Code);
 
     public bool Succeeded => this is Success;
 }
 ```
 
-The repeated `case` keyword adds tokens, but makes cases easy to recognize among ordinary members. Each declaration ends with a semicolon, without a separate boundary between cases and members. The grammar also permits cases and other members to be interspersed. For reference-type cases, the short form `union Result` avoids both `closed` and `class` in the header, whereas the enum form is `closed enum class Result`.
+The repeated `case struct` adds tokens, but makes cases easy to recognize among ordinary members. Each declaration ends with a semicolon, without a separate boundary between cases and members. The grammar also permits cases and other members to be interspersed. With `record class` cases, each declaration uses just `case`, and the header remains `union Result`, compared with `closed enum class Result`.
 
 ### Exhaustiveness and Library Evolution
 
@@ -60,9 +60,9 @@ Both shorthand designs nest their cases, so a case inherits every enclosing type
 
 ### Direct Case Objects
 
-An `enum class` value is the case record itself. A `union` without `struct` is a struct containing a reference to that record. The direct model makes `enum class` fit more naturally into existing code that relies on inheritance or works through `object` and interfaces.
+An `enum class` value is the case record itself. A union with object-backed storage is a struct containing a reference to that record. The direct model makes `enum class` fit more naturally into existing code that relies on inheritance or works through `object` and interfaces.
 
-Given `enum class Result` or `union Result` with the cases above:
+Given `enum class Result` or `union Result` with record-class `Success` and `Failure` cases:
 
 ```csharp
 Result.Success success = Result.Success("Complete");
@@ -82,7 +82,7 @@ Given an `IEnumerable<Result> results` whose elements represent `Success` cases:
 IEnumerable<Result.Success> successes = results.OfType<Result.Success>();
 ```
 
-For `enum class`, this finds the case objects. For `union`, `union struct`, and `enum struct`, enumeration exposes boxed enclosing structs, so `OfType` finds no case instances. A lambda such as `results.Where(result => result is Result.Success)` can use union- or enum-aware matching because the input is statically known to be `Result`. Improved inference does not change ordinary runtime type tests inside generic library code.
+For `enum class`, this finds the case objects. For `union` and `enum struct`, enumeration exposes boxed enclosing structs, so `OfType` finds no case instances. A lambda such as `results.Where(result => result is Result.Success)` can use union- or enum-aware matching because the input is statically known to be `Result`. Improved inference does not change ordinary runtime type tests inside generic library code.
 
 With `enum class`, `IEnumerable<Result.Success>` can also convert covariantly to `IEnumerable<Result>`. A union requires element-wise conversion because its cases are not derived from the enclosing type.
 
@@ -92,7 +92,7 @@ Reflection and serialization expose the same representation boundary. An inspect
 
 `enum class` and `enum struct` describe the actual kind of the enclosing type, consistent with `record class` and `record struct`. Authors can choose a reference type when APIs or generic constraints require one.
 
-Both `union` and `union struct` declare structs. The `struct` keyword instead changes the storage strategy and makes declared cases value types. This offers a short default declaration, but requires explaining that `struct` does not change the enclosing type from a class to a struct. A proposed [`union class` synonym](discriminated-unions.md#explicit-union-class-spelling) would make the class-case spelling explicit while potentially reinforcing that confusion.
+A `union` always declares a struct, while `case` and `case struct` choose each nested record's kind independently. This permits class cases for recursive nodes alongside small struct cases. Choosing a record kind does not choose a storage strategy: default union storage boxes struct cases, and a [generated layout](union-case-types-and-layout.md) can avoid that. This flexibility adds choices for authors and repeats `struct` on each struct case. A [uniform `union struct` alternative](discriminated-unions.md#per-case-or-uniform-record-kinds) would trade that flexibility for simpler declarations.
 
 ### Matching and Equality
 
@@ -106,7 +106,7 @@ A union also needs to lift efficient typed equality and equality operators from 
 
 The union design participates directly in the existing union system, including the [`IUnion` inspection interface](../csharp-15.0/unions.md#union-access-interface). Libraries and tools can use one contract to inspect both type unions and discriminated unions. Data-enum integration is [optional and exploratory](data-carrying-enums.md#possible-connections-to-type-unions), so adopting that design alone does not provide the same contract.
 
-That contract also has costs. The current union declaration reserves the name `Value` for the contained case, which can compete with a domain meaning such as an option's payload. For `union struct`, reading `Value` boxes a case. Data enums need not expose an object-valued view at all. Both struct designs can use the [shared non-boxed layout](union-enum-non-boxed-layout.md) for ordinary construction and typed extraction without boxing.
+That contract also has costs. The current union declaration reserves the name `Value` for the contained case, which can compete with a domain meaning such as an option's payload. With non-boxed union storage, reading `Value` boxes a `record struct` case. Data enums need not expose an object-valued view at all. Both designs can use the [shared non-boxed layout](union-enum-non-boxed-layout.md) for ordinary construction and typed extraction without boxing.
 
 ## Differences in the Current Drafts
 
@@ -114,10 +114,10 @@ The following differences affect usability or design effort, but could be change
 
 | Area | Advantage and tradeoff |
 | --- | --- |
-| [Inference from a known case](union-enum-common.md#inference-from-a-known-case-type) | `enum class` can use ordinary inference through its case's base type. Both union forms depend on proposed union-case inference. `enum struct` needs a further extension, otherwise callers need explicit type arguments or a value already typed as the enum. This comparison concerns known case types, not leading-dot shorthand generally. |
+| [Inference from a known case](union-enum-common.md#inference-from-a-known-case-type) | `enum class` can use ordinary inference through its case's base type. Unions depend on proposed union-case inference, regardless of case record kind. `enum struct` needs a further extension, otherwise callers need explicit type arguments or a value already typed as the enum. This comparison concerns known case types, not leading-dot shorthand generally. |
 | [Case extraction APIs](data-carrying-enums.md#generated-apis-and-conversions) | `enum struct` provides predicates such as `IsSome` and explicit casts back to case types. These offer convenient direct access at the cost of more generated names. Unions currently rely on matching and their established access APIs. |
 | [User-declared constructors](discriminated-unions.md#user-declared-constructors) | Unions already have rules for convenient custom initialization. Enum constructors remain an open question, though static factories can provide equivalent functionality. Whether unions should also restrict direct construction of the enclosing type remains unresolved. Enums already require callers to construct cases. |
 
 ## Optional Ref-Like Extension
 
-The [ref-like extension](union-enum-ref-like-types.md) has fewer object-view conflicts on the enum route. Both designs need ref-safety and storage rules, but `ref union struct` must additionally resolve the union pattern's requirements for an object-valued `Value` and case types convertible to `object`. Ref-like cases cannot be boxed. Data enums have no mandatory union pattern to revise.
+The [ref-like extension](union-enum-ref-like-types.md) has fewer object-view conflicts on the enum route. Both designs need ref-safety and storage rules, but ref-like unions must additionally resolve the union pattern's requirements for an object-valued `Value` and case types convertible to `object`. Ref-like cases cannot be boxed. Data enums have no mandatory union pattern to revise.

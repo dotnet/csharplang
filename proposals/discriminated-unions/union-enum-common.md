@@ -15,10 +15,10 @@ enum struct Option<T>
     Some(T Value)
 }
 
-union struct Option<T>
+union Option<T>
 {
-    case None = default;
-    case Some(T Value);
+    case struct None = default;
+    case struct Some(T Value);
 }
 ```
 
@@ -65,7 +65,7 @@ This ordering agrees with the revised draft's [nested-inference rules](https://g
 
 ### Inference from a Known Case Type
 
-We expect this call to infer `T = int` for both `union` and `union struct` if [union-case type inference](https://github.com/dotnet/csharplang/pull/10355) is adopted. For `enum class`, ordinary inference through the case's `Option<int>` base type already supplies `T = int`.
+We expect this call to infer `T = int` for `union` if [union-case type inference](https://github.com/dotnet/csharplang/pull/10355) is adopted. For `enum class`, ordinary inference through the case's `Option<int>` base type already supplies `T = int`.
 
 For `enum struct`, the corresponding inference remains an [open question](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/data-carrying-enums.md#inference-from-a-known-case-type) because existing method inference does not follow its generated user-defined conversion.
 
@@ -124,7 +124,7 @@ Result<string, string> result = error; // error: the nested case types differ
 Result<string, string> reconstructed = Result<string, string>.Error(error.Value);
 ```
 
-The incoming error cannot be propagated directly when a pipeline changes only the success type. The `Map` example reconstructs its `Error` case for this reason. The same restriction applies to the struct forms. Improved inference can shorten construction, but cannot change type identity.
+The incoming error cannot be propagated directly when a pipeline changes only the success type. The `Map` example reconstructs its `Error` case for this reason. The same restriction applies to `record struct` cases. Improved inference can shorten construction, but cannot change type identity.
 
 Ordinary unions can instead use separately declared records whose type parameters describe only their own payloads:
 
@@ -159,9 +159,9 @@ enum struct Measurement
     Reading(double Value, string Unit) = default // warning
 }
 
-union struct Measurement
+union Measurement
 {
-    case Reading(double Value, string Unit) = default; // warning
+    case struct Reading(double Value, string Unit) = default; // warning
 }
 ```
 
@@ -178,10 +178,10 @@ enum struct Message
     Text(string? Value)
 }
 
-union struct Message
+union Message
 {
-    case Empty;
-    case Text(string? Value);
+    case struct Empty;
+    case struct Text(string? Value);
 }
 ```
 
@@ -194,14 +194,14 @@ Message? present = default(Message);
 
 The represented cases below apply to both designs. The last column follows the existing [union null-pattern rules](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-15.0/unions.md#constant-pattern), including [matching nullable unions](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-15.0/unions.md#resolved-union-matching-for-nullable-of-a-union-value-type). Null-pattern matching for `enum struct` remains an [open question](data-carrying-enums.md#uninitialized-values-in-matching).
 
-| Variable | Represented case | Nullable wrapper's `HasValue` | `is null` for `union struct` |
+| Variable | Represented case | Nullable wrapper's `HasValue` | `is null` for `union` |
 | --- | --- | --- | --- |
 | `textCase` | `Text` with a null payload | N/A | `false` |
 | `uninitialized` | No case | N/A | `true` |
 | `noUnion` | No union value | `false` | `true` |
 | `present` | The contained union represents no case | `true` | `true` |
 
-For `union struct`, `textCase.Value` returns a boxed `Text` record, while `uninitialized.Value` returns null. Designating `Empty` as the `default` case makes the second and fourth rows represent `Empty` instead. The union's `Value` is then a boxed `Empty` record, and neither matches `null`. The null nullable wrapper in the third row remains null.
+For `union`, `textCase.Value` returns a boxed `Text` record, while `uninitialized.Value` returns null. Designating `Empty` as the `default` case makes the second and fourth rows represent `Empty` instead. The union's `Value` is then a boxed `Empty` record, and neither matches `null`. The null nullable wrapper in the third row remains null.
 
 ## Equality and Hashing
 
@@ -266,13 +266,13 @@ public struct Result : IEquatable<Result>
 }
 ```
 
-The `enum class` form gets these behaviors from its record hierarchy. For `enum struct` and `union struct`, the [non-boxed layout proposal](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/union-enum-non-boxed-layout.md#equality-and-hashing) shows how equality and hashing operate on decomposed storage without boxing the case.
+The `enum class` form gets these behaviors from its record hierarchy. For `enum struct` and unions using non-boxed storage, the [non-boxed layout proposal](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/union-enum-non-boxed-layout.md#equality-and-hashing) shows how equality and hashing operate on decomposed storage without boxing the case.
 
 ## Recursive Payloads
 
 Recursive payloads follow the normal [value-type layout rules](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/structs.md#1642-value-semantics). A value type cannot recursively contain itself by value when that would require infinite storage. Recursion through references is permitted.
 
-For example, both declarations below would require infinite storage:
+For example, the enum declaration below requires infinite storage. The union declaration works with its default object-backed storage because `Add` is boxed:
 
 ```csharp
 enum struct Expr
@@ -281,20 +281,22 @@ enum struct Expr
     Add(Expr Left, Expr Right) // error
 }
 
-union struct Expr
+union Expr
 {
-    case Number(int Value);
-    case Add(Expr Left, Expr Right); // error
+    case struct Number(int Value);
+    case struct Add(Expr Left, Expr Right); // valid with object-backed storage
 }
 ```
 
+A non-boxed union layout must retain reference indirection for that recursive case, or reject the declaration. A `record class` `Add` case provides that indirection without boxing.
+
 ## Concurrent Access
 
-Concurrent access to `enum struct` and `union struct` values follows the [layout proposal's concurrency and safety requirements](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/union-enum-non-boxed-layout.md#concurrent-access-and-safety).
+Concurrent access to `enum struct` and unions using non-boxed storage follows the [layout proposal's concurrency and safety requirements](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/union-enum-non-boxed-layout.md#concurrent-access-and-safety).
 
 ## Library Evolution
 
-Changing the designated `default` case changes what `default` represents in either design and is a behavioral breaking change. Adding a case to an `enum struct` or `union struct` can increase its storage or alignment requirements. Previously compiled switches use any existing fallback if they encounter a new case. A switch expression with no matching arm throws.
+Changing the designated `default` case changes what `default` represents in either design and is a behavioral breaking change. Adding a case can increase storage or alignment requirements when the enclosing type uses a non-boxed layout. Previously compiled switches use any existing fallback if they encounter a new case. A switch expression with no matching arm throws.
 
 ## Open Questions
 
@@ -314,7 +316,7 @@ Precise lookup rules remain to be specified, including how to choose between a c
 
 ### Always-Readonly Struct Types
 
-Should declarations using the `struct` keyword and their case records always be readonly, or should authors opt in with the `readonly` modifier?
+Should `enum struct` types and unions with case declarations, together with their `record struct` cases, always be readonly, or should authors opt in with the `readonly` modifier?
 
 ### Customizing Case Records
 
@@ -364,11 +366,11 @@ enum struct Message
     Numbers(params int[] Values)
 }
 
-union struct Message
+union Message
 {
-    case Empty;
-    case Text(string Value = "");
-    case Numbers(params int[] Values);
+    case struct Empty;
+    case struct Text(string Value = "");
+    case struct Numbers(params int[] Values);
 }
 ```
 
