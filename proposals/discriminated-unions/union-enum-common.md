@@ -17,8 +17,8 @@ enum struct Option<T>
 
 union Option<T>
 {
-    case struct None = default;
-    case struct Some(T Value);
+    case None = default;
+    case Some(T Value);
 }
 ```
 

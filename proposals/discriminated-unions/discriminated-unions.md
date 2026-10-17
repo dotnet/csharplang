@@ -13,8 +13,8 @@ using System;
 
 public union Option<T>
 {
-    case struct None = default;
-    case struct Some(T Value);
+    case None = default;
+    case Some(T Value);
 
     public T GetValueOrDefault(T fallback)
         => this switch
@@ -41,9 +41,7 @@ Console.WriteLine(message); // Parsed 42
 Console.WriteLine(result.GetValueOrDefault(0)); // 42
 ```
 
-Designating `None` as the [`default` case](#default-values) accounts for zero-initialized values.
-
-Each `case struct` declares a nested [`record struct`](../csharp-10.0/record-structs.md); a plain `case` declares a sealed nested `record class`. The enclosing `union` uses [object-backed storage](#type-model), boxing `record struct` cases. Choosing a [generated layout](union-case-types-and-layout.md) could avoid those allocations.
+Designating `None` as the [`default` case](#default-values) accounts for zero-initialized union values.
 
 `Parse("42")` relies on [target-typed generic type inference](https://github.com/dotnet/csharplang/blob/madstorgersen-target-typing-proposal/proposals/target-typed-generic-type-inference.md), which is not specific to unions. The `.Some(...)` and `.None` forms depend on the [contextual syntax extensions](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/union-enum-common.md#contextual-construction-and-inference), avoiding the need to repeat the enclosing union type.
 
@@ -108,7 +106,9 @@ The `ref` modifier is excluded from this proposal. A [separate proposal](union-e
 
 ### Case Declarations
 
-A case declaration introduces a public nested record. Its parameter list, if present, declares that record's primary constructor. A `case` declares a sealed `record class`; a `case struct` declares a `record struct`. Both kinds may appear in the same union. Allowing authors to supply [record bodies and case-specific interfaces](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/union-enum-common.md#customizing-case-records) is a possible future extension.
+A case declaration introduces a public nested record. Its parameter list, if present, declares that record's primary constructor. A plain `case` declares a sealed `record class`; a `case struct` declares a [`record struct`](../csharp-10.0/record-structs.md). Both kinds may appear in the same union. Allowing authors to supply [record bodies and case-specific interfaces](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/union-enum-common.md#customizing-case-records) is a possible future extension.
+
+By default, a `record struct` case is boxed when it enters the union, following normal union semantics. Layout remains an open design area: unions were designed from the start to support custom storage implementations. The [generated-layout proposal](union-case-types-and-layout.md) explores how attributes and source generators could offer layouts with different allocation, size, and copying tradeoffs.
 
 Given a union declaration such as:
 
@@ -169,7 +169,7 @@ Whether unions with declared cases should also [restrict direct construction](#d
 
 A union with case declarations generates the [non-boxing access pattern](../csharp-15.0/unions.md#non-boxing-access-members).
 
-For a `record class` case, `Value` returns the case reference. For a `record struct` case, it returns a boxed copy; box identity is not guaranteed across accesses. A layout strategy can provide typed construction and extraction without boxing.
+For a `record class` case, `Value` returns the case reference. For a `record struct` case, it returns a boxed copy; box identity is not guaranteed across accesses.
 
 Construction from a `record class` case throws `ArgumentNullException` for a null case reference. Rejecting null consistently preserves [creation equivalence](../csharp-15.0/unions.md#well-formedness).
 
@@ -179,11 +179,13 @@ Construction from a `record class` case throws `ArgumentNullException` for a nul
 Public signatures for the walkthrough's `Option<T>`, with storage and ordinary record members omitted:
 
 ```csharp
+using System.Diagnostics.CodeAnalysis;
+
 [Union]
 public struct Option<T> : IUnion
 {
-    public record struct None;
-    public record struct Some(T Value);
+    public sealed record class None;
+    public sealed record class Some(T Value);
 
     public Option(None value) { ... }
     public Option(Some value) { ... }
@@ -191,8 +193,8 @@ public struct Option<T> : IUnion
     public readonly bool HasValue { get; }
     public readonly object Value { get; }
 
-    public readonly bool TryGetValue(out None value) { ... }
-    public readonly bool TryGetValue(out Some value) { ... }
+    public readonly bool TryGetValue([NotNullWhen(true)] out None? value) { ... }
+    public readonly bool TryGetValue([NotNullWhen(true)] out Some? value) { ... }
 }
 ```
 
@@ -228,9 +230,7 @@ Nullability warnings and `default!` suppression follow the [shared rules for def
 
 ## Type Model
 
-A `union` uses the [existing object-backed struct representation](../csharp-15.0/unions.md#lowering). `record class` cases retain their references; `record struct` cases are boxed on entry. Data-free `record class` cases use shared instances.
-
-The [generated-layout proposal](union-case-types-and-layout.md) explores selecting storage independently through attributes and source generators. The [non-boxed storage exploration](union-enum-non-boxed-layout.md) describes a compact layout that could be offered through that mechanism.
+The enclosing union uses the [existing object-backed struct representation](../csharp-15.0/unions.md#lowering). Data-free `record class` cases use shared instances.
 
 ### Readonly
 

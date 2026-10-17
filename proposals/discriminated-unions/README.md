@@ -11,8 +11,8 @@ Start with either of the two main proposals. Each introduces its syntax with a c
   ```csharp
   union Option<T>
   {
-      case struct None = default;
-      case struct Some(T Value);
+      case None = default;
+      case Some(T Value);
   }
   ```
 
