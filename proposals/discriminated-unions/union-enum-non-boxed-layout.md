@@ -4,6 +4,8 @@ The `struct` keyword in [`enum struct`](https://github.com/dotnet/csharplang/blo
 
 The layout is an implementation detail. Compilers may change it, including to use future runtime capabilities, while preserving the specified API and observable semantics. No particular size, field layout, native ABI, or persistent byte representation is guaranteed.
 
+An [alternative design](union-case-types-and-layout.md) makes layout an extension point, with implementations supplied by authors or generators. Attributes select a strategy without making its storage policy part of the language. The strategies below could be offered as options through that mechanism.
+
 ## Scope
 
 A `union` without the `struct` modifier retains the existing object-backed struct representation. A non-null `enum class` value is the case instance itself. Neither uses the inline storage described here.

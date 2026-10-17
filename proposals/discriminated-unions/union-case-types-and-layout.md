@@ -2,6 +2,10 @@
 
 This document explores separating two choices in the [union-based design](discriminated-unions.md): the record kind of each declared case and the storage representation of the enclosing union. The enclosing declaration uses `union` for every storage strategy. Each case chooses `record class` or `record struct`, and an attribute can select a source-generated representation.
 
+Different applications make different tradeoffs between allocations, value size, copying, and the work needed to pack and unpack payloads. [Earlier implementation discussions](../../meetings/working-groups/discriminated-unions/Union%20implementation%20challenges.md#challenges-with-union-structs) highlight how rearranging payloads for compact storage can offset the benefits of avoiding allocations.
+
+The language would define the required behavior and member shapes while leaving storage policy to the implementation. We could ship generators for common strategies without making their policies part of the language. Authors could supply their own implementations or select third-party generators through attributes. Choosing an attribute is less direct than using a keyword, but lets strategies evolve independently and avoids committing the language to one balance of these costs.
+
 ## Example Walkthrough
 
 An expression tree can use struct leaves for efficiency and class nodes for recursion:
@@ -32,13 +36,13 @@ To see what `CompactLayout` generates, jump to [Expanded Storage and Access Code
 
 Without the attribute, ordinary object-backed storage boxes `Number` and `Name` when they enter the union and stores an `Add` reference directly. The illustrated compact strategy stores a number in an `int` field, a name's identifier in a reference field, or an `Add` object in that same reference field. Creating and extracting the leaves then requires no boxing. An `Add` retains its object identity.
 
-The recursion is `Expr` to an `Add` reference to its child `Expr` values. Making `Add` a struct would require a different storage decision: object-backed storage can box it, while a strategy that insists on storing it inline must reject the resulting recursive layout. A hybrid strategy could retain boxing for that case.
+Because `Add` is a class, its child expressions live in a separate object. If `Add` were a struct, a layout strategy would need to box it to avoid making `Expr` contain itself.
 
 ## Compiler and Generator Responsibilities
 
 The [current union declaration](../csharp-15.0/unions.md#union-declarations) synthesizes an object-backed `Value` property and case constructors. It prohibits additional instance fields and a union member provider. A generator cannot replace that representation by adding a partial declaration.
 
-We propose recognizing a `UnionLayoutAttribute` in `System.Runtime.CompilerServices` as a request for a generator-supplied representation. The compiler would:
+We propose recognizing a `UnionLayoutAttribute` in `System.Runtime.CompilerServices` as a request for an explicitly supplied representation, whether handwritten or generated. The compiler would:
 
 1. Require the union and any enclosing types to be partial.
 2. Declare the nested case records before generators run. A generator can find the attribute with [`ForAttributeWithMetadataName`](https://learn.microsoft.com/en-us/dotnet/api/microsoft.codeanalysis.syntaxvalueprovider.forattributewithmetadataname) and inspect case symbols, primary constructors, constraints, and readonlyness without depending on another generator's output.
@@ -63,8 +67,6 @@ The generator contributes the following partial declaration:
 <summary>Generated C# for Expr</summary>
 
 ```csharp
-#nullable enable
-
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
@@ -94,13 +96,15 @@ public readonly partial union Expr : Expr.IUnionMembers, IEquatable<Expr>
         public static Expr Create(Name value) => new Expr(value);
         public static Expr Create(Add value) => new Expr(value);
 
-        object? Value { get; }
         bool HasValue { get; }
+        object? Value { get; }
 
         bool TryGetValue(out Number value);
         bool TryGetValue(out Name value);
         bool TryGetValue([NotNullWhen(true)] out Add? value);
     }
+
+    public bool HasValue => _case != 0;
 
     public object? Value
         => _case switch
@@ -110,8 +114,6 @@ public readonly partial union Expr : Expr.IUnionMembers, IEquatable<Expr>
             NameCase => Expr.Name((string)_reference!),
             AddCase => (Add?)_reference,
         };
-
-    public bool HasValue => _case != 0;
 
     public bool TryGetValue(out Number value)
     {
@@ -136,7 +138,7 @@ public readonly partial union Expr : Expr.IUnionMembers, IEquatable<Expr>
         {
             0 => true,
             NumberCase => EqualityComparer<int>.Default.Equals(_number, other._number),
-            NameCase => EqualityComparer<string>.Default.Equals((string)_reference!, (string)other._reference!),
+            NameCase => EqualityComparer<string?>.Default.Equals((string?)_reference, (string?)other._reference),
             AddCase => EqualityComparer<Add?>.Default.Equals((Add?)_reference, (Add?)other._reference),
         });
 
@@ -162,39 +164,118 @@ public readonly partial union Expr : Expr.IUnionMembers, IEquatable<Expr>
 
 Equality and hashing use typed payloads without reading `Value`, following the [shared value-equality rules](union-enum-common.md#equality-and-hashing).
 
-## Rebuilding the Non-Boxed Layout Strategies
+## Storage Strategies
 
-The [non-boxed layout exploration](union-enum-non-boxed-layout.md) can be expressed through generated fields and methods:
+These strategies build on the [non-boxed storage exploration](union-enum-non-boxed-layout.md). The examples show instance fields and omit the creation, access, and equality members illustrated above.
 
-| Storage choice | Generated representation |
-| --- | --- |
-| Object-backed | One object field, boxing struct cases on entry and retaining class references. |
-| Separate case fields | A discriminator and a typed field for each struct case, with reference fields for class cases. |
-| Shared pools | Shared primitive storage and checked reference slots, plus typed fields for opaque structs and type parameters. |
-| Hybrid | Inline selected struct cases and box others, including large or recursively stored cases. Case record kinds remain unchanged. |
-| Native layout | Fields and layout attributes determined by a specific native ABI, together with matching creation and access operations. |
+### Default Object-Backed Storage
 
-For example, a generator can overlay primitive payloads in a nongeneric helper, keeping references in separate fields:
+Without any layout attribute, the compiler supplies the ordinary object-backed representation. For `Expr`, all case values occupy the same field:
+
+```csharp
+private readonly object? _value; // boxed Number, boxed Name, or an Add reference
+```
+
+This keeps the enclosing union small regardless of the case sizes. Struct cases are boxed on entry, while class cases retain their original references. It is useful when minimizing the wrapper's size matters more than avoiding those allocations.
+
+### Separate Case Fields
+
+A strategy selected with `[UnionLayout(typeof(SeparateFieldsLayout))]` could give each case its own typed field. For the walkthrough's `Expr`, it would emit:
+
+```csharp
+private readonly byte _case;
+private readonly Number _number;
+private readonly Name _name;
+private readonly Add? _add;
+```
+
+Creation and extraction can copy complete case values directly. This can be useful when minimizing conversion work matters more than the enclosing union's size. Each instance reserves space for every case, including inactive ones. Whole-value storage also accommodates opaque structs without decomposing their state.
+
+### Shared Pools
+
+The walkthrough's `CompactLayout` shares a reference slot between cases. More varied payloads can share primitive storage too:
+
+```csharp
+[UnionLayout(typeof(CompactLayout))]
+public readonly partial union Message<T>
+{
+    case struct Text(string Content, int Code);
+    case struct Buffer(byte[] Data, int Offset, int Count);
+    case struct Sequence(long Value);
+    case struct Item(T Value);
+}
+```
+
+A generator could emit these fields:
+
+```csharp
+private readonly byte _case;
+private readonly NumericStorage _numeric; // Text.Code, Buffer.Offset/Count, or Sequence.Value
+private readonly object? _reference;      // Text.Content or Buffer.Data
+private readonly T _item;                 // Item.Value
+```
+
+The nongeneric helper overlaps the primitive payloads:
 
 ```csharp
 [StructLayout(LayoutKind.Explicit)]
 internal struct NumericStorage
 {
-    [FieldOffset(0)] public long Wide;
-    [FieldOffset(0)] public int First;
-    [FieldOffset(4)] public int Second;
+    [FieldOffset(0)] public int First;  // Text.Code or Buffer.Offset
+    [FieldOffset(4)] public int Second; // Buffer.Count
+    [FieldOffset(0)] public long Wide;  // Sequence.Value
 }
 ```
 
-The runtime computes alignment from the typed fields. A generator can use this helper from a generic union, while keeping each opaque `T` in its own typed field. The helper must be outside any generic containing type because ordinary explicit-layout generic types are unsupported.
+`T` stays in a typed field so the runtime can determine its size and GC references.
+
+This is useful when many cases can reuse a few storage locations. It reduces reserved space at the cost of rearranging payloads during creation and extraction. Each pool is sized independently, so their combined size can exceed that of any individual case.
+
+The runtime computes alignment from the typed fields. The explicit-layout helper must be outside any generic containing type because ordinary explicit-layout generic types are unsupported.
 
 Decomposition is safe for the compiler-defined case records with only synthesized primary-constructor state. Arbitrary nested structs, external types, and type parameters retain typed storage. If future case bodies add state or user-defined accessors, the generator must preserve the complete case value or use an explicit decomposition contract. Running user getters or reconstructing through a validating constructor would change semantics.
 
 The [checked packing opt-in](union-enum-non-boxed-layout.md#possible-checked-packing-opt-in) can likewise be implemented by a generator. It emits the consumer-side size and reference-containment checks and ensures they run before every raw packing or extraction path, including extraction from `default`. A static constructor on the payload type alone remains insufficient.
 
+### Hybrid Storage
+
+A generator can store selected struct cases inline and box others. For example, consider a variant of `Expr` where `Add` is also a struct case:
+
+```csharp
+case struct Add(Expr Left, Expr Right);
+```
+
+Storing that case inline would require `Expr` to contain itself. A strategy selected with `[UnionLayout(typeof(HybridLayout))]` can instead emit:
+
+```csharp
+private readonly byte _case;
+private readonly int _number;
+private readonly object? _reference; // Name.Identifier or a boxed Add
+```
+
+`Number` and `Name` still avoid boxing. The generator boxes `Add` on entry and unboxes it for typed extraction, keeping the recursive layout finite. This lets `Add` remain a record struct when used independently of the union. A policy could also box unusually large struct cases to limit the union's size.
+
 ### Runtime-Computed Unmanaged Overlap
 
-There is also an existing runtime-supported alternative to fixed offsets. Current .NET 11 sources contain [`ExtendedLayoutAttribute`](https://github.com/dotnet/runtime/blob/main/src/libraries/System.Private.CoreLib/src/System/Runtime/InteropServices/ExtendedLayoutAttribute.cs) and the `CStruct` and `CUnion` members of [`ExtendedLayoutKind`](https://github.com/dotnet/runtime/blob/main/src/libraries/System.Private.CoreLib/src/System/Runtime/InteropServices/ExtendedLayoutKind.cs). A generator can emit:
+When payloads are unmanaged, runtime-computed overlap can avoid the separate typed slots needed for otherwise opaque type parameters. For example:
+
+```csharp
+[UnionLayout(typeof(UnmanagedLayout))]
+public readonly partial union Sample<T> where T : unmanaged
+{
+    case struct Item(T Value);
+    case struct Counter(long Value);
+}
+```
+
+The generator can represent both cases with one payload region and a case discriminator:
+
+```csharp
+private readonly byte _case;
+private readonly UnmanagedStorage<T> _payload;
+```
+
+Current .NET 11 sources contain [`ExtendedLayoutAttribute`](https://github.com/dotnet/runtime/blob/main/src/libraries/System.Private.CoreLib/src/System/Runtime/InteropServices/ExtendedLayoutAttribute.cs) and the `CStruct` and `CUnion` members of [`ExtendedLayoutKind`](https://github.com/dotnet/runtime/blob/main/src/libraries/System.Private.CoreLib/src/System/Runtime/InteropServices/ExtendedLayoutKind.cs). A generator can emit the payload helper as:
 
 ```csharp
 [ExtendedLayout(ExtendedLayoutKind.CUnion)]
@@ -205,7 +286,7 @@ internal struct UnmanagedStorage<T> where T : unmanaged
 }
 ```
 
-The runtime overlaps the fields at offset zero and computes their maximum size and alignment for the actual `T`. This works for generic payloads without embedding a compile-time byte size. It rejects instantiations containing GC references, including ones constructed through reflection that bypass the C# `unmanaged` check. It can be used for unmanaged storage inside a larger struct whose reference slots remain separate.
+The runtime overlaps the fields at offset zero and computes their maximum size and alignment for the actual `T`. This is useful when a generator cannot know `T`'s byte size at compile time but wants the two cases to share storage. The runtime rejects instantiations containing GC references, including ones constructed through reflection that bypass the C# `unmanaged` check.
 
 This requires a compiler and runtime that support extended layout. A generator can select a conservative typed-field implementation on older targets when its policy permits that choice, or report that the requested strategy is unsupported.
 
@@ -223,7 +304,7 @@ Layout choices also affect `Unsafe.SizeOf`, allocation, array density, and unman
 
 ## Swift Interop
 
-[Runtime issue #100896](https://github.com/dotnet/runtime/issues/100896) is directly relevant to moving layout policy into attributes and generators. Its [approved API](https://github.com/dotnet/runtime/issues/100896#issuecomment-2110876749) uses `LayoutKind.Extended`, `ExtendedLayoutAttribute`, and kinds including `CUnion`, `SwiftStruct`, and `SwiftEnum`. The current implementation exposes the two C layout kinds. The issue remains open for the remaining kinds.
+A native binding may need the union to match an existing enum's ABI. [Runtime issue #100896](https://github.com/dotnet/runtime/issues/100896) is directly relevant to moving layout policy into attributes and generators. Its [approved API](https://github.com/dotnet/runtime/issues/100896#issuecomment-2110876749) uses `LayoutKind.Extended`, `ExtendedLayoutAttribute`, and kinds including `CUnion`, `SwiftStruct`, and `SwiftEnum`. The current implementation exposes the two C layout kinds. The issue remains open for the remaining kinds.
 
 `CUnion` supplies overlapping payload storage, without supplying a discriminated union's tag or access operations. Swift enum layout also involves trailing padding, spare bits, and architecture-specific rules. A generator still needs to implement the logical case API and preserve bits used by the native discriminator.
 
@@ -315,5 +396,7 @@ Mixed per-case kinds do not transfer directly to `enum class`: its cases derive 
 ## Evidence
 
 The storage and access implementation was exercised as a custom union on .NET 11 RC1 ARM64. Tests covered conversions, recursive patterns, typed and boxed access, failed extraction, null payloads and class inputs, designated defaults, equality, and hashing. A warmed 100,000-iteration loop performing typed leaf construction, pattern extraction, equality, and hashing allocated zero bytes on its thread. The enclosing struct occupied 16 bytes, compared with the object-backed wrapper's single reference. This also makes each `Add` larger, trading larger child fields for fewer leaf allocations.
+
+Additional probes checked separate-field, shared-pool, and hybrid representations, including a boxed recursive struct case.
 
 No generator or compiler extension was built. The proposed output requires the [compiler changes described above](#compiler-and-generator-responsibilities). [Case-construction binding](union-enum-common.md#binding-case-access) and metadata remain shared design work.
