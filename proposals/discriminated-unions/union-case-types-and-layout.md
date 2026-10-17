@@ -191,9 +191,9 @@ private readonly Add? _add;
 
 This is simple to generate and makes reads and writes straightforward: creation and extraction copy complete case values directly, without boxing or rearranging payloads. It also accommodates opaque structs. Every instance reserves space for all cases, including inactive ones. Many or large struct cases can therefore make the union very large, increasing memory use and copying costs.
 
-### Shared Pools
+### Compact Storage
 
-The walkthrough's `CompactLayout` shares a reference slot between cases. More varied payloads can share primitive storage too:
+This follows the [conservative layout](union-enum-non-boxed-layout.md#conservative-storage) in the non-boxed-storage proposal. The walkthrough's `CompactLayout` shares a reference slot between cases. More varied payloads can share primitive storage too:
 
 ```csharp
 [UnionLayout(typeof(CompactLayout))]
@@ -229,7 +229,7 @@ internal struct NumericStorage
 
 `T` stays in a typed field so the runtime can determine its size and GC references.
 
-Reusing storage can reduce union size without boxing the decomposed struct cases. Creation and extraction do more work to rearrange payloads and check shared reference types, and the generated code is more complex than with separate fields. Each pool is sized independently, so their combined size can exceed that of any individual case.
+This strategy aims to minimize union size by decomposing struct cases and reusing fields, without boxing. The tradeoff is rearranging ("swizzling") payloads during creation and extraction, along with type checks when reading shared reference fields. The generated code is more complex than with separate case fields. Primitive storage, reference slots, and typed slots are sized independently, so their combined size can exceed that of any individual case.
 
 The runtime computes alignment from the typed fields. The explicit-layout helper must be outside any generic containing type because ordinary explicit-layout generic types are unsupported.
 
@@ -389,7 +389,7 @@ Concrete frozen bindings can generate the access code demonstrated above. Bindin
 
 The same implementation mechanism can serve ordinary `union X(A, B)` declarations. Their arbitrary existing types require conservative typed storage or boxing where needed to preserve the [creation-equivalence and reference-identity requirements](union-enum-non-boxed-layout.md#scope). This does not imply adding the declared-record cases' equality policy to those unions.
 
-An `enum struct` could also delegate its storage to a generator, adding its own conversion and query members to the required shape. The shared pools, typed fields, runtime overlap, and packing checks remain reusable. The compiler would need an equivalent representation-delegation hook for that declaration form.
+An `enum struct` could also delegate its storage to a generator, adding its own conversion and query members to the required shape. Compact storage, separate fields, runtime overlap, and packing checks remain reusable. The compiler would need an equivalent representation-delegation hook for that declaration form.
 
 Mixed per-case kinds do not transfer directly to `enum class`: its cases derive from the enclosing record, which a record struct cannot do. The union approach can mix the kinds because its relationship to each case is expressed by construction and access members. This exploration leaves the existing enum-based proposal's type model intact.
 
@@ -397,7 +397,7 @@ Mixed per-case kinds do not transfer directly to `enum class`: its cases derive 
 
 The storage and access implementation was exercised as a custom union on .NET 11 RC1 ARM64. Tests covered conversions, recursive patterns, typed and boxed access, failed extraction, null payloads and class inputs, designated defaults, equality, and hashing. A warmed 100,000-iteration loop performing typed leaf construction, pattern extraction, equality, and hashing allocated zero bytes on its thread. The enclosing struct occupied 16 bytes, compared with the object-backed wrapper's single reference. This also makes each `Add` larger, trading larger child fields for fewer leaf allocations.
 
-Additional probes checked separate-field, shared-pool, and hybrid representations, including a boxed recursive struct case.
+Additional probes checked separate-field, compact, and hybrid representations, including a boxed recursive struct case.
 
 No generator or compiler extension was built. The proposed output requires the [compiler changes described above](#compiler-and-generator-responsibilities). [Case-construction binding](union-enum-common.md#binding-case-access) and metadata remain shared design work.
 

@@ -36,15 +36,15 @@ The concurrent-copy hazards explored in [Fast, Efficient Unions](https://github.
 
 ### Conservative Storage
 
-A candidate inline layout uses a discriminator and three shared pools:
+A candidate inline layout uses a discriminator and three kinds of storage:
 
 1. **Unmanaged data**: A byte region for the [predefined types](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/union-enum-non-boxed-layout.md#primitive-types-and-layout-assumptions) below, sized for the greatest combined requirement of any case, including padding and alignment. Cases share the region, with distinct locations for components within each case.
 2. **Managed references**: Enough slots for the case containing the most references. A slot is normally `object`, but can be more specific when that type accommodates every value assigned to it, such as a slot used only for strings.
-3. **Typed values**: Slots for arbitrary value types and type parameters not known to be reference types. Each type needs enough slots for its maximum count in any case. Distinct types cannot generally share a slot. Reference-constrained type parameters can use the reference pool.
+3. **Typed values**: Slots for arbitrary value types and type parameters not known to be reference types. Each type needs enough slots for its maximum count in any case. Distinct types cannot generally share a slot. Reference-constrained type parameters can use the managed reference slots.
 
 Compatibility of a container's own unmanaged classification is an [open question](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/union-enum-non-boxed-layout.md#unmanaged-classification).
 
-A `struct` constraint does not rule out references. Even `where T : unmanaged` need not provide a declaration-time byte size, so such parameters can remain in typed slots. The pool maxima can come from different cases, making their combined size greater than any individual case.
+A `struct` constraint does not rule out references. Even `where T : unmanaged` need not provide a declaration-time byte size, so such parameters can remain in typed slots. The maximum requirements for the three kinds of storage can come from different cases, making their combined size greater than any individual case.
 
 ### Primitive Types and Layout Assumptions
 
@@ -112,7 +112,7 @@ public struct Message<T>
 
 ### Packing and Extraction
 
-In the shared-pool layout, creation from a case packs components into their assigned slots and sets the discriminator. Extraction checks for the requested case and reconstructs the case value. Mixed layouts require rearranging components rather than reinterpreting the shared storage as a complete case. For example, `Buffer` uses `_reference0` and both integers in `_unmanaged`, while `Pair` uses both reference slots. Unused reference and typed slots are set to `default` to avoid retaining references from other cases.
+In this layout, creation from a case packs components into their assigned slots and sets the discriminator. Extraction checks for the requested case and reconstructs the case value. Mixed layouts require rearranging components rather than reinterpreting the shared storage as a complete case. For example, `Buffer` uses `_reference0` and both integers in `_unmanaged`, while `Pair` uses both reference slots. Unused reference and typed slots are set to `default` to avoid retaining references from other cases.
 
 When every case is unmanaged and the required layout facts are established, complete case values can safely overlap in one region sized and aligned for the largest case, with a separate discriminator. Packing and extraction can then copy each case as a whole.
 
