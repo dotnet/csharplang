@@ -8,6 +8,8 @@ A recursive tree can benefit from class nodes and small struct leaves, independe
 
 The language would define case semantics while generators supply storage strategies. Attributes would let authors choose strategies supplied by our generators or third-party generators. Choosing an attribute is less direct than using a keyword, but lets strategies evolve without committing the language to one balance of these costs.
 
+The layouts below illustrate the flexibility of the extension point across allocation, value size, copying, safety, and interoperability requirements. They are exploratory examples with varying degrees of validation. Their inclusion does not imply a commitment to ship each strategy or a conclusion that every design is complete, correct, or suitable for adoption.
+
 ## Example Walkthrough
 
 An expression tree can use struct leaves for efficiency and class nodes for recursion:
