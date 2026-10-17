@@ -47,6 +47,38 @@ Each `case struct` declares a nested [`record struct`](../csharp-10.0/record-str
 
 `Parse("42")` relies on [target-typed generic type inference](https://github.com/dotnet/csharplang/blob/madstorgersen-target-typing-proposal/proposals/target-typed-generic-type-inference.md), which is not specific to unions. The `.Some(...)` and `.None` forms depend on the [contextual syntax extensions](https://github.com/dotnet/csharplang/blob/main/proposals/discriminated-unions/union-enum-common.md#contextual-construction-and-inference), avoiding the need to repeat the enclosing union type.
 
+## Motivation
+
+A type union accepts values of existing types, which can overlap. Every `string` is also an `object`, so this union cannot distinguish whether a string was supplied through its `string` or `object` constructor:
+
+```csharp
+union Content(string, object);
+
+Content text = new("hello");
+Content other = new((object)"hello");
+
+bool textIsString = text is string;   // true
+bool otherIsString = other is string; // true
+```
+
+A discriminated union declares a distinct record for each case. Each value created from a case represents exactly that case, regardless of its payload's runtime type:
+
+```csharp
+union Content
+{
+    case Text(string Value);
+    case Other(object Value);
+}
+
+Content text = Content.Text("hello");
+Content other = Content.Other("hello");
+
+bool textIsText = text is Content.Text;   // true
+bool otherIsText = other is Content.Text; // false
+```
+
+Both payloads are strings, but the chosen case remains distinct.
+
 ## Declarations
 
 ### Grammar
