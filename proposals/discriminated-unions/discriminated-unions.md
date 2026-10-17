@@ -84,7 +84,7 @@ Given a union declaration such as:
 union Result
 {
     case Success(string Value);
-    case struct Failure(int Code);
+    case Failure(int Code);
 }
 ```
 
@@ -94,7 +94,7 @@ The compiler adds the declared types to the union's set of types. Using existing
 union Result(Result.Success, Result.Failure)
 {
     public sealed record class Success(string Value);
-    public record struct Failure(int Code);
+    public sealed record class Failure(int Code);
 }
 ```
 
