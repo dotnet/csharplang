@@ -296,19 +296,26 @@ namespace System.Runtime.CompilerServices
 Closed classes shall not be inherited from languages that do not support closed classes. This is accomplished by adding `[CompilerFeatureRequired("ClosedClasses")]` to all constructors of closed classes.
 
 ```cs
-// Authoring assembly, built with .NET 10 SDK
+// Authoring assembly, built with .NET 11 SDK
 closed class C1
 {
     public C1() { }
     public C1(int param) { }
 }
+```
 
-// Consuming assembly, built with .NET 8 SDK
-class C2 : C1
-{
-    public C2() { } // error: 'C1.C1()' requires compiler feature "ClosedClasses"
-    public C2() : base(42) { } // error: 'C1.C1(int)' requires compiler feature "ClosedClasses"
-}
+```vbnet
+' Consuming assembly, written in VB and built with .NET 11 SDK
+Class D1 
+    Inherits C1
+    Public Sub New() ' `Protected Overloads Sub New()` requires compiler feature `ClosedClasses`, 
+                     ' which is not supported by this version of the Visual Basic compiler.
+    End Sub
+    Public Sub New(ByVal a As Integer)  ' `Protected Overloads Sub New()` requires compiler feature `ClosedClasses`, 
+                                        ' which is not supported by this version of the Visual Basic compiler.
+        MyBase.New(a)
+    End Sub
+End Class
 ```
 
 Metadata "view" of `C1`:
