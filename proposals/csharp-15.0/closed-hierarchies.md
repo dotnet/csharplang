@@ -302,8 +302,11 @@ closed class C1
     public C1() { }
     public C1(int param) { }
 }
+```
 
-// Consuming assembly, written in VB and built with .NET 11 SDK
+```vbnet
+' Consuming assembly, written in VB and built with .NET 11 SDK
+Class D1 
     Inherits C1
     Public Sub New() ' `Protected Overloads Sub New()` requires compiler feature `ClosedClasses`, 
                      ' which is not supported by this version of the Visual Basic compiler.
