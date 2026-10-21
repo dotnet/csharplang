@@ -155,23 +155,32 @@ The unspeakable skeleton provides the prototypes for the extension members and t
 See the following code and XML for an example of extension members and the resulting XML output.
 
 ```csharp
-/// <summary>Summary for E</summary>
-static class E
-{
-    /// <summary>Summary for extension block</summary>
-    /// <typeparam name="T">Description for T</typeparam>
-    /// <param name="t">Description for t</param>
-    extension<T>(T t)
+    public static class E
     {
-        /// <summary>Summary for M</summary>
-        /// <typeparam name="U">Description for U</typeparam>
-        /// <param name="u">Description for u</param>
-        public void M<U>(U u) => throw null!;
+        /// <summary>
+        /// Represents a sequence of integers with additional operations.
+        /// </summary>
+        extension(IEnumerable<int> sequence)
+        {
+            /// <summary>
+            /// Adds a value to each element in the sequence.
+            /// </summary>
+            /// <param name="operand"></param>
+            /// <returns></returns>
+            public IEnumerable<int> AddValue(int operand)
+            {
+                foreach (var item in sequence)
+                {
+                    yield return item + operand;
+                }
+            }
 
-        /// <summary>Summary for P</summary>
-        public int P => 0;
+            /// <summary>
+            ///     Calculates the median value of the sequence.
+            /// </summary>
+            public int Median => 0;
+        }
     }
-}
 ```
 
 produces the following XML output:
@@ -183,27 +192,25 @@ produces the following XML output:
         <name>Test</name>
     </assembly>
     <members>
-        <member name="T:E">
+        <member name="T:ClassLibrary6.E">
             <summary>Summary for E</summary>
         </member>
-        <member name="T:E.<>E__0`1">
-            <summary>Summary for extension block</summary>
-            <typeparam name="T">Description for T</typeparam>
-            <param name="t">Description for t</param>
+        <member name="T:ClassLibrary6.E.">
+            <summary>
+            Represents a sequence of integers with additional operations.
+            </summary>
         </member>
-        <member name="M:E.<>E__0`1.M``1(``0)">
-            <summary>Summary for M</summary>
-            <typeparam name="U">Description for U</typeparam>
-            <param name="u">Description for u</param>
+        <member name="M:ClassLibrary6.E..AddValue(System.Int32)">
+            <summary>
+            Adds a value to each element in the sequence.
+            </summary>
+            <param name="operand"></param>
+            <returns></returns>
         </member>
-        <member name="P:E.<>E__0`1.P">
-            <summary>Summary for P</summary>
-        </member>
-        <member name="M:E.M``2(``0,``1)">
-            <inheritdoc cref="M:E.<>E__0`1.M``1(``0)"/>
-        </member>
-        <member name="M:E.get_P``1(``0)">
-            <inheritdoc cref="P:E.<>E__0`1.P"/>
+        <member name="P:ClassLibrary6.E..Median">
+            <summary>
+                Calculates the median value of the sequence.
+            </summary>
         </member>
     </members>
 </doc>
