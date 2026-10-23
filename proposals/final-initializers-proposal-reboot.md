@@ -6,7 +6,7 @@ Original proposal: [final-initializers.md](./final-initializers.md)
 
 ## Summary
 
-Allow a class or struct to declare a *final initializer*, `init { ... }`, which runs at the end of an object's initialization, after constructors, object and collection initializers, and `with` expressions:
+Allow a class or struct to declare a *final initializer*, `init { ... }`, which runs at the end of an object's initialization:
 
 ```cs
 var marie = new Person { FirstName = " Marie ", LastName = "Curie" };
@@ -52,7 +52,7 @@ Final initializers present a clear idiom which resolves a plethora of interrelat
 
 These issues continue to hamper the adoption of recent features. Required members aimed to place object initializers on more of an even footing with constructors, but without final initializers, the language falls short of that aim. Records aimed to remove boilerplate especially from immutable objects, but they fail to do so in many cases. Indeed, getting `with` expressions for free on all records has made matters worse with non-obvious pitfalls for caching and validation. This is laid out well in [#4137 Thoughts on records, preserving invariants and verbosity](https://github.com/dotnet/csharplang/discussions/4137) and reported time and time again (see [Popular interest](#popular-interest)).
 
-C# 9 moved the end of object construction. Before `init` accessors, an object was finished when its constructor returned. Since C# 9, object initializers and `with` expressions extend object construction as they continue assigning immutable state after the constructor returns. But a type still has no place to run code once its initialization actually ends.
+C# 9 moved the end of object construction. Before `init` accessors, only a constructor could assign immutable state, so the constructor was also where a type checked that state and computed any state that derived from it. Since C# 9, object initializers and `with` expressions assign immutable state after the constructor returns, and `init` members can't be assigned once they end. That makes the end of the object initializer or `with` expression the last point where a type can normalize its immutable state or compute derived state, and the one point where a check of that state holds for the life of the object. Mutable state is different, because callers can assign a `set` property again at any point after a check, so a type checks it in its `set` accessor each time it changes. But a type still has no place to run code at the point where its immutable state becomes final.
 
 Final initializers were designed alongside records to fill that gap. The [2020 design review](https://github.com/dotnet/csharplang/blob/main/meetings/2020/LDM-2020-05-04.md#final-initializers) called it "very complicated" to know when to use a constructors and when to use final initializers, so LDM [set them aside](https://github.com/dotnet/csharplang/blob/main/meetings/2020/LDM-2020-07-20.md#future-record-direction) until it had a better handle on the user scenarios. Six years of user requests show users repeatedly converging on the same request, showing that they understand the shape of the exact piece that is still missing.
 ### Required members without a constructor
@@ -279,7 +279,7 @@ A C# primary constructor has no body, and a `with` expression runs none of the t
 
 ## Detailed design
 
-A final initializer works like an `init` accessor for the whole object. It runs once every constructor and initializer has run, it can assign what an `init` accessor can, and a `with` expression runs it again on the copy.
+A final initializer works like an `init` accessor for the whole object. It runs once every constructor and initializer has run, it can assign what an `init` accessor can, and a `with` expression runs it again on the copy. Initialization ends when it returns, so it's the final code that can assign the object's `init` members and `readonly` fields.
 
 A class, struct, record class, or record struct can declare a final initializer with the `init` keyword and a block or expression body:
 
