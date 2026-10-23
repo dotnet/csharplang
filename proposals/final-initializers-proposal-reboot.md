@@ -454,7 +454,9 @@ Future features could change that. An extension constructor whose return type is
 
 ### Running final initializers through reflection
 
-Code that creates objects through reflection acts as the compiler at runtime, so it needs to find the method the compiler would call. We propose a new method on `Type`, next to the members that reflection users already call to create objects, such as `GetConstructor`:
+Code that creates objects through reflection acts as the compiler at runtime, so it needs to find the method the compiler would call. It would be unfortunate if such code always had to correctly reinvent the lookup. The name may be unspeakable, and finding it may require nuances around resolving signatures. There would be pitfalls. Ideally, we build a pit of success for users, making it straightforward and appealing to integrate this feature into their code.
+
+We propose a new method on `Type`, next to the members that reflection users already call to create objects, such as `GetConstructor`:
 
 ```cs
 using System.Reflection;
