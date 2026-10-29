@@ -28,7 +28,7 @@ If a member of the LDM believes a question does not meet this scope, they may re
 
 ### Asking a question
 
-We will use the Proposal Questions channel (to be created) in the C# Language Design Teams Team for asking questions. Questions should each go in a new thread, and
+We will use the Proposal Questions channel in the C# Language Design Teams Team for asking questions. Questions should each go in a new thread, and
 responses to that question should stay within that thread. To ask a question and propose a decision:
 
 1. Create a thread in the channel.
