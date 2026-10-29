@@ -150,8 +150,50 @@ When an LDT member decides to champion a discussion, they take the following ste
 ### Bringing open questions to LDM
 
 During the course of development of a feature, there are several different types of questions that need to get brought to LDM for answers. The most important overriding factor
-for any question is that there is a checked-in commit that contains the question. The document and commit will be linked as part of the notes so that future readers of the notes
-can understand the full context in which the question was asked.
+for any question brought to a full LDM is that there is a checked-in commit that contains the question. The document and commit will be linked as part of the notes so that
+future readers of the notes can understand the full context in which the question was asked. Simple questions may instead use the
+[unanimous consent process](#simple-decisions-by-unanimous-consent).
+
+#### Simple decisions by unanimous consent
+
+We are experimenting with an asynchronous process for straightforward questions where the implementor or spec writer can recommend an obvious resolution, or where the
+question is a sufficiently isolated corner case with no broader design implications. Questions that need design discussion belong in a full LDM. Any LDM member can request
+that a question go to a meeting. See the [original process proposal](Simple-LDM-Decisions.md) and the
+[October 5th, 2026 notes](meetings/2026/LDM-2026-10-05.md#simple-ldm-decisions) for the decision to adopt this process.
+
+To request a decision:
+
+1. Start a new thread in the Proposal Questions channel in the C# Language Design Teams team. Give it a descriptive title, link to the champion issue and a specific commit of
+   the specification, and include the question, relevant context, alternatives where applicable, and a single recommended resolution. Ping the channel.
+2. Wait at least 24 hours and answer clarifying questions in the thread. A thumbs-up reaction or a comment explicitly approving the recommendation counts as positive feedback.
+   An objection must be explicit, such as a request to reject the recommendation or bring it to LDM; discussion or a negative tone alone is not an objection.
+3. If at least two thirds of LDM members have provided positive feedback and no LDM member has objected, the decision is approved. Only LDM members count toward approval or
+   formal objections. Guest concerns should still be taken seriously, and relevant guests should be consulted when preparing the recommendation.
+4. If there is insufficient participation after at least 24 hours and you are blocked on the decision, post a follow-up saying that the decision will be considered approved
+   after another 24 hours unless someone objects, and ping the channel again. After that additional 24 hours, the decision is approved if no LDM member has objected, even
+   without the usual level of positive feedback. This fallback does not override an objection.
+5. If approved, comment on the thread that the decision is approved. Open a PR to update the specification with the question, decision, and relevant context and rationale,
+   indicating that the decision was made by unanimous consent.
+6. If the decision is not approved, add the question to the appropriate discussion queue in the relevant year's README in the [meetings folder](meetings/) for a full LDM.
+
+LDM members should enable notifications for the channel and provide feedback promptly. The fallback is intended to be used sparingly.
+
+For the initial post, use the following template:
+
+```markdown
+Title: <Short description of the question>
+
+-------
+
+Body:
+
+**Champion issue**: <link>
+**Specification**: <link to the relevant specification at a specific commit>
+
+**Question and details**: <What needs to be decided?>
+
+**Recommendation**: <One proposed answer and its rationale>
+```
 
 #### Alternative proposals, supplemental documentation
 

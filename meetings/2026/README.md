@@ -40,12 +40,19 @@ All schedule items must have a public issue or checked-in proposal that can be l
 - [Final initializers](https://github.com/dotnet/csharplang/blob/5055b97eee8c10d12f822f6d4db9464329615947/proposals/final-initializers.md) (Joseph)
   - [LDM in 2020](https://github.com/dotnet/csharplang/blob/main/meetings/2020/LDM-2020-04-27.md#primary-constructor-bodies-and-validators) approved the syntax. Next is discussing semantics.
 
+## C# Language Design Notes for 2026
+
 ### Mon Oct 5, 2026
 
-- Simple LDM decisions (Fred, Mads)
-- [Target typed generic inference](https://github.com/dotnet/csharplang/pull/10345) (Mads)
+[C# Language Design Meeting for October 5, 2026](https://github.com/dotnet/csharplang/blob/main/meetings/2026/LDM-2026-10-05.md)
 
-## C# Language Design Notes for 2026
+- Simple LDM decisions
+- Target-typed generic type inference
+    - Target-aware binding
+    - Nested inference
+    - Existing binding and candidate selection
+    - Interactions and open questions
+    - Scope and next steps
 
 ### Wed Aug 19, 2026
 
