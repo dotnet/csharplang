@@ -2,8 +2,8 @@
 
 ## Motivation
 
-We want to enable simple decisions, there the answer is effectively "proceed with the implementor/spec proposer's recommendation", without needing a full LDM
-where reasonable. At the same time, we want to make sure that we don't surprise members of the LDM with decisions after the fact with decisions that they feel
+We want to enable simple decisions, where the answer is effectively "proceed with the implementor/spec proposer's recommendation", without needing a full LDM
+where reasonable. At the same time, we want to make sure that we don't surprise members of the LDM after the fact with decisions that they feel
 should have been brought to the full meeting; this has effectively happened in the past with bad results, so we want to avoid it in the future. We also want to
 ensure that our process, decisions, and context behind the decisions remains publicly documented, without needing to jump between a number of difference sources
 in order to understand the full context behind a decision.
@@ -16,9 +16,9 @@ The questions intended to be covered by this document are "simple and obvious" d
 when I see it". In general, though, the following criteria can be used as a gut check, in the eyes of the implementor or spec writer. A question does not have to
 meet every one of these bullets, but it should meet the spirit of at least one of them.
 
-* The question is extremely straightfoward, with no complex intracies to think through.
+* The question is extremely straightforward, with no complex intricacies to think through.
 * The question has an "obviously" correct answer, where all alternatives come with extremely apparent downsides.
-* The question is sufficiently corner case that we expect the main scenario that will be affected are the compiler's unit tests, with no ramifications to the
+* The question is sufficiently corner case that we expect the main scenario that will be affected is the compiler's unit tests, with no ramifications to the
   broader feature design.
 
 Questions brought in this manner MUST have a single proposed resolution. Alternatives can and should be presented when applicable, but there must be a recommendation
