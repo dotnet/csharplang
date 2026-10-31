@@ -30,7 +30,11 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ### Mon Nov 9, 2026
 
+- Discriminated unions (Cyrus)
+
 ### Mon Nov 2, 2026
+
+- Triage features in the [Working Set milestone](https://github.com/dotnet/csharplang/issues?q=is%3Aissue+state%3Aopen+milestone%3A%22Working+Set%22) (Mads)
 
 ### Mon Oct 12, 2026
 
