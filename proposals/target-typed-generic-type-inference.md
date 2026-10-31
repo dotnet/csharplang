@@ -1,94 +1,133 @@
 # Target-typed generic type inference
 
-## Summary
+Champion issue: [#9626](https://github.com/dotnet/csharplang/issues/9626)
 
-Generic type inference may take a target type into account. For instance, given:
+## Summary
+[summary]: #summary
+
+Generic type inference may take a target type into account when ordinary binding cannot select a method or constructor. For instance, given:
 
 ```csharp
-public class MyCollection
+public static class MyCollection
 {
     public static MyCollection<T> Create<T>() { ... }
 }
-public class MyCollection<T> : IEnumerable<T> { ... }
+public class MyCollection<T> : IEnumerable<T>
+{
+    public MyCollection() { ... }
+}
 ```
 
-We would allow the `Create` method to be called without type argument when it can be inferred from a target type:
+We would allow the `Create` method to be called without type arguments when they can be inferred from a target type:
 
 ```csharp
-IEnumerable<string> c = MyCollection.Create(); // 'T' = 'string' inferred from target type
+// 'T' = 'string' inferred from target type
+IEnumerable<string> c = MyCollection.Create();
+```
+
+The proposal also combines with [inference for constructor calls](https://github.com/dotnet/csharplang/blob/main/proposals/inference-for-constructor-calls.md) to provide target types to type-inferred constructor calls:
+
+```csharp
+// 'T' = 'string' inferred from target type
+IEnumerable<string> c = new MyCollection();
 ```
 
 ## Motivation
+[motivation]: #motivation
 
-Generic factory methods often need explicit type arguments, even when the information is clear from context; i.e. from the target type. That's because generic type inference only takes arguments into account, not target types.
-
-This would also make generic type inference a more helpful addition in non-method situations, as proposed for [constructor calls](https://github.com/dotnet/csharplang/blob/main/proposals/inference-for-constructor-calls.md) and [type patterns](https://github.com/dotnet/csharplang/blob/main/proposals/inference-for-type-patterns.md). Specifically, [union types](https://github.com/dotnet/csharplang/blob/main/proposals/nominal-type-unions.md) and [closed classes](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-15.0/closed-hierarchies.md) would benefit from this, as they are frequently a target type when case types are constructed or matched.
+Generic constructors and factory methods often need explicit type arguments, even when the information is clear from the target type. That's because generic type inference only takes arguments into account, not target types.
 
 ## Detailed design
+[design]: #detailed-design
 
-Generic type inference currently has a [first phase](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/expressions.md#12632-the-first-phase) that consists of collecting "bounds" on type parameters based on comparing each parameter type with its corresponding incoming argument. A second phase then uses the collected bounds for each type parameter to infer the corresponding type argument, if possible.
+A full draft specification is at [MadsTorgersen/csharpstandard#5](https://github.com/MadsTorgersen/csharpstandard/pull/5).
 
-This proposal adds to the first phase a facility for also collecting bounds by comparing the generic method's *return type* with the *target type* for the invocation, if one exists (new text in **bold**):
+The proposal introduces a notion of ***target-aware binding*** to constructs that support type inference. If regular candidate selection fails, later conversion to a type `T` can try binding again with `T` as a target type, flowing it to type inference and allowing other candidates to become applicable.
 
-> For each of the method arguments `Eᵢ`, an input type inference ([§12.6.3.7](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/expressions.md#12637-input-type-inferences)) is made from `Eᵢ` to the corresponding parameter type `Tᵢ`.
->
-> **Additionally, if the invocation has a target type `T`, then an *upper-bound inference* ([§12.6.3.12](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/expressions.md#126312-upper-bound-inferences)) is made from `T` to `Tₑ`.**
+The approach has the following components:
 
-Here `Tₑ`, introduced [earlier in the section](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/expressions.md#12631-general), refers to the return type of the generic method being invoked.
+- Method invocations and object creation expressions where regular candidate selection fails get the new [classification](https://github.com/MadsTorgersen/csharpstandard/blob/d63468e7fb9a9e1da5ae7284a1d738068421ce2f/standard/expressions.md#122-expression-classifications) of ***target-dependent expression***.
+- A new ***target-typing conversion*** from a target-dependent expression `E` to a type `T` attempts to do target-aware binding of `E` with the target type `T` and convert a successfully bound value to `T`. A similar path exists for reference targets.
+- Only method invocations and object creation expressions offer a route for ***target-aware binding***. It differs from regular binding only in that the target type `T` is used to give generic candidates another chance at successful inference.
+- When a target type is given to generic type inference, inferences are made from it to introduce additional bounds on type parameters.
+- No other uses are made of a target type - specifically it is not used to pre-filter candidates based on return type.
+- A target-dependent expression produces a binding-time error unless a target-typing conversion or binding to a reference target succeeds.
 
-Note that, unlike arguments, which generally introduce a *lower bound* on a parameter type (or an *exact bound* when the parameter is e.g. a `ref` parameter), a target type introduces an *upper bound* on the return type. Intuitively, type inference must pick type arguments to make sure that each parameter type is "big enough" for its argument to fit, while (with this proposal) the return type is "small enough" to fit the target type.
 
-## Example
+### Example
 
-In the `MyCollection` example above, an *upper-bound inference* will be made from the target type `IEnumerable<string>` to the return type of the method, `MyCollection<T>`. Because `IEnumerable<out T>` is "covariant" in `T`, this recursively leads to an *upper-bound inference* from `string` to `T`, which puts an *upper bound* `string` on the type parameter `T` itself. When `T` is "fixed" in the second phase, `string` is the only bound on it, and becomes the inferred type argument for `T`.
+In the `MyCollection` example above, binding `Create()` without a target fails because there are no bounds for `T`, so the invocation is classified as target-dependent. A target-typing conversion to `IEnumerable<string>` then attempts target-aware binding, where, for the `Create<T>` candidate an *upper-bound inference* is made from `IEnumerable<string>` to the method's result type, `MyCollection<T>`. Because `IEnumerable<out T>` is covariant in `T`, this leads to an upper bound of `string` for `T`. Inference chooses `string`, the invocation produces `MyCollection<string>`, and that result converts successfully to `IEnumerable<string>`.
+
+### Nested inference
+
+Target-typing does not create a "loop" between outer and inner calls that both use type inference. An inner expression contributes a type to the outer expression's type inference *only* if it has a type through regular binding. Otherwise, the outer inference needs to complete without input from the inner expression, thus ensuring that there is a resolved *target type* for the inner expression, should it need it for its own type inference.
+
+```csharp
+static T Create<T>() => default!;
+static T Choose<T>(T first, T second) => first;
+
+var value = Choose("", Create());          // T is string for both calls
+var error = Choose(Create(), Create());    // Error
+```
+
+In the first call, `Create()` has no type and contributes nothing to inference for `Choose<T>`. The first argument infers `string` for the outer `T`; the resulting parameter type then supplies the target that lets the inner call infer `string` as well. In the second call, neither inner invocation contributes a type, so the outer inference cannot determine `T`. There is no target for either level to start from.
+
+## Drawbacks
+[drawbacks]: #drawbacks
+
+### Existing binding wins
+
+The proposal only attempts target-aware binding if regular binding fails - i.e. gets classified as target-dependent. It doesn't help when regular binding succeeds, but produces an unusable result:
+
+```csharp
+static object Create() => "ordinary";
+static T Create<T>() => default!;
+
+// Error: Create() is successfully bound as the non-generic method
+string value = Create();
+```
+
+### All candidates participate
+
+Target-aware binding supplies the target to inference, but does not discard candidates whose result type is incompatible with it:
+
+```csharp
+class Pair<T1, T2> { }
+
+static Pair<T, int> Pick<T>(string value) => new();
+static Pair<T, string> Pick<T>(object value) => new();
+
+Pair<string, string> pair = Pick(""); // Error
+```
+
+The target type allows both candidates to infer `T = string` and become candidates, but the `string` overload is better, and is picked even though its result does not convert to the target type.
+
+## Alternatives
+[alternatives]: #alternatives
+
+### Broader target-aware binding
+
+Should the existing binding always win? We could broaden the set of situations where target-aware binding is attempted to, say, situations where the existing binding succeeds, but its result does not match the target. We would essentially allow ourselves to *reinterpret* an expression, even though it was successfully bound! The exact change in mechanics would have to be worked out.
+
+That would not "save" the `Create()` example above - the non-generic method would still be better, even when the generic candidate became applicable! In order to benefit from the extra chance at binding, we would *also* need to filter candidates against the target type, essentially making the proposal about target-typed *binding* more broadly, not just target-typed *inference*.
+
+Each of these changes would increase the scope of the feature, and also likely the set of breaking changes it would incur. But it *would* make more scenarios "just work".
+
+### Target-typing unification
+
+Many expression forms and classifications are already "target-typed" today, in that they get their meaning through specific conversions, not primarily their intrinsic information. Examples include anonymous functions and (non-invoked) method groups, tuple literals, conditional expressions, `null` and `default` literals. Even another syntactic form of object creation expressions, `new(...)` without a type, is target typed! Each of these is "ad-hoc", in that it doesn't participate in a shared spec-level concept or mechanism of "target typing".
+
+It's possible that we could gain simplification and generality by attempting a broader unification of the new target-typing scheme proposed here with the existing ones. However, I tried very hard to do this, and found that the differences were too significant, the benefits of sharing outweighed by an overload of new concepts and numerous exceptions and special cases. That does not rule this out as a future endeavor, but I found that it hindered more than helped in specifying this particular proposal.
 
 ## Open questions
+[open]: #open-questions
 
-- This is probably a breaking change! Certainly, like all improvements to type inference, it may cause new candidates to succeed, leading to ambiguity or to the new candidate to be picked. Additionally it may change what is inferred for already-successful candidates, or even thwart the inference completely. However, consider that if a target type causes such a change in the inference of a type parameter, it is likely because the current inference result - without the target type - would cause a subsequent type error in assignment to the target! So perhaps the break isn't as bad, but of course it needs to be investigated!
+### Breaking changes?
 
-## Implementation considerations
+Whenever more conversions to a type are allowed to succeed, more candidate methods having that type as an argument type may become applicable, possibly changing the outcome of overload resolution.
 
-The point of this section is to argue that the proposal is probably not expensive from an implementation point of view. The argument is somewhat gnarly, and can be safely skipped for the purposes of just understanding the proposal at the language level.
+However, because of the conservative nature of the feature design, I haven't been able to come up with a concrete breaking scenario. It's worth keeping an eye out for, though!
 
-The type inference machinery required for this feature is all already there in the compiler. To see this, we can systematically "map" examples such as `MyCollection<T>` to code for which the inference works today. 
+### Method group conversion
 
-We're going to rewrite the `Create` method - the one that we want to do type inference for - into one that doesn't return its result, but instead passes it to a `Receptacle<T>` delegate: an extra optional parameter that can receive the result:
-
-```csharp
-    //public static MyCollection<T> Create<T>() { ... ; return result; }
-    public static void Create<T>(Receptacle<MyCollection<T>>? use = null!) { ... ; use?.Invoke(result); }
-```
-
-`Receptacle<T>` is a delegate type that is *contravariant* in `T`:
-
-```csharp
-public delegate void Receptacle<in T>(T value);
-```
-
-(Incidentally, `Receptacle<T>` is identical to `Action<T>`.)
-
-At the point of inference, instead of assigning the result of `Create` to the fresh variable `c`, we need to create a `Receptacle` for the variable:
-
-```csharp
-// IEnumerable<string> c = MyCollection.Create();
-IEnumerable<string> c;
-Receptacle<IEnumerable<string>> set_c = value => c = value;
-```
-
-Now we're ready to call our modified `Create` method, passing in the `Receptacle` for `c`:
-
-```csharp
-MyCollection.Create(set_c); // 'T' = 'string' inferred from receptacle type
-```
-
-Type inference succeeds with `T` = `string`!
-
-To see that this is isomorphic to the inference in the proposed feature, let's follow type inference through the first couple of steps:
-
-1. The [first phase](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/expressions.md#12632-the-first-phase) performs an *input type inference* from the argument `set_c` to the parameter type `Receptacle<MyCollection<T>>`.
-2. The [input type inference](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/expressions.md#12637-input-type-inferences) performs a *lower-bound inference* from `set_c`'s type `Receptacle<IEnumerable<string>>` to the parameter type `Receptacle<MyCollection<T>>`.
-3. The [lower-bound inference](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/expressions.md#126311-lower-bound-inferences) matches up the `Receptacle<...>` on each side, and, because the type parameter of `Receptacle` is contravariant, performs an *upper-bound inference* from `IEnumerable<string>` to `MyCollection<T>`.
-
-And now we're at the point where this proposal begins: Performing an *upper-bound inference* from the target type to the return type. 
-
-In other words, the existence of contravariant type parameters in C# and their ability to "flip the sign" in type inference is how this expressiveness is already there. In fact, an alternative and equivalent (but more convoluted) way of specifying the proposal would be through such a mapping of the code in terms of the existing type inference machinery.
+As currently specified, conversion of a method group to a delegate type immediately uses the delegate's return type as a target type. That has not really been thought through, though. A more conscious decision should be made.
