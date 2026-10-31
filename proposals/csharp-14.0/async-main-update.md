@@ -1,8 +1,14 @@
 # Async main codegen update
 
+[!INCLUDE[Specletdisclaimer](../speclet-disclaimer.md)]
+
+Champion issue: <https://github.com/dotnet/csharplang/issues/9827>
+
 ## Summary
 
 We update the codegen for `async Task Main` to allow the compiler to use a separate helper from the runtime when present.
+
+This codegen update shipped with C# 14 and applies regardless of language version.
 
 ## Motivation
 

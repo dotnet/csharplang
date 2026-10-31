@@ -20,6 +20,7 @@ Features Added in C# Language Versions
 - [Simple lambda parameters with modifiers](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-14.0/simple-lambda-parameters-with-modifiers.md): allows lambda parameters to be declared with modifiers without requiring their types (`(ref entry) => ...`).
 - [Ignored directives](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-14.0/ignored-directives.md): add `#:` directive prefix to be used by `dotnet run app.cs` tooling but ignored by the language.
 - [Optional and named arguments in `Expression` trees](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-14.0/optional-and-named-parameters-in-expression-trees.md): relaxes some restrictions on `Expression` trees (`Expression<...> e = (a, i) => a.Contains(i, comparer: null);`).
+- [Async main codegen update](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-14.0/async-main-update.md): uses a runtime helper for async entry points when available; shipped with C# 14 but applies regardless of language version.
 
 # C# 13.0 - .NET 9 and Visual Studio 2022 version 17.12
 - [ESC escape sequence](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-13.0/esc-escape-sequence.md): introduces the `\e` escape sequence to represent the ESCAPE/ESC character (U+001B).
