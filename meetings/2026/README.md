@@ -28,8 +28,6 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ### Mon Nov 23, 2026
 
-### Mon Nov 9, 2026
-
 - Discriminated unions (Cyrus)
 
 ### Mon Nov 2, 2026
