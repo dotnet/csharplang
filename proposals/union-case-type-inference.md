@@ -1,6 +1,6 @@
 # Generic type inference through union case types
 
-Champion issue: <https://github.com/dotnet/csharplang/issues/9662>
+Champion issue: <https://github.com/dotnet/csharplang/issues/10411>
 
 *This proposal builds on the [unions](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-15.0/unions.md) proposal and generalized type inference.*
 
