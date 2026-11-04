@@ -34,15 +34,20 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 - Triage features in the [Working Set milestone](https://github.com/dotnet/csharplang/issues?q=is%3Aissue+state%3Aopen+milestone%3A%22Working+Set%22) (Mads)
 
+## C# Language Design Notes for 2026
+
 ### Mon Oct 12, 2026
 
-- More type inference (Mads)
-  - [Inference for pattern types](https://github.com/dotnet/csharplang/pull/10352)
-  - [Inference between union and case types](https://github.com/dotnet/csharplang/pull/10355)
-- [Final initializers](https://github.com/dotnet/csharplang/blob/5055b97eee8c10d12f822f6d4db9464329615947/proposals/final-initializers.md) (Joseph)
-  - [LDM in 2020](https://github.com/dotnet/csharplang/blob/main/meetings/2020/LDM-2020-04-27.md#primary-constructor-bodies-and-validators) approved the syntax. Next is discussing semantics.
+[C# Language Design Meeting for October 12, 2026](https://github.com/dotnet/csharplang/blob/main/meetings/2026/LDM-2026-10-12.md)
 
-## C# Language Design Notes for 2026
+- Inference for pattern types
+    - Generic and non-generic candidates
+    - Compatibility and open questions
+- Inference between union and case types
+- Final initializers
+    - Motivating scenarios
+    - Implementation and compatibility
+    - Scope and prioritization
 
 ### Mon Oct 5, 2026
 
