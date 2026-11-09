@@ -64,7 +64,7 @@ _ = pet switch
 
 ## Standard type unions
 
-- **Proposal**: [Standard type unions](https://github.com/dotnet/csharplang/blob/main/proposals/standard-unions.md)
+- **Proposal**: [Standard type unions](https://github.com/dotnet/csharplang/blob/main/proposals/rejected/standard-unions.md)
 - **LDM**: Approved. 
 - **Dependencies**: [Nominal type unions](#nominal-type-unions). 
 

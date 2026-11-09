@@ -30,11 +30,13 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 - Discriminated unions (Cyrus)
 
+## C# Language Design Notes for 2026
+
 ### Mon Nov 2, 2026
 
-- Triage features in the [Working Set milestone](https://github.com/dotnet/csharplang/issues?q=is%3Aissue+state%3Aopen+milestone%3A%22Working+Set%22) (Mads)
+[C# Language Design Meeting for November 2, 2026](https://github.com/dotnet/csharplang/blob/main/meetings/2026/LDM-2026-11-02.md)
 
-## C# Language Design Notes for 2026
+- Working set triage
 
 ### Mon Oct 12, 2026
 
