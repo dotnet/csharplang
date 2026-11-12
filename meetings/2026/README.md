@@ -30,7 +30,7 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ### Mon Jan 4, 2027
 
-### Mon Nov 14, 2026
+### Mon Dec 14, 2026
 
 ### Mon Dec 7, 2026
 
