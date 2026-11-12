@@ -24,9 +24,17 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ## Schedule
 
-### Mon Nov 30, 2026
+### Mon Jan 25, 2027
 
-### Mon Nov 23, 2026
+### Mon Jan 11, 2027
+
+### Mon Jan 4, 2027
+
+### Mon Dec 14, 2026
+
+### Mon Dec 7, 2026
+
+### Mon Nov 30, 2026
 
 - Discriminated unions (Cyrus)
 
