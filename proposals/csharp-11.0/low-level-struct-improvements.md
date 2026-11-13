@@ -950,22 +950,29 @@ Every other lifetime is a generic parameter of the method or type that uses it. 
 
 A method that declares both has the implicit constraint `where $cm : $ro`. It is left off the samples below for brevity.
 
-#### Lifetimes on types and refs
+#### Values, locations and refs
 
-Lifetimes are written as generic arguments, before any type arguments, for example `M<$ro, $cm>`.
+Lifetimes are written as generic arguments, before any type arguments, for example `M<$ro, $cm>`. A type does not have a lifetime of its own. Two things do:
 
-- Every type `T` that is not a `ref struct` implicitly has the lifetime `$heap`. This is never written out: there is no need to write `int<$heap>` in every sample.
-- The lifetime of a `ref` is written as an argument to the `ref`. For example, a `ref` to the heap is `ref<$heap>`.
-- A lifetime nested inside a type must last at least as long as what contains it. In `ref<$a> T<$b, ...>`, `$b` must be convertible to `$a`: the referenced value must live at least as long as the `ref`.
+- A *value* of a `ref struct` type has a lifetime that limits where the value can flow. This is its *safe-context*, and it is written as the lifetime argument of the type: `S<$a>`. A type parameter that `allows ref struct` is treated the same way. Every other type has no lifetime argument, because its values cannot contain a `ref`: an `int` can be copied anywhere.
+- A *location* has a lifetime that limits how long a `ref` to it is valid. This is its *ref-safe-context*. Taking a `ref` to a location whose lifetime is `$a` produces a `ref<$a> T`. For example, a `ref` to an array element is a `ref<$heap> T`.
 
-Taking a `ref` to a variable produces a `ref` with the following lifetime:
+The two are independent, with one rule connecting them: a value must last at least as long as the location that holds it. In `ref<$a> T<$b>`, `$b` must be convertible to `$a`.
 
-- A `ref` local, parameter, field or return of type `ref<$a> T`: `$a`
-- A local or a value parameter: `$local`
-- An array element, or a field `e.F` where `e` is of a reference type: `$heap`
-- A field `e.F` where `e` is of a struct type: the lifetime of `ref e`
+The lifetime of a location is:
 
-A `ref` field needs no rule of its own. Its type is `ref<$this> T`, so it falls under the first bullet and its lifetime is the `$this` lifetime of `e`.
+| Location | Lifetime |
+| --- | --- |
+| An array element, a `static` field, or a field `e.F` where `e` is of a reference type | `$heap` |
+| A local or a value parameter | `$local` |
+| The target of a `ref` local, parameter, field or return of type `ref<$a> T` | `$a` |
+| A field `e.F` where `e` is of a struct type | The lifetime of the location `e` |
+
+A `ref` field needs no rule of its own. Its type is `ref<$this> T`, so its target falls under the third row and has the `$this` lifetime of `e`.
+
+Using `$local` for every local is an approximation. A local declared in a nested block has a shorter lifetime than one declared in an enclosing block, and the language tracks the difference. The model ignores it because it does not affect method signatures.
+
+The lifetime of a location says nothing about the lifetime of a `ref struct` value stored in it. For a local, the value lifetime is inferred from its initializer, or is `$local` when the local is declared `scoped`.
 
 The samples make the lifetimes of an expression explicit by annotating it, for example `ref<$heap> array[0]` or `default(S<$heap>)`.
 
@@ -1039,7 +1046,16 @@ The C# method syntax maps to the model as follows:
 - Returns of `ref struct` type have a value lifetime of `$ro`.
 - `scoped` changes the lifetime it applies to into `$local`: the ref lifetime for `scoped ref`, and the value lifetime for a `scoped` parameter of `ref struct` type.
 - `out` parameters are implicitly `scoped`, and as an output of the method a `ref struct` value has a value lifetime of `$ro`: `out S s` maps to `ref<$local> S<$ro> s`.
-- `[UnscopedRef]` removes an implicit `scoped`.
+- `[UnscopedRef]` removes an implicit `scoped`. On a `ref` parameter, which has none, it raises the ref lifetime from `$ro` to `$cm`.
+
+A call instantiates the lifetime parameters of the method. Every argument must convert to the type of its parameter, and the caller picks the longest lifetimes for which they all do:
+
+- `$cm` can be no longer than the value lifetime of any `ref struct` argument, because `S<$a>` converts to `S<$cm>` only when `$a` converts to `$cm`.
+- `$ro` can be no longer than `$cm`, or than the ref lifetime of any `ref` argument.
+- An argument to a `scoped` parameter adds no constraint. Every lifetime in the caller converts to the `$local` of the method being called.
+- A `ref struct` argument passed by `ref` sits behind a pointer, which is an invariant position, so its value lifetime must be exactly `$cm`. An `out` argument is only written, so `$ro` must convert to its value lifetime. An `in` argument adds no such constraint, as described in [lifetime variance](#lifetime-variance).
+
+The result of the call has the type that the signature gives once those lifetimes are filled in, so a returned `ref` or `ref struct` has the chosen `$ro`. This is the model's form of the [rules for method invocation](#rules-method-invocation): the result is limited by the narrowest argument that contributes, and arguments to `scoped` parameters do not contribute. A call for which no choice satisfies the last bullet is an error, which is [method arguments must match](#rules-method-arguments-must-match).
 
 Instance methods and constructors need no rules of their own. Both are modeled as `static` methods with an explicit `this` parameter, and the mapping above gives its type:
 
@@ -1481,7 +1497,7 @@ ref struct S3<out $this, in $a> where $a : $this
 }
 ```
 
-Note that lifetimes in type arguments are not tracked today: `Action<T>` is not a `ref struct` and so has the implicit lifetime `$heap`. The `S3` example only illustrates how variance would compose if they were. This expansion would also be the natural point to decide whether the target of a `ref readonly` should be covariant for ref reassignment, which the current rules do not allow.
+Note that lifetimes in type arguments are not tracked today: `Action<T>` is not a `ref struct` and so has no lifetime argument. The `S3` example only illustrates how variance would compose if they were. This expansion would also be the natural point to decide whether the target of a `ref readonly` should be covariant for ref reassignment, which the current rules do not allow.
 
 These problems are very solvable. The compiler team has sketched out a few versions of these rules and they largely fall out from our existing analysis. The problem is there is no consuming code for such rules that helps prove out there correctness and usability. This makes us very hesitant to add support because of the fear we'll pick wrong defaults and back the runtime into usability corner when it does take advantage of this. This concern is particularly strong because .NET 8 likely pushes us in this direction with `allow T: ref struct` and `Span<Span<T>>`. The rules would be better written if it's done in conjunction with consumption code.
 
