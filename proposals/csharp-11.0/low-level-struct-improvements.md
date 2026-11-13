@@ -958,16 +958,16 @@ Lifetimes are written as generic arguments, before any type arguments, for examp
 - The lifetime of a `ref` is written as an argument to the `ref`. For example, a `ref` to the heap is `ref<$heap>`.
 - A lifetime nested inside a type must last at least as long as what contains it. In `ref<$a> T<$b, ...>`, `$b` must be convertible to `$a`: the referenced value must live at least as long as the `ref`.
 
-The `ref` of a variable has the following lifetime:
+Taking a `ref` to a variable produces a `ref` with the following lifetime:
 
-- For a `ref` local, parameter, field or return of type `ref<$a> T`: `$a`
-- For reference types and fields of reference types: `$heap`
-- For everything else: `$local`
+- A `ref` local, parameter, field or return of type `ref<$a> T`: `$a`
+- A local or a value parameter: `$local`
+- An array element, or a field `e.F` where `e` is of a reference type: `$heap`
+- A field `e.F` where `e` is of a struct type: the lifetime of `ref e`
 
-The lifetimes of an expression can be made explicit with cast annotations:
+A `ref` field needs no rule of its own. Its type is `ref<$this> T`, so it falls under the first bullet and its lifetime is the `$this` lifetime of `e`.
 
-- `(T<$a>)expr`: the value lifetime of `T<...>` is `$a`
-- `ref<$a> (T<$b>)expr`: the value lifetime of `T<...>` is `$b` and the ref lifetime is `$a`
+The samples make the lifetimes of an expression explicit by annotating it, for example `ref<$heap> array[0]` or `default(S<$heap>)`.
 
 #### Lifetime parameters on `ref struct` types
 
@@ -991,14 +991,10 @@ The declaration always has this shape, so the parameter can be left off when it 
 
 A single parameter means a type cannot give its fields differing lifetimes, but that is the reality of C# today. Changing it would be a significant change to the C# rules, and [ref fields to ref struct](#ref-fields-to-ref-struct) describes what the model would need.
 
-#### Conversions
-
-An assignment or return is legal when the underlying conversion between lifetime types is legal. For conversions, a `ref` is considered part of the type of the expression: `ref<$a> T<...>` is logically `ref<$a, T<...>>`, where `$a` is covariant and `T` is invariant. The next section explains why.
-
 #### Lifetime variance
 <a name="lifetime-variance"></a>
 
-The variance of a lifetime parameter determines which conversions between lifetime types are legal. Variance restrictions come from a combination of two factors: whether a location may be aliased, and whether it can be read or written through that alias.
+An assignment or return is legal when the underlying conversion between lifetime types is legal, and the variance of a lifetime parameter determines which conversions are legal. Variance restrictions come from a combination of two factors: whether a location may be aliased, and whether it can be read or written through that alias.
 
 - A location that may be aliased and only allows reading is covariant.
 - A location that may be aliased and only allows writing is contravariant.
@@ -1006,7 +1002,7 @@ The variance of a lifetime parameter determines which conversions between lifeti
 - A value that cannot be aliased, because it is always copied, can only be read from the point of view of its source and hence is covariant.
 - A parameter that is not used at all is bivariant.
 
-These rules explain the variance of `ref<$a, T>`. It can be thought of as a primitive `ref struct` that contains a pointer:
+For conversions a `ref` is considered part of the type of the expression: `ref<$a> T<...>` is logically `ref<$a, T<...>>`, where `$a` is covariant and `T` is invariant. The rules above explain that variance. A `ref` can be thought of as a primitive `ref struct` that contains a pointer:
 
 ```csharp
 ref struct ByRef<out $a, T>
@@ -1042,15 +1038,18 @@ The C# method syntax maps to the model as follows:
 - `ref` returns have a ref lifetime of `$ro`.
 - Returns of `ref struct` type have a value lifetime of `$ro`.
 - `scoped` changes the lifetime it applies to into `$local`: the ref lifetime for `scoped ref`, and the value lifetime for a `scoped` parameter of `ref struct` type.
+- `out` parameters are implicitly `scoped`, and as an output of the method a `ref struct` value has a value lifetime of `$ro`: `out S s` maps to `ref<$local> S<$ro> s`.
+- `[UnscopedRef]` removes an implicit `scoped`.
 
-An instance method of a `struct` is modeled as a `static` method whose first parameter is `this`. That parameter is declared `scoped ref S`, or `ref S` when the method is annotated with `[UnscopedRef]`, and the mapping above gives its type:
+Instance methods and constructors need no rules of their own. Both are modeled as `static` methods with an explicit `this` parameter, and the mapping above gives its type:
 
-- `ref<$local> S<$cm>` for a normal instance method
-- `ref<$ro> S<$cm>` for an instance method annotated with `[UnscopedRef]`
+- In an instance method of a `struct`, `this` is an implicitly `scoped` `ref` parameter: `ref<$local> S<$cm> this`. With `[UnscopedRef]` it is `ref<$ro> S<$cm> this`.
+- In a constructor, `this` is an `out` parameter, as described in [modeling constructors](#modeling-constructors): `ref<$local> S<$ro> this`. A `new` expression is annotated with the type of the value that the constructor produces, for example `new S<$heap>(...)`.
 
 ```csharp
 ref struct S
 {
+    S(ref int i) { }
     void M(ref S s) { }
 }
 
@@ -1058,11 +1057,10 @@ ref struct S
 
 ref struct S<out $this>
 {
+    static void ctor<$ro>(ref<$local> S<$ro> this, ref<$ro> int i) { }
     static void M<$ro, $cm>(ref<$local> S<$cm> this, ref<$ro> S<$cm> s) { }
 }
 ```
-
-A constructor is modeled as a method named `new` whose return type is the constructed type. This gives the returned value its own lifetime parameter list, separate from the constructor arguments, so the relationship between the two can be expressed: the model uses `Span<$a> new<$ro>` rather than `Span<$a><$ro>`. Inside the constructor, the type of `this`, including lifetimes, is the declared return type.
 
 #### Examples
 
@@ -1110,9 +1108,10 @@ ref struct S<out $this>
     // Implicitly 
     ref<$this> int Field;
 
-    S<$ro> new<$ro>(ref<$ro> int f)
+    static void ctor<$ro>(ref<$local> S<$ro> this, ref<$ro> int f)
     {
-        Field = ref f;
+        // okay: this.Field is ref<$ro> int and ref f is ref<$ro> int
+        this.Field = ref f;
     }
 }
 
