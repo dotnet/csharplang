@@ -1,71 +1,79 @@
 # Target-typed inference for type patterns
 
-Champion issue: https://github.com/dotnet/csharplang/issues/9630
-
-*This proposal builds on the [target-typed generic type inference](https://github.com/dotnet/csharplang/blob/main/proposals/target-typed-generic-type-inference.md) proposal.
+Champion issue: [#9630](https://github.com/dotnet/csharplang/issues/9630)
 
 ## Summary
+[summary]: #summary
 
-Generic type inference is extended to type patterns, which may omit a type argument list when it can be inferred from the pattern input value. For instance, given a declaration `Option<int> intOption`, instead of:
-
-```csharp
-if (intOption is Some<int> some) ...
-```
-
-You can simply write:
+Generic type inference is extended to types in patterns, allowing type arguments to be omitted when they can be inferred from the static type of the pattern input. For instance:
 
 ```csharp
-if (intOption is Some some) ... // 'Some<int>' inferred from the type of 'intOption'
-```
+abstract record class Base<T>();
+sealed record class Derived<T>(T Value) : Base<T>();
 
-## Motivation
-
-Type patterns can get unwieldy when the types are generic, which seems especially grating when the information to infer the type arguments is already available in context. 
-
-For [closed hierarchies](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-15.0/closed-hierarchies.md) and [unions](https://github.com/dotnet/csharplang/blob/main/proposals/nominal-type-unions.md) in particular, there are already rules in place that ensure that type arguments for a case type depend functionally on those of the closed class or union. This means that those type arguments are almost *guaranteed* to be inferrable when the input value is of a closed class or union type, and the type pattern is for a case type.
-
-## Detailed specification
-
-The proposal is specified by treating the type pattern "as if" it were a generic method, and the pattern application to the incoming value "as if" it were an invocation of that generic method with a target type of the incoming value.
-
-In a type pattern `T ...` where `T` has no type arguments, if a non-generic `T` does not exist, or is not allowed in a pattern (e.g. it is static), or is not [pattern compatible](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/patterns.md#1122-declaration-pattern) with the input type `I`, then type inference is attempted:
-
-For each generic type `T<X₁...Xᵥ>` with the same type name `T`, [generic type inference](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/expressions.md#1263-type-inference) is performed as if the type pattern were a generic method with the same type parameter list as `T<X₁...Xᵥ>`, with an empty parameter list, and with T<X₁...Xᵥ> as its return type:
-
-```csharp
-T<X₁...Xᵥ> M<X₁...Xᵥ>()
-```
-
-and as if the pattern application were an invocation with no type arguments, with an empty argument list and with `I` as a target type:
-
-```csharp
-I i = M()
-```
-
-(Where the names `i` and `M` are otherwise invisible and not in conflict with any other names in scope.)
-
-For instance, in the following example:
-
-```csharp
-public record None();
-public record Some<T>(T value);
-public union Option<T>(None, Some<T>);
-
-void M(Option<int> intOption) => intOption switch
+int Use(Base<int> input)
 {
-    None => ...,
-    Some some => ..., // 'Some<int>' inferred for 'some'
+    if (input is Derived(var value))
+    {
+        return value; // 'Derived<int>' inferred from the type of 'input'
+    }
+
+    return 0;
 }
 ```
 
-Type inference proceeds as if with this method and invocation:
+Inference is available in declaration, type, positional, and property patterns.
 
-```csharp
-Some<T> M<T>();
+## Motivation
+[motivation]: #motivation
 
-Option<int> i = M();
-```
+Patterns involving generic types can get unwieldy when the type arguments must be repeated, even though the static type of the input already contains enough information to infer them.
 
-Which leads to `int` being inferred as the type argument corresponding to `T`.
+This is particularly noticeable in generic hierarchies, where a pattern often tests for a derived type whose type arguments follow directly from those of the input type.
 
-If type inference succeeds and the inferred type arguments satisfy their constraints, then the type `T<X₁...Xᵥ>` is a candidate. If exactly one such candidate type is found, then that is the one inferred for use in the type pattern. Otherwise, inference fails and an error occurs. The type in the pattern must then be specified in full.
+## Detailed design
+[design]: #detailed-design
+
+A full draft specification is at [MadsTorgersen/csharpstandard#7](https://github.com/MadsTorgersen/csharpstandard/pull/7).
+
+### Pattern types
+
+Every pattern form that contains a type uses a shared `pattern_type` production, which wraps `type_group`. This covers declaration patterns, type patterns, typed positional patterns, and typed property patterns.
+
+A type group resolves to one or more bound and unbound candidate types. Its bound types are considered directly, while each unbound generic type `C<X₁...Xᵥ>` is considered by applying [generalized type inference](https://github.com/dotnet/csharplang/blob/main/proposals/target-typed-generic-type-inference.md) with:
+
+- the type parameters and constraints of `C<X₁...Xᵥ>`;
+- empty parameter and argument lists;
+- `C<X₁...Xᵥ>` as the result type; and
+- the static type of the pattern input as the target type.
+
+Each bound type or successfully inferred constructed type is a candidate only if it is permitted in the containing pattern form and is pattern-compatible with the input type. Candidate selection then proceeds as follows:
+
+- If exactly one candidate remains, it is selected.
+- If multiple candidates remain and exactly one came directly from the type group without inference, that candidate is selected.
+- Otherwise, the pattern is an error and its type must be specified more fully.
+
+In the example above, resolving `Derived` finds `Derived<T>`. Inference uses `Base<int>` as the target type and `Derived<T>` as the result type, producing the candidate `Derived<int>`. The same inference occurs for a property pattern such as `input is Derived { Value: var value }`.
+
+### Bare `is` compatibility
+
+The existing interpretation of a bare `is` expression is preserved. If the right-hand side of `input is C` resolves to an accessible type, it is treated as an is-type expression and no pattern inference is performed.
+
+If an omitted-argument name only identifies generic types, it does not resolve as an ordinary type. The expression can then be interpreted as an is-pattern, where `pattern_type` resolution may infer the missing type arguments.
+
+## Drawbacks
+[drawbacks]: #drawbacks
+
+### Breaking changes
+
+Type group lookup as currently defined can in rare cases shadow a non-generic type that would have previously been found and selected.
+
+## Alternatives
+[alternatives]: #alternatives
+
+We only do inference with the incoming expression type as a target type, leading to an upper-bound inference. However, pattern types are valid both if they convert to the incoming type *and* the other way around. We could consider *also* attempting a lower-bound inference, maybe as a fallback.
+
+## Open questions
+[open]: #open-questions
+
+None.
