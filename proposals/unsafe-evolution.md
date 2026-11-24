@@ -61,7 +61,6 @@ The following breaking changes can be observed when updating to a compiler imple
   - `unsafe` on a member now also marks it as *requires-unsafe*, meaning callers must be in an `unsafe` context and overrides cannot be `unsafe` if the base member is safe.
   - `unsafe` on a member or a type does not automatically introduce an `unsafe` context, meaning explicit `unsafe` blocks must be used around `unsafe` operations in member bodies and initializers.
   - [`extern` members](#extern) and [fields in types with explicit or extended layout, nonzero packing size, or nonzero size](#fields) require an explicit `unsafe`/`safe` keyword on the declaration.
-  - `stackalloc` under [certain conditions](#stack-allocation) requires an `unsafe` context.
   - `unsafe` modifier is an error on type declarations, static constructors, and destructors, because it does not have any effect.
 - Under a new langversion:
   - Lambda inference might consider more candidates, resulting in overload resolution [ambiguities](https://github.com/dotnet/roslyn/blob/8a40f5642f23bd941ec62d753ac7dbd7cc53dab5/docs/compilers/CSharp/Compiler%20Breaking%20Changes%20-%20DotNet%2011.md#pointer-types-no-longer-require-an-unsafe-context).
@@ -108,7 +107,7 @@ to support the `unsafe` feature. Much of what is currently considered conditiona
 unsafe in itself. [Pointer types][pointer-types-spec], [Fixed and moveable variables][fixed-and-moveable-variables], all [pointer expressions][pointer-expressions] (except for
 [pointer indirection][pointer-indirection], [pointer member access][pointer-member-access], and [pointer element access][pointer-element-access]), and [the `fixed` statement][fixed-statement]
 are all no longer considered `unsafe`, and exist in normal C# with no requirement to be used in an `unsafe` context. Similarly, declaring a [fixed size buffer][fixed-size-buffer-declarations] or
-an initialized [`stackalloc`][stack-allocation-spec] are also perfectly legal in safe C#. For all of these cases, it is only _accessing_ the memory that is unsafe.
+a [`stackalloc`][stack-allocation-spec] are also perfectly legal in safe C#. For all of these cases, it is only _accessing_ the memory that is unsafe.
 
 Importantly, these pointer relaxations apply **regardless of whether an assembly opts in** to the [updated memory safety rules](#metadata).
 Only operations that actually dereference or otherwise directly access pointed-to memory continue to require an `unsafe` context.
@@ -127,7 +126,6 @@ The following expressions require an `unsafe` context when used:
 * [Pointer element access][pointer-element-access]
 * Function pointer invocation
 * Element access on a fixed-size buffer
-* `stackalloc` under the conditions defined [below](#stack-allocation)
 
 In addition to these expressions, expressions and statements can also conditionally require an `unsafe` context if they depend on any symbol that is marked as `unsafe`. For example, calling a method
 that is *requires-unsafe* will cause the _invocation_expression_ to require an `unsafe` context. Statements with invocations embedded (such as `using`s, `foreach`, and similar) can also require an
@@ -169,21 +167,7 @@ as the _primary_expression_ of an `element_access`; these are evaluated as a _po
 #### Stack allocation
 
 Again, the story for [stack allocation][stack-allocation-spec] is very similar to [pointers](#pointer-types). Converting a `stackalloc` to a pointer is no longer unsafe; it is the deference of that
-pointer that is unsafe. We do add one new rule, however:
-
-A _stackalloc_expression_ is unsafe if all of the following statements are true:
-
-* The _stackalloc_expression_ is being converted to a `Span<T>` or a `ReadOnlySpan<T>`.
-* The _stackalloc_expression_ does not have a _stackalloc_initializer_.
-* The _stackalloc_expression_ is used within a member that has `SkipLocalsInitAttribute` applied.
-
-In these contexts, the resulting stack space could have unknown memory contents, and it is being converted to a type that provides a safe wrapper around unmanaged memory access. This violates the
-contract of `Span<T>` and `ReadOnlySpan<T>`, and so must be subject to extra scrutiny by the author and reviewers of such code.
-
-Unlike other changes to `unsafe` rules which are relaxations, this is a tightening, and hence it applies only under opt-in to the updated memory safety rules to avoid a break.
-
-> [!NOTE]
-> This means that assigning a `stackalloc` to a pointer is _always_ safe, regardless of context.
+pointer that is unsafe.
 
 Note that a `stackalloc` of a managed type remains an error.
 
@@ -603,7 +587,10 @@ are undefined unless manually cleared or assigned. Do we consider this a spec bu
 
 ### `stackalloc` rule
 
-LDM should confirm the [`stackalloc` rule defined above](#stack-allocation) and whether it should apply regardless of opt-in like other pointer-related changes.
+Should an uninitialized `stackalloc` converted to a `Span<T>` or a `ReadOnlySpan<T>` require an `unsafe` context when affected by `SkipLocalsInitAttribute`?
+
+The working group temporarily [decided](https://github.com/dotnet/roslyn/issues/86293) to lift this previously-implemented restriction.
+This allows experimentation with the rest of the feature without deciding the broader policy on uninitialized memory.
 
 ### `AllowUnsafeBlocks`
 
