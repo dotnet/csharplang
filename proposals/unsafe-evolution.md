@@ -420,6 +420,45 @@ An `unsafe_expression` establishes an `unsafe` context for evaluating its *expre
 
 The `unsafe` context established by an `unsafe_expression` does not extend beyond its closing parenthesis.
 
+##### Conversions
+
+An `unsafe_expression` does not change the unsafe context of a conversion applied to its result.
+An explicit conversion uses the context of its cast expression.
+An implicit conversion applied by an enclosing construct uses that construct's context,
+not the context introduced for evaluating the operand of the `unsafe_expression`.
+
+```cs
+class C
+{
+    public static unsafe implicit operator int(C value) => 0;
+
+    static void M(C value)
+    {
+        int x = unsafe(value);      // Error: the implicit conversion is outside the unsafe context.
+        int y = (int)unsafe(value); // Error: the cast is outside the unsafe context.
+        int z = unsafe((int)value); // Allowed: the cast is inside the unsafe context.
+    }
+}
+```
+
+The context of a conversion also applies to the constituent conversions and member invocations that perform it.
+These include conversions of the arms of a target-typed conditional or switch expression, tuple and collection element conversions, and invocations used to construct a target collection.
+For a collection type `Collection`, the conversion in `Collection c = unsafe([value]);`, including construction and element conversions, is outside the unsafe context.
+Writing `Collection c = unsafe((Collection)([value]));` places that conversion inside the unsafe context instead.
+
+> [!NOTE]
+> This follows the `checked`/`unchecked` conversion precedent. In an otherwise unchecked context:
+>
+> ```cs
+> int i = 300;
+> var x = ((byte, byte))checked((i, i)); // (44, 44): the cast and its element conversions are outside checked.
+> var y = checked(((byte, byte))(i, i)); // Throws OverflowException: the cast and its element conversions are inside checked.
+> ```
+>
+> The tuple operand being evaluated in a checked context does not make a conversion applied outside that context checked.
+> This follows from C# specification sections [12.8.20, The checked and unchecked operators](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/expressions.md#12820-the-checked-and-unchecked-operators)
+> and [10.3.6, Explicit tuple conversions](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/conversions.md#1036-explicit-tuple-conversions).
+
 #### Motivation and migration examples
 
 Several syntactic positions do not admit `unsafe` blocks at all, yet may contain subexpressions that call *requires-unsafe* members. Without `unsafe` expressions, migrating such code requires extracting the unsafe sub-expression into a helper local function or a temporary variable, or using a broader `unsafe` block than necessary, which obscures intent and increases verbosity.
