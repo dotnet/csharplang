@@ -36,7 +36,7 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ### Mon Nov 30, 2026
 
-- Discriminated unions (Cyrus)
+- [Discriminated unions](https://github.com/dotnet/csharplang/tree/main/proposals/discriminated-unions) (Cyrus)
 
 ## C# Language Design Notes for 2026
 
